@@ -9,6 +9,11 @@ import ErrorMiddleware from './middleware/error.middleware'
 import HttpException from './utils/exceptions/http.exception'
 import Controller from './interfaces/controller.interface'
 
+import connectDb from './config/db.config'
+
+// variable
+import Variable from './env/variable.env'
+
 // api constant
 import ConstantAPI from './constants/api.constant'
 
@@ -21,10 +26,13 @@ import ConstantHttpReason from './constants/http.reason.constant'
 
 class App {
   public app: Application
+  private DATABASE_URL: string
 
   constructor(controllers: Controller[]) {
     this.app = express()
+    this.DATABASE_URL = Variable.DATABASE_URL
 
+    this.initialiseDatabaseConnection(this.DATABASE_URL)
     this.initialiseConfig()
     this.initialiseRoutes()
     this.initialiseControllers(controllers)
@@ -73,6 +81,10 @@ class App {
 
   private initialiseErrorHandling(): void {
     this.app.use(ErrorMiddleware)
+  }
+
+  private initialiseDatabaseConnection(url: string): void {
+    connectDb(url)
   }
 }
 
