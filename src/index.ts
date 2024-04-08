@@ -1,36 +1,79 @@
-import express from 'express'
-import dotenv from 'dotenv'
-import swaggerUi from 'swagger-ui-express'
+import express, { Application, Request, Response, NextFunction } from 'express'
 
-import { connectToDatabase } from './database/db.config'
-//import { roleRoute } from './routes/role.route';
-//import { userRoute } from './routes/user.route';
-import { apiDocumentation } from './docs/apidocs'
-import { rateLimiterMiddleware } from './middleware/rate-limiter-middleware'
+import compression from 'compression'
+import cookieParser from 'cookie-parser'
+import cors from 'cors'
+import helmet from 'helmet'
 
-dotenv.config()
+import ErrorMiddleware from './middleware/error.middleware'
+import HttpException from './utils/exceptions/http.exception'
+import Controller from './interfaces/controller.interface'
 
-const HOST = process.env.HOST || 'http://localhost'
-const PORT = parseInt(process.env.PORT || '4500')
+// api constant
+import ConstantAPI from './constants/api.constant'
 
-const app = express()
+// message constant
+import ConstantMessage from './constants/message.constant'
 
-app.use(express.urlencoded({ extended: true }))
-app.use(express.json())
+// http constant
+import ConstantHttpCode from './constants/http.code.constant'
+import ConstantHttpReason from './constants/http.reason.constant'
 
-//ratelimiter middleware activation
-app.use(rateLimiterMiddleware)
+class App {
+  public app: Application
 
-//app.use('/', roleRoute());
-//app.use('/', userRoute());
-app.use('/documentation', swaggerUi.serve, swaggerUi.setup(apiDocumentation))
+  constructor(controllers: Controller[]) {
+    this.app = express()
 
-app.get('/', (req, res) => {
-  return res.json({ message: 'Hello World!' })
-})
+    this.initialiseConfig()
+    this.initialiseRoutes()
+    this.initialiseControllers(controllers)
+    this.initialiseErrorHandling()
+  }
 
-app.listen(PORT, async () => {
-  await connectToDatabase()
+  private initialiseConfig(): void {
+    this.app.use(express.json())
+    this.app.use(express.urlencoded({ extended: true }))
+    this.app.use(cookieParser())
+    this.app.use(compression())
+    this.app.use(cors())
+    this.app.use(helmet())
+  }
 
-  console.log(`Application started on URL ${HOST}:${PORT} 🎉`)
-})
+  private initialiseRoutes(): void {
+    this.app.get(
+      ConstantAPI.ROOT,
+      (_req: Request, res: Response, next: NextFunction) => {
+        try {
+          return res.status(ConstantHttpCode.OK).json({
+            status: {
+              code: ConstantHttpCode.OK,
+              msg: ConstantHttpReason.OK,
+            },
+            msg: ConstantMessage.API_WORKING,
+          })
+        } catch (err: any) {
+          return next(
+            new HttpException(
+              ConstantHttpCode.INTERNAL_SERVER_ERROR,
+              ConstantHttpReason.INTERNAL_SERVER_ERROR,
+              err.message,
+            ),
+          )
+        }
+      },
+    )
+  }
+
+  private initialiseControllers(controllers: Controller[]): void {
+    controllers.forEach((controller: Controller) => {
+      this.app.use(ConstantAPI.API, controller.router)
+    })
+  }
+
+  private initialiseErrorHandling(): void {
+    this.app.use(ErrorMiddleware)
+  }
+}
+
+export default App
