@@ -3,7 +3,8 @@ const apiDocumentation = {
   info: {
     version: '1.0.0',
     title: 'AKILAAH partners and sponsors REST API - Documentation',
-    description: 'Management of partners and sponsors from onboarding to product subscription',
+    description:
+      'Management of partners and sponsors from onboarding to product subscription',
     termsOfService: 'https://akilaah.com/terms',
     contact: {
       name: 'Honoré OUEDRAOGO',
@@ -37,6 +38,6 @@ const apiDocumentation = {
     },
     schemas: {},
   },
-};
+}
 
-export { apiDocumentation };
+export { apiDocumentation }
