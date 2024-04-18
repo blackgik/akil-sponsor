@@ -12,8 +12,8 @@ class PartnerRepository {
     return partner
   }
 
-  public async findByPartnername(partnername: string): Promise<PartnerInterface | null> {
-    const partner = await Partner.findOne({ partnername }).select('-password')
+  public async findByPartnername(username: string): Promise<PartnerInterface | null> {
+    const partner = await Partner.findOne({ username }).select('-password')
     return partner
   }
 
@@ -33,9 +33,9 @@ class PartnerRepository {
   }
 
   public async findByPartnernameWithPassword(
-    partnername: string,
+    username: string,
   ): Promise<PartnerInterface | null> {
-    const partner = await Partner.findOne({ partnername })
+    const partner = await Partner.findOne({ username })
     return partner
   }
 
@@ -55,8 +55,9 @@ class PartnerRepository {
 
   public async createPartner(partner: any): Promise<PartnerInterface | null> {
     const newPartner = new Partner({
-      partnername: partner.partnername,
-      name: partner.name,
+      username: partner.username,
+      firstname: partner.firstname,
+      lastname: partner.lastname,
       email: partner.email,
       password: partner.password,
       phone: partner.phone,
@@ -69,11 +70,11 @@ class PartnerRepository {
 
   public async updatePartnername(
     id: string,
-    partnername: string,
+    username: string,
   ): Promise<PartnerInterface | null> {
     const partner = await Partner.findByIdAndUpdate(
       id,
-      { partnername },
+      { username },
       { new: true },
     ).select('-password')
     return partner

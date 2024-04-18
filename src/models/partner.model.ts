@@ -5,9 +5,9 @@ import PartnerInterface from '../interfaces/partner.interface'
 
 import ConstantModel from '../constants/model.constant'
 
-const UserModel = mongoose.model<PartnerInterface>(
+const PartnerModel = mongoose.model<PartnerInterface>(
   ConstantModel.PARTNER_MODEL,
   PartnerSchema,
 )
 
-export default UserModel
+export default PartnerModel

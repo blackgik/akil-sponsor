@@ -12,8 +12,8 @@ class SponsorRepository {
     return sponsor
   }
 
-  public async findBySponsorname(sponsorname: string): Promise<SponsorInterface | null> {
-    const sponsor = await Sponsor.findOne({ sponsorname }).select('-password')
+  public async findBySponsorname(username: string): Promise<SponsorInterface | null> {
+    const sponsor = await Sponsor.findOne({ username }).select('-password')
     return sponsor
   }
 
@@ -33,9 +33,9 @@ class SponsorRepository {
   }
 
   public async findBySponsornameWithPassword(
-    sponsorname: string,
+    username: string,
   ): Promise<SponsorInterface | null> {
-    const sponsor = await Sponsor.findOne({ sponsorname })
+    const sponsor = await Sponsor.findOne({ username })
     return sponsor
   }
 
@@ -55,8 +55,9 @@ class SponsorRepository {
 
   public async createSponsor(sponsor: any): Promise<SponsorInterface | null> {
     const newSponsor = new Sponsor({
-      sponsorname: sponsor.sponsorname,
-      name: sponsor.name,
+      username: sponsor.username,
+      firstname: sponsor.firstname,
+      lastname: sponsor.lastname,
       email: sponsor.email,
       password: sponsor.password,
       phone: sponsor.phone,
@@ -69,11 +70,11 @@ class SponsorRepository {
 
   public async updateSponsorname(
     id: string,
-    sponsorname: string,
+    username: string,
   ): Promise<SponsorInterface | null> {
     const sponsor = await Sponsor.findByIdAndUpdate(
       id,
-      { sponsorname },
+      { username },
       { new: true },
     ).select('-password')
     return sponsor

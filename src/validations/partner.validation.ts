@@ -3,8 +3,9 @@ import ConstantRegex from '../constants/regex.constant'
 
 class PartnerValidation {
   public register = Joi.object({
-    partnername: Joi.string().max(30).required(),
-    name: Joi.string().max(30).required(),
+    username: Joi.string().max(30).required(),
+    firstname: Joi.string().max(30).required(),
+    lastname: Joi.string().max(30).required(),
     email: Joi.string().email().required(),
     password: Joi.string().min(6).max(30).required(),
     phone: Joi.string().min(10).max(15).required(),
@@ -17,12 +18,17 @@ class PartnerValidation {
   })
 
   public updatePartnername = Joi.object({
-    partnername: Joi.string().max(30).required(),
+    username: Joi.string().max(30).required(),
     password: Joi.string().min(6).max(30).required(),
   })
 
-  public updateName = Joi.object({
-    name: Joi.string().max(30).required(),
+  public updateFirstname = Joi.object({
+    firstname: Joi.string().max(30).required(),
+    password: Joi.string().min(6).max(30).required(),
+  })
+
+  public updateLastname = Joi.object({
+    lastname: Joi.string().max(30).required(),
     password: Joi.string().min(6).max(30).required(),
   })
 
@@ -51,12 +57,16 @@ class PartnerValidation {
     password: Joi.string().min(6).max(30).required(),
   })
 
-  public validatePartnername(partnername: string): boolean {
-    return ConstantRegex.USERNAME.test(partnername)
+  public validatePartnername(username: string): boolean {
+    return ConstantRegex.USERNAME.test(username)
   }
 
-  public validateName(name: string): boolean {
-    return ConstantRegex.NAME.test(name)
+  public validateFirstname(firstname: string): boolean {
+    return ConstantRegex.NAME.test(firstname)
+  }
+
+  public validateLastname(lastname: string): boolean {
+    return ConstantRegex.NAME.test(lastname)
   }
 
   public validateEmail(email: string): boolean {

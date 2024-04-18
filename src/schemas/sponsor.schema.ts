@@ -10,7 +10,13 @@ const SponsorSchema = new mongoose.Schema(
       min: ConstantNumber.USERNAME_MIN_LENGTH,
       max: ConstantNumber.USERNAME_MAX_LENGTH,
     },
-    name: {
+    firtsname: {
+      type: String,
+      required: true,
+      min: ConstantNumber.NAME_MIN_LENGTH,
+      max: ConstantNumber.NAME_MAX_LENGTH,
+    },
+    lastname: {
       type: String,
       required: true,
       min: ConstantNumber.NAME_MIN_LENGTH,
@@ -43,6 +49,10 @@ const SponsorSchema = new mongoose.Schema(
     isAdmin: {
       type: Boolean,
       default: true,
+    },
+    isActive: {
+      type: Boolean,
+      default: false,
     },
   },
   {

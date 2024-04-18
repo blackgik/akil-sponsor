@@ -1,7 +1,7 @@
-import mongoose from 'mongoose'
+import mongoose, { Types } from 'mongoose'
 import ConstantNumber from '../constants/number.constant'
 
-const PartnerSchema = new mongoose.Schema(
+const UserSchema = new mongoose.Schema(
   {
     username: {
       type: String,
@@ -27,6 +27,18 @@ const PartnerSchema = new mongoose.Schema(
       required: true,
       unique: true,
       max: ConstantNumber.EMAIL_MAX_LENGTH,
+    },
+    user_role_id:{
+        type: Types.ObjectId,
+        required: true
+    },
+    user_sponsor_id:{
+        type: Types.ObjectId,
+        required: true
+    },
+    user_partner_id:{
+        type: Types.ObjectId,
+        required: true
     },
     password: {
       type: String,
@@ -61,4 +73,4 @@ const PartnerSchema = new mongoose.Schema(
   },
 )
 
-export default PartnerSchema
+export default UserSchema

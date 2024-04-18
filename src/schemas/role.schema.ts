@@ -1,22 +1,22 @@
 import mongoose from 'mongoose'
 import ConstantNumber from '../constants/number.constant'
 
-const CategorySchema = new mongoose.Schema(
+const RoleSchema = new mongoose.Schema(
   {
-    category_name: {
+    role_name: {
       type: String,
       required: true,
       unique: true,
       min: ConstantNumber.USERNAME_MIN_LENGTH,
       max: ConstantNumber.USERNAME_MAX_LENGTH,
     },
-    category_slug: {
+    role_slug: {
       type: String,
       required: true,
-      min: ConstantNumber.NAME_MIN_LENGTH,
-      max: ConstantNumber.NAME_MAX_LENGTH,
+      min: ConstantNumber.USERNAME_MIN_LENGTH,
+      max: ConstantNumber.USERNAME_MAX_LENGTH,
     },
-    category_description: {
+    role_description: {
       type: String,
       required: true,
       min: ConstantNumber.ADDRESS_MIN_LENGTH,
@@ -34,4 +34,4 @@ const CategorySchema = new mongoose.Schema(
   },
 )
 
-export default CategorySchema
+export default RoleSchema
