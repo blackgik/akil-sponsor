@@ -42,17 +42,10 @@ class PartnerController implements Controller {
 
   private initialiseRoutes(): void {
     this.router.post(
-      `${this.path}${ConstantAPI.PARTNER_UPDATE_PARTNERNAME}`,
+      `${this.path}${ConstantAPI.PARTNER_UPDATE_USERNAME}`,
       this.authenticated.verifyTokenAndAuthorization,
       validationMiddleware(this.validate.updatePartnername),
       this.updatePartnername,
-    )
-
-    this.router.post(
-      `${this.path}${ConstantAPI.PARTNER_UPDATE_NAME}`,
-      this.authenticated.verifyTokenAndAuthorization,
-      validationMiddleware(this.validate.updateName),
-      this.updateName,
     )
 
     this.router.post(
@@ -74,13 +67,6 @@ class PartnerController implements Controller {
       this.authenticated.verifyTokenAndAuthorization,
       validationMiddleware(this.validate.updatePhone),
       this.updatePhone,
-    )
-
-    this.router.post(
-      `${this.path}${ConstantAPI.PARTNER_UPDATE_ADDRESS}`,
-      this.authenticated.verifyTokenAndAuthorization,
-      validationMiddleware(this.validate.updateAddress),
-      this.updateAddress,
     )
 
     this.router.post(
@@ -220,13 +206,13 @@ class PartnerController implements Controller {
     }
   }
 
-  private updateName = async (
+  private updateFirstName = async (
     req: Request,
     res: Response,
     next: NextFunction,
   ): Promise<Response | void> => {
     try {
-      const { name, password } = req.body
+      const { firstName, password } = req.body
       const { id } = req.params
 
       const user = await this.userService.findByIdWithPassword(id)
@@ -241,8 +227,8 @@ class PartnerController implements Controller {
       }
       logger.info(`user ${user.username} found`)
 
-      const isNameValid = this.validate.validateName(name)
-      if (!isNameValid) {
+      const isFirstNameValid = this.validate.validateFirstname(firstName)
+      if (!isFirstNameValid) {
         return next(
           new HttpException(
             ConstantHttpCode.BAD_REQUEST,
@@ -251,7 +237,7 @@ class PartnerController implements Controller {
           ),
         )
       }
-      logger.info(`name ${name} is valid`)
+      logger.info(`firstName ${firstName} is valid`)
 
       const isPasswordValid = this.validate.validatePassword(password)
       if (!isPasswordValid) {
@@ -277,7 +263,7 @@ class PartnerController implements Controller {
       }
       logger.info(`password ${password} match`)
 
-      if (user.name === name) {
+      if (user.firstName === firstName) {
         return next(
           new HttpException(
             ConstantHttpCode.BAD_REQUEST,
@@ -287,7 +273,7 @@ class PartnerController implements Controller {
         )
       }
 
-      const updatedPartner = await this.userService.updateName(id, name)
+      const updatedPartner = await this.userService.updateName(id, firstName)
       if (!updatedPartner) {
         return next(
           new HttpException(

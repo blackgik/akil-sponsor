@@ -57,7 +57,7 @@ class SponsorValidation {
     password: Joi.string().min(6).max(30).required(),
   })
 
-  public validateSponsorname(username: string): boolean {
+  public validateUserName(username: string): boolean {
     return ConstantRegex.USERNAME.test(username)
   }
 

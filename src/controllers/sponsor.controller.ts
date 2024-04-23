@@ -42,17 +42,10 @@ class SponsorController implements Controller {
 
   private initialiseRoutes(): void {
     this.router.post(
-      `${this.path}${ConstantAPI.SPONSOR_UPDATE_SPONSORNAME}`,
+      `${this.path}${ConstantAPI.SPONSOR_UPDATE_USERNAME}`,
       this.authenticated.verifyTokenAndAuthorization,
       validationMiddleware(this.validate.updateSponsorname),
       this.updateSponsorname,
-    )
-
-    this.router.post(
-      `${this.path}${ConstantAPI.SPONSOR_UPDATE_NAME}`,
-      this.authenticated.verifyTokenAndAuthorization,
-      validationMiddleware(this.validate.updateName),
-      this.updateName,
     )
 
     this.router.post(
@@ -74,13 +67,6 @@ class SponsorController implements Controller {
       this.authenticated.verifyTokenAndAuthorization,
       validationMiddleware(this.validate.updatePhone),
       this.updatePhone,
-    )
-
-    this.router.post(
-      `${this.path}${ConstantAPI.SPONSOR_UPDATE_ADDRESS}`,
-      this.authenticated.verifyTokenAndAuthorization,
-      validationMiddleware(this.validate.updateAddress),
-      this.updateAddress,
     )
 
     this.router.post(
@@ -129,18 +115,6 @@ class SponsorController implements Controller {
         )
       }
       logger.info(`user ${user.username} found`)
-
-      const isSponsornameValid = this.validate.validateSponsorname(username)
-      if (!isSponsornameValid) {
-        return next(
-          new HttpException(
-            ConstantHttpCode.BAD_REQUEST,
-            ConstantHttpReason.BAD_REQUEST,
-            ConstantMessage.USERNAME_NOT_VALID,
-          ),
-        )
-      }
-      logger.info(`username ${username} is valid`)
 
       const isPasswordValid = this.validate.validatePassword(password)
       if (!isPasswordValid) {
@@ -220,13 +194,13 @@ class SponsorController implements Controller {
     }
   }
 
-  private updateName = async (
+  private updateUserName = async (
     req: Request,
     res: Response,
     next: NextFunction,
   ): Promise<Response | void> => {
     try {
-      const { name, password } = req.body
+      const { username, password } = req.body
       const { id } = req.params
 
       const user = await this.userService.findByIdWithPassword(id)
@@ -241,8 +215,8 @@ class SponsorController implements Controller {
       }
       logger.info(`user ${user.username} found`)
 
-      const isNameValid = this.validate.validateName(name)
-      if (!isNameValid) {
+      const isUserNameValid = this.validate.validateUserName(username)
+      if (!isUserNameValid) {
         return next(
           new HttpException(
             ConstantHttpCode.BAD_REQUEST,
@@ -251,7 +225,7 @@ class SponsorController implements Controller {
           ),
         )
       }
-      logger.info(`name ${name} is valid`)
+      logger.info(`username ${username} is valid`)
 
       const isPasswordValid = this.validate.validatePassword(password)
       if (!isPasswordValid) {
@@ -277,7 +251,7 @@ class SponsorController implements Controller {
       }
       logger.info(`password ${password} match`)
 
-      if (user.name === name) {
+      if (user.username === username) {
         return next(
           new HttpException(
             ConstantHttpCode.BAD_REQUEST,
@@ -287,7 +261,7 @@ class SponsorController implements Controller {
         )
       }
 
-      const updatedSponsor = await this.userService.updateName(id, name)
+      const updatedSponsor = await this.userService.updateName(id, username)
       if (!updatedSponsor) {
         return next(
           new HttpException(
