@@ -62,5 +62,13 @@ class Message {
   public static readonly CATEGORY_FOUND: string = 'Category  found'
   public static readonly CATEGORY_CREATE_SUCCESS: string ='Category created successfully'
   public static readonly PRODUCT_CREATE_SUCCESS: string ='Product created successfully'
+
+  //Occupation
+  public static readonly OCCUPATION_NOT_UPDATED: string = 'Occupation not updated'
+  public static readonly OCCUPATION_UPDATE_SUCCESS: string ='Occupation updated successfully'
+  public static readonly OCCUPATION_NOT_DELETED: string =    'Occupation not deleted, please try again'
+  public static readonly OCCUPATION_DELETE_SUCCESS: string = 'Occupation deleted successfully'
+  public static readonly OCCUPATION_FOUND: string = 'Occupation found'
+  public static readonly OCCUPATION_CREATE_SUCCESS: string ='Occupation created successfully'
 }
 export default Message

@@ -5,6 +5,7 @@ class Api {
 
   public static readonly AUTH: string = `/auth`
   public static readonly PARTNERS: string = '/partners'
+  public static readonly OCCUPATIONS: string = '/occupations'
   public static readonly SPONSORS: string = '/sponsors'
 
   // partner-uth
@@ -50,6 +51,14 @@ class Api {
   public static readonly CATEGORY_GET: string = '/category/find/:id'
   public static readonly CATEGORY_GET_ALL: string = '/categories'
   public static readonly CATEGORY_GET_ALL_STATS: string = '/category/stats'
+
+    // categories
+    public static readonly OCCUPATION_UPDATE: string = '/occupation/:id'
+    public static readonly OCCUPATION_CREATE: string = '/occupation'
+    public static readonly OCCUPATION_DELETE: string = '/occupation/delete/:id'
+    public static readonly OCCUPATION_GET: string = '/occupation/find/:id'
+    public static readonly OCCUPATION_GET_ALL: string = '/occupations'
+    public static readonly OCCUPATION_GET_ALL_STATS: string = '/occupation/stats'
 
   // products
   public static readonly PRODUCT_UPDATE: string = '/product/:id'
