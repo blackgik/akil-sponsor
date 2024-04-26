@@ -3,7 +3,7 @@ import ConstantNumber from '../constants/number.constant'
 
 const SponsorSchema = new mongoose.Schema(
   {
-    username: {
+    name: {
       type: String,
       required: true,
       unique: true,
@@ -21,6 +21,18 @@ const SponsorSchema = new mongoose.Schema(
       required: true,
       min: ConstantNumber.NAME_MIN_LENGTH,
       max: ConstantNumber.NAME_MAX_LENGTH,
+    },
+    sponsor_code: { 
+      type: String, 
+      trim: true, 
+      required: true, 
+      index: true 
+    },
+    avatar: { 
+      key: { 
+        type: String, 
+        default: '' 
+      } 
     },
     email: {
       type: String,
@@ -46,13 +58,39 @@ const SponsorSchema = new mongoose.Schema(
       min: ConstantNumber.ADDRESS_MIN_LENGTH,
       max: ConstantNumber.ADDRESS_MAX_LENGTH,
     },
-    isAdmin: {
-      type: Boolean,
-      default: true,
+    slug: { 
+      type: String, 
+      default: '', 
+      lowercase: true,
+      min: ConstantNumber.ADDRESS_MIN_LENGTH,
+      max: ConstantNumber.ADDRESS_MAX_LENGTH,
     },
-    isActive: {
+    language: { 
+      type: String, 
+      default: 'english' 
+    },
+    on_trial: { 
+      type: Boolean, 
+      default: true 
+    },
+    hasPaid: { 
+      type: Boolean, 
+      default: false 
+    },
+    tosAgreement: { 
       type: Boolean,
-      default: false,
+      default: false
+    },
+    isApproved: { 
+      type: Boolean, 
+      default: false 
+    },
+    acctstatus: {
+      type: String,
+      trim: true,
+      default: 'pending',
+      index: true,
+      enum: ['pending', 'active', 'suspended']
     },
   },
   {

@@ -15,8 +15,7 @@ class Message {
   public static readonly PHONE_EXIST: string = 'phone is exist'
   public static readonly USER_NOT_CREATE: string =
     'user is not create, please try again'
-  public static readonly USER_CREATE_SUCCESS: string =
-    'user is create success, please login'
+  public static readonly USER_CREATE_SUCCESS: string ='user is create success, please login'
   public static readonly USER_NOT_FOUND: string = 'user is not found'
   public static readonly PASSWORD_NOT_MATCH: string = 'password is not match'
   public static readonly USER_LOGIN_SUCCESS: string = 'user is login success'
@@ -48,5 +47,20 @@ class Message {
     'user is not delete, please try again'
   public static readonly USER_DELETE_SUCCESS: string = 'user is delete success'
   public static readonly USER_FOUND: string = 'user is found'
+
+  //Product and categories
+
+  public static readonly PRODUCT_NOT_UPDATED: string = 'Product not updated'
+  public static readonly PRODUCT_UPDATE_SUCCESS: string ='Product updated successfully'
+  public static readonly CATEGORY_NOT_UPDATED: string = 'Category not updated'
+  public static readonly CATEGORY_UPDATE_SUCCESS: string = 'Category updated successfully'
+  public static readonly PRODUCT_NOT_DELETED: string =    'Product not deleted, please try again'
+  public static readonly CATEGORY_NOT_DELETED: string =    'Category not deleted, please try again'
+  public static readonly PRODUCT_DELETE_SUCCESS: string = 'Product deleted successfully'
+  public static readonly CATEGORY_DELETE_SUCCESS: string = 'Category deleted successfully'
+  public static readonly PRODUCT_FOUND: string = 'Product found'
+  public static readonly CATEGORY_FOUND: string = 'Category  found'
+  public static readonly CATEGORY_CREATE_SUCCESS: string ='Category created successfully'
+  public static readonly PRODUCT_CREATE_SUCCESS: string ='Product created successfully'
 }
 export default Message
