@@ -5,6 +5,9 @@ import cookieParser from 'cookie-parser'
 import cors from 'cors'
 import helmet from 'helmet'
 
+import swaggerUi from 'swagger-ui-express';
+import { apiDocumentation } from './docs/apidocs';
+
 import ErrorMiddleware from './middleware/error.middleware'
 import HttpException from './utils/exceptions/http.exception'
 import Controller from './interfaces/controller.interface'
@@ -46,6 +49,7 @@ class App {
     this.app.use(compression())
     this.app.use(cors())
     this.app.use(helmet())
+    this.app.use('/documentation', swaggerUi.serve, swaggerUi.setup(apiDocumentation));
   }
 
   private initialiseRoutes(): void {

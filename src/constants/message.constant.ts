@@ -70,5 +70,13 @@ class Message {
   public static readonly OCCUPATION_DELETE_SUCCESS: string = 'Occupation deleted successfully'
   public static readonly OCCUPATION_FOUND: string = 'Occupation found'
   public static readonly OCCUPATION_CREATE_SUCCESS: string ='Occupation created successfully'
+
+  //Role
+  public static readonly ROLE_NOT_UPDATED: string = 'Role not updated'
+  public static readonly ROLE_UPDATE_SUCCESS: string ='Role updated successfully'
+  public static readonly ROLE_NOT_DELETED: string =    'Role not deleted, please try again'
+  public static readonly ROLE_DELETE_SUCCESS: string = 'Role deleted successfully'
+  public static readonly ROLE_FOUND: string = 'Role found'
+  public static readonly ROLE_CREATE_SUCCESS: string ='Role created successfully'
 }
 export default Message

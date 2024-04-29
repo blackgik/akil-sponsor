@@ -7,6 +7,8 @@ class Api {
   public static readonly PARTNERS: string = '/partners'
   public static readonly OCCUPATIONS: string = '/occupations'
   public static readonly SPONSORS: string = '/sponsors'
+  public static readonly PAYMENTS: string = '/payments'
+  public static readonly ROLES: string = '/roles'
 
   // partner-uth
   public static readonly PARTNER_AUTH_REGISTER: string = '/partner/register'
@@ -80,6 +82,12 @@ class Api {
   public static readonly USER_GET_BY_PARTNER: string = '/users/partner/:id'
   public static readonly USER_GET_BY_SPONSOR: string = '/users/sponsor/:id'
   public static readonly USER_GET_ALL_STATS: string = '/user/stats'
+
+    // PAYSTACK PAYMENT
+    public static readonly PAYMENT_INIT: string = '/paystack-init'
+    public static readonly PAYMENT_VERIFY: string = '/paystack-verify'
+    public static readonly PAYSTACK_BANK_LIST: string = '/paystack-bank-list'
+    public static readonly PAYSTACK_ACCOUNT_INQUIRY: string = '/paystack-acct-inquiry'
 
   // roles
   public static readonly ROLE_UPDATE: string = '/role/:id'

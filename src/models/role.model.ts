@@ -1,13 +1,20 @@
-import mongoose from 'mongoose'
+import { Document, Model, Types} from 'mongoose'
 
-import RoleSchema from '../schemas/role.schema'
-import RoleInterface from '../interfaces/role.interface'
+export interface IRole{
+    role_name: string,
+    role_code: string,
+    role_slug?: string,
+    role_description?: string
+    is_active: boolean
+}
 
-import ConstantModel from '../constants/model.constant'
+export interface IRoleDocument extends IRole, Document{}
 
-const RoleModel = mongoose.model<RoleInterface>(
-  ConstantModel.CATEGORY_MODEL,
-  RoleSchema,
-)
+export interface IRoleModel extends Model<IRoleDocument>{
+    buildRole(role: IRole):IRoleDocument
+    listRoles():Promise<IRoleDocument[]>
+    getRole(role_id: Types.ObjectId):Promise<IRoleDocument | null>
+    updateRole(role_id: Types.ObjectId, role: IRole):Promise<IRoleDocument>
+    deleteRole(role_id: Types.ObjectId):Promise<IRoleDocument | null>
+}
 
-export default RoleModel

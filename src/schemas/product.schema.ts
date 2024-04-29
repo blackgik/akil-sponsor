@@ -9,7 +9,7 @@ const ProductCategorySchema = new Schema({
     },
     category_slug: {
         type: String,
-        required: true,
+        required: false,
         min: ConstantNumber.NAME_MIN_LENGTH,
         max: ConstantNumber.NAME_MAX_LENGTH,
       },
@@ -28,7 +28,10 @@ const ProductCategorySchema = new Schema({
         required: true,
         default: true
     }
-})
+},{
+    collection: 'product_categories',
+    timestamps: true,
+  },)
 
 const ProductSchema = new Schema({
     product_name:{
@@ -68,7 +71,10 @@ const ProductSchema = new Schema({
         default: true,
         required: false
     }
-});
+},{
+    collection: 'products',
+    timestamps: true,
+  });
 
 ProductSchema.statics.buildProduct=(product: IProduct): IProductDocument=>{
     return new Product(product)

@@ -3,23 +3,17 @@ import ConstantRegex from '../constants/regex.constant'
 
 class ProductValidation {
   public createNewProduct = Joi.object({
-    username: Joi.string().max(30).required(),
-    firstname: Joi.string().max(30).required(),
-    lastname: Joi.string().max(30).required(),
-    email: Joi.string().email().required(),
-    password: Joi.string().min(6).max(30).required(),
-    phone: Joi.string().min(10).max(15).required(),
-    address: Joi.string().max(100).required(),
+    product_name: Joi.string().max(30).required(),
+    product_category_id: Joi.string().max(30).required(),
+    product_partner_id: Joi.string().max(30).required(),
+    product_price: Joi.string().email().required(),
+    product_code: Joi.string().min(6).max(30).required(),
+    product_description: Joi.string().max(100).optional(),
   });
   
   public createNewProductCategory = Joi.object({
-    username: Joi.string().max(30).required(),
-    firstname: Joi.string().max(30).required(),
-    lastname: Joi.string().max(30).required(),
-    email: Joi.string().email().required(),
-    password: Joi.string().min(6).max(30).required(),
-    phone: Joi.string().min(10).max(15).required(),
-    address: Joi.string().max(100).required(),
+    product_category_name: Joi.string().max(30).required(),
+    category_description: Joi.string().max(100).optional(),
   })
 
 }
