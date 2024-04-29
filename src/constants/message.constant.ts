@@ -78,5 +78,13 @@ class Message {
   public static readonly ROLE_DELETE_SUCCESS: string = 'Role deleted successfully'
   public static readonly ROLE_FOUND: string = 'Role found'
   public static readonly ROLE_CREATE_SUCCESS: string ='Role created successfully'
+
+  //Partner
+  public static readonly PARTNER_NOT_UPDATED: string = 'Partner not updated'
+  public static readonly PARTNER_UPDATE_SUCCESS: string ='Partner updated successfully'
+  public static readonly PARTNER_NOT_DELETED: string =    'Partner not deleted, please try again'
+  public static readonly PARTNER_DELETE_SUCCESS: string = 'Partner deleted successfully'
+  public static readonly PARTNER_FOUND: string = 'Partner found'
+  public static readonly PARTNER_CREATE_SUCCESS: string ='Partner created successfully'
 }
 export default Message

@@ -27,10 +27,8 @@ class Api {
   public static readonly USER_AUTH_RESET: string = '/user/reset'
 
   // partners
-  public static readonly PARTNER_UPDATE_USERNAME: string = '/partner/update-username/:id'
-  public static readonly PARTNER_UPDATE_EMAIL: string = '/partner/update-email/:id'
-  public static readonly PARTNER_UPDATE_PASSWORD: string = '/partner/update-password/:id'
-  public static readonly PARTNER_UPDATE_PHONE: string = '/partner/update-phone/:id'
+  public static readonly PARTNER_UPDATE: string = '/partner/:id'
+  public static readonly PARTNER_CREATE: string = '/partner'
   public static readonly PARTNER_DELETE: string = '/partner/delete/:id'
   public static readonly PARTNER_GET: string = '/partner/find/:id'
   public static readonly PARTNER_GET_ALL: string = '/partner'

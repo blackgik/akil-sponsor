@@ -3,6 +3,7 @@ import { createOrUpdateRoleBody, createRole, deleteRole, getRole, getRoles, upda
 import { createOccupation, createOrUpdateOccupationBody, deleteOccupation, getOccupation, getOccupations, updateOccupation } from './occupations';
 import { createOrUpdateProduct_categoryBody, createProduct_category, deleteProduct_category, getProduct_category, getProduct_categories, updateProduct_category } from './product_categories';
 import { createProduct, createProductBody, deleteProduct, getProduct, getProducts, updateProduct, updateProductBody } from './products';
+import { createPartner, createPartnerBody, deletePartner, getPartner, getPartners, updatePartner, updatePartnerBody } from './partners';
 
 const apiDocumentation = {
   openapi: '3.0.1',
@@ -107,6 +108,15 @@ const apiDocumentation = {
       get: getProduct,
       put: updateProduct,
     },
+    partners: {
+      post: createPartner,
+      get: getPartners,
+    },
+    'partners/{id}': {
+      delete: deletePartner,
+      get: getPartner,
+      put: updatePartner,
+    },
   },
   components: {
     securitySchemes: {
@@ -124,6 +134,8 @@ const apiDocumentation = {
       createOrUpdateProduct_categoryBody,
       createProductBody,
       updateProductBody,
+      createPartnerBody,
+      updatePartnerBody,
     },
   },
 }

@@ -3,39 +3,98 @@ const productResponseWithProduct_category = {
         type: 'string',
         example: '60564fcb544047cdc3844818',
     },
-    product_name: {
-        type: 'string',
-        example: 'scholarship',
+    product_category: {
+        type: 'object',
+        properties: {
+            category_name: {
+                type: 'string',
+                example: 'Health',
+            },
+            subscription_category: {
+                type: 'string',
+                example: 'Health',
+            },
+            subscription_sector: {
+                type: 'string',
+                example: 'HEALTH',
+            },
+            category_description: {
+                type: 'string',
+                example: 'this product_category gives you access to...',
+            },
+        },
     },
-    product_code: {
-        type: 'string',
-        example: 'PTD-001',
+    general_information: {
+        type: 'object',
+        properties: {
+            product_name: {
+                type: 'string',
+                example: 'RAS',
+            },
+            product_code: {
+                type: 'string',
+                example: 'PDT0012',
+            },
+            product_slug: {
+                type: 'string',
+                example: 'ras',
+            },
+            product_description: {
+                type: 'string',
+                example: 'this product_category gives you access to...',
+            },
+            product_partner_id: {
+                type: 'string',
+                example: '605636683f6e29c81c8b2db0',
+            },
+            product_image: {
+                type: 'string',
+                example: 'http://imagebank.test/alt.png',
+            },
+            is_active: {
+                type: 'boolean',
+                example: true,
+            },
+        },
     },
-    product_slug: {
-        type: 'string',
-        example: 'scholarship',
-    },
-    product_price: {
-        type: 'number',
-        example: 1000,
-    },
-    product_image: {
-        type: 'string',
-        example: 'http://www.test-image.com/test.png',
-    },
-    product_description: {
-        type: 'string',
-        example: 'this is a description',
-    },
-    is_active: {
-        type: 'boolean',
-        example: true,
+    subscription_settings: {
+        type: 'object',
+        properties: {
+            category_price: {
+                type: 'number',
+                example: 1200,
+            },
+            frequency: {
+                type: 'number',
+                example: 3,
+            },
+            discount: {
+                type: 'number',
+                example: 0,
+            },
+            discount_code: {
+                type: 'string',
+                example: 'CM00235',
+            },
+            discount_start_date: {
+                type: 'string',
+                example: '2021-03-20T21:23:10.879Z',
+            },
+            discount_end_date: {
+                type: 'string',
+                example: '2021-03-20T21:23:10.879Z',
+            },
+            enable_direct_debit: {
+                type: 'boolean',
+                example: true,
+            },
+        },
     },
     product_partner_id: {
         type: 'string',
         example: '605636683f6e29c81c8b2db0',
     },
-    product_category: {
+    category: {
         type: 'object',
         properties: {
             product_category_id: {
@@ -142,41 +201,84 @@ const security = [
 const createProductBody = {
     type: 'object',
     properties: {
-        product_name: {
-            type: 'string',
-            example: 'scholarship',
+        product_category: {
+            type: 'object',
+            properties: {
+                category_name: {
+                    type: 'string',
+                    example: 'Health',
+                },
+                subscription_category: {
+                    type: 'string',
+                    example: 'Health',
+                },
+                subscription_sector: {
+                    type: 'string',
+                    example: 'HEALTH',
+                },
+                category_description: {
+                    type: 'string',
+                    example: 'this product_category gives you access to...',
+                },
+            },
         },
-        product_code: {
-            type: 'string',
-            example: 'PTD-001',
+        general_information: {
+            type: 'object',
+            properties: {
+                product_name: {
+                    type: 'string',
+                    example: 'RAS',
+                },
+                product_slug: {
+                    type: 'string',
+                    example: 'ras',
+                },
+                product_code: {
+                    type: 'string',
+                    example: 'ras',
+                },
+                product_description: {
+                    type: 'string',
+                    example: 'this product_category gives you access to...',
+                },
+            },
         },
-        product_slug: {
-            type: 'string',
-            example: 'scholarship',
-        },
-        product_price: {
-            type: 'number',
-            example: 1000,
-        },
-        product_image: {
-            type: 'string',
-            example: 'http://www.test-image.com/test.png',
-        },
-        product_description: {
-            type: 'string',
-            example: 'this is a description',
-        },
-        is_active: {
-            type: 'boolean',
-            example: true,
-        },
-        product_category_id: {
-            type: 'string',
-            example: '605636683f6e29c81c8b2db0',
-        },
-        product_partner_id: {
-            type: 'string',
-            example: '605636683f6e29c81c8b2db0',
+        subscription_settings: {
+            type: 'object',
+            properties: {
+                category_price: {
+                    type: 'number',
+                    example: 1200,
+                },
+                frequency: {
+                    type: 'number',
+                    example: 3,
+                },
+                discount: {
+                    type: 'number',
+                    example: 0,
+                },
+                discount_code: {
+                    type: 'string',
+                    example: 'CM00235',
+                },
+                discount_start_date: {
+                    type: 'string',
+                    example: '2021-03-20T21:23:10.879Z',
+                },
+                discount_end_date: {
+                    type: 'string',
+                    example: '2021-03-20T21:23:10.879Z',
+                },
+                enable_direct_debit: {
+                    type: 'boolean',
+                    example: true,
+                },
+            },
+            product_partner_id: {
+                type: 'string',
+                example: '605636683f6e29c81c8b2db0',
+            },
         },
     },
 };
@@ -184,13 +286,96 @@ const createProductBody = {
 const updateProductBody = {
     type: 'object',
     properties: {
-        fullName: {
-            type: 'string',
-            example: 'John Snow',
-        },
         product_category: {
-            type: 'string',
-            example: '605636683f6e29c81c8b2db0',
+            type: 'object',
+            properties: {
+                category_name: {
+                    type: 'string',
+                    example: 'Health',
+                },
+                subscription_category: {
+                    type: 'string',
+                    example: 'Health',
+                },
+                subscription_sector: {
+                    type: 'string',
+                    example: 'HEALTH',
+                },
+                category_description: {
+                    type: 'string',
+                    example: 'this product_category gives you access to...',
+                },
+            },
+        },
+        general_information: {
+            type: 'object',
+            properties: {
+                product_name: {
+                    type: 'string',
+                    example: 'RAS',
+                },
+                product_code: {
+                    type: 'string',
+                    example: 'PDT0012',
+                },
+                product_slug: {
+                    type: 'string',
+                    example: 'ras',
+                },
+                product_description: {
+                    type: 'string',
+                    example: 'this product_category gives you access to...',
+                },
+                product_partner_id: {
+                    type: 'string',
+                    example: '605636683f6e29c81c8b2db0',
+                },
+                product_image: {
+                    type: 'string',
+                    example: 'http://imagebank.test/alt.png',
+                },
+                is_active: {
+                    type: 'boolean',
+                    example: true,
+                },
+            },
+        },
+        subscription_settings: {
+            type: 'object',
+            properties: {
+                category_price: {
+                    type: 'number',
+                    example: 1200,
+                },
+                frequency: {
+                    type: 'number',
+                    example: 3,
+                },
+                discount: {
+                    type: 'number',
+                    example: 0,
+                },
+                discount_code: {
+                    type: 'string',
+                    example: 'CM00235',
+                },
+                discount_start_date: {
+                    type: 'string',
+                    example: '2021-03-20T21:23:10.879Z',
+                },
+                discount_end_date: {
+                    type: 'string',
+                    example: '2021-03-20T21:23:10.879Z',
+                },
+                enable_direct_debit: {
+                    type: 'boolean',
+                    example: true,
+                },
+            },
+            product_partner_id: {
+                type: 'string',
+                example: '605636683f6e29c81c8b2db0',
+            },
         },
     },
 };
@@ -226,41 +411,133 @@ const createProduct = {
                                 type: 'string',
                                 example: '60564fcb544047cdc3844818',
                             },
-                            product_name: {
-                                type: 'string',
-                                example: 'scholarship',
+                            product_category: {
+                                type: 'object',
+                                properties: {
+                                    category_name: {
+                                        type: 'string',
+                                        example: 'Health',
+                                    },
+                                    subscription_category: {
+                                        type: 'string',
+                                        example: 'Health',
+                                    },
+                                    subscription_sector: {
+                                        type: 'string',
+                                        example: 'HEALTH',
+                                    },
+                                    category_description: {
+                                        type: 'string',
+                                        example: 'this product_category gives you access to...',
+                                    },
+                                },
                             },
-                            product_code: {
-                                type: 'string',
-                                example: 'PTD-001',
+                            general_information: {
+                                type: 'object',
+                                properties: {
+                                    product_name: {
+                                        type: 'string',
+                                        example: 'RAS',
+                                    },
+                                    product_code: {
+                                        type: 'string',
+                                        example: 'PDT0012',
+                                    },
+                                    product_slug: {
+                                        type: 'string',
+                                        example: 'ras',
+                                    },
+                                    product_description: {
+                                        type: 'string',
+                                        example: 'this product_category gives you access to...',
+                                    },
+                                    product_partner_id: {
+                                        type: 'string',
+                                        example: '605636683f6e29c81c8b2db0',
+                                    },
+                                    product_image: {
+                                        type: 'string',
+                                        example: 'http://imagebank.test/alt.png',
+                                    },
+                                    is_active: {
+                                        type: 'boolean',
+                                        example: true,
+                                    },
+                                },
                             },
-                            product_slug: {
-                                type: 'string',
-                                example: 'scholarship',
-                            },
-                            product_price: {
-                                type: 'number',
-                                example: 1000,
-                            },
-                            product_image: {
-                                type: 'string',
-                                example: 'http://www.test-image.com/test.png',
-                            },
-                            product_description: {
-                                type: 'string',
-                                example: 'this is a description',
-                            },
-                            is_active: {
-                                type: 'boolean',
-                                example: true,
-                            },
-                            product_category_id: {
-                                type: 'string',
-                                example: '605636683f6e29c81c8b2db0',
+                            subscription_settings: {
+                                type: 'object',
+                                properties: {
+                                    category_price: {
+                                        type: 'number',
+                                        example: 1200,
+                                    },
+                                    frequency: {
+                                        type: 'number',
+                                        example: 3,
+                                    },
+                                    discount: {
+                                        type: 'number',
+                                        example: 0,
+                                    },
+                                    discount_code: {
+                                        type: 'string',
+                                        example: 'CM00235',
+                                    },
+                                    discount_start_date: {
+                                        type: 'string',
+                                        example: '2021-03-20T21:23:10.879Z',
+                                    },
+                                    discount_end_date: {
+                                        type: 'string',
+                                        example: '2021-03-20T21:23:10.879Z',
+                                    },
+                                    enable_direct_debit: {
+                                        type: 'boolean',
+                                        example: true,
+                                    },
+                                },
                             },
                             product_partner_id: {
                                 type: 'string',
                                 example: '605636683f6e29c81c8b2db0',
+                            },
+                            category: {
+                                type: 'object',
+                                properties: {
+                                    product_category_id: {
+                                        type: 'string',
+                                        example: '60564fcb544047cdc3844818',
+                                    },
+                                    product_category_name: {
+                                        type: 'string',
+                                        example: 'Administrateur',
+                                    },
+                                    product_category_slug: {
+                                        type: 'string',
+                                        example: 'administrateur',
+                                    },
+                                    parent_category_id: {
+                                        type: 'string',
+                                        example: '60564fcb544047cdc3844818',
+                                    },
+                                    product_category_description: {
+                                        type: 'string',
+                                        example: 'this product_category gives you access to...',
+                                    },
+                                    is_active: {
+                                        type: 'boolean',
+                                        example: true,
+                                    },
+                                    createdAt: {
+                                        type: 'string',
+                                        example: '2021-03-19T09:51:01.506Z',
+                                    },
+                                    updatedAt: {
+                                        type: 'string',
+                                        example: '2021-03-19T11:48:25.980Z',
+                                    },
+                                },
                             },
                             createdAt: {
                                 type: 'string',

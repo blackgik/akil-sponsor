@@ -119,7 +119,7 @@ const createOrUpdateProduct_categoryBody = {
 };
 
 const createProduct_category = {
-    tags: ['Product_categories'],
+    tags: ['Product-categories'],
     description: 'Create a new product_category in the system',
     operationId: 'createProduct_category',
     security: [
@@ -155,7 +155,7 @@ const createProduct_category = {
 };
 
 const getProduct_categories = {
-    tags: ['Product_categories'],
+    tags: ['Product-categories'],
     description: 'Retrieve all the product_categorys',
     operationId: 'getProduct_categories',
     security: [
@@ -183,7 +183,7 @@ const getProduct_categories = {
 };
 
 const getProduct_category = {
-    tags: ['Product_categories'],
+    tags: ['Product-categories'],
     description: 'Retrieve one product_category',
     operationId: 'getProduct_category',
     security: [
@@ -218,7 +218,7 @@ const getProduct_category = {
 };
 
 const updateProduct_category = {
-    tags: ['Product_categories'],
+    tags: ['Product-categories'],
     description: 'Update a product_category',
     operationId: 'updateProduct_category',
     security,
@@ -260,7 +260,7 @@ const updateProduct_category = {
 };
 
 const deleteProduct_category = {
-    tags: ['Product_categories'],
+    tags: ['Product-categories'],
     description: 'Delete a product_category',
     operationId: 'deleteProduct_category',
     security: [

@@ -1,15 +1,31 @@
 import { Document, Model, Types} from 'mongoose'
 
-export interface IProduct{
-    product_name: string,
-    product_category_id: Types.ObjectId,
-    product_code: string,
-    product_price: number,
-    product_image?: string
-    product_slug?: string,
-    product_partner_id: Types.ObjectId,
-    product_description?: string
-    is_active: boolean
+export interface IProduct{    
+    product_category: {
+        category_name: string,
+        subscription_category: string,
+        subscription_sector: string,
+        category_description?: string
+    },
+    general_information:{
+        product_name: string,
+        product_code: string
+        product_slug?: string,
+        product_description?: string
+        product_partner_id: Types.ObjectId,
+        product_image?: string
+        is_active: boolean
+    },
+    subscription_settings:{
+        category_price: number,
+        frequency: number,
+        discount: number,
+        discount_code: string,
+        discount_start_date: Date,
+        discount_end_date: Date,
+        enable_direct_debit?: boolean
+    }
+    
 }
 
 export interface IProductCategory{

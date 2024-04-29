@@ -2,72 +2,43 @@ import Joi from 'joi'
 import ConstantRegex from '../constants/regex.constant'
 
 class PartnerValidation {
-  public register = Joi.object({
-    username: Joi.string().max(30).required(),
-    firstname: Joi.string().max(30).required(),
-    lastname: Joi.string().max(30).required(),
-    email: Joi.string().email().required(),
-    password: Joi.string().min(6).max(30).required(),
-    phone: Joi.string().min(10).max(15).required(),
-    address: Joi.string().max(100).required(),
+  public createPartner = Joi.object({
+    partner_business_name: Joi.string().max(150).required(),
+    partner_admin_name: Joi.string().max(150).required(),
+    partner_slug: Joi.string().max(150).required(),
+    partner_sector: Joi.string().max(150).required(),
+    partner_phone: Joi.string().min(10).max(15).required(),
+    partner_address: Joi.string().max(100).required(),
+    partner_email: Joi.string().email().required(),
+    tosAgreement: Joi.boolean(),
+    password: Joi.string().min(6).max(150).required(),
+  })
+
+  public updatePartner = Joi.object({
+    partner_business_name: Joi.string().max(150).required(),
+    partner_admin_name: Joi.string().max(150).required(),
+    partner_slug: Joi.string().max(150).required(),
+    partner_sector: Joi.string().max(150).required(),
+    partner_phone: Joi.string().min(10).max(15).required(),
+    partner_address: Joi.string().max(100).required(),
+    partner_email: Joi.string().email().required(),
   })
 
   public login = Joi.object({
     email: Joi.string().email().required(),
-    password: Joi.string().min(6).max(30).required(),
-  })
-
-  public updatePartnername = Joi.object({
-    username: Joi.string().max(30).required(),
-    password: Joi.string().min(6).max(30).required(),
-  })
-
-  public updateFirstname = Joi.object({
-    firstname: Joi.string().max(30).required(),
-    password: Joi.string().min(6).max(30).required(),
-  })
-
-  public updateLastname = Joi.object({
-    lastname: Joi.string().max(30).required(),
-    password: Joi.string().min(6).max(30).required(),
+    password: Joi.string().min(6).max(150).required(),
   })
 
   public updateEmail = Joi.object({
     email: Joi.string().email().required(),
-    password: Joi.string().min(6).max(30).required(),
+    password: Joi.string().min(6).max(150).required(),
   })
 
   public updatePassword = Joi.object({
-    oldPassword: Joi.string().min(6).max(30).required(),
-    newPassword: Joi.string().min(6).max(30).required(),
-    confirmPassword: Joi.string().min(6).max(30).required(),
+    oldPassword: Joi.string().min(6).max(150).required(),
+    newPassword: Joi.string().min(6).max(150).required(),
+    confirmPassword: Joi.string().min(6).max(150).required(),
   })
-
-  public updatePhone = Joi.object({
-    phone: Joi.string().min(10).max(15).required(),
-    password: Joi.string().min(6).max(30).required(),
-  })
-
-  public updateAddress = Joi.object({
-    address: Joi.string().max(100).required(),
-    password: Joi.string().min(6).max(30).required(),
-  })
-
-  public deletePartner = Joi.object({
-    password: Joi.string().min(6).max(30).required(),
-  })
-
-  public validatePartnername(username: string): boolean {
-    return ConstantRegex.USERNAME.test(username)
-  }
-
-  public validateFirstname(firstname: string): boolean {
-    return ConstantRegex.NAME.test(firstname)
-  }
-
-  public validateLastname(lastname: string): boolean {
-    return ConstantRegex.NAME.test(lastname)
-  }
 
   public validateEmail(email: string): boolean {
     return ConstantRegex.EMAIL.test(email)

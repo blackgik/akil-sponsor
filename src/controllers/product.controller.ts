@@ -46,14 +46,14 @@ class ProductController implements Controller {
         this.router.post(
             `${this.path}${ConstantAPI.PRODUCT_CREATE}`,
             this.authenticated.verifyTokenAndAuthorization,
-            validationMiddleware(this.validate.createNewProduct),
+            validationMiddleware(this.validate.createProduct),
             this.createProduct,
         )
 
         this.router.put(
             `${this.path}${ConstantAPI.PRODUCT_UPDATE}`,
             this.authenticated.verifyTokenAndAuthorization,
-            validationMiddleware(this.validate.createNewProduct),
+            validationMiddleware(this.validate.updateProduct),
             this.updateProduct,
         )
 
@@ -84,7 +84,7 @@ class ProductController implements Controller {
         try {
             const input_product: IProduct = req.body.product
             const saved_product = await this.productService.createProductService(input_product);
-            logger.info(`user ${input_product.product_name} found`)
+            logger.info(`user ${input_product.general_information.product_name} found`)
 
             return res.status(ConstantHttpCode.OK).json({
                 status: {
