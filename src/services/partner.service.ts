@@ -1,4 +1,3 @@
-import PartnerRepository from '../repositories/partner.repository'
 import PartnerSecurity from '../security/partner.security'
 import { IPartner,IPartnerDocument } from '../models/partner.model';
 import { Partner} from '../schemas/partner.schema';

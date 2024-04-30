@@ -11,11 +11,11 @@ class ProductService {
         try {
             if (!product.product_name)
                 throw new Error(`Please enter product name`);
-            if (!product.product_code)
+            if (!product.product_quantity)
                 throw new Error(`Please enter product code`);
             if (!product.product_category_id)
                 throw new Error(`Please enter product category`);
-            if (!product.product_price)
+            if (!product.product_unit)
                 throw new Error(`Please enter product price`)
 
             const newProduct: IProductDocument = Product.buildProduct(product);

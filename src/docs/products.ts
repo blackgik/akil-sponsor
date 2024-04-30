@@ -3,96 +3,29 @@ const productResponseWithProduct_category = {
         type: 'string',
         example: '60564fcb544047cdc3844818',
     },
-    product_category: {
-        type: 'object',
-        properties: {
-            category_name: {
-                type: 'string',
-                example: 'Health',
-            },
-            subscription_category: {
-                type: 'string',
-                example: 'Health',
-            },
-            subscription_sector: {
-                type: 'string',
-                example: 'HEALTH',
-            },
-            category_description: {
-                type: 'string',
-                example: 'this product_category gives you access to...',
-            },
-        },
-    },
-    general_information: {
-        type: 'object',
-        properties: {
-            product_name: {
-                type: 'string',
-                example: 'RAS',
-            },
-            product_code: {
-                type: 'string',
-                example: 'PDT0012',
-            },
-            product_slug: {
-                type: 'string',
-                example: 'ras',
-            },
-            product_description: {
-                type: 'string',
-                example: 'this product_category gives you access to...',
-            },
-            product_partner_id: {
-                type: 'string',
-                example: '605636683f6e29c81c8b2db0',
-            },
-            product_image: {
-                type: 'string',
-                example: 'http://imagebank.test/alt.png',
-            },
-            is_active: {
-                type: 'boolean',
-                example: true,
-            },
-        },
-    },
-    subscription_settings: {
-        type: 'object',
-        properties: {
-            category_price: {
-                type: 'number',
-                example: 1200,
-            },
-            frequency: {
-                type: 'number',
-                example: 3,
-            },
-            discount: {
-                type: 'number',
-                example: 0,
-            },
-            discount_code: {
-                type: 'string',
-                example: 'CM00235',
-            },
-            discount_start_date: {
-                type: 'string',
-                example: '2021-03-20T21:23:10.879Z',
-            },
-            discount_end_date: {
-                type: 'string',
-                example: '2021-03-20T21:23:10.879Z',
-            },
-            enable_direct_debit: {
-                type: 'boolean',
-                example: true,
-            },
-        },
-    },
-    product_partner_id: {
+    product_name: {
         type: 'string',
-        example: '605636683f6e29c81c8b2db0',
+        example: 'RAS',
+    },
+    product_unit: {
+        type: 'string',
+        example: 'RAS',
+    },
+    product_slug: {
+        type: 'string',
+        example: 'RAS',
+    },
+    product_quantity: {
+        type: 'string',
+        example: 'RAS',
+    },
+    product_sponsor_id: {
+        type: 'string',
+        example: '60564fcb544047cdc3844818',
+    },
+    product_description: {
+        type: 'string',
+        example: 'RAS',
     },
     category: {
         type: 'object',
@@ -201,84 +134,33 @@ const security = [
 const createProductBody = {
     type: 'object',
     properties: {
-        product_category: {
-            type: 'object',
-            properties: {
-                category_name: {
-                    type: 'string',
-                    example: 'Health',
-                },
-                subscription_category: {
-                    type: 'string',
-                    example: 'Health',
-                },
-                subscription_sector: {
-                    type: 'string',
-                    example: 'HEALTH',
-                },
-                category_description: {
-                    type: 'string',
-                    example: 'this product_category gives you access to...',
-                },
-            },
+        product_name: {
+            type: 'string',
+            example: 'RAS',
         },
-        general_information: {
-            type: 'object',
-            properties: {
-                product_name: {
-                    type: 'string',
-                    example: 'RAS',
-                },
-                product_slug: {
-                    type: 'string',
-                    example: 'ras',
-                },
-                product_code: {
-                    type: 'string',
-                    example: 'ras',
-                },
-                product_description: {
-                    type: 'string',
-                    example: 'this product_category gives you access to...',
-                },
-            },
+        product_unit: {
+            type: 'string',
+            example: 'RAS',
         },
-        subscription_settings: {
-            type: 'object',
-            properties: {
-                category_price: {
-                    type: 'number',
-                    example: 1200,
-                },
-                frequency: {
-                    type: 'number',
-                    example: 3,
-                },
-                discount: {
-                    type: 'number',
-                    example: 0,
-                },
-                discount_code: {
-                    type: 'string',
-                    example: 'CM00235',
-                },
-                discount_start_date: {
-                    type: 'string',
-                    example: '2021-03-20T21:23:10.879Z',
-                },
-                discount_end_date: {
-                    type: 'string',
-                    example: '2021-03-20T21:23:10.879Z',
-                },
-                enable_direct_debit: {
-                    type: 'boolean',
-                    example: true,
-                },
-            },
-            product_partner_id: {
-                type: 'string',
-                example: '605636683f6e29c81c8b2db0',
-            },
+        product_slug: {
+            type: 'string',
+            example: 'RAS',
+        },
+        product_quantity: {
+            type: 'string',
+            example: 'RAS',
+        },
+        product_sponsor_id: {
+            type: 'string',
+            example: '60564fcb544047cdc3844818',
+        },
+        product_category_id: {
+            type: 'string',
+            example: '60564fcb544047cdc3844818',
+        },
+        product_description: {
+            type: 'string',
+            example: 'RAS',
         },
     },
 };
@@ -286,96 +168,33 @@ const createProductBody = {
 const updateProductBody = {
     type: 'object',
     properties: {
-        product_category: {
-            type: 'object',
-            properties: {
-                category_name: {
-                    type: 'string',
-                    example: 'Health',
-                },
-                subscription_category: {
-                    type: 'string',
-                    example: 'Health',
-                },
-                subscription_sector: {
-                    type: 'string',
-                    example: 'HEALTH',
-                },
-                category_description: {
-                    type: 'string',
-                    example: 'this product_category gives you access to...',
-                },
-            },
+        product_name: {
+            type: 'string',
+            example: 'RAS',
         },
-        general_information: {
-            type: 'object',
-            properties: {
-                product_name: {
-                    type: 'string',
-                    example: 'RAS',
-                },
-                product_code: {
-                    type: 'string',
-                    example: 'PDT0012',
-                },
-                product_slug: {
-                    type: 'string',
-                    example: 'ras',
-                },
-                product_description: {
-                    type: 'string',
-                    example: 'this product_category gives you access to...',
-                },
-                product_partner_id: {
-                    type: 'string',
-                    example: '605636683f6e29c81c8b2db0',
-                },
-                product_image: {
-                    type: 'string',
-                    example: 'http://imagebank.test/alt.png',
-                },
-                is_active: {
-                    type: 'boolean',
-                    example: true,
-                },
-            },
+        product_unit: {
+            type: 'string',
+            example: 'RAS',
         },
-        subscription_settings: {
-            type: 'object',
-            properties: {
-                category_price: {
-                    type: 'number',
-                    example: 1200,
-                },
-                frequency: {
-                    type: 'number',
-                    example: 3,
-                },
-                discount: {
-                    type: 'number',
-                    example: 0,
-                },
-                discount_code: {
-                    type: 'string',
-                    example: 'CM00235',
-                },
-                discount_start_date: {
-                    type: 'string',
-                    example: '2021-03-20T21:23:10.879Z',
-                },
-                discount_end_date: {
-                    type: 'string',
-                    example: '2021-03-20T21:23:10.879Z',
-                },
-                enable_direct_debit: {
-                    type: 'boolean',
-                    example: true,
-                },
-            },
-            product_partner_id: {
-                type: 'string',
-                example: '605636683f6e29c81c8b2db0',
-            },
+        product_slug: {
+            type: 'string',
+            example: 'RAS',
+        },
+        product_quantity: {
+            type: 'string',
+            example: 'RAS',
+        },
+        product_sponsor_id: {
+            type: 'string',
+            example: '60564fcb544047cdc3844818',
+        },
+        product_category_id: {
+            type: 'string',
+            example: '60564fcb544047cdc3844818',
+        },
+        product_description: {
+            type: 'string',
+            example: 'RAS',
         },
     },
 };
@@ -410,97 +229,30 @@ const createProduct = {
                             product_id: {
                                 type: 'string',
                                 example: '60564fcb544047cdc3844818',
-                            },
-                            product_category: {
-                                type: 'object',
-                                properties: {
-                                    category_name: {
-                                        type: 'string',
-                                        example: 'Health',
-                                    },
-                                    subscription_category: {
-                                        type: 'string',
-                                        example: 'Health',
-                                    },
-                                    subscription_sector: {
-                                        type: 'string',
-                                        example: 'HEALTH',
-                                    },
-                                    category_description: {
-                                        type: 'string',
-                                        example: 'this product_category gives you access to...',
-                                    },
-                                },
-                            },
-                            general_information: {
-                                type: 'object',
-                                properties: {
-                                    product_name: {
-                                        type: 'string',
-                                        example: 'RAS',
-                                    },
-                                    product_code: {
-                                        type: 'string',
-                                        example: 'PDT0012',
-                                    },
-                                    product_slug: {
-                                        type: 'string',
-                                        example: 'ras',
-                                    },
-                                    product_description: {
-                                        type: 'string',
-                                        example: 'this product_category gives you access to...',
-                                    },
-                                    product_partner_id: {
-                                        type: 'string',
-                                        example: '605636683f6e29c81c8b2db0',
-                                    },
-                                    product_image: {
-                                        type: 'string',
-                                        example: 'http://imagebank.test/alt.png',
-                                    },
-                                    is_active: {
-                                        type: 'boolean',
-                                        example: true,
-                                    },
-                                },
-                            },
-                            subscription_settings: {
-                                type: 'object',
-                                properties: {
-                                    category_price: {
-                                        type: 'number',
-                                        example: 1200,
-                                    },
-                                    frequency: {
-                                        type: 'number',
-                                        example: 3,
-                                    },
-                                    discount: {
-                                        type: 'number',
-                                        example: 0,
-                                    },
-                                    discount_code: {
-                                        type: 'string',
-                                        example: 'CM00235',
-                                    },
-                                    discount_start_date: {
-                                        type: 'string',
-                                        example: '2021-03-20T21:23:10.879Z',
-                                    },
-                                    discount_end_date: {
-                                        type: 'string',
-                                        example: '2021-03-20T21:23:10.879Z',
-                                    },
-                                    enable_direct_debit: {
-                                        type: 'boolean',
-                                        example: true,
-                                    },
-                                },
-                            },
-                            product_partner_id: {
+                            }, 
+                            product_name: {
                                 type: 'string',
-                                example: '605636683f6e29c81c8b2db0',
+                                example: 'RAS',
+                            },
+                            product_unit: {
+                                type: 'string',
+                                example: 'RAS',
+                            },
+                            product_slug: {
+                                type: 'string',
+                                example: 'RAS',
+                            },
+                            product_quantity: {
+                                type: 'string',
+                                example: 'RAS',
+                            },
+                            product_sponsor_id: {
+                                type: 'string',
+                                example: '60564fcb544047cdc3844818',
+                            },
+                            product_description: {
+                                type: 'string',
+                                example: 'RAS',
                             },
                             category: {
                                 type: 'object',

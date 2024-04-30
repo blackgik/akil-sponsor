@@ -84,7 +84,7 @@ class ProductController implements Controller {
         try {
             const input_product: IProduct = req.body.product
             const saved_product = await this.productService.createProductService(input_product);
-            logger.info(`user ${input_product.general_information.product_name} found`)
+            logger.info(`user ${input_product.product_name} found`)
 
             return res.status(ConstantHttpCode.OK).json({
                 status: {

@@ -1,6 +1,7 @@
 import { Schema, model, Types } from 'mongoose'
 import ConstantNumber from '../constants/number.constant'
 import { IProduct, IProductDocument, IProductCategory, IProductCategoryDocument, IProductModel, IProductCategoryModel } from '../models/product.model';
+import { num } from 'envalid';
 
 const ProductCategorySchema = new Schema({
     product_category_name: {
@@ -34,87 +35,43 @@ const ProductCategorySchema = new Schema({
 },)
 
 const ProductSchema = new Schema({
-    product_category: {
-        category_name: {
-            type: String,
-            required: true
-        },
-        subscription_category: {
-            type: String,
-            required: true
-        },
-        subscription_sector: {
-            type: String,
-            required: true
-        },
-        category_description: {
-            type: String,
-            required: false
-        },
+
+    product_name: {
+        type: String,
+        required: true
     },
-    general_information: {
-        product_name: {
-            type: String,
-            required: true
-        },
-        product_code: {
-            type: String,
-            required: true
-        },
-        product_slug: {
-            type: String,
-            required: true
-        },
-        product_partner_id: {
-            type: Types.ObjectId,
-            required: true
-        },
-        product_image: {
-            type: String,
-            required: false
-        },
-        product_description: {
-            type: String,
-            required: false
-        },
-        is_active: {
-            type: Boolean,
-            default: true,
-            required: false
-        }
+    product_quantity: {
+        type: Number,
+        required: true
     },
-    subscription_settings: {
-        category_price: {
-            type: Number,
-            required: true
-        },
-        frequency: {
-            type: Number,
-            required: true
-        },
-        discount: {
-            type: Number,
-            required: false
-        },
-        discount_code: {
-            type: String,
-            required: false
-        },
-        discount_start_date: { type: Date },
-        discount_end_date: { type: Date },
-        product_description: {
-            type: String,
-            required: false
-        },
-        enable_direct_debit: {
-            type: Boolean,
-            default: true,
-            required: false
-        }
+    product_slug: {
+        type: String,
+        required: false
+    },
+    product_unit: {
+        type: String,
+        required: true
+    },
+    product_sponsor_id: {
+        type: Types.ObjectId,
+        required: true
+    },
+    product_image: {
+        type: String,
+        required: false
+    },
+    product_description: {
+        type: String,
+        required: false
+    },
+    is_active: {
+        type: Boolean,
+        default: true,
+        required: false
     },
     product_category_id: {
         type: Types.ObjectId,
-        required: false
+        required: true
     },
 
 }, {

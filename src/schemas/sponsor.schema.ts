@@ -3,14 +3,7 @@ import ConstantNumber from '../constants/number.constant'
 import { ISponsor,ISponsorDocument, ISponsorModel } from '../models/sponsor.model';
 
 const SponsorSchema = new Schema({
-  name: {
-    type: String,
-    required: true,
-    unique: true,
-    min: ConstantNumber.USERNAME_MIN_LENGTH,
-    max: ConstantNumber.USERNAME_MAX_LENGTH,
-  },
-  firtsname: {
+  firstname: {
     type: String,
     required: true,
     min: ConstantNumber.NAME_MIN_LENGTH,
@@ -22,48 +15,39 @@ const SponsorSchema = new Schema({
     min: ConstantNumber.NAME_MIN_LENGTH,
     max: ConstantNumber.NAME_MAX_LENGTH,
   },
-  sponsor_code: { 
-    type: String, 
-    trim: true, 
-    required: true, 
-    index: true 
-  },
-  avatar: { 
-    key: { 
-      type: String, 
-      default: '' 
-    } 
-  },
-  email: {
+  avatar: { key: { type: String, default: '' } },
+  email: { type: String, required: true, lowercase: true },
+  phone: { type: String, required: true },
+  gender: { type: String, default: '', lowercase: true },
+  password: { type: String, required: true },
+  state: { type: String, required: true, lowercase: true },
+  country: { type: String, required: true, lowercase: true },
+  city: { type: String, required: true , lowercase: true},
+  address: { type: String, required: true },
+  dob: { type: Date, required: true },
+  email_verified: { type: Boolean, default: false },
+  acctstatus: { type: String, default: 'pending', enum: ['pending', 'active', 'suspended'] },
+  kyc_status: {
     type: String,
-    required: true,
-    unique: true,
-    max: ConstantNumber.EMAIL_MAX_LENGTH,
+    default: 'pending',
+    enum: ['pending', 'submitted', 'approved', 'declined']
   },
-  password: {
-    type: String,
-    required: true,
-    min: ConstantNumber.PASSWORD_MIN_LENGTH,
-  },
-  phone: {
-    type: String,
-    required: true,
-    unique: true,
-    min: ConstantNumber.PHONE_MIN_LENGTH,
-    max: ConstantNumber.PHONE_MAX_LENGTH,
-  },
-  address: {
-    type: String,
-    required: true,
-    min: ConstantNumber.ADDRESS_MIN_LENGTH,
-    max: ConstantNumber.ADDRESS_MAX_LENGTH,
-  },
-  slug: { 
-    type: String, 
-    default: '', 
-    lowercase: true,
-    min: ConstantNumber.ADDRESS_MIN_LENGTH,
-    max: ConstantNumber.ADDRESS_MAX_LENGTH,
+  kyc_docs: {
+    bank_details: {
+      bvn: { type: String, default: '' },
+      acct_number: { type: String, default: '' },
+      acct_name: { type: String, default: '' },
+      bank_name: { type: String, default: '' },
+      acct_type: { type: String, default: '' },
+      bank_code: { type: String, default: '' },
+      bvn_verified: { type: Boolean, default: false }
+    },
+    identitifications: {
+      id_type: { type: String, default: '' },
+      id_card: { key: String },
+      utility_bill: { key: String }
+    },
+    customer_code: String //gotten from paystack.com or in the future any platform we support.
   },
   language: { 
     type: String, 
@@ -84,13 +68,6 @@ const SponsorSchema = new Schema({
   isApproved: { 
     type: Boolean, 
     default: false 
-  },
-  acctstatus: {
-    type: String,
-    trim: true,
-    default: 'pending',
-    index: true,
-    enum: ['pending', 'active', 'suspended']
   },
   start_trial_ts: { type: Date },
   end_trial_ts: { type: Date },

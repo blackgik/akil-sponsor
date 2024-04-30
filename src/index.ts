@@ -49,7 +49,7 @@ class App {
     this.app.use(compression())
     this.app.use(cors())
     this.app.use(helmet())
-    this.app.use('/documentation', swaggerUi.serve, swaggerUi.setup(apiDocumentation));
+    this.app.use(`${ConstantAPI.API}/documentation`, swaggerUi.serve, swaggerUi.setup(apiDocumentation));
   }
 
   private initialiseRoutes(): void {
