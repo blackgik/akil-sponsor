@@ -45,33 +45,33 @@ class OccupationController implements Controller {
     private initialiseRoutes(): void {
         this.router.post(
             `${this.path}${ConstantAPI.OCCUPATION_CREATE}`,
-            this.authenticated.verifyTokenAndAuthorization,
+            //this.authenticated.verifyTokenAndAuthorization,
             validationMiddleware(this.validate.createOccupation),
             this.createOccupation,
         )
 
         this.router.put(
             `${this.path}${ConstantAPI.OCCUPATION_UPDATE}`,
-            this.authenticated.verifyTokenAndAuthorization,
+            //this.authenticated.verifyTokenAndAuthorization,
             validationMiddleware(this.validate.updateOccupation),
             this.updateOccupation,
         )
 
         this.router.get(
             `${this.path}${ConstantAPI.OCCUPATION_GET}`,
-            this.authenticated.verifyTokenAndAuthorization,
+            //this.authenticated.verifyTokenAndAuthorization,
             this.getOccupation,
         )
 
         this.router.get(
             `${this.path}${ConstantAPI.OCCUPATION_GET_ALL}`,
-            this.authenticated.verifyTokenAndAuthorization,
+           // this.authenticated.verifyTokenAndAuthorization,
             this.listOccupation,
         )
 
         this.router.get(
             `${this.path}${ConstantAPI.OCCUPATION_DELETE}`,
-            this.authenticated.verifyTokenAndAuthorization,
+           // this.authenticated.verifyTokenAndAuthorization,
             this.deleteOccupation,
         )
     }

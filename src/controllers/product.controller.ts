@@ -45,33 +45,33 @@ class ProductController implements Controller {
     private initialiseRoutes(): void {
         this.router.post(
             `${this.path}${ConstantAPI.PRODUCT_CREATE}`,
-            this.authenticated.verifyTokenAndAuthorization,
+            //this.authenticated.verifyTokenAndAuthorization,
             validationMiddleware(this.validate.createProduct),
             this.createProduct,
         )
 
         this.router.put(
             `${this.path}${ConstantAPI.PRODUCT_UPDATE}`,
-            this.authenticated.verifyTokenAndAuthorization,
+            //this.authenticated.verifyTokenAndAuthorization,
             validationMiddleware(this.validate.updateProduct),
             this.updateProduct,
         )
 
         this.router.get(
             `${this.path}${ConstantAPI.PRODUCT_GET}`,
-            this.authenticated.verifyTokenAndAuthorization,
+            //this.authenticated.verifyTokenAndAuthorization,
             this.getProduct,
         )
 
         this.router.get(
             `${this.path}${ConstantAPI.PRODUCT_GET_ALL}`,
-            this.authenticated.verifyTokenAndAuthorization,
+            //this.authenticated.verifyTokenAndAuthorization,
             this.listProduct,
         )
 
         this.router.get(
             `${this.path}${ConstantAPI.PRODUCT_DELETE}`,
-            this.authenticated.verifyTokenAndAuthorization,
+            //this.authenticated.verifyTokenAndAuthorization,
             this.deleteProduct,
         )
     }
