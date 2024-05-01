@@ -20,16 +20,18 @@ import ProductCategoryController from '../controllers/product_category.controlle
 import ProductController from '../controllers/product.controller'
 import RoleController from '../controllers/role.controller'
 import ProjectController from '../controllers/project.controller'
+import UserController from '../controllers/user.controller'
 
-const { app } = new App([new PartnerController(), 
-  new SponsorController(),
-  new AuthController(),
-  new OccupationController(),
-  new PaymentController(),
-  new ProductCategoryController(),
-  new ProductController(),
-  new RoleController(),
-  new ProjectController(),])
+const { app } = new App([new PartnerController(),
+new SponsorController(),
+new AuthController(),
+new OccupationController(),
+new PaymentController(),
+new ProductCategoryController(),
+new ProductController(),
+new RoleController(),
+new ProjectController(),
+new UserController()])
 
 /**
  * Normalize a port into a number, string, or false.

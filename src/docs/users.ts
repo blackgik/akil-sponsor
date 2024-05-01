@@ -3,7 +3,15 @@ const userResponseWithRole = {
     type: 'string',
     example: '60564fcb544047cdc3844818',
   },
-  fullName: {
+  firstname: {
+    type: 'string',
+    example: 'John Snow',
+  },
+  lastname: {
+    type: 'string',
+    example: 'John Snow',
+  },
+  avatar: {
     type: 'string',
     example: 'John Snow',
   },
@@ -11,13 +19,53 @@ const userResponseWithRole = {
     type: 'string',
     example: 'john.snow@email.com',
   },
-  password: {
+  phone: {
     type: 'string',
-    example: '442893aba778ab321dc151d9b1ad98c64ed56c07f8cbaed',
+    example: '+223458689',
   },
-  enabled: {
-    type: 'boolean',
-    example: true,
+  gender: {
+    type: 'string',
+    example: 'M',
+  },
+  state: {
+    type: 'string',
+    example: 'Kaduna',
+  },
+  country: {
+    type: 'string',
+    example: 'BF',
+  },
+  city: {
+    type: 'string',
+    example: 'Lagos',
+  },
+  address: {
+    type: 'string',
+    example: 'Anthony',
+  },
+  dob: {
+    type: 'string',
+    example: '2024-05-01',
+  },
+  hash: {
+    type: 'string',
+    example: 'fdtrsrguygyrswsred',
+  },
+  hashedRt: {
+    type: 'string',
+    example: 'rdesestgiupouytutrtesdxdf',
+  },
+  email_verified: {
+    type: 'bool',
+    example: false,
+  },
+  acctstatus: {
+    type: 'string',
+    example: 'pending',
+  },
+  otpHash: {
+    type: 'string',
+    example: 'rdesestgiupouytutrtesdxdf',
   },
   role: {
     type: 'object',
@@ -26,13 +74,25 @@ const userResponseWithRole = {
         type: 'string',
         example: '605636683f6e29c81c8b2db0',
       },
-      name: {
+      role_name: {
         type: 'string',
-        example: "Role's name",
+        example: 'Administrateur',
       },
-      description: {
+      role_code: {
         type: 'string',
-        example: "Role's description",
+        example: 'ADMIN',
+      },
+      role_slug: {
+        type: 'string',
+        example: 'administrateur',
+      },
+      role_description: {
+        type: 'string',
+        example: 'this role gives you access to...',
+      },
+      is_active: {
+        type: 'boolean',
+        example: true,
       },
       createdAt: {
         type: 'string',
@@ -114,7 +174,15 @@ const security = [
 const createUserBody = {
   type: 'object',
   properties: {
-    fullName: {
+    firstname: {
+      type: 'string',
+      example: 'John Snow',
+    },
+    lastname: {
+      type: 'string',
+      example: 'John Snow',
+    },
+    avatar: {
       type: 'string',
       example: 'John Snow',
     },
@@ -122,18 +190,33 @@ const createUserBody = {
       type: 'string',
       example: 'john.snow@email.com',
     },
-    password: {
+    phone: {
       type: 'string',
-      description: "unencrypted user's password",
-      example: '!1234aWe1Ro3$#',
+      example: '+223458689',
     },
-    enabled: {
-      type: 'boolean',
-      example: true,
-    },
-    role: {
+    gender: {
       type: 'string',
-      example: '605636683f6e29c81c8b2db0',
+      example: 'M',
+    },
+    state: {
+      type: 'string',
+      example: 'Kaduna',
+    },
+    country: {
+      type: 'string',
+      example: 'BF',
+    },
+    city: {
+      type: 'string',
+      example: 'Lagos',
+    },
+    address: {
+      type: 'string',
+      example: 'Anthony',
+    },
+    roleIdd: {
+      type: 'string',
+      example: '60564fcb544047cdc3844818',
     },
   },
 };
@@ -141,13 +224,49 @@ const createUserBody = {
 const updateUserBody = {
   type: 'object',
   properties: {
-    fullName: {
+    firstname: {
       type: 'string',
       example: 'John Snow',
     },
-    role: {
+    lastname: {
       type: 'string',
-      example: '605636683f6e29c81c8b2db0',
+      example: 'John Snow',
+    },
+    avatar: {
+      type: 'string',
+      example: 'John Snow',
+    },
+    email: {
+      type: 'string',
+      example: 'john.snow@email.com',
+    },
+    phone: {
+      type: 'string',
+      example: '+223458689',
+    },
+    gender: {
+      type: 'string',
+      example: 'M',
+    },
+    state: {
+      type: 'string',
+      example: 'Kaduna',
+    },
+    country: {
+      type: 'string',
+      example: 'BF',
+    },
+    city: {
+      type: 'string',
+      example: 'Lagos',
+    },
+    address: {
+      type: 'string',
+      example: 'Anthony',
+    },
+    acctstatus: {
+      type: 'string',
+      example: 'pending',
     },
   },
 };
@@ -183,7 +302,15 @@ const createUser = {
                 type: 'string',
                 example: '60564fcb544047cdc3844818',
               },
-              fullName: {
+              firstname: {
+                type: 'string',
+                example: 'John Snow',
+              },
+              lastname: {
+                type: 'string',
+                example: 'John Snow',
+              },
+              avatar: {
                 type: 'string',
                 example: 'John Snow',
               },
@@ -191,17 +318,78 @@ const createUser = {
                 type: 'string',
                 example: 'john.snow@email.com',
               },
-              password: {
+              phone: {
                 type: 'string',
-                example: '442893aba778ab321dc151d9b1ad98c64ed56c07f8cbaed',
+                example: '+223458689',
               },
-              enabled: {
-                type: 'boolean',
-                example: true,
+              gender: {
+                type: 'string',
+                example: 'M',
+              },
+              state: {
+                type: 'string',
+                example: 'Kaduna',
+              },
+              country: {
+                type: 'string',
+                example: 'BF',
+              },
+              city: {
+                type: 'string',
+                example: 'Lagos',
+              },
+              address: {
+                type: 'string',
+                example: 'Anthony',
+              },
+              dob: {
+                type: 'string',
+                example: '2024-05-01',
+              },
+              email_verified: {
+                type: 'bool',
+                example: false,
+              },
+              acctstatus: {
+                type: 'string',
+                example: 'pending',
               },
               role: {
-                type: 'string',
-                example: '605636683f6e29c81c8b2db0',
+                type: 'object',
+                properties: {
+                  _id: {
+                    type: 'string',
+                    example: '605636683f6e29c81c8b2db0',
+                  },
+                  role_name: {
+                    type: 'string',
+                    example: 'Administrateur',
+                  },
+                  role_code: {
+                    type: 'string',
+                    example: 'ADMIN',
+                  },
+                  role_slug: {
+                    type: 'string',
+                    example: 'administrateur',
+                  },
+                  role_description: {
+                    type: 'string',
+                    example: 'this role gives you access to...',
+                  },
+                  is_active: {
+                    type: 'boolean',
+                    example: true,
+                  },
+                  createdAt: {
+                    type: 'string',
+                    example: '2021-03-19T09:51:01.506Z',
+                  },
+                  updatedAt: {
+                    type: 'string',
+                    example: '2021-03-19T11:48:25.980Z',
+                  },
+                },
               },
               createdAt: {
                 type: 'string',

@@ -27,6 +27,8 @@ import logger from '../utils/logger.util'
 import { ISponsor, ISponsorDocument } from '../models/sponsor.model';
 import { Types } from 'mongoose'
 import { IUser, IUserDocument } from '../models/user.model'
+import { IAuthDto } from 'dto/IAuthDto'
+import { Tokens } from 'types'
 
 
 class AuthController implements Controller {
@@ -129,9 +131,8 @@ class AuthController implements Controller {
         next: NextFunction,
     ): Promise<Response | void> => {
         try {
-            const sponsor_id: string = req.params.sponsor_id;
-            const input_sponsor: ISponsor = req.body.sponsor;
-            const updated_sponsor: ISponsorDocument | null = await this.sponsorService.updateSponsorService(new Types.ObjectId(sponsor_id), input_sponsor)
+            const authDto: IAuthDto = req.body;
+            const tokens: Tokens | null = await this.authService.signinLocal(authDto)
 
             return res.status(ConstantHttpCode.OK).json({
                 status: {
@@ -139,7 +140,7 @@ class AuthController implements Controller {
                     msg: ConstantHttpReason.OK,
                 },
                 msg: ConstantMessage.SPONSOR_UPDATE_SUCCESS,
-                data: updated_sponsor,
+                data: tokens,
             })
         } catch (err: any) {
             next(

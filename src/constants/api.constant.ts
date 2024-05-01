@@ -9,6 +9,7 @@ class Api {
   public static readonly SPONSORS: string = '/sponsors'
   public static readonly PAYMENTS: string = '/payments'
   public static readonly ROLES: string = '/roles'
+  public static readonly USERS: string = '/users'
 
   // partner-uth
   public static readonly PARTNER_AUTH_ONBOARDING: string = '/onboarding'
@@ -70,14 +71,13 @@ class Api {
   public static readonly PRODUCT_GET_ALL_STATS: string = '/stats'
 
   // users
-  public static readonly USER_UPDATE: string = '/:id'
+  public static readonly USER_UPDATE: string = '/:user_id'
   public static readonly USER_CREATE: string = ''
-  public static readonly USER_DELETE: string = '/delete/:id'
-  public static readonly USER_GET: string = '/find/:id'
+  public static readonly USER_DELETE: string = '/delete/:user_id'
+  public static readonly USER_GET: string = '/find/:user_id'
   public static readonly USER_GET_ALL: string = ''
-  public static readonly USER_GET_BY_ROLE: string = '/role/:id'
-  public static readonly USER_GET_BY_PARTNER: string = '/partner/:id'
-  public static readonly USER_GET_BY_SPONSOR: string = '/sponsor/:id'
+  public static readonly USER_GET_BY_ROLE: string = '/role/:role_id'
+  public static readonly USER_GET_BY_SPONSOR: string = '/sponsor/:sponsor_id'
   public static readonly USER_GET_ALL_STATS: string = '/stats'
 
   // PAYSTACK PAYMENT

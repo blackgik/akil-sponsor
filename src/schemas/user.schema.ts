@@ -19,19 +19,19 @@ const UserSchema = new Schema({
   email: { type: String, required: true, lowercase: true },
   phone: { type: String, required: true },
   gender: { type: String, default: '', lowercase: true },
-  password: { type: String, required: true },
-  state: { type: String, required: true, lowercase: true },
-  country: { type: String, required: true, lowercase: true },
-  city: { type: String, required: true, lowercase: true },
-  address: { type: String, required: true },
-  hash:{ type: String, required: true },
-  hashedRt:{ type: String, required: true },
-  dob: { type: Date, required: true },
+  password: { type: String, required: false },
+  state: { type: String, required: false, lowercase: true },
+  country: { type: String, required: false, lowercase: true },
+  city: { type: String, required: false, lowercase: true },
+  address: { type: String, required: false },
+  hash:{ type: String, required: false },
+  hashedRt:{ type: String, required: false },
+  dob: { type: Date, required: false },
   email_verified: { type: Boolean, default: false },
   acctstatus: { type: String, default: 'pending', enum: ['pending', 'active', 'suspended'] },
   roleId: {
     type: Types.ObjectId,
-    required: true
+    required: false
   }
 }, {
   collection: 'users',

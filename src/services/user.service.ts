@@ -18,7 +18,7 @@ import customConfig from "../config/default";
 import { formattMailInfo } from "../utils/mail.formatter";
 import { IUser, IUserDocument } from "models/user.model";
 
-class AuthService {
+class UserService {
 
     hashData(data: string) {
         return argon.hash(data);
@@ -163,5 +163,5 @@ class AuthService {
 
 }
 
-export default AuthService
+export default UserService
 
