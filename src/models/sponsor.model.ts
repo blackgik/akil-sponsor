@@ -14,6 +14,7 @@ export interface ISponsor {
     dob: string,
     email_verified: boolean,
     acctstatus: string,
+    otpHash: string,
     kyc_status: string,
     kyc_docs: {
         bank_details: {

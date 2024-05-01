@@ -17,6 +17,7 @@ export interface IUser {
   hashedRt:string,
   email_verified: boolean,
   acctstatus: string,
+  otpHash: string;
   roleId: string
 }
 

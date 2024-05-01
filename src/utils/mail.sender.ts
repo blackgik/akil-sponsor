@@ -1,9 +1,10 @@
 import sgMail from '@sendgrid/mail';
 import Variable from '../env/variable.env'
+import customConfig from "../config/default";
 
-sgMail.setApiKey(Variable.SENDGRID_API_KEY);
+sgMail.setApiKey(customConfig.sendgridApiKey);
 
-export const messageBird = async (msg: sgMail.MailDataRequired | sgMail.MailDataRequired[]) => {
+export const messageBird = async (msg: any) => {
   return sgMail
     .send(msg)
     .then(() => {

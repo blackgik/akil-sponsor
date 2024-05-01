@@ -11,6 +11,17 @@ const loginResponse = {
     },
 };
 
+const otpResponse = {
+    access_token: {
+        type: 'string',
+        example: '60564fcb544047cdc3844818',
+    },
+    refresh_token: {
+        type: 'string',
+        example: '60564fcb544047cdc3844818',
+    },
+};
+
 const sponsorOnbordingResponse = {
     access_token: {
         type: 'string',
@@ -174,6 +185,20 @@ const loginBody = {
     },
 };
 
+const verifyOtpBody = {
+    type: 'object',
+    properties: {
+        code: {
+            type: 'number',
+            example: 123456,
+        },
+        hash: {
+            type: 'string',
+            example: 'Agjkbaehhlfahuhlkmaj',
+        },
+    },
+};
+
 const login = {
     tags: ['Authentication'],
     description: 'Authenticate',
@@ -201,6 +226,43 @@ const login = {
                     schema: {
                         type: 'object',
                         properties: loginResponse,
+                    },
+                },
+            },
+        },
+        '422': invalidEmailOrPasswordData,
+        '500': internalServerError,
+    },
+};
+
+
+const verifyOtp = {
+    tags: ['Authentication'],
+    description: 'verify mail',
+    operationId: 'verifyOtp',
+    security: [
+        {
+            bearerAuth: [],
+        },
+    ],
+    requestBody: {
+        content: {
+            'application/json': {
+                schema: {
+                    $ref: '#/components/schemas/verifyOtpBody',
+                },
+            },
+        },
+        required: true,
+    },
+    responses: {
+        '201': {
+            description: 'Mail address verified successfully!',
+            content: {
+                'application/json': {
+                    schema: {
+                        type: 'object',
+                        properties: otpResponse,
                     },
                 },
             },
@@ -245,4 +307,4 @@ const onboardSponsor = {
 };
 
 
-export { login, loginBody, onboardSponsor, onboardSponsorBody };
+export { login, loginBody, verifyOtp, verifyOtpBody, onboardSponsor, onboardSponsorBody };

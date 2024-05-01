@@ -26,6 +26,7 @@ import ConstantHttpReason from '../constants/http.reason.constant'
 import logger from '../utils/logger.util'
 import { ISponsor, ISponsorDocument } from '../models/sponsor.model';
 import { Types } from 'mongoose'
+import { IUser, IUserDocument } from '../models/user.model'
 
 
 class AuthController implements Controller {
@@ -72,9 +73,10 @@ class AuthController implements Controller {
     ): Promise<Response | void> => {
         try {
             const input_sponsor: ISponsor = req.body
+            let saved_user: IUserDocument 
             const saved_sponsor = await this.sponsorService.createSponsorService(input_sponsor);
             logger.info(`user ${input_sponsor.firstname} found`)
-            if (saved_sponsor) {
+            if (saved_sponsor._id) {
                 const userRole = await this.roleService.getRoleByCodeService('SPONSOR');
                 const newUser = {
                     firstname: saved_sponsor.firstname,
@@ -95,7 +97,11 @@ class AuthController implements Controller {
                     acctstatus: 'pending',
                     roleId: userRole?._id
                 };
-                const saved_user = await this.authService.signupLocal(newUser);
+                saved_user = await this.authService.signupLocal(newUser);
+                if (saved_user._id) {
+                    saved_sponsor.otpHash = saved_user.otpHash;
+                    await this.sponsorService.updateSponsorService(saved_sponsor._id, saved_sponsor);
+                }
             }
             return res.status(ConstantHttpCode.OK).json({
                 status: {

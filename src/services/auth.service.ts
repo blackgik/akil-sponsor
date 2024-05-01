@@ -2,12 +2,21 @@ import jwt from "jsonwebtoken";
 import * as argon from 'argon2';
 import { User } from '../schemas/user.schema';
 import { JwtPayload, Tokens } from '../types';
-import { UnAuthorizedError, ForbiddenError } from '../utils/app.errors';
+import { UnAuthorizedError, ForbiddenError, InternalServerError } from '../utils/app.errors';
 import { IUserCreateDto } from '../dto/IUserCreateDto';
 import { IAuthDto } from '../dto/IAuthDto';
 import { Types } from 'mongoose'
-import { now } from "core-js/core/date";
-import { codeGenerator } from "../utils/code.generator";
+import {
+    buildOtpHash,
+    codeGenerator,
+    generateEnterpriseCredentials,
+    verifyOTP
+} from "../utils/code.generator";
+import { messageBird } from "../utils/mail.sender";
+import { onboardinMail, verifyOnbordingMail } from "../utils/mail.data";
+import customConfig from "../config/default";
+import { formattMailInfo } from "../utils/mail.formatter";
+import { IUser, IUserDocument } from "models/user.model";
 
 class AuthService {
 
@@ -43,7 +52,7 @@ class AuthService {
         });
     }
 
-    async signupLocal(dto: IUserCreateDto): Promise<Tokens> {
+    async signupLocal(dto: IUserCreateDto): Promise<IUserDocument> {
         const generatePassword = await codeGenerator(9, 'ABCDEFGHI&*$%#1234567890');
         console.log('====================================');
         console.log(generatePassword);
@@ -66,11 +75,37 @@ class AuthService {
             acctstatus: 'pending',
             hash: hash,
             hashedRt: '',
+            otpHash: '',
             roleId: dto.roleId
         })
         const tokens = await this.signJwt(newUser._id, newUser.email);
         await this.updateRtHash(newUser._id, tokens.refresh_token);
-        return tokens;
+
+        const otp = await codeGenerator(6, '1234567890');
+
+        const otpHash = buildOtpHash(newUser.email, otp, customConfig.otpKey, 15);
+
+        newUser.otpHash = otpHash;
+        //create email profile here
+        const onboardingData = {
+            name: newUser.firstname+' '+newUser.lastname,
+            code: otp
+        };
+        const mailData = {
+            email: newUser.email,
+            subject: 'MAJFINTECH ONBOARDING',
+            type: 'html',
+            html: verifyOnbordingMail(onboardingData).html,
+            text: verifyOnbordingMail(onboardingData).text
+        };
+        const msg = await formattMailInfo(mailData, customConfig);
+
+        const msgDelivered = await messageBird(msg);
+        if (!msgDelivered)
+            throw new InternalServerError(
+                'server slip. Organization was created without mail being sent'
+            );
+        return newUser;
     }
     async signinLocal(dto: IAuthDto): Promise<Tokens> {
         //console.log(dto);

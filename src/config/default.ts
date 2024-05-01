@@ -14,6 +14,9 @@ const customConfig: {
     redisCacheExpiresIn: number;
     baseProdUrl: string;
     baseLocalUrl: string;
+    otpKey: string;
+    sendgridApiKey: string;
+    sendgridMailSender: string;
 } = {
     port: 8000,
     accessTokenExpiresIn: 15,
@@ -28,6 +31,9 @@ const customConfig: {
     refreshTokenPublicKey: process.env.REFRESH_TOKEN_PUBLIC_KEY as string,
     baseProdUrl: process.env.BASE_PROD_URL as string,
     baseLocalUrl: process.env.BASE_LOCAL_URL as string,
+    otpKey: process.env.OTP_KEY as string,
+    sendgridApiKey: process.env.SENDGRID_API_KEY as string,
+    sendgridMailSender: process.env.EMAIL_SENDER as string
 };
 
 export default customConfig;
