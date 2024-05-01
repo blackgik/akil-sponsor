@@ -45,27 +45,27 @@ class PartnerController implements Controller {
     private initialiseRoutes(): void {
         this.router.post(
             `${this.path}${ConstantAPI.PARTNER_CREATE}`,
-            this.authenticated.verifyTokenAndAuthorization,
+            //this.authenticated.verifyTokenAndAuthorization,
             validationMiddleware(this.validate.createPartner),
             this.createPartner,
         )
 
         this.router.put(
             `${this.path}${ConstantAPI.PARTNER_UPDATE}`,
-            this.authenticated.verifyTokenAndAuthorization,
+            //this.authenticated.verifyTokenAndAuthorization,
             validationMiddleware(this.validate.updatePartner),
             this.updatePartner,
         )
 
         this.router.get(
             `${this.path}${ConstantAPI.PARTNER_GET}`,
-            this.authenticated.verifyTokenAndAuthorization,
+            //this.authenticated.verifyTokenAndAuthorization,
             this.getPartner,
         )
 
         this.router.get(
             `${this.path}${ConstantAPI.PARTNER_GET_ALL}`,
-            this.authenticated.verifyTokenAndAuthorization,
+            //this.authenticated.verifyTokenAndAuthorization,
             this.listPartner,
         )
 

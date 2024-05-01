@@ -10,6 +10,7 @@ class Api {
   public static readonly PAYMENTS: string = '/payments'
   public static readonly ROLES: string = '/roles'
   public static readonly USERS: string = '/users'
+  public static readonly PRODUCTS: string = '/products'
 
   // partner-uth
   public static readonly PARTNER_AUTH_ONBOARDING: string = '/onboarding'
