@@ -33,7 +33,7 @@ class ProductCategoryController implements Controller {
     private validate: Validate
 
     constructor() {
-        this.path = ConstantAPI.PRODUCTS
+        this.path = ConstantAPI.PRODUCT_CATEGORIES
         this.router = Router()
         this.productService = new ProductService()
         this.authenticated = new Authenticated()
