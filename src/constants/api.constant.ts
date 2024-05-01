@@ -1,7 +1,7 @@
 class Api {
   public static readonly ROOT: string = '/'
 
-  public static readonly API: string = '/api'
+  public static readonly API: string = '/api/v1/sponsors/stag'
 
   public static readonly AUTH: string = `/auth`
   public static readonly PARTNERS: string = '/partners'
