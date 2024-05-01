@@ -150,7 +150,7 @@ const apiDocumentation = {
       post: createSponsor,
       get: getSponsors,
     },
-    login: {
+    'sponsors/login': {
       post: login,
     },
     'sponsors/onboarding': {
