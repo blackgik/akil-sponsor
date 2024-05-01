@@ -1,3 +1,4 @@
+import { DuplicateError } from '../utils/app.errors';
 import { IOccupation, IOccupationDocument } from '../models/occupation.model';
 import { Occupation } from '../schemas/occupation.schema';
 import { Types } from 'mongoose'
@@ -13,6 +14,9 @@ class OccupationService {
                 throw new Error(`Please enter occupation name`);
             if (!occupation.occupation_code)
                 throw new Error(`Please enter occupation code`);
+
+            const checkIfExist = await Occupation.findOne({ occupation_code: occupation.occupation_code });
+            if (checkIfExist) throw new DuplicateError('Occupation already exists');
 
             const newOccupation: IOccupationDocument = Occupation.buildOccupation(occupation);
             return await newOccupation.save();

@@ -25,7 +25,7 @@ const PartnerSchema = new Schema({
   partner_code: { 
     type: String, 
     trim: true, 
-    required: true, 
+    required: false, 
     index: true 
   },
   partner_avatar: { 
@@ -39,11 +39,6 @@ const PartnerSchema = new Schema({
     required: true,
     unique: true,
     max: ConstantNumber.EMAIL_MAX_LENGTH,
-  },
-  password: {
-    type: String,
-    required: true,
-    min: ConstantNumber.PASSWORD_MIN_LENGTH,
   },
   partner_phone: {
     type: String,

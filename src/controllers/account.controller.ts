@@ -2,9 +2,9 @@ import { Router, Request, Response, NextFunction } from 'express'
 
 import Controller from '../interfaces/controller.interface'
 
-import UserService from '../services/user.service'
+import AccountService from '../services/account.service'
 import RoleService from '../services/role.service'
-import Validate from '../validations/user.validation'
+import Validate from '../validations/account.validation'
 
 import Authenticated from '../middleware/authenticated.middleware'
 import validationMiddleware from '../middleware/validation.middleware'
@@ -24,15 +24,15 @@ import ConstantHttpReason from '../constants/http.reason.constant'
 // logger
 import logger from '../utils/logger.util'
 import { Types } from 'mongoose'
-import { IUser, IUserDocument } from '../models/user.model'
+import { IAccount, IAccountDocument } from '../models/account.model'
 import { IAuthDto } from 'dto/IAuthDto'
 import { Tokens } from 'types'
 
 
-class UserController implements Controller {
+class AccountController implements Controller {
     public path: string
     public router: Router
-    private userService: UserService
+    private accountService: AccountService
     private authenticated: Authenticated
     private validate: Validate
     private roleService: RoleService
@@ -40,7 +40,7 @@ class UserController implements Controller {
     constructor() {
         this.path = ConstantAPI.USERS
         this.router = Router()
-        this.userService = new UserService()
+        this.accountService = new AccountService()
         this.roleService = new RoleService()
         this.authenticated = new Authenticated()
         this.validate = new Validate()
@@ -51,48 +51,48 @@ class UserController implements Controller {
     private initialiseRoutes(): void {
         this.router.post(
             `${this.path}${ConstantAPI.USER_CREATE}`,
-            validationMiddleware(this.validate.createUser),
-            this.createUser,
+            validationMiddleware(this.validate.createAccount),
+            this.createAccount,
         )
 
     }
 
-    private createUser = async (
+    private createAccount = async (
         req: Request,
         res: Response,
         next: NextFunction,
     ): Promise<Response | void> => {
         try {
-            const input_user: IUser = req.body
-            let saved_user: IUserDocument
-            const userRole = await this.roleService.getRoleByCodeService('USER');
-            const newUser = {
-                firstname: input_user.firstname,
-                lastname: input_user.lastname,
-                avatar: input_user.avatar,
-                email: input_user.email,
-                phone: input_user.phone,
-                gender: input_user.gender,
+            const input_account: IAccount = req.body
+            let saved_account: IAccountDocument
+            const accountRole = await this.roleService.getRoleByCodeService('USER');
+            const newAccount = {
+                firstname: input_account.firstname,
+                lastname: input_account.lastname,
+                avatar: input_account.avatar,
+                email: input_account.email,
+                phone: input_account.phone,
+                gender: input_account.gender,
                 password: '',
-                state: input_user.state,
-                country: input_user.country,
-                city: input_user.city,
-                address: input_user.address,
+                state: input_account.state,
+                country: input_account.country,
+                city: input_account.city,
+                address: input_account.address,
                 dob: new Date,
                 hash: '',
                 hashedRt: '',
                 email_verified: false,
                 acctstatus: 'pending',
-                roleId: userRole?._id
+                roleId: accountRole?._id
             };
-            saved_user = await this.userService.signupLocal(input_user);
+            //saved_account = await this.accountService.signupLocal(input_account);
             return res.status(ConstantHttpCode.OK).json({
                 status: {
                     code: ConstantHttpCode.OK,
                     msg: ConstantHttpReason.OK,
                 },
                 msg: ConstantMessage.USER_CREATE_SUCCESS,
-                data: input_user,
+                data: input_account,
             })
         } catch (err: any) {
             next(
@@ -110,4 +110,4 @@ class UserController implements Controller {
 
 }
 
-export default UserController
+export default AccountController

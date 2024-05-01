@@ -44,6 +44,7 @@ class Api {
   public static readonly SPONSOR_GET: string = '/find/:sponsor_id'
   public static readonly SPONSOR_GET_ALL: string = ''
   public static readonly SPONSOR_GET_ALL_STATS: string = '/stats'
+  public static readonly SPONSOR_MAIL_VERIFY: string = '/verify-mail'
 
 
   // categories

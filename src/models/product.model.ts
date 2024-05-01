@@ -15,7 +15,7 @@ export interface IProduct {
 export interface IProductCategory {
     product_category_name: string
     parent_category_id?: Types.ObjectId,
-    product_category_slug?: string
+    product_category_slug: string
     product_category_description?: string
     is_active: boolean
 }

@@ -25,7 +25,9 @@ class ProductValidation {
 
   public createNewProductCategory = Joi.object({
     product_category_name: Joi.string().max(30).required(),
-    category_description: Joi.string().max(100).optional(),
+    product_category_slug: Joi.string().max(30).required(),
+    product_category_description: Joi.string().max(100).optional(),
+    parent_category_id: Joi.string().max(100).optional(),
   })
 
 }

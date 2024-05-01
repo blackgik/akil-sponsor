@@ -1,8 +1,8 @@
 import Joi from 'joi'
 import ConstantRegex from '../constants/regex.constant'
 
-class UserValidation {
-  public createUser = Joi.object({
+class AccountValidation {
+  public createAccount = Joi.object({
     firstname: Joi.string().max(30).required(),
     lastname: Joi.string().max(30).required(),
     email: Joi.string().email().required(),
@@ -13,7 +13,7 @@ class UserValidation {
     country: Joi.string().max(30).required()
   })
 
-  public updateUser = Joi.object({
+  public updateAccount = Joi.object({
     firstname: Joi.string().max(30).required(),
     lastname: Joi.string().max(30).required(),
     email: Joi.string().email().required(),
@@ -36,4 +36,4 @@ class UserValidation {
   })
 }
 
-export default UserValidation
+export default AccountValidation

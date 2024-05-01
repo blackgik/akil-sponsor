@@ -10,7 +10,9 @@ class SponsorValidation {
     phone: Joi.string().min(10).max(15).required(),
     address: Joi.string().max(100).required(),
     state: Joi.string().max(30).required(),
-    country: Joi.string().max(30).required()
+    country: Joi.string().max(30).required(),
+    tosAgreement: Joi.boolean().required(),
+    psdAgreement: Joi.boolean().optional()
   })
 
   public updateSponsor = Joi.object({
@@ -27,6 +29,11 @@ class SponsorValidation {
   public login = Joi.object({
     email: Joi.string().email().required(),
     password: Joi.string().min(6).max(30).required(),
+  })
+
+  public verifyMail = Joi.object({
+    code: Joi.string().required(),
+    hash: Joi.string().min(6).max(150).required(),
   })
 
   public updatePassword = Joi.object({

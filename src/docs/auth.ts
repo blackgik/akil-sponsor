@@ -164,7 +164,15 @@ const onboardSponsorBody = {
             type: 'string',
             example: 'BLACKROCK',
         },
+        password: {
+            type: 'string',
+            example: 'BLACKROCK',
+        },
         tosAgreement: {
+            type: 'boolean',
+            example: true,
+        },
+        pdsAgreement: {
             type: 'boolean',
             example: true,
         },

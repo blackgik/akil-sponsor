@@ -1,3 +1,4 @@
+import { DuplicateError } from '../utils/app.errors';
 import { IProduct, IProductCategory, IProductCategoryDocument, IProductDocument } from '../models/product.model';
 import { Product, ProductCategory } from '../schemas/product.schema';
 import { Types } from 'mongoose'
@@ -17,6 +18,9 @@ class ProductService {
                 throw new Error(`Please enter product category`);
             if (!product.product_unit)
                 throw new Error(`Please enter product price`)
+
+            const checkIfExist = await Product.findOne({ product_name: product.product_name });
+            if (checkIfExist) throw new DuplicateError('Product already exists');
 
             const newProduct: IProductDocument = Product.buildProduct(product);
             return await newProduct.save();
@@ -70,6 +74,9 @@ class ProductService {
                 throw new Error(`Please enter product category name`);
             if (product_category.parent_category_id)
                 product_category.parent_category_id = new Types.ObjectId(product_category.parent_category_id)
+
+            const checkIfExist = await ProductCategory.findOne({ product_category_name: product_category.product_category_name });
+            if (checkIfExist) throw new DuplicateError('Product Category already exists');
             const newProductCategory = ProductCategory.buildProductCategory(product_category);
             return await newProductCategory.save();
         } catch (err: any) {

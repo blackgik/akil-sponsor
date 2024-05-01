@@ -11,6 +11,7 @@ export interface ISponsor {
     country: string,
     city: string,
     address: string,
+    password: string,
     dob: string,
     email_verified: boolean,
     acctstatus: string,
@@ -39,6 +40,7 @@ export interface ISponsor {
     end_trial_ts: Date,
     hasPaid: boolean,
     tosAgreement: boolean,
+    psdAgreement: boolean,
 }
 
 export interface ISponsorDocument extends ISponsor, Document { }

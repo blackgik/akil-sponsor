@@ -1,9 +1,9 @@
 import jwt from "jsonwebtoken";
 import * as argon from 'argon2';
-import { User } from '../schemas/user.schema';
+import { Account } from '../schemas/account.schema';
 import { JwtPayload, Tokens } from '../types';
-import { UnAuthorizedError, ForbiddenError, InternalServerError } from '../utils/app.errors';
-import { IUserCreateDto } from '../dto/IUserCreateDto';
+import { UnAuthorizedError, ForbiddenError, InternalServerError, NotFoundError, InvalidError, BadRequestError } from '../utils/app.errors';
+import { IAccountCreateDto } from '../dto/IAccountCreateDto';
 import { IAuthDto } from '../dto/IAuthDto';
 import { Types } from 'mongoose'
 import {
@@ -16,7 +16,10 @@ import { messageBird } from "../utils/mail.sender";
 import { onboardinMail, verifyOnbordingMail } from "../utils/mail.data";
 import customConfig from "../config/default";
 import { formattMailInfo } from "../utils/mail.formatter";
-import { IUser, IUserDocument } from "models/user.model";
+import { IAccount, IAccountDocument } from "models/account.model";
+import { Sponsor } from "../schemas/sponsor.schema";
+import { ISponsor, ISponsorDocument } from "../models/sponsor.model";
+import { Role } from "../schemas/role.schema";
 
 class AuthService {
 
@@ -42,7 +45,7 @@ class AuthService {
 
     async updateRtHash(userId: string, rt: string) {
         const hash = await argon.hash(rt);
-        await User.updateOne({
+        await Account.updateOne({
             where: {
                 _id: userId,
             },
@@ -52,50 +55,53 @@ class AuthService {
         });
     }
 
-    async signupLocal(dto: IUserCreateDto): Promise<IUserDocument> {
-        const generatePassword = await codeGenerator(9, 'ABCDEFGHI&*$%#1234567890');
+    async signupLocal(dto: ISponsor): Promise<IAccountDocument|BadRequestError> {
+        try {
+            console.log('====================================');
+        console.log(dto);
         console.log('====================================');
-        console.log(generatePassword);
-        console.log('====================================');
-        const hash = await argon.hash(generatePassword);
-        const newUser = await User.buildUser({
-            firstname: dto.firstname,
-            lastname: dto.lastname,
-            avatar: dto.avatar,
-            email: dto.email,
-            phone: dto.phone,
-            gender: dto.gender,
-            password: hash,
-            state: dto.state,
-            country: dto.country,
-            city: dto.city,
-            address: dto.address,
-            dob: dto.dob,
+        const hash = await argon.hash(dto.password);       
+
+        const newSponsor: ISponsorDocument = Sponsor.buildSponsor(dto);
+        const userRole = await Role.getRoleByCode('SPONSOR');
+        const newAccount =  Account.buildAccount({
+            firstname: newSponsor.firstname,
+            lastname: newSponsor.lastname,
+            avatar: newSponsor.avatar,
+            email: newSponsor.email,
+            phone: newSponsor.phone,
+            gender: newSponsor.gender,
+            state: newSponsor.state,
+            country: newSponsor.country,
+            city: newSponsor.city,
+            address: newSponsor.address,
+            dob: new Date(),
             email_verified: false,
             acctstatus: 'pending',
             hash: hash,
             hashedRt: '',
+            ownerId: newSponsor._id,
             otpHash: '',
-            roleId: dto.roleId
+            roleId: userRole?._id
         })
-        console.log('====================================');
-        console.log(newUser);
-        console.log('====================================');
-        const tokens = await this.signJwt(newUser._id, newUser.email);
-        await this.updateRtHash(newUser._id, tokens.refresh_token);
+        const tokens = await this.signJwt(newAccount._id, newAccount.email);
+        await this.updateRtHash(newAccount._id, tokens.refresh_token);
 
         const otp = await codeGenerator(6, '1234567890');
 
-        const otpHash = buildOtpHash(newUser.email, otp, customConfig.otpKey, 15);
+        const otpHash = buildOtpHash(newAccount.email, otp, customConfig.otpKey, 15);
 
-        newUser.otpHash = otpHash;
+        newAccount.otpHash = otpHash;
+        newSponsor.otpHash = otpHash;
+        await Sponsor.updateSponsor(newSponsor._id, newSponsor);
+        await Account.updateAccount(newAccount._id, newAccount);
         //create email profile here
         const onboardingData = {
-            name: newUser.firstname+' '+newUser.lastname,
+            name: newAccount.firstname + ' ' + newAccount.lastname,
             code: otp
         };
         const mailData = {
-            email: newUser.email,
+            email: newAccount.email,
             subject: 'MAJFINTECH ONBOARDING',
             type: 'html',
             html: verifyOnbordingMail(onboardingData).html,
@@ -108,13 +114,20 @@ class AuthService {
             throw new InternalServerError(
                 'server slip. Organization was created without mail being sent'
             );
-        return newUser;
+        return newAccount;
+        } catch (error) {
+            console.log('====================================');
+            console.log(error);
+            console.log('====================================');
+            throw new BadRequestError('Please review your data');
+        }
     }
     async signinLocal(dto: IAuthDto): Promise<Tokens> {
-        //console.log(dto);
-        const user = await User.findOne({
+        console.log(dto);
+        const user = await Account.findOne({
             where: {
                 email: dto.email,
+                email_verified: true
             },
         });
         if (!user) {
@@ -130,7 +143,7 @@ class AuthService {
         return tokens;
     }
     async logout(userId: string) {
-        await User.updateMany({
+        await Account.updateMany({
             where: {
                 _id: userId,
                 hashedRt: {
@@ -144,7 +157,7 @@ class AuthService {
         return true;
     }
     async refreshTokens(userId: string, rt: string) {
-        const user = await User.findOne({
+        const user = await Account.findOne({
             where: {
                 _id: userId,
             },
@@ -160,6 +173,56 @@ class AuthService {
 
         return tokens;
     }
+
+    verifyOtp = async (body: any): Promise<Tokens> => {
+        const { code, hash } = body;
+
+        const checkAcct = await Account.findOne({
+            where: {
+                otpHash: hash,
+            },
+        });
+        if (!checkAcct) throw new NotFoundError('Account not found');
+
+        const verifyOtp = verifyOTP(checkAcct.email, code, hash, customConfig.otpKey);
+        if (!verifyOtp) throw new InvalidError('Wrong otp code');
+
+        const generatePassword = await codeGenerator(9, 'ABCDEFGHI&*$%#1234567890');
+
+        const hashedPwd = await argon.hash(generatePassword);
+        checkAcct.email_verified = true;
+        checkAcct.otpHash = '';
+        
+        let toVerifySponsor = await Sponsor.findById(checkAcct.ownerId);
+        if (toVerifySponsor) {
+            toVerifySponsor.email_verified = true;
+            toVerifySponsor.otpHash = '';
+            checkAcct.ownerId = toVerifySponsor._id;
+            await Sponsor.updateSponsor(toVerifySponsor._id, toVerifySponsor);
+        }
+        await Account.updateAccount(checkAcct._id, checkAcct);
+        //create email profile here
+        const onboardingData = {
+            email: checkAcct.email,
+            password: checkAcct.hash
+        };
+        const mailData = {
+            email: checkAcct.email,
+            subject: 'MAJFINTECH ONBOARDING',
+            type: 'html',
+            html: onboardinMail(onboardingData).html,
+            text: onboardinMail(onboardingData).text
+        };
+        const msg = await formattMailInfo(mailData, customConfig);
+
+        const msgDelivered = await messageBird(msg);
+        if (!msgDelivered)
+            throw new InternalServerError(
+                'server slip. Organization was created without mail being sent'
+            );
+            const tokens = await this.signJwt(checkAcct._id, checkAcct.email);
+        return tokens;
+    };
 
 }
 

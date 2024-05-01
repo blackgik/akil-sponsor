@@ -8,7 +8,7 @@ import { createSponsor, deleteSponsor, getSponsor, getSponsors, updateSponsor } 
 // api constant
 import ConstantAPI from '../constants/api.constant'
 import customConfig from "../config/default";
-import { login, loginBody, onboardSponsor, onboardSponsorBody } from './auth';
+import { login, loginBody, onboardSponsor, onboardSponsorBody, verifyOtp, verifyOtpBody } from './auth';
 
 const apiDocumentation = {
   openapi: '3.0.1',
@@ -111,13 +111,13 @@ const apiDocumentation = {
       post: createProduct_category,
       get: getProduct_categories,
     },
-    'product-categories/delete/{id}': {
+    'product_categories/delete/{id}': {
       delete: deleteProduct_category,
     },
-    'product-categories/find/{id}': {
+    'product_categories/find/{id}': {
       get: getProduct_category,
     },
-    'product-categories/{id}': {
+    'product_categories/{id}': {
       patch: updateProduct_category,
     },
     products: {
@@ -156,6 +156,9 @@ const apiDocumentation = {
     'sponsors/onboarding': {
       post: onboardSponsor,
     },
+    'sponsors/verify-mail': {
+      post: verifyOtp,
+    },
     'sponsors/delete/{id}': {
       delete: deleteSponsor,
     },
@@ -179,6 +182,7 @@ const apiDocumentation = {
       loginBody,
       createUserBody,
       updateUserBody,
+      verifyOtpBody,
       createOrUpdateRoleBody,
       createOrUpdateOccupationBody,
       createOrUpdateProduct_categoryBody,

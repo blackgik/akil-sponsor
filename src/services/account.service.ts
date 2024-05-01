@@ -1,9 +1,9 @@
 import jwt from "jsonwebtoken";
 import * as argon from 'argon2';
-import { User } from '../schemas/user.schema';
+import { Account } from '../schemas/account.schema';
 import { JwtPayload, Tokens } from '../types';
-import { UnAuthorizedError, ForbiddenError, InternalServerError } from '../utils/app.errors';
-import { IUserCreateDto } from '../dto/IUserCreateDto';
+import { UnAuthorizedError, ForbiddenError, InternalServerError, DuplicateError } from '../utils/app.errors';
+import { IAccountCreateDto } from '../dto/IAccountCreateDto';
 import { IAuthDto } from '../dto/IAuthDto';
 import { Types } from 'mongoose'
 import {
@@ -16,17 +16,17 @@ import { messageBird } from "../utils/mail.sender";
 import { onboardinMail, verifyOnbordingMail } from "../utils/mail.data";
 import customConfig from "../config/default";
 import { formattMailInfo } from "../utils/mail.formatter";
-import { IUser, IUserDocument } from "models/user.model";
+import { IAccount, IAccountDocument } from "../models/account.model";
 
-class UserService {
+class AccountService {
 
     hashData(data: string) {
         return argon.hash(data);
     }
 
-    async signJwt(userId: string, username: string): Promise<Tokens> {
+    async signJwt(accountId: string, username: string): Promise<Tokens> {
         const jwtPayload: JwtPayload = {
-            sub: userId,
+            sub: accountId,
             username: username,
         };
 
@@ -40,11 +40,11 @@ class UserService {
         };
     }
 
-    async updateRtHash(userId: string, rt: string) {
+    async updateRtHash(accountId: string, rt: string) {
         const hash = await argon.hash(rt);
-        await User.updateOne({
+        await Account.updateOne({
             where: {
-                _id: userId,
+                _id: accountId,
             },
             data: {
                 hashedRt: hash,
@@ -52,20 +52,21 @@ class UserService {
         });
     }
 
-    async signupLocal(dto: IUserCreateDto): Promise<IUserDocument> {
+    async signupLocal(dto: IAccountCreateDto): Promise<IAccountDocument> {
+        const checkIfExist = await Account.findOne({ email: dto.email });
+            if (checkIfExist) throw new DuplicateError('Account already exists');
         const generatePassword = await codeGenerator(9, 'ABCDEFGHI&*$%#1234567890');
         console.log('====================================');
         console.log(generatePassword);
         console.log('====================================');
         const hash = await argon.hash(generatePassword);
-        const newUser = await User.buildUser({
+        const newAccount = await Account.buildAccount({
             firstname: dto.firstname,
             lastname: dto.lastname,
             avatar: dto.avatar,
             email: dto.email,
             phone: dto.phone,
             gender: dto.gender,
-            password: hash,
             state: dto.state,
             country: dto.country,
             city: dto.city,
@@ -76,26 +77,27 @@ class UserService {
             hash: hash,
             hashedRt: '',
             otpHash: '',
+            ownerId: '',
             roleId: dto.roleId
         })
         console.log('====================================');
-        console.log(newUser);
+        console.log(newAccount);
         console.log('====================================');
-        const tokens = await this.signJwt(newUser._id, newUser.email);
-        await this.updateRtHash(newUser._id, tokens.refresh_token);
+        const tokens = await this.signJwt(newAccount._id, newAccount.email);
+        await this.updateRtHash(newAccount._id, tokens.refresh_token);
 
         const otp = await codeGenerator(6, '1234567890');
 
-        const otpHash = buildOtpHash(newUser.email, otp, customConfig.otpKey, 15);
+        const otpHash = buildOtpHash(newAccount.email, otp, customConfig.otpKey, 15);
 
-        newUser.otpHash = otpHash;
+        newAccount.otpHash = otpHash;
         //create email profile here
         const onboardingData = {
-            name: newUser.firstname+' '+newUser.lastname,
+            name: newAccount.firstname+' '+newAccount.lastname,
             code: otp
         };
         const mailData = {
-            email: newUser.email,
+            email: newAccount.email,
             subject: 'MAJFINTECH ONBOARDING',
             type: 'html',
             html: verifyOnbordingMail(onboardingData).html,
@@ -108,31 +110,31 @@ class UserService {
             throw new InternalServerError(
                 'server slip. Organization was created without mail being sent'
             );
-        return newUser;
+        return newAccount;
     }
     async signinLocal(dto: IAuthDto): Promise<Tokens> {
         //console.log(dto);
-        const user = await User.findOne({
+        const account = await Account.findOne({
             where: {
                 email: dto.email,
             },
         });
-        if (!user) {
+        if (!account) {
             throw new ForbiddenError('Acces non authorisé!');
         }
 
-        const passwordMatches = await argon.verify(user.hash, dto.password);
+        const passwordMatches = await argon.verify(account.hash, dto.password);
         if (!passwordMatches) throw new ForbiddenError('Acces non autorisé!');
 
-        const tokens = await this.signJwt(user._id, user.email);
-        await this.updateRtHash(user._id, tokens.refresh_token);
+        const tokens = await this.signJwt(account._id, account.email);
+        await this.updateRtHash(account._id, tokens.refresh_token);
 
         return tokens;
     }
-    async logout(userId: string) {
-        await User.updateMany({
+    async logout(accountId: string) {
+        await Account.updateMany({
             where: {
-                _id: userId,
+                _id: accountId,
                 hashedRt: {
                     not: null,
                 },
@@ -143,25 +145,25 @@ class UserService {
         });
         return true;
     }
-    async refreshTokens(userId: string, rt: string) {
-        const user = await User.findOne({
+    async refreshTokens(accountId: string, rt: string) {
+        const account = await Account.findOne({
             where: {
-                _id: userId,
+                _id: accountId,
             },
         });
-        if (!user || !user.hashedRt) throw new ForbiddenError('Access Denied');
-        console.log(user.hashedRt);
+        if (!account || !account.hashedRt) throw new ForbiddenError('Access Denied');
+        console.log(account.hashedRt);
 
-        const rtMatches = await argon.verify(user.hashedRt, rt);
+        const rtMatches = await argon.verify(account.hashedRt, rt);
         if (!rtMatches) throw new ForbiddenError('Acces non autorisé!');
 
-        const tokens = await this.signJwt(user._id, user.email);
-        await this.updateRtHash(user._id, tokens.refresh_token);
+        const tokens = await this.signJwt(account._id, account.email);
+        await this.updateRtHash(account._id, tokens.refresh_token);
 
         return tokens;
     }
 
 }
 
-export default UserService
+export default AccountService
 

@@ -47,6 +47,10 @@ const sponsorResponse = {
         type: 'boolean',
         example: true,
     },
+    psdAgreement: {
+        type: 'boolean',
+        example: true,
+    },
     on_trial: {
         type: 'boolean',
         example: true,
@@ -173,6 +177,14 @@ const createSponsorBody = {
             type: 'string',
             example: 'BLACKROCK',
         },
+        password: {
+            type: 'string',
+            example: 'BLACKROCK',
+        },
+        psdAgreement: {
+            type: 'boolean',
+            example: true,
+        },
         tosAgreement: {
             type: 'boolean',
             example: true,
@@ -219,9 +231,9 @@ const updateSponsorBody = {
             type: 'string',
             example: 'BLACKROCK',
         },
-        tosAgreement: {
-            type: 'boolean',
-            example: true,
+        password: {
+            type: 'string',
+            example: 'BLACKROCK',
         },
     },
 };
@@ -292,6 +304,10 @@ const createSponsor = {
                             address: {
                                 type: 'string',
                                 example: 'BLACKROCK',
+                            },
+                            psdAgreement: {
+                                type: 'boolean',
+                                example: true,
                             },
                             tosAgreement: {
                                 type: 'boolean',

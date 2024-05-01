@@ -531,7 +531,7 @@ import {
     };
   };
   
-  export const onboardinMail = (data: { email: any; password: any; sponsor_code: any; }) => {
+  export const onboardinMail = (data: { email: string; password: string }) => {
     return {
       html: `
       <!DOCTYPE HTML
@@ -847,15 +847,10 @@ import {
                                                                                     <li>Password: ${
                                                                                       data.password
                                                                                     }</li>
-                                                                                    <li>Organisation Unique Code: ${
-                                                                                      data.sponsor_code
-                                                                                    } (This is your secret pass into your
-                                                                                        organisation; please ensure its
-                                                                                        confidentiality as it is required for
-                                                                                        every login of your members)</li>
+                                                                                    
                                                                                     <li>Organisation Login URL: <a
                                                                                             style="color: red;"
-                                                                                            href="https://organization.akilaah.com/login">https://organization.akilaah.com</a>
+                                                                                            href="https://sponsor.akilaah.com/login">https://sponsor.akilaah.com</a>
                                                                                     </li>
                                                                                 </ul>
                                                                                 <br>
@@ -1081,7 +1076,6 @@ import {
     Name of Company</strong>: AKILAAH\n
     email: ${data.email}\n
     password:${data.password}\n
-    Sponsor Unique Code:${data.sponsor_code}\n
     Login url: https://sponsor.akilaah.com \n\n
     NB: Your Sponsor Unique code should be share with beneficiaries `
     };

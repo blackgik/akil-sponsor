@@ -23,6 +23,7 @@ const SponsorSchema = new Schema({
   country: { type: String, required: true, lowercase: true },
   city: { type: String, required: false , lowercase: true},
   address: { type: String, required: true },
+  password: { type: String, required: true },
   dob: { type: Date, required: false },
   email_verified: { type: Boolean, default: false },
   otpHash: { type: String, required: false },
@@ -62,6 +63,12 @@ const SponsorSchema = new Schema({
   },
   tosAgreement: { 
     type: Boolean,
+    required: true,
+    default: false
+  },
+  psdAgreement:  { 
+    type: Boolean,
+    required: true,
     default: false
   },
   isApproved: { 

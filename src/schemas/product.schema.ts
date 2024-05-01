@@ -10,23 +10,25 @@ const ProductCategorySchema = new Schema({
     },
     product_category_slug: {
         type: String,
-        required: false,
-        min: ConstantNumber.NAME_MIN_LENGTH,
-        max: ConstantNumber.NAME_MAX_LENGTH,
+        required: true
     },
     product_category_description: {
         type: String,
-        required: false,
-        min: ConstantNumber.ADDRESS_MIN_LENGTH,
-        max: ConstantNumber.ADDRESS_MAX_LENGTH,
+        required: false
     },
+    category_products: [
+        {
+            type: Types.ObjectId,
+            ref: "products"
+        }
+    ],
     parent_category_id: {
         type: Types.ObjectId,
         required: false
     },
     is_active: {
         type: Boolean,
-        required: true,
+        required: false,
         default: true
     }
 }, {
@@ -54,6 +56,7 @@ const ProductSchema = new Schema({
     },
     product_sponsor_id: {
         type: Types.ObjectId,
+        ref: "sponsors",
         required: true
     },
     product_image: {

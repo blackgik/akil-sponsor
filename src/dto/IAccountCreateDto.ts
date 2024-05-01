@@ -1,4 +1,4 @@
-export interface IUserCreateDto {
+export interface IAccountCreateDto {
     firstname: string,
     lastname: string,
     avatar: string,
@@ -7,10 +7,10 @@ export interface IUserCreateDto {
     gender: string,
     state: string,
     country: string,
-    password: string,
     city: string,
     address: string,
     dob: Date,
+    password: string,
     hash: string,
     hashedRt: string,
     email_verified: boolean,

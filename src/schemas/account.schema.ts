@@ -1,8 +1,8 @@
 import { Schema, model, Types } from 'mongoose'
 import ConstantNumber from '../constants/number.constant'
-import { IUser, IUserDocument, IUserModel } from '../models/user.model';
+import { IAccount, IAccountDocument, IAccountModel } from '../models/account.model';
 
-const UserSchema = new Schema({
+const AccountSchema = new Schema({
   firstname: {
     type: String,
     required: true,
@@ -25,6 +25,7 @@ const UserSchema = new Schema({
   city: { type: String, required: false, lowercase: true },
   address: { type: String, required: false },
   hash:{ type: String, required: false },
+  otpHash:{ type: String, required: false },
   hashedRt:{ type: String, required: false },
   dob: { type: Date, required: false },
   email_verified: { type: Boolean, default: false },
@@ -32,34 +33,38 @@ const UserSchema = new Schema({
   roleId: {
     type: Types.ObjectId,
     required: false
+  },
+  ownerId: {
+    type: Types.ObjectId,
+    required: false
   }
 }, {
-  collection: 'users',
+  collection: 'accounts',
   timestamps: true,
 });
 
-UserSchema.statics.buildUser = (user: IUser): IUserDocument => {
-  return new User(user)
+AccountSchema.statics.buildAccount = (account: IAccount): IAccountDocument => {
+  return new Account(account)
 }
 
-UserSchema.statics.listUsers = async (): Promise<IUserDocument[]> => {
-  return await User.find();
+AccountSchema.statics.listAccounts = async (): Promise<IAccountDocument[]> => {
+  return await Account.find();
 }
-UserSchema.statics.getUser = async (user_id: Types.ObjectId): Promise<IUserDocument | null> => {
-  return await User.findById(user_id)
-}
-
-UserSchema.statics.updateUser = async (user_id: Types.ObjectId, user: IUser): Promise<IUserDocument | null> => {
-  return await User.findByIdAndUpdate(user_id, user);
+AccountSchema.statics.getAccount = async (account_id: Types.ObjectId): Promise<IAccountDocument | null> => {
+  return await Account.findById(account_id)
 }
 
-UserSchema.statics.deleteUser = async (user_id: Types.ObjectId): Promise<IUserDocument | null> => {
-  return await User.findByIdAndDelete(user_id);
+AccountSchema.statics.updateAccount = async (account_id: Types.ObjectId, account: IAccount): Promise<IAccountDocument | null> => {
+  return await Account.findByIdAndUpdate(account_id, account);
 }
 
-const User = model<IUserDocument, IUserModel>('users', UserSchema);
+AccountSchema.statics.deleteAccount = async (account_id: Types.ObjectId): Promise<IAccountDocument | null> => {
+  return await Account.findByIdAndDelete(account_id);
+}
+
+const Account = model<IAccountDocument, IAccountModel>('accounts', AccountSchema);
 
 
 export {
-  User
+  Account
 }

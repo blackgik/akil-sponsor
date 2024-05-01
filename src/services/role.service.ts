@@ -1,3 +1,4 @@
+import { DuplicateError } from '../utils/app.errors';
 import { IRole, IRoleDocument } from '../models/role.model';
 import { Role } from '../schemas/role.schema';
 import { Types } from 'mongoose'
@@ -13,6 +14,9 @@ class RoleService {
                 throw new Error(`Please enter role name`);
             if (!role.role_code)
                 throw new Error(`Please enter role code`);
+
+            const checkIfExist = await Role.findOne({ role_code: role.role_code });
+            if (checkIfExist) throw new DuplicateError('Role already exists');
 
             const newRole: IRoleDocument = Role.buildRole(role);
             return await newRole.save();

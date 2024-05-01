@@ -26,7 +26,7 @@ import ConstantHttpReason from '../constants/http.reason.constant'
 import logger from '../utils/logger.util'
 import { ISponsor, ISponsorDocument } from '../models/sponsor.model';
 import { Types } from 'mongoose'
-import { IUser, IUserDocument } from '../models/user.model'
+import { IAccount, IAccountDocument } from '../models/account.model'
 import { IAuthDto } from 'dto/IAuthDto'
 import { Tokens } from 'types'
 
@@ -65,6 +65,12 @@ class AuthController implements Controller {
             this.login,
         )
 
+        this.router.post(
+            `${this.path}${ConstantAPI.SPONSOR_MAIL_VERIFY}`,
+            validationMiddleware(this.validate.verifyMail),
+            this.verifySponsorMail,
+        )
+
 
     }
 
@@ -75,43 +81,44 @@ class AuthController implements Controller {
     ): Promise<Response | void> => {
         try {
             const input_sponsor: ISponsor = req.body
-            let saved_user: IUserDocument 
-            const saved_sponsor = await this.sponsorService.createSponsorService(input_sponsor);
-            logger.info(`user ${input_sponsor.firstname} found`)
-            if (saved_sponsor._id) {
-                const userRole = await this.roleService.getRoleByCodeService('SPONSOR');
-                const newUser = {
-                    firstname: saved_sponsor.firstname,
-                    lastname: saved_sponsor.lastname,
-                    avatar: saved_sponsor.avatar,
-                    email: saved_sponsor.email,
-                    phone: saved_sponsor.phone,
-                    gender: saved_sponsor.gender,
-                    password: '',
-                    state: saved_sponsor.state,
-                    country: saved_sponsor.country,
-                    city: saved_sponsor.city,
-                    address: saved_sponsor.address,
-                    dob: new Date,
-                    hash: '',
-                    hashedRt : '',
-                    email_verified: false,
-                    acctstatus: 'pending',
-                    roleId: userRole?._id
-                };
-                saved_user = await this.authService.signupLocal(newUser);
-                if (saved_user._id) {
-                    saved_sponsor.otpHash = saved_user.otpHash;
-                    await this.sponsorService.updateSponsorService(saved_sponsor._id, saved_sponsor);
-                }
-            }
+        
+            const saved_user = await this.authService.signupLocal(input_sponsor);
             return res.status(ConstantHttpCode.OK).json({
                 status: {
                     code: ConstantHttpCode.OK,
                     msg: ConstantHttpReason.OK,
                 },
                 msg: ConstantMessage.SPONSOR_CREATE_SUCCESS,
-                data: saved_sponsor,
+                data: saved_user,
+            })
+        } catch (err: any) {
+            next(
+                new HttpException(
+                    ConstantHttpCode.INTERNAL_SERVER_ERROR,
+                    ConstantHttpReason.INTERNAL_SERVER_ERROR,
+                    err?.message,
+                ),
+            )
+        }
+    }
+
+
+    private verifySponsorMail = async (
+        req: Request,
+        res: Response,
+        next: NextFunction,
+    ): Promise<Response | void> => {
+        try {
+            const otpData = req.body
+            const verifData = await this.authService.verifyOtp(otpData);
+
+            return res.status(ConstantHttpCode.OK).json({
+                status: {
+                    code: ConstantHttpCode.OK,
+                    msg: ConstantHttpReason.OK,
+                },
+                msg: ConstantMessage.SPONSOR_CREATE_SUCCESS,
+                data: verifData,
             })
         } catch (err: any) {
             next(
