@@ -8,15 +8,15 @@ const ProductCategorySchema = new Schema({
         type: String,
         required: true
     },
-    category_slug: {
+    product_category_slug: {
         type: String,
         required: false,
         min: ConstantNumber.NAME_MIN_LENGTH,
         max: ConstantNumber.NAME_MAX_LENGTH,
     },
-    category_description: {
+    product_category_description: {
         type: String,
-        required: true,
+        required: false,
         min: ConstantNumber.ADDRESS_MIN_LENGTH,
         max: ConstantNumber.ADDRESS_MAX_LENGTH,
     },
