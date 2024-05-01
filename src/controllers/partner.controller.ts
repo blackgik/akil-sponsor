@@ -65,13 +65,13 @@ class PartnerController implements Controller {
 
         this.router.get(
             `${this.path}${ConstantAPI.PARTNER_GET_ALL}`,
-            this.authenticated.verifyTokenAndAdmin,
+            this.authenticated.verifyTokenAndAuthorization,
             this.listPartner,
         )
 
         this.router.get(
             `${this.path}${ConstantAPI.PARTNER_DELETE}`,
-            this.authenticated.verifyTokenAndAdmin,
+            this.authenticated.verifyTokenAndAuthorization,
             this.deletePartner,
         )
     }

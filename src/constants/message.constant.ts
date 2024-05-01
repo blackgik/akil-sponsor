@@ -86,5 +86,13 @@ class Message {
   public static readonly PARTNER_DELETE_SUCCESS: string = 'Partner deleted successfully'
   public static readonly PARTNER_FOUND: string = 'Partner found'
   public static readonly PARTNER_CREATE_SUCCESS: string ='Partner created successfully'
+
+  //Sponsor
+  public static readonly SPONSOR_NOT_UPDATED: string = 'Sponsor not updated'
+  public static readonly SPONSOR_UPDATE_SUCCESS: string ='Sponsor updated successfully'
+  public static readonly SPONSOR_NOT_DELETED: string =    'Sponsor not deleted, please try again'
+  public static readonly SPONSOR_DELETE_SUCCESS: string = 'Sponsor deleted successfully'
+  public static readonly SPONSOR_FOUND: string = 'Sponsor found'
+  public static readonly SPONSOR_CREATE_SUCCESS: string ='Sponsor created successfully'
 }
 export default Message

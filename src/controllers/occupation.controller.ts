@@ -65,13 +65,13 @@ class OccupationController implements Controller {
 
         this.router.get(
             `${this.path}${ConstantAPI.OCCUPATION_GET_ALL}`,
-            this.authenticated.verifyTokenAndAdmin,
+            this.authenticated.verifyTokenAndAuthorization,
             this.listOccupation,
         )
 
         this.router.get(
             `${this.path}${ConstantAPI.OCCUPATION_DELETE}`,
-            this.authenticated.verifyTokenAndAdmin,
+            this.authenticated.verifyTokenAndAuthorization,
             this.deleteOccupation,
         )
     }

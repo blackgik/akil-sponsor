@@ -13,8 +13,9 @@ export interface IRoleDocument extends IRole, Document{}
 export interface IRoleModel extends Model<IRoleDocument>{
     buildRole(role: IRole):IRoleDocument
     listRoles():Promise<IRoleDocument[]>
-    getRole(role_id: Types.ObjectId):Promise<IRoleDocument | null>
-    updateRole(role_id: Types.ObjectId, role: IRole):Promise<IRoleDocument>
-    deleteRole(role_id: Types.ObjectId):Promise<IRoleDocument | null>
+    getRole(_id: Types.ObjectId):Promise<IRoleDocument | null>
+    getRoleByCode(role_code: string):Promise<IRoleDocument | null>
+    updateRole(_id: Types.ObjectId, role: IRole):Promise<IRoleDocument>
+    deleteRole(_id: Types.ObjectId):Promise<IRoleDocument | null>
 }
 

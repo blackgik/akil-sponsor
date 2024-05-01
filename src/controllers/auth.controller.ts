@@ -2,8 +2,10 @@ import { Router, Request, Response, NextFunction } from 'express'
 
 import Controller from '../interfaces/controller.interface'
 
-import PartnerService from '../services/partner.service'
-import Validate from '../validations/partner.validation'
+import SponsorService from '../services/sponsor.service'
+import AuthService from '../services/auth.service'
+import RoleService from '../services/role.service'
+import Validate from '../validations/sponsor.validation'
 
 import Authenticated from '../middleware/authenticated.middleware'
 import validationMiddleware from '../middleware/validation.middleware'
@@ -22,20 +24,25 @@ import ConstantHttpReason from '../constants/http.reason.constant'
 
 // logger
 import logger from '../utils/logger.util'
-import { IPartner,IPartnerDocument } from '../models/partner.model';
+import { ISponsor, ISponsorDocument } from '../models/sponsor.model';
 import { Types } from 'mongoose'
+
 
 class AuthController implements Controller {
     public path: string
     public router: Router
-    private partnerService: PartnerService
+    private sponsorService: SponsorService
+    private authService: AuthService
     private authenticated: Authenticated
     private validate: Validate
+    private roleService: RoleService
 
     constructor() {
-        this.path = ConstantAPI.PARTNERS
+        this.path = ConstantAPI.SPONSORS
         this.router = Router()
-        this.partnerService = new PartnerService()
+        this.sponsorService = new SponsorService()
+        this.authService = new AuthService()
+        this.roleService = new RoleService()
         this.authenticated = new Authenticated()
         this.validate = new Validate()
 
@@ -44,62 +51,59 @@ class AuthController implements Controller {
 
     private initialiseRoutes(): void {
         this.router.post(
-            `${this.path}${ConstantAPI.PARTNER_AUTH_REGISTER}`,
-            this.authenticated.verifyTokenAndAuthorization,
-            validationMiddleware(this.validate.createPartner),
-            this.createPartner,
+            `${this.path}${ConstantAPI.SPONSOR_AUTH_ONBOARDING}`,
+            validationMiddleware(this.validate.createSponsor),
+            this.createSponsor,
         )
 
         this.router.post(
-            `${this.path}${ConstantAPI.PARTNER_AUTH_LOGIN}`,
-            this.authenticated.verifyTokenAndAuthorization,
-            validationMiddleware(this.validate.createPartner),
-            this.createPartner,
+            `${this.path}${ConstantAPI.SPONSOR_AUTH_LOGIN}`,
+            validationMiddleware(this.validate.login),
+            this.login,
         )
 
-        this.router.put(
-            `${this.path}${ConstantAPI.PRODUCT_UPDATE}`,
-            this.authenticated.verifyTokenAndAuthorization,
-            validationMiddleware(this.validate.updatePartner),
-            this.updatePartner,
-        )
 
-        this.router.get(
-            `${this.path}${ConstantAPI.PRODUCT_GET}`,
-            this.authenticated.verifyTokenAndAuthorization,
-            this.getPartner,
-        )
-
-        this.router.get(
-            `${this.path}${ConstantAPI.PRODUCT_GET_ALL}`,
-            this.authenticated.verifyTokenAndAdmin,
-            this.listPartner,
-        )
-
-        this.router.get(
-            `${this.path}${ConstantAPI.PRODUCT_DELETE}`,
-            this.authenticated.verifyTokenAndAdmin,
-            this.deletePartner,
-        )
     }
 
-    private createPartner = async (
+    private createSponsor = async (
         req: Request,
         res: Response,
         next: NextFunction,
     ): Promise<Response | void> => {
         try {
-            const input_partner: IPartner = req.body
-            const saved_partner = await this.partnerService.createPartnerService(input_partner);
-            logger.info(`user ${input_partner.partner_business_name} found`)
-
+            const input_sponsor: ISponsor = req.body
+            const saved_sponsor = await this.sponsorService.createSponsorService(input_sponsor);
+            logger.info(`user ${input_sponsor.firstname} found`)
+            if (saved_sponsor) {
+                const userRole = await this.roleService.getRoleByCodeService('SPONSOR');
+                const newUser = {
+                    firstname: saved_sponsor.firstname,
+                    lastname: saved_sponsor.lastname,
+                    avatar: saved_sponsor.avatar,
+                    email: saved_sponsor.email,
+                    phone: saved_sponsor.phone,
+                    gender: saved_sponsor.gender,
+                    password: '',
+                    state: saved_sponsor.state,
+                    country: saved_sponsor.country,
+                    city: saved_sponsor.city,
+                    address: saved_sponsor.address,
+                    dob: new Date,
+                    hash: '',
+                    hashedRt : '',
+                    email_verified: false,
+                    acctstatus: 'pending',
+                    roleId: userRole?._id
+                };
+                const saved_user = await this.authService.signupLocal(newUser);
+            }
             return res.status(ConstantHttpCode.OK).json({
                 status: {
                     code: ConstantHttpCode.OK,
                     msg: ConstantHttpReason.OK,
                 },
-                msg: ConstantMessage.PRODUCT_CREATE_SUCCESS,
-                data: saved_partner,
+                msg: ConstantMessage.SPONSOR_CREATE_SUCCESS,
+                data: saved_sponsor,
             })
         } catch (err: any) {
             next(
@@ -112,20 +116,24 @@ class AuthController implements Controller {
         }
     }
 
-    private listPartner = async (
+
+    private login = async (
         req: Request,
         res: Response,
         next: NextFunction,
     ): Promise<Response | void> => {
         try {
-            const partners: IPartnerDocument[] = await this.partnerService.listPartnersService()
+            const sponsor_id: string = req.params.sponsor_id;
+            const input_sponsor: ISponsor = req.body.sponsor;
+            const updated_sponsor: ISponsorDocument | null = await this.sponsorService.updateSponsorService(new Types.ObjectId(sponsor_id), input_sponsor)
+
             return res.status(ConstantHttpCode.OK).json({
                 status: {
                     code: ConstantHttpCode.OK,
                     msg: ConstantHttpReason.OK,
                 },
-                msg: ConstantMessage.PRODUCT_FOUND,
-                data: partners,
+                msg: ConstantMessage.SPONSOR_UPDATE_SUCCESS,
+                data: updated_sponsor,
             })
         } catch (err: any) {
             next(
@@ -138,89 +146,6 @@ class AuthController implements Controller {
         }
     }
 
-    private getPartner = async (
-        req: Request,
-        res: Response,
-        next: NextFunction,
-    ): Promise<Response | void> => {
-        try {
-            const partner_id: string = req.params.partner_id;
-            const partner: IPartner | null = await this.partnerService.getPartnerService(new Types.ObjectId(partner_id));
-            return res.status(ConstantHttpCode.OK).json({
-                status: {
-                    code: ConstantHttpCode.OK,
-                    msg: ConstantHttpReason.OK,
-                },
-                msg: ConstantMessage.PRODUCT_FOUND,
-                data: partner,
-            })
-        } catch (err: any) {
-            next(
-                new HttpException(
-                    ConstantHttpCode.INTERNAL_SERVER_ERROR,
-                    ConstantHttpReason.INTERNAL_SERVER_ERROR,
-                    err?.message,
-                ),
-            )
-        }
-    }
-
-    private updatePartner = async (
-        req: Request,
-        res: Response,
-        next: NextFunction,
-    ): Promise<Response | void> => {
-        try {
-            const partner_id: string = req.params.partner_id;
-            const input_partner: IPartner = req.body.partner;
-            const updated_partner: IPartnerDocument | null = await this.partnerService.updatePartnerService(new Types.ObjectId(partner_id), input_partner)
-
-            return res.status(ConstantHttpCode.OK).json({
-                status: {
-                    code: ConstantHttpCode.OK,
-                    msg: ConstantHttpReason.OK,
-                },
-                msg: ConstantMessage.PRODUCT_UPDATE_SUCCESS,
-                data: updated_partner,
-            })
-        } catch (err: any) {
-            next(
-                new HttpException(
-                    ConstantHttpCode.INTERNAL_SERVER_ERROR,
-                    ConstantHttpReason.INTERNAL_SERVER_ERROR,
-                    err?.message,
-                ),
-            )
-        }
-    }
-
-    private deletePartner = async (
-        req: Request,
-        res: Response,
-        next: NextFunction,
-    ): Promise<Response | void> => {
-        try {
-            const partner_id: string = req.params.partner_id;
-            const deleted_partner: IPartnerDocument | null = await this.partnerService.deletePartnerService(new Types.ObjectId(partner_id));
-
-            return res.status(ConstantHttpCode.OK).json({
-                status: {
-                    code: ConstantHttpCode.OK,
-                    msg: ConstantHttpReason.OK,
-                },
-                msg: ConstantMessage.PRODUCT_DELETE_SUCCESS,
-                data: deleted_partner,
-            })
-        } catch (err: any) {
-            next(
-                new HttpException(
-                    ConstantHttpCode.INTERNAL_SERVER_ERROR,
-                    ConstantHttpReason.INTERNAL_SERVER_ERROR,
-                    err?.message,
-                ),
-            )
-        }
-    }
 }
 
 export default AuthController

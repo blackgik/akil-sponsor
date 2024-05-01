@@ -65,13 +65,13 @@ class ProductController implements Controller {
 
         this.router.get(
             `${this.path}${ConstantAPI.PRODUCT_GET_ALL}`,
-            this.authenticated.verifyTokenAndAdmin,
+            this.authenticated.verifyTokenAndAuthorization,
             this.listProduct,
         )
 
         this.router.get(
             `${this.path}${ConstantAPI.PRODUCT_DELETE}`,
-            this.authenticated.verifyTokenAndAdmin,
+            this.authenticated.verifyTokenAndAuthorization,
             this.deleteProduct,
         )
     }

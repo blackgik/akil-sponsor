@@ -19,12 +19,11 @@ const SponsorSchema = new Schema({
   email: { type: String, required: true, lowercase: true },
   phone: { type: String, required: true },
   gender: { type: String, default: '', lowercase: true },
-  password: { type: String, required: true },
-  state: { type: String, required: true, lowercase: true },
+  state: { type: String, required: false, lowercase: true },
   country: { type: String, required: true, lowercase: true },
-  city: { type: String, required: true , lowercase: true},
+  city: { type: String, required: false , lowercase: true},
   address: { type: String, required: true },
-  dob: { type: Date, required: true },
+  dob: { type: Date, required: false },
   email_verified: { type: Boolean, default: false },
   acctstatus: { type: String, default: 'pending', enum: ['pending', 'active', 'suspended'] },
   kyc_status: {
@@ -34,20 +33,19 @@ const SponsorSchema = new Schema({
   },
   kyc_docs: {
     bank_details: {
-      bvn: { type: String, default: '' },
-      acct_number: { type: String, default: '' },
-      acct_name: { type: String, default: '' },
-      bank_name: { type: String, default: '' },
-      acct_type: { type: String, default: '' },
-      bank_code: { type: String, default: '' },
-      bvn_verified: { type: Boolean, default: false }
+      bvn: { type: String, default: '', required: false },
+      acct_number: { type: String, default: '', required: false },
+      acct_name: { type: String, default: '', required: false },
+      bank_name: { type: String, default: '', required: false },
+      acct_type: { type: String, default: '', required: false },
+      bank_code: { type: String, default: '', required: false },
+      bvn_verified: { type: Boolean, default: false, required: false }
     },
     identitifications: {
       id_type: { type: String, default: '' },
       id_card: { key: String },
       utility_bill: { key: String }
     },
-    customer_code: String //gotten from paystack.com or in the future any platform we support.
   },
   language: { 
     type: String, 

@@ -37,16 +37,22 @@ RoleSchema.statics.buildRole=(role: IRole): IRoleDocument=>{
 RoleSchema.statics.listRoles=async(): Promise<IRoleDocument[]>=>{
     return await Role.find();
 }
-RoleSchema.statics.getRole=async(role_id: Types.ObjectId): Promise<IRoleDocument | null>=>{
-    return await Role.findById(role_id)
+RoleSchema.statics.getRole=async(_id: Types.ObjectId): Promise<IRoleDocument | null>=>{
+    return await Role.findById(_id)
 }
 
-RoleSchema.statics.updateRole=async(role_id: Types.ObjectId, role: IRole): Promise<IRoleDocument | null>=>{
-    return await Role.findByIdAndUpdate(role_id, role);
+RoleSchema.statics.getRoleByCode=async(role_code: string): Promise<IRoleDocument | null>=>{
+    return await Role.findOne({where: {
+        role_code: role_code
+    }})
 }
 
-RoleSchema.statics.deleteRole=async(role_id: Types.ObjectId): Promise<IRoleDocument| null>=>{
-    return await Role.findByIdAndDelete(role_id);
+RoleSchema.statics.updateRole=async(_id: Types.ObjectId, role: IRole): Promise<IRoleDocument | null>=>{
+    return await Role.findByIdAndUpdate(_id, role);
+}
+
+RoleSchema.statics.deleteRole=async(_id: Types.ObjectId): Promise<IRoleDocument| null>=>{
+    return await Role.findByIdAndDelete(_id);
 }
 
 const Role = model<IRoleDocument, IRoleModel>('roles',RoleSchema);

@@ -7,7 +7,6 @@ export interface ISponsor {
     email: string,
     phone: string,
     gender: string,
-    password: string,
     state: string,
     country: string,
     city: string,

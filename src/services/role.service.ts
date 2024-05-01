@@ -30,31 +30,41 @@ class RoleService {
     }
 
 
-    public async getRoleService(role_id: Types.ObjectId): Promise<IRoleDocument | null> {
+    public async getRoleService(_id: Types.ObjectId): Promise<IRoleDocument | null> {
         try {
-            if (!role_id)
+            if (!_id)
                 throw new Error(`Please enter role id`);
-            return Role.getRole(role_id);
+            return Role.getRole(_id);
         } catch (err: any) {
             throw new Error(`Something went wrong - ${err.message}`)
         }
     }
 
-    public async updateRoleService(role_id: Types.ObjectId, role: IRole): Promise<IRoleDocument | null> {
+    public async getRoleByCodeService(role_code: string): Promise<IRoleDocument | null> {
         try {
-            if (!role_id)
+            if (!role_code)
+                throw new Error(`Please enter role code`);
+            return Role.getRoleByCode(role_code);
+        } catch (err: any) {
+            throw new Error(`Something went wrong - ${err.message}`)
+        }
+    }
+
+    public async updateRoleService(_id: Types.ObjectId, role: IRole): Promise<IRoleDocument | null> {
+        try {
+            if (!_id)
                 throw new Error(`Please enter role id`);
-            return Role.updateRole(role_id, role);
+            return Role.updateRole(_id, role);
         } catch (err: any) {
             throw new Error(`Something went wrong -${err.message}`);
         }
     }
 
-    public async deleteRoleService(role_id: Types.ObjectId): Promise<IRoleDocument | null> {
+    public async deleteRoleService(_id: Types.ObjectId): Promise<IRoleDocument | null> {
         try {
-            if (!role_id)
+            if (!_id)
                 throw new Error(`Please enter role id`);
-            return Role.deleteRole(role_id);
+            return Role.deleteRole(_id);
         } catch (err: any) {
             throw new Error(`Something went wrong-${err.message}`);
         }

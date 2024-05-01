@@ -4,6 +4,10 @@ import { createOccupation, createOrUpdateOccupationBody, deleteOccupation, getOc
 import { createOrUpdateProduct_categoryBody, createProduct_category, deleteProduct_category, getProduct_category, getProduct_categories, updateProduct_category } from './product_categories';
 import { createProduct, createProductBody, deleteProduct, getProduct, getProducts, updateProduct, updateProductBody } from './products';
 import { createPartner, createPartnerBody, deletePartner, getPartner, getPartners, updatePartner, updatePartnerBody } from './partners';
+import { createSponsor, deleteSponsor, getSponsor, getSponsors, updateSponsor } from './sponsors';
+// api constant
+import ConstantAPI from '../constants/api.constant'
+import { login, loginBody, onboardSponsor, onboardSponsorBody } from './auth';
 
 const apiDocumentation = {
   openapi: '3.0.1',
@@ -25,11 +29,11 @@ const apiDocumentation = {
   },
   servers: [
     {
-      url: 'http://localhost:4500/',
+      url: `http://localhost:3030${ConstantAPI.API}//`,
       description: 'Local Server',
     },
     {
-      url: 'https://api.akilaah.com',
+      url: `https://api.akilaah.com${ConstantAPI.API}/`,
       description: 'Production Server',
     },
   ],
@@ -67,55 +71,98 @@ const apiDocumentation = {
       post: createUser,
       get: getUsers,
     },
-    'users/{id}': {
+    'users/delete/{id}': {
       delete: deleteUser,
+    },
+    'users/find/{id}': {
       get: getUser,
+    },
+    'users/{id}': {
       patch: updateUser,
     },
     roles: {
       post: createRole,
       get: getRoles,
     },
-    'roles/{id}': {
+    'roles/delete/{id}': {
       delete: deleteRole,
+    },
+    'roles/find/{id}': {
       get: getRole,
-      put: updateRole,
+    },
+    'roles/{id}': {
+      patch: updateRole,
     },
     occupations: {
       post: createOccupation,
       get: getOccupations,
     },
-    'occupations/{id}': {
+    'occupations/delete/{id}': {
       delete: deleteOccupation,
+    },
+    'occupations/find/{id}': {
       get: getOccupation,
-      put: updateOccupation,
+    },
+    'occupations/{id}': {
+      patch: deleteOccupation,
     },
     product_categories: {
       post: createProduct_category,
       get: getProduct_categories,
     },
-    'product-categories/{id}': {
+    'product-categories/delete/{id}': {
       delete: deleteProduct_category,
+    },
+    'product-categories/find/{id}': {
       get: getProduct_category,
-      put: updateProduct_category,
+    },
+    'product-categories/{id}': {
+      patch: updateProduct_category,
     },
     products: {
       post: createProduct,
       get: getProducts,
     },
-    'products/{id}': {
+    'products/delete/{id}': {
       delete: deleteProduct,
+    },
+    'products/find/{id}': {
       get: getProduct,
-      put: updateProduct,
+    },
+    'products/{id}': {
+      patch: updateProduct,
     },
     partners: {
       post: createPartner,
       get: getPartners,
     },
-    'partners/{id}': {
+    'partners/delete/{id}': {
       delete: deletePartner,
+    },
+    'partners/find/{id}': {
       get: getPartner,
-      put: updatePartner,
+    },
+    'partners/{id}': {
+      patch: updatePartner,
+    },
+    sponsors: {
+      post: createSponsor,
+      get: getSponsors,
+    },
+    login: {
+      post: login,
+    },
+    'sponsors/onboarding': {
+      post: onboardSponsor,
+    },
+    'sponsors/delete/{id}': {
+      delete: deleteSponsor,
+    },
+    'sponsors/find/{id}': {
+      get: getSponsor,
+    },
+    'sponsors/{id}': {
+      patch: updateSponsor,
     },
   },
   components: {
@@ -127,6 +174,8 @@ const apiDocumentation = {
       },
     },
     schemas: {
+      onboardSponsorBody,
+      loginBody,
       createUserBody,
       updateUserBody,
       createOrUpdateRoleBody,

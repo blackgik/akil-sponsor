@@ -13,8 +13,23 @@ import logger from '../utils/logger.util'
 // controllers
 import PartnerController from '../controllers/partner.controller'
 import SponsorController from '../controllers/sponsor.controller'
+import AuthController from '../controllers/auth.controller'
+import OccupationController from '../controllers/occupation.controller'
+import PaymentController from '../controllers/payment.controller'
+import ProductCategoryController from '../controllers/product_category.controller'
+import ProductController from '../controllers/product.controller'
+import RoleController from '../controllers/role.controller'
+import ProjectController from '../controllers/project.controller'
 
-const { app } = new App([new PartnerController(), new SponsorController()])
+const { app } = new App([new PartnerController(), 
+  new SponsorController(),
+  new AuthController(),
+  new OccupationController(),
+  new PaymentController(),
+  new ProductCategoryController(),
+  new ProductController(),
+  new RoleController(),
+  new ProjectController(),])
 
 /**
  * Normalize a port into a number, string, or false.

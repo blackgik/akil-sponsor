@@ -72,7 +72,7 @@ class ProductCategoryController implements Controller {
 
         this.router.get(
             `${this.path}${ConstantAPI.CATEGORY_GET_ALL}`,
-            this.authenticated.verifyTokenAndAdmin,
+            this.authenticated.verifyTokenAndAuthorization,
             this.listProductCategory,
         )
 

@@ -31,25 +31,6 @@ class AuthenticatedMiddleware {
     })
   }
 
-  public async verifyTokenAndAdmin(
-    req: Request,
-    res: Response,
-    next: NextFunction,
-  ) {
-    verifyToken(req, res, () => {
-      if (req?.user?.isAdmin) {
-        return next()
-      }
-
-      return next(
-        new HttpException(
-          ConstantHttpCode.FORBIDDEN,
-          ConstantHttpReason.FORBIDDEN,
-          ConstantMessage.NOT_ALLOWED,
-        ),
-      )
-    })
-  }
 }
 
 export default AuthenticatedMiddleware
