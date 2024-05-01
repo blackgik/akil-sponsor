@@ -12,6 +12,8 @@ const customConfig: {
     refreshTokenPrivateKey: string;
     refreshTokenPublicKey: string;
     redisCacheExpiresIn: number;
+    baseProdUrl: string;
+    baseLocalUrl: string;
 } = {
     port: 8000,
     accessTokenExpiresIn: 15,
@@ -24,6 +26,8 @@ const customConfig: {
     accessTokenPublicKey: process.env.ACCESS_TOKEN_PUBLIC_KEY as string,
     refreshTokenPrivateKey: process.env.REFRESH_TOKEN_PRIVATE_KEY as string,
     refreshTokenPublicKey: process.env.REFRESH_TOKEN_PUBLIC_KEY as string,
+    baseProdUrl: process.env.BASE_PROD_URL as string,
+    baseLocalUrl: process.env.BASE_LOCAL_URL as string,
 };
 
 export default customConfig;

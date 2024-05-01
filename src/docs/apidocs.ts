@@ -7,6 +7,7 @@ import { createPartner, createPartnerBody, deletePartner, getPartner, getPartner
 import { createSponsor, deleteSponsor, getSponsor, getSponsors, updateSponsor } from './sponsors';
 // api constant
 import ConstantAPI from '../constants/api.constant'
+import customConfig from "../config/default";
 import { login, loginBody, onboardSponsor, onboardSponsorBody } from './auth';
 
 const apiDocumentation = {
@@ -29,11 +30,11 @@ const apiDocumentation = {
   },
   servers: [
     {
-      url: `http://localhost:3030${ConstantAPI.API}//`,
+      url: `${customConfig.baseLocalUrl}${ConstantAPI.API}//`,
       description: 'Local Server',
     },
     {
-      url: `https://api.akilaah.com${ConstantAPI.API}/`,
+      url: `${customConfig.baseProdUrl}${ConstantAPI.API}//`,
       description: 'Production Server',
     },
   ],
