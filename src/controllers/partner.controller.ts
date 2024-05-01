@@ -82,7 +82,7 @@ class PartnerController implements Controller {
         next: NextFunction,
     ): Promise<Response | void> => {
         try {
-            const input_partner: IPartner = req.body.partner
+            const input_partner: IPartner = req.body
             const saved_partner = await this.partnerService.createPartnerService(input_partner);
             logger.info(`user ${input_partner.partner_business_name} found`)
 
@@ -165,7 +165,7 @@ class PartnerController implements Controller {
     ): Promise<Response | void> => {
         try {
             const partner_id: string = req.params.partner_id;
-            const input_partner: IPartner = req.body.partner;
+            const input_partner: IPartner = req.body;
             const updated_partner: IPartnerDocument | null = await this.partnerService.updatePartnerService(new Types.ObjectId(partner_id), input_partner)
 
             return res.status(ConstantHttpCode.OK).json({

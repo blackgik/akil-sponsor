@@ -82,7 +82,7 @@ class SponsorController implements Controller {
         next: NextFunction,
     ): Promise<Response | void> => {
         try {
-            const input_sponsor: ISponsor = req.body.sponsor
+            const input_sponsor: ISponsor = req.body;
             const saved_sponsor = await this.sponsorService.createSponsorService(input_sponsor);
             logger.info(`user ${input_sponsor.firstname} found`)
 
@@ -165,7 +165,7 @@ class SponsorController implements Controller {
     ): Promise<Response | void> => {
         try {
             const sponsor_id: string = req.params.sponsor_id;
-            const input_sponsor: ISponsor = req.body.sponsor;
+            const input_sponsor: ISponsor = req.body;
             const updated_sponsor: ISponsorDocument | null = await this.sponsorService.updateSponsorService(new Types.ObjectId(sponsor_id), input_sponsor)
 
             return res.status(ConstantHttpCode.OK).json({

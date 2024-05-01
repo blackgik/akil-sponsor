@@ -84,7 +84,7 @@ class ProductCategoryController implements Controller {
         next: NextFunction,
     ): Promise<Response | void> => {
         try {
-            const input_product_category: IProductCategory = req.body.product_category
+            const input_product_category: IProductCategory = req.body
             const saved_product_category = await this.productService.createProductCategoryService(input_product_category);
 
             logger.info(`category ${saved_product_category.product_category_name} found`)
@@ -171,7 +171,7 @@ class ProductCategoryController implements Controller {
     ): Promise<Response | void> => {
         try {
             const product_category_id: string = req.params.product_category_id;
-            const input_product_category: IProductCategory = req.body.product_category;
+            const input_product_category: IProductCategory = req.body;
             const updated_product_category: IProductCategoryDocument | null = await this.productService.updateProductCategoryService(new Types.ObjectId(product_category_id), input_product_category)
 
             return res.status(ConstantHttpCode.OK).json({

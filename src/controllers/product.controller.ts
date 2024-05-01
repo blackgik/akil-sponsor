@@ -82,7 +82,7 @@ class ProductController implements Controller {
         next: NextFunction,
     ): Promise<Response | void> => {
         try {
-            const input_product: IProduct = req.body.product
+            const input_product: IProduct = req.body
             const saved_product = await this.productService.createProductService(input_product);
             logger.info(`user ${input_product.product_name} found`)
 
@@ -165,7 +165,7 @@ class ProductController implements Controller {
     ): Promise<Response | void> => {
         try {
             const product_id: string = req.params.product_id;
-            const input_product: IProduct = req.body.product;
+            const input_product: IProduct = req.body;
             const updated_product: IProductDocument | null = await this.productService.updateProductService(new Types.ObjectId(product_id), input_product)
 
             return res.status(ConstantHttpCode.OK).json({

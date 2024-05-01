@@ -82,7 +82,7 @@ class OccupationController implements Controller {
         next: NextFunction,
     ): Promise<Response | void> => {
         try {
-            const input_occupation: IOccupation = req.body.occupation
+            const input_occupation: IOccupation = req.body
             const saved_occupation = await this.occupationService.createOccupationService(input_occupation);
             logger.info(`user ${input_occupation.occupation_name} found`)
 
@@ -165,7 +165,7 @@ class OccupationController implements Controller {
     ): Promise<Response | void> => {
         try {
             const occupation_id: string = req.params.occupation_id;
-            const input_occupation: IOccupation = req.body.occupation;
+            const input_occupation: IOccupation = req.body;
             const updated_occupation: IOccupationDocument | null = await this.occupationService.updateOccupationService(new Types.ObjectId(occupation_id), input_occupation)
 
             return res.status(ConstantHttpCode.OK).json({
