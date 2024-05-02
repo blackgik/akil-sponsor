@@ -77,12 +77,11 @@ class AccountService {
             hash: hash,
             hashedRt: '',
             otpHash: '',
+            otp: '',
             ownerId: '',
             roleId: dto.roleId
         })
-        console.log('====================================');
-        console.log(newAccount);
-        console.log('====================================');
+        
         const tokens = await this.signJwt(newAccount._id, newAccount.email);
         await this.updateRtHash(newAccount._id, tokens.refresh_token);
 

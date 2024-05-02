@@ -18,6 +18,7 @@ export interface IAccount {
   acctstatus: string,
   ownerId: string,
   otpHash: string;
+  otp: string;
   roleId: string
 }
 

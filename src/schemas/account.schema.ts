@@ -26,6 +26,7 @@ const AccountSchema = new Schema({
   address: { type: String, required: false },
   hash:{ type: String, required: false },
   otpHash:{ type: String, required: false },
+  otp:{ type: String, required: false },
   hashedRt:{ type: String, required: false },
   dob: { type: Date, required: false },
   email_verified: { type: Boolean, default: false },

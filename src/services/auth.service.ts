@@ -2,21 +2,18 @@ import jwt from "jsonwebtoken";
 import * as argon from 'argon2';
 import { Account } from '../schemas/account.schema';
 import { JwtPayload, Tokens } from '../types';
-import { UnAuthorizedError, ForbiddenError, InternalServerError, NotFoundError, InvalidError, BadRequestError } from '../utils/app.errors';
-import { IAccountCreateDto } from '../dto/IAccountCreateDto';
+import { ForbiddenError, InternalServerError, NotFoundError, InvalidError, BadRequestError } from '../utils/app.errors';
 import { IAuthDto } from '../dto/IAuthDto';
-import { Types } from 'mongoose'
 import {
     buildOtpHash,
     codeGenerator,
-    generateEnterpriseCredentials,
     verifyOTP
 } from "../utils/code.generator";
 import { messageBird } from "../utils/mail.sender";
 import { onboardinMail, verifyOnbordingMail } from "../utils/mail.data";
 import customConfig from "../config/default";
 import { formattMailInfo } from "../utils/mail.formatter";
-import { IAccount, IAccountDocument } from "models/account.model";
+import { IAccountDocument } from "models/account.model";
 import { Sponsor } from "../schemas/sponsor.schema";
 import { ISponsor, ISponsorDocument } from "../models/sponsor.model";
 import { Role } from "../schemas/role.schema";
@@ -62,9 +59,9 @@ class AuthService {
         console.log('====================================');
         const hash = await argon.hash(dto.password);       
 
-        const newSponsor: ISponsorDocument = Sponsor.buildSponsor(dto);
+        const newSponsor: ISponsorDocument = await Sponsor.create(dto);
         const userRole = await Role.getRoleByCode('SPONSOR');
-        const newAccount =  Account.buildAccount({
+        const newAccount =  await Account.create({
             firstname: newSponsor.firstname,
             lastname: newSponsor.lastname,
             avatar: newSponsor.avatar,
@@ -92,6 +89,7 @@ class AuthService {
         const otpHash = buildOtpHash(newAccount.email, otp, customConfig.otpKey, 15);
 
         newAccount.otpHash = otpHash;
+        newAccount.otp = otp;
         newSponsor.otpHash = otpHash;
         await Sponsor.updateSponsor(newSponsor._id, newSponsor);
         await Account.updateAccount(newAccount._id, newAccount);
@@ -125,11 +123,9 @@ class AuthService {
     async signinLocal(dto: IAuthDto): Promise<Tokens> {
         console.log(dto);
         const user = await Account.findOne({
-            where: {
                 email: dto.email,
                 email_verified: true
-            },
-        });
+            });
         if (!user) {
             throw new ForbiddenError('Acces non authorisé!');
         }
@@ -157,11 +153,7 @@ class AuthService {
         return true;
     }
     async refreshTokens(userId: string, rt: string) {
-        const user = await Account.findOne({
-            where: {
-                _id: userId,
-            },
-        });
+        const user = await Account.findOne({_id: userId});
         if (!user || !user.hashedRt) throw new ForbiddenError('Access Denied');
         console.log(user.hashedRt);
 
@@ -176,12 +168,9 @@ class AuthService {
 
     verifyOtp = async (body: any): Promise<Tokens> => {
         const { code, hash } = body;
+        
+        const checkAcct = await Account.findOne({otp: code});
 
-        const checkAcct = await Account.findOne({
-            where: {
-                otpHash: hash,
-            },
-        });
         if (!checkAcct) throw new NotFoundError('Account not found');
 
         const verifyOtp = verifyOTP(checkAcct.email, code, hash, customConfig.otpKey);
@@ -192,11 +181,13 @@ class AuthService {
         const hashedPwd = await argon.hash(generatePassword);
         checkAcct.email_verified = true;
         checkAcct.otpHash = '';
+        checkAcct.acctstatus = 'active';
         
         let toVerifySponsor = await Sponsor.findById(checkAcct.ownerId);
         if (toVerifySponsor) {
             toVerifySponsor.email_verified = true;
             toVerifySponsor.otpHash = '';
+            toVerifySponsor.acctstatus = 'active';
             checkAcct.ownerId = toVerifySponsor._id;
             await Sponsor.updateSponsor(toVerifySponsor._id, toVerifySponsor);
         }
