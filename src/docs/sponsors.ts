@@ -19,19 +19,11 @@ const sponsorResponse = {
         type: 'string',
         example: 'BLACKROCK',
     },
-    gender: {
-        type: 'string',
-        example: 'BLACKROCK',
-    },
     state: {
         type: 'string',
         example: 'BLACKROCK',
     },
     country: {
-        type: 'string',
-        example: 'BLACKROCK',
-    },
-    city: {
         type: 'string',
         example: 'BLACKROCK',
     },
@@ -157,19 +149,11 @@ const createSponsorBody = {
             type: 'string',
             example: 'BLACKROCK',
         },
-        gender: {
-            type: 'string',
-            example: 'BLACKROCK',
-        },
         state: {
             type: 'string',
             example: 'BLACKROCK',
         },
         country: {
-            type: 'string',
-            example: 'BLACKROCK',
-        },
-        city: {
             type: 'string',
             example: 'BLACKROCK',
         },
@@ -211,19 +195,11 @@ const updateSponsorBody = {
             type: 'string',
             example: 'BLACKROCK',
         },
-        gender: {
-            type: 'string',
-            example: 'BLACKROCK',
-        },
         state: {
             type: 'string',
             example: 'BLACKROCK',
         },
         country: {
-            type: 'string',
-            example: 'BLACKROCK',
-        },
-        city: {
             type: 'string',
             example: 'BLACKROCK',
         },
@@ -285,19 +261,11 @@ const createSponsor = {
                                 type: 'string',
                                 example: 'BLACKROCK',
                             },
-                            gender: {
-                                type: 'string',
-                                example: 'BLACKROCK',
-                            },
                             state: {
                                 type: 'string',
                                 example: 'BLACKROCK',
                             },
                             country: {
-                                type: 'string',
-                                example: 'BLACKROCK',
-                            },
-                            city: {
                                 type: 'string',
                                 example: 'BLACKROCK',
                             },
