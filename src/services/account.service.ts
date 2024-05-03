@@ -56,9 +56,7 @@ class AccountService {
         const checkIfExist = await Account.findOne({ email: dto.email });
             if (checkIfExist) throw new DuplicateError('Account already exists');
         const generatePassword = await codeGenerator(9, 'ABCDEFGHI&*$%#1234567890');
-        console.log('====================================');
-        console.log(generatePassword);
-        console.log('====================================');
+        
         const hash = await argon.hash(dto.password);
         const newAccount = await Account.buildAccount({
             firstname: dto.firstname,
