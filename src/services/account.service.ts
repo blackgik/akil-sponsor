@@ -59,7 +59,7 @@ class AccountService {
         console.log('====================================');
         console.log(generatePassword);
         console.log('====================================');
-        const hash = await argon.hash(generatePassword);
+        const hash = await argon.hash(dto.password);
         const newAccount = await Account.buildAccount({
             firstname: dto.firstname,
             lastname: dto.lastname,
