@@ -66,6 +66,12 @@ class AuthController implements Controller {
         )
 
         this.router.post(
+            `${this.path}${ConstantAPI.SPONSOR_AUTH_FORGOT}`,
+            validationMiddleware(this.validate.login),
+            this.forgotPassword,
+        )
+
+        this.router.post(
             `${this.path}${ConstantAPI.SPONSOR_MAIL_VERIFY}`,
             validationMiddleware(this.validate.verifyMail),
             this.verifySponsorMail,
@@ -133,6 +139,62 @@ class AuthController implements Controller {
 
 
     private login = async (
+        req: Request,
+        res: Response,
+        next: NextFunction,
+    ): Promise<Response | void> => {
+        try {
+            const authDto: IAuthDto = req.body;
+            const tokens: Tokens | null = await this.authService.signinLocal(authDto)
+
+            return res.status(ConstantHttpCode.OK).json({
+                status: {
+                    code: ConstantHttpCode.OK,
+                    msg: ConstantHttpReason.OK,
+                },
+                msg: ConstantMessage.SPONSOR_UPDATE_SUCCESS,
+                data: tokens,
+            })
+        } catch (err: any) {
+            next(
+                new HttpException(
+                    ConstantHttpCode.INTERNAL_SERVER_ERROR,
+                    ConstantHttpReason.INTERNAL_SERVER_ERROR,
+                    err?.message,
+                ),
+            )
+        }
+    }
+
+    private forgotPassword = async (
+        req: Request,
+        res: Response,
+        next: NextFunction,
+    ): Promise<Response | void> => {
+        try {
+            const authDto: IAuthDto = req.body;
+            const tokens: Tokens | null = await this.authService.signinLocal(authDto)
+
+            return res.status(ConstantHttpCode.OK).json({
+                status: {
+                    code: ConstantHttpCode.OK,
+                    msg: ConstantHttpReason.OK,
+                },
+                msg: ConstantMessage.SPONSOR_UPDATE_SUCCESS,
+                data: tokens,
+            })
+        } catch (err: any) {
+            next(
+                new HttpException(
+                    ConstantHttpCode.INTERNAL_SERVER_ERROR,
+                    ConstantHttpReason.INTERNAL_SERVER_ERROR,
+                    err?.message,
+                ),
+            )
+        }
+    }
+
+    private refreshToken = async (
         req: Request,
         res: Response,
         next: NextFunction,

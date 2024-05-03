@@ -17,6 +17,7 @@ import { IAccountDocument } from "models/account.model";
 import { Sponsor } from "../schemas/sponsor.schema";
 import { ISponsor, ISponsorDocument } from "../models/sponsor.model";
 import { Role } from "../schemas/role.schema";
+import logger from "../utils/logger.util";
 
 class AuthService {
 
@@ -54,9 +55,6 @@ class AuthService {
 
     async signupLocal(dto: ISponsor): Promise<IAccountDocument|BadRequestError> {
         try {
-            console.log('====================================');
-        console.log(dto);
-        console.log('====================================');
         const hash = await argon.hash(dto.password);       
 
         const newSponsor: ISponsorDocument = await Sponsor.create(dto);
@@ -113,6 +111,7 @@ class AuthService {
         return newAccount;
         } catch (error) {
             console.log('====================================');
+            logger.error(error);
             console.log(error);
             console.log('====================================');
             throw new BadRequestError('Please review your data');
