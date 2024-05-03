@@ -144,19 +144,11 @@ const onboardSponsorBody = {
             type: 'string',
             example: 'BLACKROCK',
         },
-        gender: {
-            type: 'string',
-            example: 'BLACKROCK',
-        },
         state: {
             type: 'string',
             example: 'BLACKROCK',
         },
         country: {
-            type: 'string',
-            example: 'BLACKROCK',
-        },
-        city: {
             type: 'string',
             example: 'BLACKROCK',
         },
