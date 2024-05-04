@@ -20,6 +20,7 @@ import { ISponsor, ISponsorDocument } from "../models/sponsor.model";
 import { Role } from "../schemas/role.schema";
 import logger from "../utils/logger.util";
 import { signJwt, verifyJwt } from "../utils/jwt.util";
+import { ILoggedInDto } from "dto/ILoggedInDto";
 
 class AuthService {
 
@@ -142,11 +143,20 @@ class AuthService {
         const passwordMatches = await argon.verify(user.hash, dto.password);
         if (!passwordMatches) throw new ForbiddenError('Acces non autorisé!');
 
-        const userRole = await Role.findById(user.roleId);
-        const payload = {
-            userId: user._id,
-            userEmail: user.email,
-            role: userRole?.role_code
+        const userRole = await Role.findById(user.roleId)!;
+        const payload: ILoggedInDto = {
+            firstname: user.firstname,
+            lastname: user.lastname,
+            avatar: user.avatar,
+            email: user.email,
+            phone: user.phone,
+            state: user.state,
+            country: user.country,
+            address: user.address,
+            email_verified: user.email_verified,
+            acctstatus: user.acctstatus,
+            ownerId: user.ownerId,
+            role: userRole!.role_code
         };
         const at = signJwt(payload, "accessTokenPrivateKey", {});
         const rt = signJwt(payload, "refreshTokenPrivateKey", {});
