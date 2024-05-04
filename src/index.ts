@@ -51,11 +51,18 @@ class App {
   }
 
   private initialiseConfig(): void {
+    //this.app.use(cors())
+    this.app.use(function (_req: Request, res: Response, next: NextFunction) {
+      res.setHeader('Access-Control-Allow-Origin', '*');
+      res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
+      res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+      res.setHeader('Access-Control-Allow-Credentials', 'true');
+      next();
+    });
     this.app.use(express.json())
     this.app.use(express.urlencoded({ extended: true }))
     this.app.use(cookieParser())
     this.app.use(compression())
-    this.app.use(cors())
     this.app.use(helmet())
     this.app.use(`${ConstantAPI.API}/documentation`, swaggerUi.serve, swaggerUi.setup(apiDocumentation));
   }
