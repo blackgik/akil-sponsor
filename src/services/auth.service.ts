@@ -83,7 +83,7 @@ class AuthService {
             dob: new Date(),
             email_verified: false,
             acctstatus: 'pending',
-            hash: hash,
+            hash: dto.password,
             hashedRt: '',
             ownerId: newSponsor._id,
             otpHash: '',
@@ -206,17 +206,19 @@ class AuthService {
         const verifyOtp = verifyOTP(checkAcct.email, code, hash, customConfig.otpKey);
         if (!verifyOtp) throw new InvalidError('Wrong otp code');
 
-        const generatePassword = await codeGenerator(9, 'ABCDEFGHI&*$%#1234567890');
+        const generatePassword = checkAcct.hash;;
 
-        const hashedPwd = await argon.hash(generatePassword);
+        const hashedPwd = await argon.hash(checkAcct.hash);
         checkAcct.email_verified = true;
         checkAcct.otpHash = '';
+        checkAcct.hash = hashedPwd;
         checkAcct.acctstatus = 'active';
 
         let toVerifySponsor = await Sponsor.findById(checkAcct.ownerId);
         if (toVerifySponsor) {
             toVerifySponsor.email_verified = true;
             toVerifySponsor.otpHash = '';
+            toVerifySponsor.password = hashedPwd;
             toVerifySponsor.acctstatus = 'active';
             checkAcct.ownerId = toVerifySponsor._id;
             await Sponsor.updateSponsor(toVerifySponsor._id, toVerifySponsor);
@@ -225,7 +227,7 @@ class AuthService {
         //create email profile here
         const onboardingData = {
             email: checkAcct.email,
-            password: checkAcct.hash
+            password: generatePassword
         };
         const mailData = {
             email: checkAcct.email,

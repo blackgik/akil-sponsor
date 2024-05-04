@@ -30,10 +30,18 @@ import ConstantHttpReason from './constants/http.reason.constant'
 class App {
   public app: Application
   private DATABASE_URL: string
+  corsOptions: {
+    credentials: boolean; origin: string[]|string // Whitelist the domains you want to allow
+  }
 
   constructor(controllers: Controller[]) {
     this.app = express()
-    this.DATABASE_URL = Variable.DATABASE_URL
+    this.DATABASE_URL = Variable.DATABASE_URL;
+    // Define the CORS options
+    this.corsOptions = {
+      credentials: true,
+      origin: '*' // Whitelist the domains you want to allow
+    };
 
     this.initialiseDatabaseConnection(this.DATABASE_URL)
     this.initialiseConfig()
@@ -47,7 +55,7 @@ class App {
     this.app.use(express.urlencoded({ extended: true }))
     this.app.use(cookieParser())
     this.app.use(compression())
-    this.app.use(cors())
+    this.app.use(cors(this.corsOptions))
     this.app.use(helmet())
     this.app.use(`${ConstantAPI.API}/documentation`, swaggerUi.serve, swaggerUi.setup(apiDocumentation));
   }
