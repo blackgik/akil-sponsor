@@ -3,21 +3,18 @@ import ConstantNumber from '../constants/number.constant'
 import { IAccount, IAccountDocument, IAccountModel } from '../models/account.model';
 
 const AccountSchema = new Schema({
+  
   firstname: {
     type: String,
     required: true,
-    min: ConstantNumber.NAME_MIN_LENGTH,
-    max: ConstantNumber.NAME_MAX_LENGTH,
   },
   lastname: {
     type: String,
     required: true,
-    min: ConstantNumber.NAME_MIN_LENGTH,
-    max: ConstantNumber.NAME_MAX_LENGTH,
   },
   avatar: { key: { type: String, default: '' } },
-  email: { type: String, required: true, lowercase: true },
-  phone: { type: String, required: true },
+  email: { type: String, required: true, unique: true, lowercase: true },
+  phone: { type: String, required: true, unique: true },
   password: { type: String, required: false },
   state: { type: String, required: false, lowercase: true },
   country: { type: String, required: false, lowercase: true },

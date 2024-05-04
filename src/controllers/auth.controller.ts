@@ -48,7 +48,6 @@ class AuthController implements Controller {
         this.roleService = new RoleService()
         this.authenticated = new Authenticated()
         this.validate = new Validate()
-
         this.initialiseRoutes()
     }
 

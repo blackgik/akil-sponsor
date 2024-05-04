@@ -6,8 +6,8 @@ export interface IBeneficiary {
   lastname: { type: String, default: '' },
   othername: { type: String, default: '' },
   avatar: { type: String, default: '' },
-  email: { type: String, default: '' },
-  phone: { type: String, default: '' },
+  email: { type: String, default: '', unique: true },
+  phone: { type: String, default: '', unique: true },
   gender: { type: String, default: '' },
   country: { type: String, default: '' },
   suspension_date: { type: Date, default: '' }
