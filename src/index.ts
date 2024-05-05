@@ -98,9 +98,9 @@ class App {
     })
   }
 
-  private initialiseErrorHandling(): void {
-    this.app.use(ErrorMiddleware)
-  }
+   private initialiseErrorHandling(): void {
+     this.app.use(ErrorMiddleware)
+   }
 
   private initialiseDatabaseConnection(url: string): void {
     connectDb(url)

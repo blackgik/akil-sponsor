@@ -3,7 +3,7 @@ import * as crypto from "crypto";
 import * as argon from 'argon2';
 import { Account } from '../schemas/account.schema';
 import { JwtPayload, Tokens } from '../types';
-import { ForbiddenError, InternalServerError, NotFoundError, InvalidError, BadRequestError, DuplicateError } from '../utils/app.errors';
+import HttpException, { ForbiddenError, InternalServerError, NotFoundError, InvalidError, BadRequestError, DuplicateError } from '../utils/exceptions/http.exception';
 import { IAuthDto } from '../dto/IAuthDto';
 import {
     buildOtpHash,
@@ -68,7 +68,7 @@ class AuthService {
         // console.log("Public Key:\n", publicKey);
         // console.log("Private Key:\n", privateKey);
         const checkIfOnboarded = await Account.findOne({ $or: [{ email: dto.email }, { phone: dto.phone }] });
-        if (checkIfOnboarded) throw new DuplicateError('Sponsor already exists');
+        if (checkIfOnboarded) throw new HttpException(406, 'Sponsor already exists', 'Sponsor already exists',);
 
         const newSponsor: ISponsorDocument = await Sponsor.create(dto);
         const userRole = await Role.findOne({role_code: 'SPONSOR'});
@@ -124,12 +124,14 @@ class AuthService {
 
         const msgDelivered = await messageBird(msg);
         if (!msgDelivered)
-            throw new InternalServerError(
-                'server slip. Organization was created without mail being sent'
+            throw new InternalServerError(500,
+                'server slip. Organization was created without mail being sent',
+                ''
             );
         return newAccount;
 
     }
+
     async signinLocal(dto: IAuthDto): Promise<Tokens> {
         //console.log(dto);
         const user = await Account.findOne({
@@ -137,14 +139,14 @@ class AuthService {
             email_verified: true
         });
         if (!user) {
-            throw new ForbiddenError('Acces non authorisé!');
+            throw new ForbiddenError(403, 'Acces non authorisé!', '');
         }
 
         const passwordMatches = await argon.verify(user.hash, dto.password);
-        if (!passwordMatches) throw new ForbiddenError('Acces non autorisé!');
+        if (!passwordMatches) throw new ForbiddenError(403, 'Acces non authorisé!', '');
 
         const userRole = await Role.findById(user.roleId)!;
-        if (userRole === undefined || userRole === null) throw new ForbiddenError('Acces non autorisé!');
+        if (userRole === undefined || userRole === null) throw new ForbiddenError(403, 'Acces non authorisé!', '');
         const payload: ILoggedInDto = {
             firstname: user.firstname,
             lastname: user.lastname,
@@ -185,10 +187,10 @@ class AuthService {
     async refreshTokens(rt: string) {
 
         const rtMatches = await verifyJwt(rt, "refreshTokenPublicKey");
-        if (!rtMatches || rtMatches.userId == '') throw new ForbiddenError('Acces non autorisé!');
+        if (!rtMatches || rtMatches.userId == '') throw new ForbiddenError(403, 'Acces non authorisé!', '');
 
         const user = await Account.findOne({ _id: rtMatches.userId });
-        if (!user || !user.hashedRt) throw new ForbiddenError('Access Denied');
+        if (!user || !user.hashedRt) throw new ForbiddenError(403, 'Acces non authorisé!', '');
         console.log(user.hashedRt);
 
         const userRole = await Role.findById(user.roleId);
@@ -212,10 +214,10 @@ class AuthService {
 
         const checkAcct = await Account.findOne({ otp: code });
 
-        if (!checkAcct) throw new NotFoundError('Account not found');
+        if (!checkAcct) throw new NotFoundError(200, 'Account not found', '');
 
         const verifyOtp = verifyOTP(checkAcct.email, code, hash, customConfig.otpKey);
-        if (!verifyOtp) throw new InvalidError('Wrong otp code');
+        if (!verifyOtp) throw new InvalidError(422, 'Invalid Input', '');
 
         const generatePassword = checkAcct.hash;;
 
@@ -251,8 +253,8 @@ class AuthService {
 
         const msgDelivered = await messageBird(msg);
         if (!msgDelivered)
-            throw new InternalServerError(
-                'server slip. Organization was created without mail being sent'
+            throw new InternalServerError(500,
+                'server slip. Organization was created without mail being sent', ''
             );
         const tokens = await this.signJwt(checkAcct._id, checkAcct.email);
         return tokens;
@@ -260,7 +262,7 @@ class AuthService {
 
     forgotPassword = async (body: any) => {
         const checkOrg = await Account.findOne({ email: body.email });
-        if (!checkOrg) throw new NotFoundError('Account not found');
+        if (!checkOrg) throw new NotFoundError(200, 'Data not found', '');
 
         const newPassword = await codeGenerator(6, '1234567890');
 
@@ -287,7 +289,7 @@ class AuthService {
 
         const msgDelivered = await messageBird(msg);
 
-        if (!msgDelivered) throw new InternalServerError('server slip. Reset Password code not sent');
+        if (!msgDelivered) throw new InternalServerError(500,'server slip. Reset Password code not sent','');
 
         // return { email: checkMember.contact.email };
         return { hash: hash, email: checkOrg.email };
@@ -297,10 +299,10 @@ class AuthService {
         const { code, hash, password } = body;
 
         const checkOrg = await Account.findOne({ email });
-        if (!checkOrg) throw new NotFoundError('User not found');
+        if (!checkOrg) throw new NotFoundError(200,'User not found','');
 
         const verifyOtp = verifyOTP(email, code, hash, customConfig.otpKey);
-        if (!verifyOtp) throw new InvalidError('Wrong otp code');
+        if (!verifyOtp) throw new InvalidError(422,'Wrong otp code','');
 
         const hashPassword = await await argon.hash(password);
 

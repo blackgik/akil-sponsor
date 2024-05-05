@@ -54,7 +54,7 @@ class AccountService {
 
     async signupLocal(dto: IAccountCreateDto): Promise<IAccountDocument> {
         const checkIfExist = await Account.findOne({ email: dto.email });
-            if (checkIfExist) throw new DuplicateError('Account already exists');
+            if (checkIfExist) throw new DuplicateError('Account already exists', 406);
         const generatePassword = await codeGenerator(9, 'ABCDEFGHI&*$%#1234567890');
         
         const hash = await argon.hash(dto.password);

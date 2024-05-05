@@ -8,7 +8,7 @@ function formatMessage(objectOrMessage: any) {
     return '';
   }
   
-  function createResponse(objectOrMessage: any, data = null, success = null) {
+  function createResponse(objectOrMessage: any, data = null, success = false) {
     return {
       success: success === null ? true : success,
       message: formatMessage(objectOrMessage),

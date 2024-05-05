@@ -23,13 +23,45 @@ const otpResponse = {
 };
 
 const sponsorOnbordingResponse = {
-    access_token: {
+    firstname: {
         type: 'string',
-        example: '60564fcb544047cdc3844818',
+        example: 'BLACKROCK',
     },
-    refresh_token: {
+    lastname: {
         type: 'string',
-        example: '60564fcb544047cdc3844818',
+        example: 'BLACKROCK',
+    },
+    email: {
+        type: 'string',
+        example: 'BLACKROCK',
+    },
+    phone: {
+        type: 'string',
+        example: 'BLACKROCK',
+    },
+    state: {
+        type: 'string',
+        example: 'BLACKROCK',
+    },
+    country: {
+        type: 'string',
+        example: 'BLACKROCK',
+    },
+    address: {
+        type: 'string',
+        example: 'BLACKROCK',
+    },
+    role: {
+        type: 'string',
+        example: 'BLACKROCK',
+    },
+    tosAgreement: {
+        type: 'boolean',
+        example: true,
+    },
+    pdsAgreement: {
+        type: 'boolean',
+        example: true,
     },
 };
 
