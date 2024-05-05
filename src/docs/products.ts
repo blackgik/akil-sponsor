@@ -23,6 +23,10 @@ const productResponseWithProduct_category = {
         type: 'string',
         example: '60564fcb544047cdc3844818',
     },
+    product_image: {
+        type: 'string',
+        example: 'RAS',
+    },
     product_description: {
         type: 'string',
         example: 'RAS',
@@ -158,6 +162,10 @@ const createProductBody = {
             type: 'string',
             example: '60564fcb544047cdc3844818',
         },
+        product_image: {
+            type: 'string',
+            example: 'RAS',
+        },
         product_description: {
             type: 'string',
             example: 'RAS',
@@ -191,6 +199,10 @@ const updateProductBody = {
         product_category_id: {
             type: 'string',
             example: '60564fcb544047cdc3844818',
+        },
+        product_image: {
+            type: 'string',
+            example: 'RAS',
         },
         product_description: {
             type: 'string',
@@ -249,6 +261,10 @@ const createProduct = {
                             product_sponsor_id: {
                                 type: 'string',
                                 example: '60564fcb544047cdc3844818',
+                            },
+                            product_image: {
+                                type: 'string',
+                                example: 'RAS',
                             },
                             product_description: {
                                 type: 'string',
