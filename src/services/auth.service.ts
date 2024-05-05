@@ -144,6 +144,7 @@ class AuthService {
         if (!passwordMatches) throw new ForbiddenError('Acces non autorisé!');
 
         const userRole = await Role.findById(user.roleId)!;
+        if (userRole === undefined || userRole === null) throw new ForbiddenError('Acces non autorisé!');
         const payload: ILoggedInDto = {
             firstname: user.firstname,
             lastname: user.lastname,
