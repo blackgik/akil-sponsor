@@ -71,7 +71,7 @@ class AuthService {
         if (checkIfOnboarded) throw new DuplicateError('Sponsor already exists');
 
         const newSponsor: ISponsorDocument = await Sponsor.create(dto);
-        const userRole = await Role.getRoleByCode('SPONSOR');
+        const userRole = await Role.findOne({role_code: 'SPONSOR'});
         const newAccount = await Account.create({
             firstname: newSponsor.firstname,
             lastname: newSponsor.lastname,
