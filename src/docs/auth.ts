@@ -22,6 +22,13 @@ const otpResponse = {
     },
 };
 
+const sendOtpBody = {
+    emal: {
+        type: 'string',
+        example: 'test@gmail.com',
+    }
+};
+
 const sponsorOnbordingResponse = {
     firstname: {
         type: 'string',
