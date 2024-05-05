@@ -1,7 +1,7 @@
 const productResponseWithProduct_category = {
     product_id: {
         type: 'string',
-        example: '60564fcb544047cdc3844818',
+        example: '60564fcb542017cdc3844818',
     },
     product_name: {
         type: 'string',
@@ -21,7 +21,7 @@ const productResponseWithProduct_category = {
     },
     product_sponsor_id: {
         type: 'string',
-        example: '60564fcb544047cdc3844818',
+        example: '60564fcb542017cdc3844818',
     },
     product_image: {
         type: 'string',
@@ -36,7 +36,7 @@ const productResponseWithProduct_category = {
         properties: {
             product_category_id: {
                 type: 'string',
-                example: '60564fcb544047cdc3844818',
+                example: '60564fcb542017cdc3844818',
             },
             product_category_name: {
                 type: 'string',
@@ -48,7 +48,7 @@ const productResponseWithProduct_category = {
             },
             parent_category_id: {
                 type: 'string',
-                example: '60564fcb544047cdc3844818',
+                example: '60564fcb542017cdc3844818',
             },
             product_category_description: {
                 type: 'string',
@@ -156,11 +156,11 @@ const createProductBody = {
         },
         product_sponsor_id: {
             type: 'string',
-            example: '60564fcb544047cdc3844818',
+            example: '60564fcb542017cdc3844818',
         },
         product_category_id: {
             type: 'string',
-            example: '60564fcb544047cdc3844818',
+            example: '60564fcb542017cdc3844818',
         },
         product_image: {
             type: 'string',
@@ -194,11 +194,11 @@ const updateProductBody = {
         },
         product_sponsor_id: {
             type: 'string',
-            example: '60564fcb544047cdc3844818',
+            example: '60564fcb542017cdc3844818',
         },
         product_category_id: {
             type: 'string',
-            example: '60564fcb544047cdc3844818',
+            example: '60564fcb542017cdc3844818',
         },
         product_image: {
             type: 'string',
@@ -240,7 +240,7 @@ const createProduct = {
                         properties: {
                             product_id: {
                                 type: 'string',
-                                example: '60564fcb544047cdc3844818',
+                                example: '60564fcb542017cdc3844818',
                             }, 
                             product_name: {
                                 type: 'string',
@@ -260,7 +260,7 @@ const createProduct = {
                             },
                             product_sponsor_id: {
                                 type: 'string',
-                                example: '60564fcb544047cdc3844818',
+                                example: '60564fcb542017cdc3844818',
                             },
                             product_image: {
                                 type: 'string',
@@ -275,7 +275,7 @@ const createProduct = {
                                 properties: {
                                     product_category_id: {
                                         type: 'string',
-                                        example: '60564fcb544047cdc3844818',
+                                        example: '60564fcb542017cdc3844818',
                                     },
                                     product_category_name: {
                                         type: 'string',
@@ -287,7 +287,7 @@ const createProduct = {
                                     },
                                     parent_category_id: {
                                         type: 'string',
-                                        example: '60564fcb544047cdc3844818',
+                                        example: '60564fcb542017cdc3844818',
                                     },
                                     product_category_description: {
                                         type: 'string',
@@ -383,7 +383,7 @@ const getProduct = {
                 },
             },
         },
-        '404': productNotFound,
+        '201': productNotFound,
         '500': internalServerError,
     },
 };
@@ -424,7 +424,7 @@ const updateProduct = {
                 },
             },
         },
-        '404': productNotFound,
+        '201': productNotFound,
         '422': invalidProductData,
         '500': internalServerError,
     },

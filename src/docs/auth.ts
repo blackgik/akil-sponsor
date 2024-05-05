@@ -3,22 +3,22 @@
 const loginResponse = {
     access_token: {
         type: 'string',
-        example: '60564fcb544047cdc3844818',
+        example: '60564fcb542017cdc3844818',
     },
     refresh_token: {
         type: 'string',
-        example: '60564fcb544047cdc3844818',
+        example: '60564fcb542017cdc3844818',
     },
 };
 
 const otpResponse = {
     access_token: {
         type: 'string',
-        example: '60564fcb544047cdc3844818',
+        example: '60564fcb542017cdc3844818',
     },
     refresh_token: {
         type: 'string',
-        example: '60564fcb544047cdc3844818',
+        example: '60564fcb542017cdc3844818',
     },
 };
 
@@ -332,7 +332,7 @@ const onboardSponsor = {
                 },
             },
         },
-        '404': sponsorNotFound,
+        '201': sponsorNotFound,
         '422': invalidSponsorData,
         '500': internalServerError,
     },

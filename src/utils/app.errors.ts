@@ -45,7 +45,7 @@ class AppError extends Error {
   }
   
   export class NotFoundError extends AppError {
-    constructor(message = 'Resource not found', statusCode = 404) {
+    constructor(message = 'Resource not found', statusCode = 200) {
       super(message, statusCode);
     }
   }

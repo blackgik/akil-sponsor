@@ -3,7 +3,7 @@
 const product_categoryResponse = {
     product_category_id: {
         type: 'string',
-        example: '60564fcb544047cdc3844818',
+        example: '60564fcb542017cdc3844818',
     },
     product_category_name: {
         type: 'string',
@@ -15,7 +15,7 @@ const product_categoryResponse = {
     },
     parent_category_id: {
         type: 'string',
-        example: '60564fcb544047cdc3844818',
+        example: '60564fcb542017cdc3844818',
     },
     product_category_description: {
         type: 'string',
@@ -105,7 +105,7 @@ const createOrUpdateProduct_categoryBody = {
         },
         parent_category_id: {
             type: 'string',
-            example: '60564fcb544047cdc3844818',
+            example: '60564fcb542017cdc3844818',
         },
         product_category_description: {
             type: 'string',
@@ -212,7 +212,7 @@ const getProduct_category = {
                 },
             },
         },
-        '404': product_categoryNotFound,
+        '201': product_categoryNotFound,
         '500': internalServerError,
     },
 };
@@ -253,7 +253,7 @@ const updateProduct_category = {
                 },
             },
         },
-        '404': product_categoryNotFound,
+        '201': product_categoryNotFound,
         '422': invalidProduct_categoryData,
         '500': internalServerError,
     },

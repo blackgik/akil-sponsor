@@ -20,7 +20,8 @@ import { ISponsor, ISponsorDocument } from "../models/sponsor.model";
 import { Role } from "../schemas/role.schema";
 import logger from "../utils/logger.util";
 import { signJwt, verifyJwt } from "../utils/jwt.util";
-import { ILoggedInDto } from "dto/ILoggedInDto";
+import { ILoggedInDto } from "../dto/ILoggedInDto";
+import { IResendOtpDto } from "../dto/IResendOtpDto";
 
 class AuthService {
 
@@ -312,6 +313,44 @@ class AuthService {
 
         return true;
     };
+
+    async resendOtp(dto: IResendOtpDto): Promise<IAccountDocument | BadRequestError> {
+
+        //const hash = await argon.hash(dto.password);
+        const checkIfOnboarded = await Account.findOne({ email: dto.email });
+        if (!checkIfOnboarded) throw new HttpException(406,'User do not exist','');
+
+        const otp = await codeGenerator(6, '1234567890');
+
+        const otpHash = buildOtpHash(checkIfOnboarded.email, otp, customConfig.otpKey, 15);
+
+        checkIfOnboarded.otpHash = otpHash;
+        checkIfOnboarded.otp = otp;
+        checkIfOnboarded.otpHash = otpHash;
+        await Account.updateAccount(checkIfOnboarded._id, checkIfOnboarded);
+        //create email profile here
+        const onboardingData = {
+            name: checkIfOnboarded.firstname + ' ' + checkIfOnboarded.lastname,
+            code: otp
+        };
+        const mailData = {
+            email: checkIfOnboarded.email,
+            subject: 'MAJFINTECH ONBOARDING',
+            type: 'html',
+            html: verifyOnbordingMail(onboardingData).html,
+            text: verifyOnbordingMail(onboardingData).text
+        };
+        const msg = await formattMailInfo(mailData, customConfig);
+
+        const msgDelivered = await messageBird(msg);
+        if (!msgDelivered)
+            throw new InternalServerError(500,
+                'server slip. Organization was created without mail being sent',
+                ''
+            );
+        return checkIfOnboarded;
+
+    }
 
 }
 

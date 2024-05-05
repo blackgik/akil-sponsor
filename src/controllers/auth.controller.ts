@@ -66,13 +66,19 @@ class AuthController implements Controller {
 
         this.router.post(
             `${this.path}${ConstantAPI.SPONSOR_AUTH_FORGOT}`,
-            validationMiddleware(this.validate.login),
+            //validationMiddleware(this.validate.login),
             this.forgotPassword,
         )
 
         this.router.post(
+            `${this.path}${ConstantAPI.GET_OTP}`,
+            //validationMiddleware(this.validate.getOtp),
+            this.resendOtp,
+        )
+
+        this.router.post(
             `${this.path}${ConstantAPI.SPONSOR_MAIL_VERIFY}`,
-            validationMiddleware(this.validate.verifyMail),
+            //validationMiddleware(this.validate.verifyMail),
             this.verifySponsorMail,
         )
 
@@ -135,6 +141,35 @@ class AuthController implements Controller {
             )
         }
     }
+
+    private resendOtp = async (
+        req: Request,
+        res: Response,
+        next: NextFunction,
+    ): Promise<Response | void> => {
+        try {
+            const otpData = req.body
+            const verifData = await this.authService.resendOtp(otpData);
+
+            return res.status(ConstantHttpCode.OK).json({
+                status: {
+                    code: ConstantHttpCode.OK,
+                    msg: ConstantHttpReason.OK,
+                },
+                msg: ConstantMessage.SPONSOR_CREATE_SUCCESS,
+                data: verifData,
+            })
+        } catch (err: any) {
+            next(
+                new HttpException(
+                    ConstantHttpCode.INTERNAL_SERVER_ERROR,
+                    ConstantHttpReason.INTERNAL_SERVER_ERROR,
+                    err?.message,
+                ),
+            )
+        }
+    }
+
 
 
     private login = async (

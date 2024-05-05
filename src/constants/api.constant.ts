@@ -18,6 +18,8 @@ class Api {
   public static readonly PARTNER_AUTH_LOGIN: string = '/login'
   public static readonly PARTNER_AUTH_FORGOT: string = '/forgot'
   public static readonly PARTNER_AUTH_RESET: string = '/reset'
+  public static readonly GET_OTP: string = '/resend-otp'
+  
   // sponsor-auth
   public static readonly SPONSOR_AUTH_ONBOARDING: string = '/onboarding'
   public static readonly SPONSOR_AUTH_LOGIN: string = '/login'

@@ -1,7 +1,7 @@
 const partnerResponse = {
     partner_id: {
         type: 'string',
-        example: '60564fcb544047cdc3844818',
+        example: '60564fcb542017cdc3844818',
     },
     partner_business_name: {
         type: 'string',
@@ -278,7 +278,7 @@ const createPartner = {
                         properties: {
                             partner_id: {
                                 type: 'string',
-                                example: '60564fcb544047cdc3844818',
+                                example: '60564fcb542017cdc3844818',
                             },
                             partner_business_name: {
                                 type: 'string',
@@ -437,7 +437,7 @@ const getPartner = {
                 },
             },
         },
-        '404': partnerNotFound,
+        '201': partnerNotFound,
         '500': internalServerError,
     },
 };
@@ -478,7 +478,7 @@ const updatePartner = {
                 },
             },
         },
-        '404': partnerNotFound,
+        '201': partnerNotFound,
         '422': invalidPartnerData,
         '500': internalServerError,
     },

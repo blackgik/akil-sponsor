@@ -49,7 +49,7 @@ class HttpException extends Error {
   }
   
   export class NotFoundError extends HttpException {
-    constructor(statusCode = 404, statusMsg = 'Resource not found', msg = '404') {
+    constructor(statusCode = 404, statusMsg = 'Resource not found', msg = '200') {
       super(statusCode, statusMsg, msg);
     }
   }

@@ -3,7 +3,7 @@
 const occupationResponse = {
     occupation_id: {
         type: 'string',
-        example: '60564fcb544047cdc3844818',
+        example: '60564fcb542017cdc3844818',
     },
     occupation_name: {
         type: 'string',
@@ -212,7 +212,7 @@ const getOccupation = {
                 },
             },
         },
-        '404': occupationNotFound,
+        '201': occupationNotFound,
         '500': internalServerError,
     },
 };
@@ -253,7 +253,7 @@ const updateOccupation = {
                 },
             },
         },
-        '404': occupationNotFound,
+        '201': occupationNotFound,
         '422': invalidOccupationData,
         '500': internalServerError,
     },

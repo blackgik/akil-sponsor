@@ -418,7 +418,7 @@ const updateSponsor = {
                 },
             },
         },
-        '404': sponsorNotFound,
+        '200': sponsorNotFound,
         '422': invalidSponsorData,
         '500': internalServerError,
     },

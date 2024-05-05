@@ -1,7 +1,7 @@
 const userResponseWithRole = {
   _id: {
     type: 'string',
-    example: '60564fcb544047cdc3844818',
+    example: '60564fcb542017cdc3844818',
   },
   firstname: {
     type: 'string',
@@ -216,7 +216,7 @@ const createUserBody = {
     },
     roleIdd: {
       type: 'string',
-      example: '60564fcb544047cdc3844818',
+      example: '60564fcb542017cdc3844818',
     },
   },
 };
@@ -300,7 +300,7 @@ const createUser = {
             properties: {
               _id: {
                 type: 'string',
-                example: '60564fcb544047cdc3844818',
+                example: '60564fcb542017cdc3844818',
               },
               firstname: {
                 type: 'string',
@@ -467,7 +467,7 @@ const getUser = {
         },
       },
     },
-    '404': userNotFound,
+    '201': userNotFound,
     '500': internalServerError,
   },
 };
@@ -508,7 +508,7 @@ const updateUser = {
         },
       },
     },
-    '404': userNotFound,
+    '201': userNotFound,
     '422': invalidUserData,
     '500': internalServerError,
   },

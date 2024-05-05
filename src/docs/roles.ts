@@ -3,7 +3,7 @@
 const roleResponse = {
     role_id: {
         type: 'string',
-        example: '60564fcb544047cdc3844818',
+        example: '60564fcb542017cdc3844818',
     },
     role_name: {
         type: 'string',
@@ -212,7 +212,7 @@ const getRole = {
                 },
             },
         },
-        '404': roleNotFound,
+        '201': roleNotFound,
         '500': internalServerError,
     },
 };
@@ -253,7 +253,7 @@ const updateRole = {
                 },
             },
         },
-        '404': roleNotFound,
+        '201': roleNotFound,
         '422': invalidRoleData,
         '500': internalServerError,
     },
