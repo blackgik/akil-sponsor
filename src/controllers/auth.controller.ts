@@ -54,13 +54,13 @@ class AuthController implements Controller {
     private initialiseRoutes(): void {
         this.router.post(
             `${this.path}${ConstantAPI.SPONSOR_AUTH_ONBOARDING}`,
-            validationMiddleware(this.validate.createSponsor),
+            //validationMiddleware(this.validate.createSponsor),
             this.createSponsor,
         )
 
         this.router.post(
             `${this.path}${ConstantAPI.SPONSOR_AUTH_LOGIN}`,
-            validationMiddleware(this.validate.login),
+            //validationMiddleware(this.validate.login),
             this.login,
         )
 
