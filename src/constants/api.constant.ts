@@ -16,20 +16,20 @@ class Api {
   // partner-uth
   public static readonly PARTNER_AUTH_ONBOARDING: string = '/onboarding'
   public static readonly PARTNER_AUTH_LOGIN: string = '/login'
-  public static readonly PARTNER_AUTH_FORGOT: string = '/forgot'
-  public static readonly PARTNER_AUTH_RESET: string = '/reset'
+  public static readonly PARTNER_AUTH_FORGOT: string = '/forgot-pwd'
+  public static readonly PARTNER_AUTH_RESET: string = '/reset-pwd'
   public static readonly GET_OTP: string = '/resend-otp'
   
   // sponsor-auth
   public static readonly SPONSOR_AUTH_ONBOARDING: string = '/onboarding'
   public static readonly SPONSOR_AUTH_LOGIN: string = '/login'
-  public static readonly SPONSOR_AUTH_FORGOT: string = '/forgot'
-  public static readonly SPONSOR_AUTH_RESET: string = '/reset'
+  public static readonly SPONSOR_AUTH_FORGOT: string = '/forgot-pwd'
+  public static readonly SPONSOR_AUTH_RESET: string = '/reset-pwd'
   // user-auth
   public static readonly USER_AUTH_ONBOARDING: string = '/register'
   public static readonly USER_AUTH_LOGIN: string = '/login'
-  public static readonly USER_AUTH_FORGOT: string = '/forgot'
-  public static readonly USER_AUTH_RESET: string = '/reset'
+  public static readonly USER_AUTH_FORGOT: string = '/forgot-pwd'
+  public static readonly USER_AUTH_RESET: string = '/reset-pwd'
 
   // partners
   public static readonly PARTNER_UPDATE: string = '/:partner_id'

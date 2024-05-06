@@ -312,6 +312,115 @@ const verifyOtp = {
 };
 
 
+const resendOtp = {
+    tags: ['Authentication'],
+    description: 'verify mail',
+    operationId: 'resendOtp',
+    security: [
+        {
+            bearerAuth: [],
+        },
+    ],
+    requestBody: {
+        content: {
+            'application/json': {
+                schema: {
+                    $ref: '#/components/schemas/sendOtpBody',
+                },
+            },
+        },
+        required: true,
+    },
+    responses: {
+        '201': {
+            description: 'Otp sent successfully!',
+            content: {
+                'application/json': {
+                    schema: {
+                        type: 'object',
+                        properties: otpResponse,
+                    },
+                },
+            },
+        },
+        '422': invalidEmailOrPasswordData,
+        '500': internalServerError,
+    },
+};
+
+const forgotPwd = {
+    tags: ['Authentication'],
+    description: 'verify mail',
+    operationId: 'forgotPwd',
+    security: [
+        {
+            bearerAuth: [],
+        },
+    ],
+    requestBody: {
+        content: {
+            'application/json': {
+                schema: {
+                    $ref: '#/components/schemas/sendOtpBody',
+                },
+            },
+        },
+        required: true,
+    },
+    responses: {
+        '201': {
+            description: 'Otp sent successfully!',
+            content: {
+                'application/json': {
+                    schema: {
+                        type: 'object',
+                        properties: otpResponse,
+                    },
+                },
+            },
+        },
+        '422': invalidEmailOrPasswordData,
+        '500': internalServerError,
+    },
+};
+
+const resetPwd = {
+    tags: ['Authentication'],
+    description: 'verify mail',
+    operationId: 'resetPwd',
+    security: [
+        {
+            bearerAuth: [],
+        },
+    ],
+    requestBody: {
+        content: {
+            'application/json': {
+                schema: {
+                    $ref: '#/components/schemas/verifyOtpBody',
+                },
+            },
+        },
+        required: true,
+    },
+    responses: {
+        '201': {
+            description: 'Password reset successfully!',
+            content: {
+                'application/json': {
+                    schema: {
+                        type: 'object',
+                        properties: otpResponse,
+                    },
+                },
+            },
+        },
+        '422': invalidEmailOrPasswordData,
+        '500': internalServerError,
+    },
+};
+
+
 const onboardSponsor = {
     tags: ['Authentication'],
     description: 'Onboard a sponsor',
@@ -346,4 +455,4 @@ const onboardSponsor = {
 };
 
 
-export { login, loginBody, verifyOtp, verifyOtpBody, onboardSponsor, onboardSponsorBody };
+export { login, loginBody, verifyOtp,resendOtp,forgotPwd, resetPwd, verifyOtpBody, onboardSponsor, onboardSponsorBody };

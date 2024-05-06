@@ -82,6 +82,11 @@ class AuthController implements Controller {
             this.verifySponsorMail,
         )
 
+        this.router.post(
+            `${this.path}${ConstantAPI.SPONSOR_AUTH_RESET}`,
+            //validationMiddleware(this.validate.verifyMail),
+            this.resetPwd,
+        )
 
     }
 
@@ -129,6 +134,34 @@ class AuthController implements Controller {
                     msg: ConstantHttpReason.OK,
                 },
                 msg: ConstantMessage.SPONSOR_CREATE_SUCCESS,
+                data: verifData,
+            })
+        } catch (err: any) {
+            next(
+                new HttpException(
+                    ConstantHttpCode.INTERNAL_SERVER_ERROR,
+                    ConstantHttpReason.INTERNAL_SERVER_ERROR,
+                    err?.message,
+                ),
+            )
+        }
+    }
+
+    private resetPwd = async (
+        req: Request,
+        res: Response,
+        next: NextFunction,
+    ): Promise<Response | void> => {
+        try {
+            const otpData = req.body
+            const verifData = await this.authService.resetPassword(otpData);
+
+            return res.status(ConstantHttpCode.OK).json({
+                status: {
+                    code: ConstantHttpCode.OK,
+                    msg: ConstantHttpReason.OK,
+                },
+                msg: "password reset successfully. Kindly check your mail for your new password",
                 data: verifData,
             })
         } catch (err: any) {
@@ -206,8 +239,8 @@ class AuthController implements Controller {
         next: NextFunction,
     ): Promise<Response | void> => {
         try {
-            const authDto: IAuthDto = req.body;
-            const tokens: Tokens | null = await this.authService.signinLocal(authDto)
+            const forgotData = req.body;
+            const verifData = await this.authService.forgotPassword(forgotData)
 
             return res.status(ConstantHttpCode.OK).json({
                 status: {
@@ -215,7 +248,7 @@ class AuthController implements Controller {
                     msg: ConstantHttpReason.OK,
                 },
                 msg: ConstantMessage.SPONSOR_UPDATE_SUCCESS,
-                data: tokens,
+                data: verifData,
             })
         } catch (err: any) {
             next(

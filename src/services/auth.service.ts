@@ -265,17 +265,18 @@ class AuthService {
         const checkOrg = await Account.findOne({ email: body.email });
         if (!checkOrg) throw new NotFoundError(200, 'Data not found', '');
 
-        const newPassword = await codeGenerator(6, '1234567890');
+        const otp = await codeGenerator(6, '1234567890');
 
-        const hash = buildOtpHash(body.email, newPassword, customConfig.otpKey, 15);
+        const hash = buildOtpHash(body.email, otp, customConfig.otpKey, 15);
 
-        checkOrg.hash = hash;
+        checkOrg.otpHash = hash;
+        checkOrg.otp = otp;
 
         checkOrg.save();
 
         const onboardingData = {
             name: checkOrg.firstname,
-            code: newPassword
+            code: otp
         };
 
         const mailData = {
@@ -296,20 +297,41 @@ class AuthService {
         return { hash: hash, email: checkOrg.email };
     };
 
-    resetPassword = async (body: any, email: string) => {
-        const { code, hash, password } = body;
+    resetPassword = async (body: any) => {
+        const { code, hash } = body;
 
-        const checkOrg = await Account.findOne({ email });
+        const checkOrg = await Account.findOne({ otp: code });
         if (!checkOrg) throw new NotFoundError(200,'User not found','');
 
-        const verifyOtp = verifyOTP(email, code, hash, customConfig.otpKey);
+        const verifyOtp = verifyOTP(checkOrg.email, code, hash, customConfig.otpKey);
         if (!verifyOtp) throw new InvalidError(422,'Wrong otp code','');
 
-        const hashPassword = await await argon.hash(password);
+        const newPwd = await codeGenerator(6, '1234567890');
+        const hashPassword = await await argon.hash(newPwd);
 
         checkOrg.hash = hashPassword;
 
         await checkOrg.save();
+
+        //create email profile here
+        const onboardingData = {
+            email: checkOrg.email,
+            password: newPwd
+        };
+        const mailData = {
+            email: checkOrg.email,
+            subject: 'MAJFINTECH ONBOARDING',
+            type: 'html',
+            html: onboardinMail(onboardingData).html,
+            text: onboardinMail(onboardingData).text
+        };
+        const msg = await formattMailInfo(mailData, customConfig);
+
+        const msgDelivered = await messageBird(msg);
+        if (!msgDelivered)
+            throw new InternalServerError(500,
+                'server slip. Organization was created without mail being sent', ''
+            );
 
         return true;
     };
