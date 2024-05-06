@@ -13,6 +13,10 @@ export interface IAccount {
   hash:string,
   hashedRt:string,
   email_verified: boolean,
+  isPreferenceSet: boolean,
+  isPackageBuilt: boolean,
+  isProfileUpdated: boolean,
+  hasPaid: boolean,
   acctstatus: string,
   ownerId: string,
   otpHash: string;

@@ -22,6 +22,8 @@ import logger from "../utils/logger.util";
 import { signJwt, verifyJwt } from "../utils/jwt.util";
 import { ILoggedInDto } from "../dto/ILoggedInDto";
 import { IResendOtpDto } from "../dto/IResendOtpDto";
+import { Occupation } from "../schemas/occupation.schema";
+import { ProductCategory } from "../schemas/product.schema";
 
 class AuthService {
 
@@ -371,6 +373,16 @@ class AuthService {
                 ''
             );
         return checkIfOnboarded;
+
+    }
+
+     getPreferences = async () => {
+
+        //const hash = await argon.hash(dto.password);
+        const occupations = await Occupation.find({ is_active: true });
+        const product_categories = await ProductCategory.find({is_active: true});
+        
+        return {occupations: occupations, categories: product_categories};
 
     }
 

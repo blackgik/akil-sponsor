@@ -11,6 +11,9 @@ export interface IAccountCreateDto {
     password: string,
     hash: string,
     hashedRt: string,
+    isPreferenceSet: boolean,
+    isPackageBuilt: boolean,
+    isProfileUpdated: boolean,
     email_verified: boolean,
     acctstatus: string,
     roleId: string

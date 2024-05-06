@@ -69,6 +69,18 @@ const SponsorSchema = new Schema({
     required: true,
     default: false
   },
+  isPreferenceSet: { 
+    type: Boolean, 
+    default: false 
+  },
+  isPackageBuilt: { 
+    type: Boolean, 
+    default: false 
+  },
+  isProfileUpdated: { 
+    type: Boolean, 
+    default: false 
+  },
   isApproved: { 
     type: Boolean, 
     default: false 

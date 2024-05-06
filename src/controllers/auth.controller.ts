@@ -76,6 +76,12 @@ class AuthController implements Controller {
             this.resendOtp,
         )
 
+        this.router.get(
+            `${this.path}${ConstantAPI.SPONSOR_GET_PREFERENCES}`,
+            //validationMiddleware(this.validate.getOtp),
+            this.listPreferences,
+        )
+
         this.router.post(
             `${this.path}${ConstantAPI.SPONSOR_MAIL_VERIFY}`,
             //validationMiddleware(this.validate.verifyMail),
@@ -135,6 +141,33 @@ class AuthController implements Controller {
                 },
                 msg: ConstantMessage.SPONSOR_CREATE_SUCCESS,
                 data: verifData,
+            })
+        } catch (err: any) {
+            next(
+                new HttpException(
+                    ConstantHttpCode.INTERNAL_SERVER_ERROR,
+                    ConstantHttpReason.INTERNAL_SERVER_ERROR,
+                    err?.message,
+                ),
+            )
+        }
+    }
+
+    private listPreferences = async (
+        req: Request,
+        res: Response,
+        next: NextFunction,
+    ): Promise<Response | void> => {
+        try {
+            const preferences = await this.authService.getPreferences();
+
+            return res.status(ConstantHttpCode.OK).json({
+                status: {
+                    code: ConstantHttpCode.OK,
+                    msg: 'List of preferences',
+                },
+                msg: 'List of preferences',
+                data: preferences,
             })
         } catch (err: any) {
             next(

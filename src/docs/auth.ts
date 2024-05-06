@@ -72,6 +72,57 @@ const sponsorOnbordingResponse = {
     },
 };
 
+const preferenceResponse = {
+    occupations: [
+        {
+            occupation_id: {
+                type: 'string',
+                example: '60564fcb542017cdc3844818',
+            },
+            occupation_name: {
+                type: 'string',
+                example: 'Administrateur',
+            },
+            occupation_code: {
+                type: 'string',
+                example: 'ADMIN',
+            },
+            occupation_slug: {
+                type: 'string',
+                example: 'administrateur',
+            },
+            occupation_description: {
+                type: 'string',
+                example: 'this occupation gives you access to...',
+            },
+        }
+    ],
+    categories: [
+        {
+            product_category_id: {
+                type: 'string',
+                example: '60564fcb542017cdc3844818',
+            },
+            product_category_name: {
+                type: 'string',
+                example: 'Administrateur',
+            },
+            product_category_slug: {
+                type: 'string',
+                example: 'administrateur',
+            },
+            parent_category_id: {
+                type: 'string',
+                example: '60564fcb542017cdc3844818',
+            },
+            product_category_description: {
+                type: 'string',
+                example: 'this product_category gives you access to...',
+            },
+        }
+    ]
+};
+
 const internalServerError = {
     description: 'Internal Server Error',
     content: {
@@ -274,6 +325,34 @@ const login = {
     },
 };
 
+const listePreferences = {
+    tags: ['Authentication'],
+    description: 'Retrieve all the preferences',
+    operationId: 'listePreferences',
+    security: [
+        {
+            bearerAuth: [],
+        },
+    ],
+    responses: {
+        '200': {
+            description: 'preferences retrieved successfully!',
+            content: {
+                'application/json': {
+                    schema: {
+                        type: 'array',
+                        items: {
+                            type: 'object',
+                            properties: preferenceResponse,
+                        },
+                    },
+                },
+            },
+        },
+        '500': internalServerError,
+    },
+};
+
 
 const verifyOtp = {
     tags: ['Authentication'],
@@ -455,4 +534,4 @@ const onboardSponsor = {
 };
 
 
-export { login, loginBody, verifyOtp,resendOtp,forgotPwd, resetPwd, verifyOtpBody, onboardSponsor, onboardSponsorBody };
+export { login, loginBody, listePreferences, verifyOtp, resendOtp, forgotPwd, resetPwd, verifyOtpBody, onboardSponsor, onboardSponsorBody };

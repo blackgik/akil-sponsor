@@ -9,7 +9,7 @@ import { createSponsor, deleteSponsor, getSponsor, getSponsors, updateSponsor } 
 import ConstantAPI from '../constants/api.constant'
 import customConfig from "../config/default";
 
-import { forgotPwd, login, loginBody, onboardSponsor, onboardSponsorBody, resendOtp, resetPwd, verifyOtp, verifyOtpBody } from './auth';
+import { forgotPwd, listePreferences, login, loginBody, onboardSponsor, onboardSponsorBody, resendOtp, resetPwd, verifyOtp, verifyOtpBody } from './auth';
 
 const apiDocumentation = {
   openapi: '3.0.1',
@@ -168,6 +168,9 @@ const apiDocumentation = {
     },
     'sponsors/reset-pwd': {
       post: resetPwd,
+    },
+    'sponsors/list-preferences': {
+      get: listePreferences,
     },
     'sponsors/delete/{id}': {
       delete: deleteSponsor,

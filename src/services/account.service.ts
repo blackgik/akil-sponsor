@@ -54,9 +54,9 @@ class AccountService {
 
     async signupLocal(dto: IAccountCreateDto): Promise<IAccountDocument> {
         const checkIfExist = await Account.findOne({ email: dto.email });
-            if (checkIfExist) throw new DuplicateError('Account already exists', 406);
+        if (checkIfExist) throw new DuplicateError('Account already exists', 406);
         const generatePassword = await codeGenerator(9, 'ABCDEFGHI&*$%#1234567890');
-        
+
         const hash = await argon.hash(dto.password);
         const newAccount = await Account.buildAccount({
             firstname: dto.firstname,
@@ -69,6 +69,10 @@ class AccountService {
             address: dto.address,
             dob: dto.dob,
             email_verified: false,
+            isPreferenceSet: false,
+            isPackageBuilt: false,
+            isProfileUpdated: false,
+            hasPaid: false,
             acctstatus: 'pending',
             hash: hash,
             hashedRt: '',
@@ -77,7 +81,7 @@ class AccountService {
             ownerId: '',
             roleId: dto.roleId
         })
-        
+
         const tokens = await this.signJwt(newAccount._id, newAccount.email);
         await this.updateRtHash(newAccount._id, tokens.refresh_token);
 
@@ -88,7 +92,7 @@ class AccountService {
         newAccount.otpHash = otpHash;
         //create email profile here
         const onboardingData = {
-            name: newAccount.firstname+' '+newAccount.lastname,
+            name: newAccount.firstname + ' ' + newAccount.lastname,
             code: otp
         };
         const mailData = {

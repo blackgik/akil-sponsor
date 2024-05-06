@@ -3,7 +3,7 @@ import ConstantNumber from '../constants/number.constant'
 import { IAccount, IAccountDocument, IAccountModel } from '../models/account.model';
 
 const AccountSchema = new Schema({
-  
+
   firstname: {
     type: String,
     required: true,
@@ -19,12 +19,16 @@ const AccountSchema = new Schema({
   state: { type: String, required: false, lowercase: true },
   country: { type: String, required: false, lowercase: true },
   address: { type: String, required: false },
-  hash:{ type: String, required: false },
-  otpHash:{ type: String, required: false },
-  otp:{ type: String, required: false },
-  hashedRt:{ type: String, required: false },
+  hash: { type: String, required: false },
+  otpHash: { type: String, required: false },
+  otp: { type: String, required: false },
+  hashedRt: { type: String, required: false },
   dob: { type: Date, required: false },
   email_verified: { type: Boolean, default: false },
+  isPreferenceSet: { type: Boolean, default: false },
+  isPackageBuilt: { type: Boolean, default: false },
+  isProfileUpdated: { type: Boolean, default: false },
+  hasPaid: { type: Boolean, default: false },
   acctstatus: { type: String, default: 'pending', enum: ['pending', 'active', 'suspended'] },
   roleId: {
     type: Types.ObjectId,
