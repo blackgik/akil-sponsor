@@ -15,7 +15,7 @@ class Message {
   public static readonly PHONE_EXIST: string = 'phone is exist'
   public static readonly USER_NOT_CREATE: string =
     'user is not create, please try again'
-  public static readonly USER_CREATE_SUCCESS: string ='user is create success, please login'
+  public static readonly USER_CREATE_SUCCESS: string = 'user is create success, please login'
   public static readonly USER_NOT_FOUND: string = 'user is not found'
   public static readonly PASSWORD_NOT_MATCH: string = 'password is not match'
   public static readonly USER_LOGIN_SUCCESS: string = 'user is login success'
@@ -51,48 +51,64 @@ class Message {
   //Product and categories
 
   public static readonly PRODUCT_NOT_UPDATED: string = 'Product not updated'
-  public static readonly PRODUCT_UPDATE_SUCCESS: string ='Product updated successfully'
+  public static readonly PRODUCT_UPDATE_SUCCESS: string = 'Product updated successfully'
   public static readonly CATEGORY_NOT_UPDATED: string = 'Category not updated'
   public static readonly CATEGORY_UPDATE_SUCCESS: string = 'Category updated successfully'
-  public static readonly PRODUCT_NOT_DELETED: string =    'Product not deleted, please try again'
-  public static readonly CATEGORY_NOT_DELETED: string =    'Category not deleted, please try again'
+  public static readonly PRODUCT_NOT_DELETED: string = 'Product not deleted, please try again'
+  public static readonly CATEGORY_NOT_DELETED: string = 'Category not deleted, please try again'
   public static readonly PRODUCT_DELETE_SUCCESS: string = 'Product deleted successfully'
   public static readonly CATEGORY_DELETE_SUCCESS: string = 'Category deleted successfully'
   public static readonly PRODUCT_FOUND: string = 'Product found'
   public static readonly CATEGORY_FOUND: string = 'Category  found'
-  public static readonly CATEGORY_CREATE_SUCCESS: string ='Category created successfully'
-  public static readonly PRODUCT_CREATE_SUCCESS: string ='Product created successfully'
+  public static readonly CATEGORY_CREATE_SUCCESS: string = 'Category created successfully'
+  public static readonly PRODUCT_CREATE_SUCCESS: string = 'Product created successfully'
 
   //Occupation
   public static readonly OCCUPATION_NOT_UPDATED: string = 'Occupation not updated'
-  public static readonly OCCUPATION_UPDATE_SUCCESS: string ='Occupation updated successfully'
-  public static readonly OCCUPATION_NOT_DELETED: string =    'Occupation not deleted, please try again'
+  public static readonly OCCUPATION_UPDATE_SUCCESS: string = 'Occupation updated successfully'
+  public static readonly OCCUPATION_NOT_DELETED: string = 'Occupation not deleted, please try again'
   public static readonly OCCUPATION_DELETE_SUCCESS: string = 'Occupation deleted successfully'
   public static readonly OCCUPATION_FOUND: string = 'Occupation found'
-  public static readonly OCCUPATION_CREATE_SUCCESS: string ='Occupation created successfully'
+  public static readonly OCCUPATION_CREATE_SUCCESS: string = 'Occupation created successfully'
 
   //Role
   public static readonly ROLE_NOT_UPDATED: string = 'Role not updated'
-  public static readonly ROLE_UPDATE_SUCCESS: string ='Role updated successfully'
-  public static readonly ROLE_NOT_DELETED: string =    'Role not deleted, please try again'
+  public static readonly ROLE_UPDATE_SUCCESS: string = 'Role updated successfully'
+  public static readonly ROLE_NOT_DELETED: string = 'Role not deleted, please try again'
   public static readonly ROLE_DELETE_SUCCESS: string = 'Role deleted successfully'
   public static readonly ROLE_FOUND: string = 'Role found'
-  public static readonly ROLE_CREATE_SUCCESS: string ='Role created successfully'
+  public static readonly ROLE_CREATE_SUCCESS: string = 'Role created successfully'
 
   //Partner
   public static readonly PARTNER_NOT_UPDATED: string = 'Partner not updated'
-  public static readonly PARTNER_UPDATE_SUCCESS: string ='Partner updated successfully'
-  public static readonly PARTNER_NOT_DELETED: string =    'Partner not deleted, please try again'
+  public static readonly PARTNER_UPDATE_SUCCESS: string = 'Partner updated successfully'
+  public static readonly PARTNER_NOT_DELETED: string = 'Partner not deleted, please try again'
   public static readonly PARTNER_DELETE_SUCCESS: string = 'Partner deleted successfully'
   public static readonly PARTNER_FOUND: string = 'Partner found'
-  public static readonly PARTNER_CREATE_SUCCESS: string ='Partner created successfully'
+  public static readonly PARTNER_CREATE_SUCCESS: string = 'Partner created successfully'
+
+  //beneficiaries
+  public static readonly BENEFICIARY_NOT_UPDATED: string = 'Beneficiary not updated'
+  public static readonly BENEFICIARY_UPDATE_SUCCESS: string = 'Beneficiary updated successfully'
+  public static readonly BENEFICIARY_NOT_DELETED: string = 'Beneficiary not deleted, please try again'
+  public static readonly BENEFICIARY_DELETE_SUCCESS: string = 'Beneficiary deleted successfully'
+  public static readonly BENEFICIARY_FOUND: string = 'Beneficiary found'
+  public static readonly BENEFICIARY_CREATE_SUCCESS: string = 'Beneficiary created successfully'
+
+  //beneficiaries
+  public static readonly PROJECT_NOT_UPDATED: string = 'Project not updated'
+  public static readonly PROJECT_UPDATE_SUCCESS: string = 'Project updated successfully'
+  public static readonly PROJECT_NOT_DELETED: string = 'Project not deleted, please try again'
+  public static readonly PROJECT_DELETE_SUCCESS: string = 'Project deleted successfully'
+  public static readonly PROJECT_FOUND: string = 'Project found'
+  public static readonly PROJECT_CREATE_SUCCESS: string = 'Project created successfully'
 
   //Sponsor
   public static readonly SPONSOR_NOT_UPDATED: string = 'Sponsor not updated'
-  public static readonly SPONSOR_UPDATE_SUCCESS: string ='Sponsor updated successfully'
-  public static readonly SPONSOR_NOT_DELETED: string =    'Sponsor not deleted, please try again'
+  public static readonly SPONSOR_UPDATE_SUCCESS: string = 'Sponsor updated successfully'
+  public static readonly SPONSOR_NOT_DELETED: string = 'Sponsor not deleted, please try again'
   public static readonly SPONSOR_DELETE_SUCCESS: string = 'Sponsor deleted successfully'
   public static readonly SPONSOR_FOUND: string = 'Sponsor found'
-  public static readonly SPONSOR_CREATE_SUCCESS: string ='Sponsor created successfully'
+  public static readonly SPONSOR_CREATE_SUCCESS: string = 'Sponsor created successfully'
 }
 export default Message

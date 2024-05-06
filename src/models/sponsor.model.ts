@@ -11,7 +11,10 @@ export interface ISponsor {
     address: string,
     password: string,
     dob: string,
-    
+    modules: string,
+    requested_modules: string,
+    total_number_of_members_chosen: number,
+    total_number_of_members_created: number,
     acctstatus: string,
     otpHash: string,
     kyc_status: string,

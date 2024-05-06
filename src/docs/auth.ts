@@ -534,4 +534,4 @@ const onboardSponsor = {
 };
 
 
-export { login, loginBody, listePreferences, verifyOtp, resendOtp, forgotPwd, resetPwd, verifyOtpBody, onboardSponsor, onboardSponsorBody };
+export { login, loginBody, listePreferences, verifyOtp, resendOtp, sendOtpBody, forgotPwd, resetPwd, verifyOtpBody, onboardSponsor, onboardSponsorBody };

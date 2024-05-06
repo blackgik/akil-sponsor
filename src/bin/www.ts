@@ -11,6 +11,7 @@ import Variable from '../env/variable.env'
 import logger from '../utils/logger.util'
 
 // controllers
+import BeneficiaryController from '../controllers/beneficiary.controller'
 import PartnerController from '../controllers/partner.controller'
 import SponsorController from '../controllers/sponsor.controller'
 import AuthController from '../controllers/auth.controller'
@@ -22,7 +23,7 @@ import RoleController from '../controllers/role.controller'
 import ProjectController from '../controllers/project.controller'
 import AccountController from '../controllers/account.controller'
 
-const { app } = new App([new PartnerController(),
+const { app } = new App([new BeneficiaryController(), new PartnerController(),
 new SponsorController(),
 new AuthController(),
 new OccupationController(),

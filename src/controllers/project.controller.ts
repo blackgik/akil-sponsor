@@ -33,7 +33,7 @@ class ProjectController implements Controller {
     private validate: Validate
 
     constructor() {
-        this.path = ConstantAPI.PARTNERS
+        this.path = ConstantAPI.PROJECTS
         this.router = Router()
         this.projectService = new ProjectService()
         this.authenticated = new Authenticated()
@@ -44,33 +44,33 @@ class ProjectController implements Controller {
 
     private initialiseRoutes(): void {
         this.router.post(
-            `${this.path}${ConstantAPI.PRODUCT_CREATE}`,
+            `${this.path}${ConstantAPI.PROJECT_CREATE}`,
             this.authenticated.verifyTokenAndAuthorization,
             validationMiddleware(this.validate.createProject),
             this.createProject,
         )
 
         this.router.put(
-            `${this.path}${ConstantAPI.PRODUCT_UPDATE}`,
+            `${this.path}${ConstantAPI.PROJECT_UPDATE}`,
             this.authenticated.verifyTokenAndAuthorization,
             validationMiddleware(this.validate.updateProject),
             this.updateProject,
         )
 
         this.router.get(
-            `${this.path}${ConstantAPI.PRODUCT_GET}`,
+            `${this.path}${ConstantAPI.PROJECT_GET}`,
             this.authenticated.verifyTokenAndAuthorization,
             this.getProject,
         )
 
         this.router.get(
-            `${this.path}${ConstantAPI.PRODUCT_GET_ALL}`,
+            `${this.path}${ConstantAPI.PROJECT_GET_ALL}`,
             this.authenticated.verifyTokenAndAuthorization,
             this.listProject,
         )
 
         this.router.get(
-            `${this.path}${ConstantAPI.PRODUCT_DELETE}`,
+            `${this.path}${ConstantAPI.PROJECT_DELETE}`,
             this.authenticated.verifyTokenAndAuthorization,
             this.deleteProject,
         )
@@ -91,7 +91,7 @@ class ProjectController implements Controller {
                     code: ConstantHttpCode.OK,
                     msg: ConstantHttpReason.OK,
                 },
-                msg: ConstantMessage.PRODUCT_CREATE_SUCCESS,
+                msg: ConstantMessage.PROJECT_CREATE_SUCCESS,
                 data: saved_project,
             })
         } catch (err: any) {
@@ -117,7 +117,7 @@ class ProjectController implements Controller {
                     code: ConstantHttpCode.OK,
                     msg: ConstantHttpReason.OK,
                 },
-                msg: ConstantMessage.PRODUCT_FOUND,
+                msg: ConstantMessage.PROJECT_FOUND,
                 data: projects,
             })
         } catch (err: any) {
@@ -144,7 +144,7 @@ class ProjectController implements Controller {
                     code: ConstantHttpCode.OK,
                     msg: ConstantHttpReason.OK,
                 },
-                msg: ConstantMessage.PRODUCT_FOUND,
+                msg: ConstantMessage.PROJECT_FOUND,
                 data: project,
             })
         } catch (err: any) {
@@ -173,7 +173,7 @@ class ProjectController implements Controller {
                     code: ConstantHttpCode.OK,
                     msg: ConstantHttpReason.OK,
                 },
-                msg: ConstantMessage.PRODUCT_UPDATE_SUCCESS,
+                msg: ConstantMessage.PROJECT_UPDATE_SUCCESS,
                 data: updated_project,
             })
         } catch (err: any) {
@@ -201,7 +201,7 @@ class ProjectController implements Controller {
                     code: ConstantHttpCode.OK,
                     msg: ConstantHttpReason.OK,
                 },
-                msg: ConstantMessage.PRODUCT_DELETE_SUCCESS,
+                msg: ConstantMessage.PROJECT_DELETE_SUCCESS,
                 data: deleted_project,
             })
         } catch (err: any) {

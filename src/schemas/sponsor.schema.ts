@@ -24,6 +24,10 @@ const SponsorSchema = new Schema({
   password: { type: String, required: true },
   dob: { type: Date, required: false },
   email_verified: { type: Boolean, default: false },
+  modules: Array,
+  requested_modules: Array,
+  total_number_of_members_chosen: { type: Number, default: 0 },
+  total_number_of_members_created: { type: Number, default: 0 },
   otpHash: { type: String, required: false },
   acctstatus: { type: String, default: 'pending', enum: ['pending', 'active', 'suspended'] },
   kyc_status: {

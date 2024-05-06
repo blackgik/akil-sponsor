@@ -12,6 +12,8 @@ class Api {
   public static readonly USERS: string = '/users'
   public static readonly PRODUCTS: string = '/products'
   public static readonly PRODUCT_CATEGORIES: string = '/product_categories'
+  public static readonly BENEFICIARIES: string = '/beneficiaries'
+  public static readonly PROJECTS: string = '/projects'
 
   // partner-uth
   public static readonly PARTNER_AUTH_ONBOARDING: string = '/onboarding'
@@ -19,7 +21,7 @@ class Api {
   public static readonly PARTNER_AUTH_FORGOT: string = '/forgot-pwd'
   public static readonly PARTNER_AUTH_RESET: string = '/reset-pwd'
   public static readonly GET_OTP: string = '/resend-otp'
-  
+
   // sponsor-auth
   public static readonly SPONSOR_AUTH_ONBOARDING: string = '/onboarding'
   public static readonly SPONSOR_AUTH_LOGIN: string = '/login'
@@ -76,6 +78,23 @@ class Api {
   public static readonly PRODUCT_GET_BY_PARTNER: string = '/sponsor/:sponsor_id'
   public static readonly PRODUCT_GET_ALL_STATS: string = '/stats'
 
+  // beneficiaries
+  public static readonly BENEFICIARY_UPDATE: string = '/:beneficiary_id'
+  public static readonly BENEFICIARY_CREATE: string = ''
+  public static readonly BENEFICIARY_DELETE: string = '/delete/:beneficiary_id'
+  public static readonly BENEFICIARY_GET: string = '/find/:beneficiary_id'
+  public static readonly BENEFICIARY_GET_ALL: string = ''
+  public static readonly BENEFICIARY_GET_BY_SPONSOR: string = '/sponsor/:sponsor_id'
+  public static readonly BENEFICIARY_GET_ALL_STATS: string = '/stats'
+
+  // beneficiaries
+  public static readonly PROJECT_UPDATE: string = '/:project_id'
+  public static readonly PROJECT_CREATE: string = ''
+  public static readonly PROJECT_DELETE: string = '/delete/:project_id'
+  public static readonly PROJECT_GET: string = '/find/:project_id'
+  public static readonly PROJECT_GET_ALL: string = ''
+  public static readonly PROJECT_GET_BY_SPONSOR: string = '/sponsor/:sponsor_id'
+  public static readonly PROJECT_GET_ALL_STATS: string = '/stats'
   // users
   public static readonly USER_UPDATE: string = '/:user_id'
   public static readonly USER_CREATE: string = ''

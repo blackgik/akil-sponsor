@@ -10,6 +10,7 @@ import ConstantAPI from '../constants/api.constant'
 import customConfig from "../config/default";
 
 import { forgotPwd, listePreferences, login, loginBody, onboardSponsor, onboardSponsorBody, resendOtp, resetPwd, verifyOtp, verifyOtpBody } from './auth';
+import { createBeneficiary, createBeneficiaryBody, deleteBeneficiary, getBeneficiaries, getBeneficiariesBySponsor, getBeneficiary, updateBeneficiary, updateBeneficiaryBody } from './beneficiaries';
 
 const apiDocumentation = {
   openapi: '3.0.1',
@@ -181,6 +182,22 @@ const apiDocumentation = {
     'sponsors/{id}': {
       patch: updateSponsor,
     },
+    beneficiaries: {
+      post: createBeneficiary,
+      get: getBeneficiaries,
+    },
+    'beneficiaries/delete/{id}': {
+      delete: deleteBeneficiary,
+    },
+    'beneficiaries/find/{id}': {
+      get: getBeneficiary,
+    },
+    'beneficiaries/sponsor/{id}': {
+      get: getBeneficiariesBySponsor,
+    },
+    'beneficiaries/{id}': {
+      patch: updateBeneficiary,
+    },
   },
   components: {
     securitySchemes: {
@@ -194,6 +211,8 @@ const apiDocumentation = {
       onboardSponsorBody,
       loginBody,
       createUserBody,
+      createBeneficiaryBody,
+      updateBeneficiaryBody,
       updateUserBody,
       verifyOtpBody,
       createOrUpdateRoleBody,

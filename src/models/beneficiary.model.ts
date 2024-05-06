@@ -4,6 +4,7 @@ export interface IBeneficiary {
   firstname: string,
   lastname: string,
   othername: string,
+  sponsor_id: Types.ObjectId,
   avatar: string,
   email: string,
   phone: string,
