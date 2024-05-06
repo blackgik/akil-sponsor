@@ -27,8 +27,9 @@ import logger from '../utils/logger.util'
 import { ISponsor, ISponsorDocument } from '../models/sponsor.model';
 import { Types } from 'mongoose'
 import { IAccount, IAccountDocument } from '../models/account.model'
-import { IAuthDto } from 'dto/IAuthDto'
+import { IAuthDto } from '../dto/IAuthDto'
 import { Tokens } from 'types'
+import { IResendOtpDto } from '../dto/IResendOtpDto'
 
 
 class AuthController implements Controller {
@@ -214,7 +215,7 @@ class AuthController implements Controller {
         next: NextFunction,
     ): Promise<Response | void> => {
         try {
-            const otpData = req.body
+            const otpData: IResendOtpDto = req.body
             const verifData = await this.authService.resendOtp(otpData);
 
             return res.status(ConstantHttpCode.OK).json({

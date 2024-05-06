@@ -9,7 +9,7 @@ import { createSponsor, deleteSponsor, getSponsor, getSponsors, updateSponsor } 
 import ConstantAPI from '../constants/api.constant'
 import customConfig from "../config/default";
 
-import { forgotPwd, listePreferences, login, loginBody, onboardSponsor, onboardSponsorBody, resendOtp, resetPwd, verifyOtp, verifyOtpBody } from './auth';
+import { forgotPwd, listePreferences, login, loginBody, onboardSponsor, onboardSponsorBody, resendOtp, resetPwd, sendOtpBody, verifyOtp, verifyOtpBody } from './auth';
 import { createBeneficiary, createBeneficiaryBody, deleteBeneficiary, getBeneficiaries, getBeneficiariesBySponsor, getBeneficiary, updateBeneficiary, updateBeneficiaryBody } from './beneficiaries';
 
 const apiDocumentation = {
@@ -215,6 +215,7 @@ const apiDocumentation = {
       updateBeneficiaryBody,
       updateUserBody,
       verifyOtpBody,
+      sendOtpBody,
       createOrUpdateRoleBody,
       createOrUpdateOccupationBody,
       createOrUpdateProduct_categoryBody,

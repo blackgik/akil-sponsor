@@ -23,10 +23,13 @@ const otpResponse = {
 };
 
 const sendOtpBody = {
-    emal: {
-        type: 'string',
-        example: 'test@gmail.com',
-    }
+    type: 'object',
+    properties: {
+        email: {
+            type: 'string',
+            example: 'test@gmail.com',
+        },
+    },
 };
 
 const sponsorOnbordingResponse = {

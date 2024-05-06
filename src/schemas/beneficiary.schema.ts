@@ -37,7 +37,7 @@ BeneficiarySchema.statics.deleteBeneficiary=async(beneficiary_id: Types.ObjectId
   return await Beneficiary.findByIdAndDelete(beneficiary_id);
 }
 
-const Beneficiary = model<IBeneficiaryDocument, IBeneficiaryModel>('beneficiarys',BeneficiarySchema);
+const Beneficiary = model<IBeneficiaryDocument, IBeneficiaryModel>('beneficiaries',BeneficiarySchema);
 
 
 export {

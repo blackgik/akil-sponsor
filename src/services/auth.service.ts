@@ -160,6 +160,10 @@ class AuthService {
             country: user.country,
             address: user.address,
             email_verified: user.email_verified,
+            hasPaid: user.hasPaid,
+            isPackageBuilt: user.isPackageBuilt,
+            isPreferenceSet: user.isPreferenceSet,
+            isProfileUpdated: user.isProfileUpdated,
             acctstatus: user.acctstatus,
             ownerId: user.ownerId,
             role: userRole!.role_code

@@ -1081,7 +1081,7 @@ import {
     };
   };
   
-  export const memberBulkUpload = (data: { name_of_cooperation: string; number_uploaded: any; date: any; email: any; password: any; sponsor_code: any; }) => {
+  export const memberBulkUpload = (data: { name_of_sponsor: string; number_uploaded: any; date: any; email: any; }) => {
     return {
       html: `
       <!DOCTYPE HTML
@@ -1328,7 +1328,7 @@ import {
                                                                                           style="line-height: 21px;">Dear
                                                                                       </span></strong></span><strong><span
                                                                                       style="line-height: 21px;"><span
-                                                                                          style="color: #CB6015; line-height: 21px;">${data.name_of_cooperation.toUpperCase()}</span></span></strong></span>
+                                                                                          style="color: #CB6015; line-height: 21px;">${data.name_of_sponsor.toUpperCase()}</span></span></strong></span>
   
                                                                       </p>
                                                                   </div>
@@ -1591,8 +1591,6 @@ import {
     \n
     Name of Coopoeration</strong>: AKILAAH\n
     email: ${data.email}\n
-    password:${data.password}\n
-    company Unique Code:${data.sponsor_code}\n
     Login url: https://organization.akilaah.com \n\n
     NB: You Company Unique code should be share to members `
     };
