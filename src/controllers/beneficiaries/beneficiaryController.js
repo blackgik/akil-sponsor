@@ -1,0 +1,98 @@
+import appResponse from '../../../lib/appResponse.js';
+import {
+  editBeneficiaryProfile,
+  fetchBeneficiariesByStatus,
+  fileFormatter,
+  getBankList,
+  getInstitutionsInOrg,
+  pdfBuilder,
+  updateBeneficiaryStatus,
+  updateMemeberBatchListStatus,
+  viewBeneficiaryProfile,
+  viewBeneficiariesDashboardStats,
+  viewBeneficiariesUploadedList
+} from '../../services/beneficiaryServices/beneficiaryService.js';
+
+export const fetchedUploadedFilesHandler = async (req, res) => {
+  const formatFile = await fileFormatter(req.files);
+
+  res.send(appResponse('uploaded to cloud storage sucessfully', formatFile));
+};
+
+export const fetchBeneficiariesByStatusHandler = async (req, res) => {
+  const { user } = req;
+  const params = req.query;
+
+  const beneficiaries = await fetchBeneficiariesByStatus({ user, params });
+
+  res.send(appResponse('fetched organization beneficiaries successfully', beneficiaries));
+};
+
+export const updateBeneficiaryStatusHandler = async (req, res) => {
+  const { user, body } = req;
+  const { beneficiary_id } = req.params;
+
+  const { status, note } = body;
+
+  const updatedBeneficiary = await updateBeneficiaryStatus({ user, status, beneficiary_id, note });
+
+  res.send(appResponse(`updated organization beneficiary successfully`, updatedBeneficiary));
+};
+
+export const viewBeneficiaryProfileHandler = async (req, res) => {
+  const { beneficiary_id } = req.params;
+
+  const beneficiary = await viewBeneficiaryProfile({ beneficiary_id });
+
+  res.send(appResponse(`Viewing organization beneficiary successfully`, beneficiary));
+};
+
+export const editBeneficiaryProfileHandler = async (req, res) => {
+  const { beneficiary_id } = req.params;
+  const { body, user } = req;
+
+  const updatedUser = await editBeneficiaryProfile({ user, beneficiary_id, body });
+
+  res.send(appResponse(`Edited organization beneficiary Profile successfully`, updatedUser));
+};
+
+export const beneficiaryDashboardStatsHandler = async (req, res) => {
+  const { user } = req;
+
+  const stats = await viewBeneficiariesDashboardStats({ user });
+
+  res.send(appResponse(`fetched dashboard stats successfully`, stats));
+};
+
+export const beneficiaryUploadedListHandler = async (req, res) => {
+  const { user, query } = req;
+  const params = query;
+
+  const beneficiaryBatchList = await viewBeneficiariesUploadedList({ user, params });
+
+  res.send(appResponse('fetched beneficiaries uploaded list successfully', beneficiaryBatchList));
+};
+
+export const beneficiaryUpdateBatchListHandler = async (req, res) => {
+  const { user, body, query } = req;
+  const { beneficiary_batch_id } = query;
+
+  const updatedList = await updateMemeberBatchListStatus({ beneficiary_batch_id, body, user });
+
+  res.send(appResponse('Updated beneficiaries uploaded list successfully', updatedList));
+};
+
+
+export const beneficiaryBankListHandler = async (req, res) => {
+  const banks = await getBankList();
+
+  res.send(appResponse('listed banks Successfully', banks));
+};
+
+export const pdfBuilderHandler = async (req, res) => {
+  const { body } = req;
+
+  const pdfResponse = await pdfBuilder({ body, res }, (filer, doc) => {
+    // res.send(filer);
+  });
+};
