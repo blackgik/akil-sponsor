@@ -7,28 +7,29 @@ export const validateOnboardingOrganizationSchema = Joi.object({
   email: Joi.string().email().required(),
   address: Joi.string().optional().allow('', null),
   admin_name: Joi.string().optional().allow('', null),
-  phone: Joi.string().optional().allow('', null),
+  phone: Joi.string().optional().required(),
   website: Joi.string().optional().allow('', null),
   modules: Joi.array().items(Joi.string().optional().allow('', null)),
-  total_number_of_beneficiarys_chosen: Joi.number().required(),
+  total_number_of_beneficiaries_chosen: Joi.number().optional().default(0),
   reg_fee: Joi.number().optional().allow(0, null),
   slug: Joi.string().required(),
   bank_details: Joi.object({
     bvn: Joi.string().optional().allow('', null),
-    bank_name: Joi.string().required(),
-    acct_no: Joi.string().required(),
-    acct_name: Joi.string().required(),
-    bank_code: Joi.string().required()
-  }).required(),
+    bank_name: Joi.string().optional().allow('', null),
+    acct_no: Joi.string().optional().allow('', null),
+    acct_name: Joi.string().optional().allow('', null),
+    bank_code: Joi.string().optional().allow('', null)
+  }).optional(),
   credit_balance: Joi.number().optional().allow(0, null),
   deduction_uploads: Joi.number().optional().allow(0, null),
   agent_referral_code: Joi.string().optional().allow('', null),
   tosAgreement: Joi.boolean().required(),
-  organization_reg_fee: Joi.number().required(),
+  pdsAgreement: Joi.boolean().required(),
+  organization_reg_fee: Joi.number().optional().allow(0, null),
   payment_plan: Joi.string()
-    .required()
-    .valid('basic', 'standard', 'premium', 'ultimate', 'third_party_api'),
-  annual_plan: Joi.boolean().required()
+    .optional()
+    .valid('basic', 'standard', 'premium', 'ultimate', 'third_party_api').default('basic'),
+  annual_plan: Joi.boolean().optional().default(false)
 });
 
 export const updateOrganizationProfileSchema = Joi.object({
@@ -43,11 +44,12 @@ export const updateOrganizationProfileSchema = Joi.object({
   organization_reg_fee: Joi.number().optional().allow(0, null),
   reg_fee: Joi.number().optional(),
   bank_details: Joi.object({
-    bank_name: Joi.string().required(),
-    acct_no: Joi.string().required(),
-    acct_name: Joi.string().required(),
-    bank_code: Joi.string().required()
-  }).optional()
+    bvn: Joi.string().optional().allow('', null),
+    bank_name: Joi.string().optional().allow('', null),
+    acct_no: Joi.string().optional().allow('', null),
+    acct_name: Joi.string().optional().allow('', null),
+    bank_code: Joi.string().optional().allow('', null)
+  }).optional(),
 });
 
 export const validateLoginOrganizationSchema = Joi.object({
@@ -55,145 +57,32 @@ export const validateLoginOrganizationSchema = Joi.object({
   password: Joi.string().optional().allow('', null).min(6)
 });
 
-export const validateOrganizationMemberSchema = Joi.object({
+export const validateOrganizationBeneficiarySchema = Joi.object({
   avatar: Joi.object({
     key: Joi.string().optional().allow('', null)
   }),
-  institution: Joi.string().required(),
-  personal: Joi.object({
-    beneficiary_name: Joi.string().required(),
-    gender: Joi.string().required(),
-    marital_status: Joi.string().required(),
-    nationality: Joi.string().required(),
-    language: Joi.string().required(),
-    state_of_origin: Joi.string().required(),
-    lga: Joi.string().required()
-  }),
-  contact: Joi.object({
-    country_of_residence: Joi.string().required(),
-    state: Joi.string().required(),
-    phone: Joi.string().required(),
-    email: Joi.string().required(),
-    city: Joi.string().required(),
-    resident_address: Joi.string().required()
-  }),
-  documents: Joi.object({
-    id_card: Joi.string().optional().allow('', null),
-    id_number: Joi.string().optional().allow('', null),
-    issued_date: Joi.date().optional(),
-    expiry_date: Joi.date().optional(),
-    nin: Joi.string().optional().allow('', null),
-    highest_level_education: Joi.string().optional().allow('', null),
-    agent: Joi.string().optional().allow('', null)
-  }),
-  employment_info: Joi.object({
-    place_of_employment: Joi.string().optional().allow('', null),
-    country_of_employment: Joi.string().optional().allow('', null),
-    state_of_employment: Joi.string().optional().allow('', null),
-    employment_address: Joi.string().optional().allow('', null),
-    city: Joi.string().optional().allow('', null),
-    employment_status: Joi.string().optional().allow('', null),
-    start_date: Joi.date().optional(),
-    department: Joi.string().optional().allow('', null),
-    monthly_net_salary: Joi.string().optional().allow('', null),
-    position: Joi.string().optional().allow('', null)
-  }),
-  next_of_kin: Joi.array()
-    .items(
-      Joi.object({
-        relationship: Joi.string().optional().allow('', null),
-        gender: Joi.string().optional().allow('', null),
-        phone: Joi.string().optional().allow('', null),
-        name: Joi.string().optional().allow('', null),
-        email: Joi.string().optional().allow('', null),
-        address: Joi.string().optional().allow('', null)
-      })
-    )
-    .optional(),
-  bank_details: Joi.object({
-    bank: Joi.object({
-      bvn: Joi.string().optional().allow('', null),
-      bank_name: Joi.string().optional().allow('', null),
-      acct_name: Joi.string().optional().allow('', null),
-      acct_number: Joi.string().optional().allow('', null),
-      bank_code: Joi.string().optional().allow('', null)
-    }).optional(),
-    card: Joi.object({
-      card_name: Joi.string().optional().allow('', null),
-      card_number: Joi.string().optional().allow('', null),
-      date: Joi.string().optional().allow('', null)
-    })
-  }).optional()
+  firstname: Joi.string().required(),
+  lastname: Joi.string().required(),
+  othername: Joi.string().optional().allow('', null),
+  phone: Joi.string().required(),
+  email: Joi.string().required(),
+  address: Joi.string().optional().allow('', null),
+  gender: Joi.string().required(),
+  country: Joi.string().optional().allow('', null),
 });
 
-export const validateMemberUpdateSchema = Joi.object({
+export const validateBeneficiaryUpdateSchema = Joi.object({
   avatar: Joi.object({
     key: Joi.string().optional().allow('', null)
-  }).optional(),
-  institution: Joi.string().optional().allow('', null),
-  personal: Joi.object({
-    beneficiary_name: Joi.string().optional().allow('', null),
-    gender: Joi.string().optional().allow('', null),
-    marital_status: Joi.string().optional().allow('', null),
-    language: Joi.string().optional().allow('', null),
-    nationality: Joi.string().optional().allow('', null),
-    state_of_origin: Joi.string().optional().allow('', null),
-    lga: Joi.string().optional().allow('', null)
   }),
-  contact: Joi.object({
-    country_of_residence: Joi.string().optional().allow('', null),
-    state: Joi.string().optional().allow('', null),
-    phone: Joi.string().optional().allow('', null),
-    email: Joi.string().optional().allow('', null),
-    city: Joi.string().optional().allow('', null),
-    resident_address: Joi.string().optional().allow('', null)
-  }),
-  documents: Joi.object({
-    id_card: Joi.string().optional().allow('', null),
-    id_number: Joi.string().optional().allow('', null),
-    issued_date: Joi.date().optional(),
-    expiry_date: Joi.date().optional(),
-    nin: Joi.string().optional().allow('', null),
-    highest_level_education: Joi.string().optional().allow('', null),
-    agent: Joi.string().optional().allow('', null)
-  }),
-  employment_info: Joi.object({
-    place_of_employment: Joi.string().optional().allow('', null),
-    country_of_employment: Joi.string().optional().allow('', null),
-    state_of_employment: Joi.string().optional().allow('', null),
-    employment_address: Joi.string().optional().allow('', null),
-    city: Joi.string().optional().allow('', null),
-    employment_status: Joi.string().optional().allow('', null),
-    start_date: Joi.date().optional(),
-    department: Joi.string().optional().allow('', null),
-    monthly_net_salary: Joi.string().optional().allow('', null),
-    position: Joi.string().optional().allow('', null)
-  }),
-  next_of_kin: Joi.array()
-    .items(
-      Joi.object({
-        relationship: Joi.string().optional().allow('', null),
-        gender: Joi.string().optional().allow('', null),
-        phone: Joi.string().optional().allow('', null),
-        name: Joi.string().optional().allow('', null),
-        email: Joi.string().optional().allow('', null),
-        address: Joi.string().optional().allow('', null)
-      })
-    )
-    .optional(),
-  bank_details: Joi.object({
-    bank: Joi.object({
-      bank_name: Joi.string().optional().allow('', null),
-      bank_code: Joi.string().optional().allow('', null),
-      acct_name: Joi.string().optional().allow('', null),
-      acct_number: Joi.string().optional().allow('', null)
-    }).optional(),
-    card: Joi.object({
-      card_name: Joi.string().optional().allow('', null),
-      card_number: Joi.string().optional().allow('', null),
-      date: Joi.string().optional().allow('', null)
-    }).optional()
-  }).optional()
+  firstname: Joi.string().required(),
+  lastname: Joi.string().required(),
+  othername: Joi.string().optional().allow('', null),
+  phone: Joi.string().required(),
+  email: Joi.string().required(),
+  address: Joi.string().optional().allow('', null),
+  gender: Joi.string().required(),
+  country: Joi.string().optional().allow('', null),
 });
 
 export const validateResetPasswordSchema = Joi.object({
