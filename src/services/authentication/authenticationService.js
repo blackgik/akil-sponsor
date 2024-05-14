@@ -26,6 +26,10 @@ import { plans } from '../../config/modules.js';
 import notificationsModel from '../../models/settings/notificationsModel.js';
 import { encryptData } from '../../utils/vault.js';
 import { finance } from '../../config/general.js';
+import fs from "fs";
+
+const accessTokenPrivateKey = fs.readFileSync(path.join(__dirname, '../keys', 'accessTokenPrivateKey.key'), 'utf8')
+const accessTokenPublicKey = fs.readFileSync(path.join(__dirname, '../keys', 'accessTokenPublicKey.key.pub'), 'utf8')
 
 export const onboardNewOrganization = async ({ body, start_trial, dbConnection }) => {
   if (!body.tosAgreement) throw new BadRequestError(`Terms and conditions not met`);
@@ -276,7 +280,7 @@ export const loginOrganization = async (body) => {
 
   const encrypedDataString = await encryptData({
     data2encrypt: { ...admin, is_first_time },
-    pubKey: env.public_key
+    pubKey: accessTokenPublicKey
   });
 
   const tokenEncryption = jwt.sign({ _id: admin._id, email: admin.email }, env.jwt_key);

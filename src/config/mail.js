@@ -2406,7 +2406,7 @@ export const loanDisbuersmenttMail = (data) => {
                                                                 style="font-size: 18px; line-height: 150%; text-align: left; word-wrap: break-word;color:#002366;">
                                                                 <p style="font-size: 18px; line-height: 150%;"> We
                                                                     wanted to inform you that the loan request from
-                                                                    <strong>${data.firstname.toUpperCase()}</strong>
+                                                                    <strong>${data.beneficiary_name.toUpperCase()}</strong>
                                                                     has been approved and now requires
                                                                     disbursement. Please proceed with the disbursement
                                                                     process through the admin portal.
@@ -2443,7 +2443,7 @@ export const loanDisbuersmenttMail = (data) => {
                                                                                 ${data.product_name}
                                                                             </li>
                                                                             <li>Member Name:
-                                                                                ${data.firstname}
+                                                                                ${data.beneficiary_name}
                                                                             </li>
                                                                             <li>Loan Request ID: ${
                                                                                 data.request_id
@@ -3450,7 +3450,7 @@ export const beneficiaryApprovedStatusAgentUpdate = (data) => {
                                                                 style="font-size: 18px; line-height: 150%; text-align: left; word-wrap: break-word;color:#002366;">
                                                                 <p style="font-size: 18px; line-height: 150%;"></p>
                                                                 We are pleased to inform you that
-                                                                <strong>${data.firstname.toUpperCase()}</strong> a
+                                                                <strong>${data.beneficiary_name.toUpperCase()}</strong> a
                                                                 memeber of
                                                                 <strong>${data.name_of_cooperation.toUpperCase()}</strong>
                                                                 on Akilaah has been approved.
@@ -3487,7 +3487,7 @@ export const beneficiaryApprovedStatusAgentUpdate = (data) => {
                                                                         <ul
                                                                             style="font-size: 14px; line-height: 23.8px; color: #002366;">
                                                                             <li>Member Name:
-                                                                                ${data.firstname.toUpperCase()}
+                                                                                ${data.beneficiary_name.toUpperCase()}
                                                                             </li>
                                                                             <li>Email: ${
                                                                                 data.email
@@ -4000,7 +4000,7 @@ export const beneficiaryApprovedStatusOrgUpdate = (data) => {
                                                                         <ul
                                                                             style="font-size: 14px; line-height: 23.8px; color: #002366;">
                                                                             <li>Member Name:
-                                                                                ${data.firstname.toUpperCase()}
+                                                                                ${data.beneficiary_name.toUpperCase()}
                                                                             </li>
                                                                             <li>Member ID: ${
                                                                                 data.beneficiary_id
@@ -4458,7 +4458,7 @@ return {
                                                                                     style="line-height: 21px;">Dear
                                                                                 </span></strong></span><strong><span
                                                                                 style="line-height: 21px;"><span
-                                                                                    style="color: #CB6015; line-height: 21px;">${data.firstname.toUpperCase()}
+                                                                                    style="color: #CB6015; line-height: 21px;">${data.beneficiary_name.toUpperCase()}
                                                                                     </span></span></strong></span>
 
                                                                 </p>
@@ -4515,7 +4515,7 @@ return {
                                                                         <ul
                                                                             style="font-size: 14px; line-height: 23.8px; color: #002366;">
                                                                             <li>Member Name:
-                                                                                ${data.firstname.toUpperCase()}
+                                                                                ${data.beneficiary_name.toUpperCase()}
                                                                             </li>
                                                                             <li>Email: ${
                                                                                 data.email
@@ -4981,7 +4981,7 @@ export const declinedAcountMail = (data) => {
                                                                                     style="line-height: 21px;">Dear
                                                                                 </span></strong></span><strong><span
                                                                                 style="line-height: 21px;"><span
-                                                                                    style="color: #CB6015; line-height: 21px;">${data.firstname.toUpperCase()}
+                                                                                    style="color: #CB6015; line-height: 21px;">${data.beneficiary_name.toUpperCase()}
                                                                                 </span></span></strong></span>
 
                                                                 </p>
@@ -5479,7 +5479,7 @@ export const agentDeclinedAcountMail = (data) => {
                                                                 style="font-size: 18px; line-height: 150%; text-align: left; word-wrap: break-word;color:#002366;">
                                                                 <p style="font-size: 18px; line-height: 150%;"></p>
                                                                 We regret to inform you that your registration request
-                                                                for <strong>${data.firstname.toUpperCase()}</strong>
+                                                                for <strong>${data.beneficiary_name.toUpperCase()}</strong>
                                                                 on Akilaah has been reviewed and,
                                                                 unfortunately, has not been accepted at this time.
                                                                 <p>
@@ -7433,7 +7433,7 @@ export const newSavingsProductMail = (data) => {
 export const paymentReceiptMail = (data) => {
   return paymentReceiptHTML
     .replace('{{cooperative_name}}', data.cooperative_name)
-    .replace('{{name}}', data.firstname)
+    .replace('{{name}}', data.beneficiary_name)
     .replace('{{product_name}}', data.product_name)
     .replace('{{initial_amount}}', data.initial_amount)
     .replace('{{amount}}', data.amount)
@@ -7443,7 +7443,7 @@ export const paymentReceiptMail = (data) => {
 export const paymentWarningsMail = (data) => {
   return paymentWarningHTML
     .replace('{{cooperative_name}}', data.cooperative_name)
-    .replace('{{name}}', data.firstname)
+    .replace('{{name}}', data.beneficiary_name)
     .replace('{{product_name}}', data.product_name)
     .replace('{{initial_amount}}', data.initial_amount)
     .replace('{{amount}}', data.amount)
@@ -7453,7 +7453,7 @@ export const paymentWarningsMail = (data) => {
 export const directDebitInitiationMail = (data) => {
   return directDebitWarningsHTML
     .replace('{{cooperative_name}}', data.cooperative_name)
-    .replace('{{name}}', data.firstname)
+    .replace('{{name}}', data.beneficiary_name)
     .replace('{{product_name}}', data.product_name)
     .replace('{{initial_amount}}', data.initial_amount)
     .replace('{{amount}}', data.amount)
@@ -7463,7 +7463,7 @@ export const directDebitInitiationMail = (data) => {
 export const withrawalMail = (data) => {
   return withdrawalReceiptHTML
     .replace('{{cooperative_name}}', data.cooperative_name)
-    .replace('{{name}}', data.firstname)
+    .replace('{{name}}', data.beneficiary_name)
     .replace('{{product_name}}', data.product_name)
     .replace('{{initial_amount}}', data.initial_amount)
     .replace('{{amount}}', data.amount)
@@ -7474,7 +7474,7 @@ export const beneficiaryOnboardingMail = (data) => {
   return beneficiaryOnboardingHTML
     .replace('{{name}}', data.cooperative_name)
     .replace('{{cooperative_name}}', data.cooperative_name)
-    .replace('{{firstname}}', data.firstname)
+    .replace('{{beneficiary_name}}', data.beneficiary_name)
     .replace('{{email}}', data.email)
     .replace('{{phone}}', data.phone)
     .replace('{{date}}', data.date);
@@ -7512,7 +7512,7 @@ export const loanRequestMailer = (data) => {
   return loanRequestHTML
     .replace('{{name}}', data.cooperative_name)
     .replace('{{cooperative_name}}', data.cooperative_name.toLowerCase())
-    .replace('{{firstname}}', data.firstname)
+    .replace('{{beneficiary_name}}', data.beneficiary_name)
     .replace('{{acctstatus}}', data.acctstatus)
     .replace('{{phone}}', data.phone)
     .replace('{{request_amount}}', data.request_amount)
@@ -7524,9 +7524,9 @@ export const loanRequestMailer = (data) => {
 
 export const loanStatusUpdateMail = (data) => {
   return loanStatusUpdateHTML
-    .replace('{{name}}', data.firstname)
+    .replace('{{name}}', data.beneficiary_name)
     .replace('{{cooperative_name}}', data.cooperative_name)
-    .replace('{{firstname}}', data.firstname)
+    .replace('{{beneficiary_name}}', data.beneficiary_name)
     .replace('{{loan_status}}', data.loan_status)
     .replace('{{phone}}', data.phone)
     .replace('{{request_amount}}', data.request_amount)
