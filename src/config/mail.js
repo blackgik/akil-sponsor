@@ -4,7 +4,7 @@ import {
   directDebitWarningsHTML,
   loanRequestHTML,
   loanStatusUpdateHTML,
-  memberOnboardingHTML,
+  beneficiaryOnboardingHTML,
   organizationChoosesAgentOnboardingHTML,
   paymentReceiptHTML,
   paymentWarningHTML,
@@ -335,7 +335,7 @@ export const onboardinMail = (data) => {
                                                                                   } (This is your secret pass into your
                                                                                       organisation; please ensure its
                                                                                       confidentiality as it is required for
-                                                                                      every login of your members)</li>
+                                                                                      every login of your beneficiaries)</li>
                                                                                   <li>Organisation Login URL: <a
                                                                                           style="color: red;"
                                                                                           href="https://organization.akilaah.com/login">https://organization.akilaah.com</a>
@@ -566,11 +566,11 @@ export const onboardinMail = (data) => {
   password:${data.password}\n
   company Unique Code:${data.company_code}\n
   Login url: https://organization.akilaah.com \n\n
-  NB: You Company Unique code should be share to members `
+  NB: You Company Unique code should be share to beneficiaries `
   };
 };
 
-export const memberBulkUpload = (data) => {
+export const beneficiaryBulkUpload = (data) => {
   return {
     html: `
     <!DOCTYPE HTML
@@ -838,8 +838,8 @@ export const memberBulkUpload = (data) => {
                                                                     style="font-size: 18px; line-height: 150%; text-align: left; word-wrap: break-word;color:#002366;">
                                                                     <p style="font-size: 18px; line-height: 150%;"></p>
                                                                     We wanted to inform you that the recent bulk upload of
-                                                                    members to Akilaah has been successfully processed. The
-                                                                    new members are now officially part of your community.
+                                                                    beneficiaries to Akilaah has been successfully processed. The
+                                                                    new beneficiaries are now officially part of your community.
                                                                     </p>
 
                                                                 </div>
@@ -900,7 +900,7 @@ export const memberBulkUpload = (data) => {
                                                                 <div class="v-line-height"
                                                                     style="font-size: 18px; line-height: 150%; text-align: left; word-wrap: break-word;color:#002366;">
                                                                     <p style="font-size: 18px; line-height: 150%;">
-                                                                        Each member has been sent an individual confirmation
+                                                                        Each beneficiary has been sent an individual confirmation
                                                                         email with their login credentials. They should
                                                                         receive a separate email notifying them of their
                                                                         successful onboarding.
@@ -1083,7 +1083,7 @@ export const memberBulkUpload = (data) => {
   password:${data.password}\n
   company Unique Code:${data.company_code}\n
   Login url: https://organization.akilaah.com \n\n
-  NB: You Company Unique code should be share to members `
+  NB: You Company Unique code should be share to beneficiaries `
   };
 };
 
@@ -1596,7 +1596,7 @@ export const contributionBulkUpload = (data) => {
   password:${data.password}\n
   company Unique Code:${data.company_code}\n
   Login url: https://organization.akilaah.com \n\n
-  NB: You Company Unique code should be share to members `
+  NB: You Company Unique code should be share to beneficiaries `
   };
 };
 
@@ -2108,7 +2108,7 @@ export const loanBulkUpload = (data) => {
   password:${data.password}\n
   company Unique Code:${data.company_code}\n
   Login url: https://organization.akilaah.com \n\n
-  NB: You Company Unique code should be share to members `
+  NB: You Company Unique code should be share to beneficiaries `
   };
 };
 
@@ -2406,7 +2406,7 @@ export const loanDisbuersmenttMail = (data) => {
                                                                 style="font-size: 18px; line-height: 150%; text-align: left; word-wrap: break-word;color:#002366;">
                                                                 <p style="font-size: 18px; line-height: 150%;"> We
                                                                     wanted to inform you that the loan request from
-                                                                    <strong>${data.member_name.toUpperCase()}</strong>
+                                                                    <strong>${data.firstname.toUpperCase()}</strong>
                                                                     has been approved and now requires
                                                                     disbursement. Please proceed with the disbursement
                                                                     process through the admin portal.
@@ -2443,7 +2443,7 @@ export const loanDisbuersmenttMail = (data) => {
                                                                                 ${data.product_name}
                                                                             </li>
                                                                             <li>Member Name:
-                                                                                ${data.member_name}
+                                                                                ${data.firstname}
                                                                             </li>
                                                                             <li>Loan Request ID: ${
                                                                                 data.request_id
@@ -3182,7 +3182,7 @@ export const forgotPasswordMail = (data) => {
   };
 };
 
-export const memberApprovedStatusAgentUpdate = (data) => {
+export const beneficiaryApprovedStatusAgentUpdate = (data) => {
   return {
     html: `
     <!DOCTYPE HTML
@@ -3450,7 +3450,7 @@ export const memberApprovedStatusAgentUpdate = (data) => {
                                                                 style="font-size: 18px; line-height: 150%; text-align: left; word-wrap: break-word;color:#002366;">
                                                                 <p style="font-size: 18px; line-height: 150%;"></p>
                                                                 We are pleased to inform you that
-                                                                <strong>${data.member_name.toUpperCase()}</strong> a
+                                                                <strong>${data.firstname.toUpperCase()}</strong> a
                                                                 memeber of
                                                                 <strong>${data.name_of_cooperation.toUpperCase()}</strong>
                                                                 on Akilaah has been approved.
@@ -3462,7 +3462,7 @@ export const memberApprovedStatusAgentUpdate = (data) => {
                                                                 style="font-size: 18px; line-height: 150%; text-align: left; word-wrap: break-word;color:#002366;">
                                                                 <p
                                                                     style="font-size: 18px; line-height: 150%; text-align: justify;">
-                                                                    Here are the membership details:
+                                                                    Here are the beneficiarieship details:
                                                                 </p>
                                                             </div>
 
@@ -3487,13 +3487,13 @@ export const memberApprovedStatusAgentUpdate = (data) => {
                                                                         <ul
                                                                             style="font-size: 14px; line-height: 23.8px; color: #002366;">
                                                                             <li>Member Name:
-                                                                                ${data.member_name.toUpperCase()}
+                                                                                ${data.firstname.toUpperCase()}
                                                                             </li>
                                                                             <li>Email: ${
                                                                                 data.email
                                                                                 }</li>
                                                                             <li>Member ID: ${
-                                                                                data.member_id
+                                                                                data.beneficiary_id
                                                                                 }</li>
                                                                             <li>Organization: ${
                                                                                 data.name_of_cooperation
@@ -3699,7 +3699,7 @@ export const memberApprovedStatusAgentUpdate = (data) => {
   };
 };
 
-export const memberApprovedStatusOrgUpdate = (data) => {
+export const beneficiaryApprovedStatusOrgUpdate = (data) => {
     return {
       html: `
       <!DOCTYPE HTML
@@ -3966,8 +3966,8 @@ export const memberApprovedStatusOrgUpdate = (data) => {
                                                             <div class="v-line-height"
                                                                 style="font-size: 18px; line-height: 150%; text-align: left; word-wrap: break-word;color:#002366;">
                                                                 <p style="font-size: 18px; line-height: 150%;"></p>
-                                                                You have a new member awaiting approval on our platform.
-                                                                The details of the recently registered member are as
+                                                                You have a new beneficiary awaiting approval on our platform.
+                                                                The details of the recently registered beneficiary are as
                                                                 follows:
                                                             </div>
                                                             <br>
@@ -3975,7 +3975,7 @@ export const memberApprovedStatusOrgUpdate = (data) => {
                                                                 style="font-size: 18px; line-height: 150%; text-align: left; word-wrap: break-word;color:#002366;">
                                                                 <p
                                                                     style="font-size: 18px; line-height: 150%; text-align: justify;">
-                                                                    Here are the membership details:
+                                                                    Here are the beneficiarieship details:
                                                                 </p>
                                                             </div>
 
@@ -4000,10 +4000,10 @@ export const memberApprovedStatusOrgUpdate = (data) => {
                                                                         <ul
                                                                             style="font-size: 14px; line-height: 23.8px; color: #002366;">
                                                                             <li>Member Name:
-                                                                                ${data.member_name.toUpperCase()}
+                                                                                ${data.firstname.toUpperCase()}
                                                                             </li>
                                                                             <li>Member ID: ${
-                                                                                data.member_id
+                                                                                data.beneficiary_id
                                                                                 }</li>
                                                                             <li>Registration Date: ${
                                                                                 data.date
@@ -4212,7 +4212,7 @@ export const memberApprovedStatusOrgUpdate = (data) => {
     };
   };
 
-export const memberApprovedStatusUpdate = (data) => {
+export const beneficiaryApprovedStatusUpdate = (data) => {
 return {
     html: `
     <!DOCTYPE HTML
@@ -4458,7 +4458,7 @@ return {
                                                                                     style="line-height: 21px;">Dear
                                                                                 </span></strong></span><strong><span
                                                                                 style="line-height: 21px;"><span
-                                                                                    style="color: #CB6015; line-height: 21px;">${data.member_name.toUpperCase()}
+                                                                                    style="color: #CB6015; line-height: 21px;">${data.firstname.toUpperCase()}
                                                                                     </span></span></strong></span>
 
                                                                 </p>
@@ -4480,7 +4480,7 @@ return {
                                                                 style="font-size: 18px; line-height: 150%; text-align: left; word-wrap: break-word;color:#002366;">
                                                                 <p style="font-size: 18px; line-height: 150%;"></p>
                                                                 Congratulations! We are pleased to inform you that your
-                                                                membership request for
+                                                                beneficiarieship request for
                                                                 <strong>${data.name_of_cooperation.toUpperCase()}</strong>
                                                                 on Akilaah
                                                                 has been approved. Welcome to our esteemed community!
@@ -4490,7 +4490,7 @@ return {
                                                                 style="font-size: 18px; line-height: 150%; text-align: left; word-wrap: break-word;color:#002366;">
                                                                 <p
                                                                     style="font-size: 18px; line-height: 150%; text-align: justify;">
-                                                                    Here are the membership details:
+                                                                    Here are the beneficiarieship details:
                                                                 </p>
                                                             </div>
 
@@ -4515,13 +4515,13 @@ return {
                                                                         <ul
                                                                             style="font-size: 14px; line-height: 23.8px; color: #002366;">
                                                                             <li>Member Name:
-                                                                                ${data.member_name.toUpperCase()}
+                                                                                ${data.firstname.toUpperCase()}
                                                                             </li>
                                                                             <li>Email: ${
                                                                                 data.email
                                                                                 }</li>
                                                                             <li>Member ID: ${
-                                                                                data.member_id
+                                                                                data.beneficiary_id
                                                                                 }</li>
                                                                             <li>Organisation Unique ID: ${
                                                                                 data.organization_code
@@ -4551,7 +4551,7 @@ return {
                                                                 style="font-size: 18px; text-align: left; word-wrap: break-word;color:#002366;">
                                                                 <p style="font-size: 18px; line-height: 150%;">
                                                                     Feel free to log in to your account using the
-                                                                    following link: [Login URL for members]. Your
+                                                                    following link: [Login URL for beneficiaries]. Your
                                                                     organisation unique ID will be your reference for
                                                                     all interactions within
                                                                     <strong>${data.name_of_cooperation.toUpperCase()}</strong>.
@@ -4981,7 +4981,7 @@ export const declinedAcountMail = (data) => {
                                                                                     style="line-height: 21px;">Dear
                                                                                 </span></strong></span><strong><span
                                                                                 style="line-height: 21px;"><span
-                                                                                    style="color: #CB6015; line-height: 21px;">${data.member_name.toUpperCase()}
+                                                                                    style="color: #CB6015; line-height: 21px;">${data.firstname.toUpperCase()}
                                                                                 </span></span></strong></span>
 
                                                                 </p>
@@ -5479,7 +5479,7 @@ export const agentDeclinedAcountMail = (data) => {
                                                                 style="font-size: 18px; line-height: 150%; text-align: left; word-wrap: break-word;color:#002366;">
                                                                 <p style="font-size: 18px; line-height: 150%;"></p>
                                                                 We regret to inform you that your registration request
-                                                                for <strong>${data.member_name.toUpperCase()}</strong>
+                                                                for <strong>${data.firstname.toUpperCase()}</strong>
                                                                 on Akilaah has been reviewed and,
                                                                 unfortunately, has not been accepted at this time.
                                                                 <p>
@@ -5893,11 +5893,11 @@ export const onboardAgentMail = (data) => {
   password:${data.password}\n
   company Unique Code:${data.company_code}\n
   Login url: https://organization.akilaah.com \n\n
-  NB: You Company Unique code should be share to members `
+  NB: You Company Unique code should be share to beneficiaries `
   };
 };
 
-export const newContributionProductMail = (data) => {
+export const newProductMail = (data) => {
   return {
     html: `
       <!DOCTYPE HTML
@@ -6167,7 +6167,7 @@ export const newContributionProductMail = (data) => {
                                                                   We are pleased to inform you that a new contribution
                                                                   product <strong>${data.product_name}</strong> has been successfully created on
                                                                   Akilaah. This product is now available within the
-                                                                  Contribution Module for members to engage with.
+                                                                  Contribution Module for beneficiaries to engage with.
                                                               </div>
                                                               <br>
                                                               <div class="v-line-height"
@@ -6410,7 +6410,7 @@ export const newContributionProductMail = (data) => {
   password:${data.password}\n
   company Unique Code:${data.company_code}\n
   Login url: https://organization.akilaah.com \n\n
-  NB: You Company Unique code should be share to members `
+  NB: You Company Unique code should be share to beneficiaries `
   };
 };
 
@@ -6684,7 +6684,7 @@ export const newSubscriptionProductMail = (data) => {
                                                                   We are pleased to inform you that a new subscription
                                                                   product <strong>${data.product_name}</strong> has been successfully created on
                                                                   Akilaah. This product is now available within the
-                                                                  Subscription Module for members to engage with.
+                                                                  Subscription Module for beneficiaries to engage with.
                                                               </div>
                                                               <br>
                                                               <div class="v-line-height"
@@ -6927,7 +6927,7 @@ export const newSubscriptionProductMail = (data) => {
   password:${data.password}\n
   company Unique Code:${data.company_code}\n
   Login url: https://organization.akilaah.com \n\n
-  NB: You Company Unique code should be share to members `
+  NB: You Company Unique code should be share to beneficiaries `
   };
 };
 
@@ -7426,14 +7426,14 @@ export const newSavingsProductMail = (data) => {
   password:${data.password}\n
   company Unique Code:${data.company_code}\n
   Login url: https://organization.akilaah.com \n\n
-  NB: You Company Unique code should be share to members `
+  NB: You Company Unique code should be share to beneficiaries `
   };
 };
 
 export const paymentReceiptMail = (data) => {
   return paymentReceiptHTML
     .replace('{{cooperative_name}}', data.cooperative_name)
-    .replace('{{name}}', data.member_name)
+    .replace('{{name}}', data.firstname)
     .replace('{{product_name}}', data.product_name)
     .replace('{{initial_amount}}', data.initial_amount)
     .replace('{{amount}}', data.amount)
@@ -7443,7 +7443,7 @@ export const paymentReceiptMail = (data) => {
 export const paymentWarningsMail = (data) => {
   return paymentWarningHTML
     .replace('{{cooperative_name}}', data.cooperative_name)
-    .replace('{{name}}', data.member_name)
+    .replace('{{name}}', data.firstname)
     .replace('{{product_name}}', data.product_name)
     .replace('{{initial_amount}}', data.initial_amount)
     .replace('{{amount}}', data.amount)
@@ -7453,7 +7453,7 @@ export const paymentWarningsMail = (data) => {
 export const directDebitInitiationMail = (data) => {
   return directDebitWarningsHTML
     .replace('{{cooperative_name}}', data.cooperative_name)
-    .replace('{{name}}', data.member_name)
+    .replace('{{name}}', data.firstname)
     .replace('{{product_name}}', data.product_name)
     .replace('{{initial_amount}}', data.initial_amount)
     .replace('{{amount}}', data.amount)
@@ -7463,20 +7463,20 @@ export const directDebitInitiationMail = (data) => {
 export const withrawalMail = (data) => {
   return withdrawalReceiptHTML
     .replace('{{cooperative_name}}', data.cooperative_name)
-    .replace('{{name}}', data.member_name)
+    .replace('{{name}}', data.firstname)
     .replace('{{product_name}}', data.product_name)
     .replace('{{initial_amount}}', data.initial_amount)
     .replace('{{amount}}', data.amount)
     .replace('{{date}}', data.date);
 };
 
-export const memberOnboardingMail = (data) => {
-  return memberOnboardingHTML
+export const beneficiaryOnboardingMail = (data) => {
+  return beneficiaryOnboardingHTML
     .replace('{{name}}', data.cooperative_name)
     .replace('{{cooperative_name}}', data.cooperative_name)
-    .replace('{{member_name}}', data.member_name)
-    .replace('{{member_email}}', data.member_email)
-    .replace('{{member_phone}}', data.member_phone)
+    .replace('{{firstname}}', data.firstname)
+    .replace('{{email}}', data.email)
+    .replace('{{phone}}', data.phone)
     .replace('{{date}}', data.date);
 };
 
@@ -7512,7 +7512,7 @@ export const loanRequestMailer = (data) => {
   return loanRequestHTML
     .replace('{{name}}', data.cooperative_name)
     .replace('{{cooperative_name}}', data.cooperative_name.toLowerCase())
-    .replace('{{member_name}}', data.member_name)
+    .replace('{{firstname}}', data.firstname)
     .replace('{{acctstatus}}', data.acctstatus)
     .replace('{{phone}}', data.phone)
     .replace('{{request_amount}}', data.request_amount)
@@ -7524,9 +7524,9 @@ export const loanRequestMailer = (data) => {
 
 export const loanStatusUpdateMail = (data) => {
   return loanStatusUpdateHTML
-    .replace('{{name}}', data.member_name)
+    .replace('{{name}}', data.firstname)
     .replace('{{cooperative_name}}', data.cooperative_name)
-    .replace('{{member_name}}', data.member_name)
+    .replace('{{firstname}}', data.firstname)
     .replace('{{loan_status}}', data.loan_status)
     .replace('{{phone}}', data.phone)
     .replace('{{request_amount}}', data.request_amount)

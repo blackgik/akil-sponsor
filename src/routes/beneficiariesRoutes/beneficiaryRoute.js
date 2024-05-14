@@ -5,7 +5,6 @@ import {
   editBeneficiaryProfileHandler,
   fetchBeneficiariesByStatusHandler,
   fetchedUploadedFilesHandler,
-  institutionsinOrganizationHandler,
   beneficiaryBankListHandler,
   beneficiaryDashboardStatsHandler,
   beneficiaryUpdateBatchListHandler,
@@ -33,11 +32,7 @@ const beneficiaryRoute = () => {
   beneficiaryRoutes.get('/beneficiaries-dashboard-stats', authentication, beneficiaryDashboardStatsHandler);
   beneficiaryRoutes.get('/fetch-beneficiary-uploaded-list', authentication, beneficiaryUploadedListHandler);
   beneficiaryRoutes.patch('/update-batch-list/', authentication, beneficiaryUpdateBatchListHandler);
-  beneficiaryRoutes.get(
-    '/list-institutions-in-organization',
-    authentication,
-    institutionsinOrganizationHandler
-  );
+
   beneficiaryRoutes.get('/bank-list', beneficiaryBankListHandler);
   beneficiaryRoutes.post('/pdf-builder', pdfBuilderHandler);
 

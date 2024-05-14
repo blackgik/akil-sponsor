@@ -1,13 +1,11 @@
 import axios from 'axios';
 import bcrypt from 'bcrypt';
 import PDFDocument from 'pdfkit';
-import qr from 'qrcode';
 import fs from 'fs';
 import mongoose from 'mongoose';
 import base64String from 'base64-stream';
 import env from '../../config/env.js';
 import beneficiaryBatchUploadModel from '../../models/beneficiaries/beneficiaryBatchUploadModel.js';
-import beneficiaryPocketModel from '../../models/beneficiaries/beneficiaryPocketModel.js';
 import organizationBeneficiaryModel from '../../models/beneficiaries/organizationBeneficiaryModel.js';
 import {
   BadRequestError,
@@ -481,16 +479,6 @@ export const updateBeneficiaryBatchListStatus = async ({ beneficiary_batch_id, b
           if (!activeBeneficiary)
             throw new InternalServerError(
               `server slipped, beneficiary was approved but could be transfered to active beneficiaries`
-            );
-
-          const pocket = await beneficiaryPocketModel.create({
-            beneficiary_id: activeBeneficiary._id,
-            organization_id: user._id
-          });
-
-          if (!pocket)
-            throw new InternalServerError(
-              'server slip. Beneficiary approved but no pocket was initialized'
             );
 
           // email constructor

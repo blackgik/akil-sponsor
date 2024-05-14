@@ -7,8 +7,6 @@ import {
 } from '../../validators/organizationSchema.js';
 import {
   addNewBankAccountHandler,
-  profilesDashbaord1Handler,
-  profilesDashbaordHandler,
   updateOrganizationProfileHandler
 } from '../../controllers/profile/profileController.js';
 import validators from '../../validators/index.js';
@@ -23,8 +21,6 @@ const profileRoot = () => {
     updateOrganizationProfileHandler
   );
 
-  profileRooute.get('/dashboard', authentication, profilesDashbaordHandler);
-  profileRooute.get('/dashboard-1', authentication, profilesDashbaord1Handler);
   profileRooute.patch(
     '/add-bank-account',
     validators(updateBankDetails),

@@ -1,7 +1,6 @@
 import appResponse from '../../../lib/appResponse.js';
 import env from '../../config/env.js';
 import {
-  accountRecovery,
   addModules,
   fetchBankCode,
   forgotPassword,
@@ -100,12 +99,4 @@ export const addModulesHandler = async (req, res) => {
   res.send(appResponse('generated Gateway successfully', gateway));
 };
 
-export const accountRecoveryHandler = async (req, res) => {
-  const { body } = req;
 
-  const response = await accountRecovery({ body });
-
-  res.send(
-    appResponse('Validated account recovery successfully. Check your alternative email', response)
-  );
-};

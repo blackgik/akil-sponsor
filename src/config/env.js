@@ -13,17 +13,12 @@ export default {
   payatittude_secret_key: process.env.PAYATITTUDE_SECRETKEY,
   paystack_api_url: process.env.PAYSTACK_API_URL,
   paystack_secret_key: process.env.PAYSTACK_SECRET_KEY,
-  flutterwave_secret_key: process.env.FLUTTERWAVE_SECRET_KEY,
-  flutterwave_api_key: process.env.FLUTTERWAVE_API_URL,
   public_key: process.env.PUBLIC_KEY,
   private_key: process.env.PRIVATE_KEY,
   akilaah_api_url: process.env.AKLAAH_API_URL,
   akilaah_api_secret: process.env.AKLAAH_API_SECRET,
-  termii_api_secret: process.env.TERMII_API_SECRET,
-  termii_api_url: process.env.TERMII_API_URL,
-  termii_sender_id: process.env.TERMII_SENDER_ID,
-  dev_base_url_org: `https://akilaah-organization.vercel.app`,
-  dev_base_url_member: `https://akilaah-member.vercel.app`,
-  prod_base_url_member: `https://member.akilaah.com`,
-  prod_base_url_org: `https://organization.akilaah.com`
+  dev_base_url_org: `http://localhost`,
+  dev_base_url_member: `http://localhost`,
+  prod_base_url_member: `http://localhost`,
+  prod_base_url_org: `http://localhost`
 };

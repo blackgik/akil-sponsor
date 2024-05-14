@@ -966,7 +966,7 @@ span.MsoHyperlinkFollowed {
  </body>
 </html>
 `;
-export const memberOnboardingHTML = `
+export const beneficiaryOnboardingHTML = `
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html
   dir="ltr"
@@ -980,7 +980,7 @@ export const memberOnboardingHTML = `
     <meta name="x-apple-disable-message-reformatting" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta content="telephone=no" name="format-detection" />
-    <title>Member Onboarding</title>
+    <title>Beneficiary Onboarding</title>
     <!--[if (mso 16)]>
       <style type="text/css">
         a {
@@ -1694,7 +1694,7 @@ export const memberOnboardingHTML = `
                                         font-size: 14px;
                                       "
                                     >
-                                      A member has onboarded at
+                                      A beneficiary has onboarded at
                                       {{cooperative_name}}.
                                     </p>
                                     <!-- <p
@@ -1737,7 +1737,7 @@ export const memberOnboardingHTML = `
                                         font-size: 14px;
                                       "
                                     >
-                                      Members details are as follows:
+                                      Beneficiaries details are as follows:
                                     </p>
                                     <ul
                                       style="
@@ -1765,7 +1765,7 @@ export const memberOnboardingHTML = `
                                             font-size: 14px;
                                           "
                                         >
-                                          👤Member Name- {{member_name}}
+                                          👤Beneficiary Name- {{firstname}}
                                         </p>
                                       </li>
                                       <li
@@ -1787,7 +1787,7 @@ export const memberOnboardingHTML = `
                                             font-size: 14px;
                                           "
                                         >
-                                        📲Email - {{member_email}}
+                                        📲Email - {{email}}
                                         </p>
                                       </li>
                                       <li
@@ -1809,7 +1809,7 @@ export const memberOnboardingHTML = `
                                             font-size: 14px;
                                           "
                                         >
-                                          📞Member Phone - {{member_phone}}
+                                          📞Beneficiary Phone - {{phone}}
                                         </p>
                                       </li>
                                       <li
@@ -6486,9 +6486,9 @@ export const loanRequestHTML = `
                                       "
                                     >
                                       On your {{cooperative_name}} account, a loan request was
-                                      intiated by one of your members. Our system allows these
+                                      intiated by one of your beneficiaries. Our system allows these
                                       requests only when they are Elligble. If your have a contrary
-                                      opinion, please do well to decline and call the member for
+                                      opinion, please do well to decline and call the beneficiary for
                                       further advice: .&nbsp;
                                     </p>
                                     <p
@@ -6543,7 +6543,7 @@ export const loanRequestHTML = `
                                             font-size: 14px;
                                           "
                                         >
-                                          👤Individual's Name- {{member_name}}
+                                          👤Individual's Name- {{firstname}}
                                         </p>
                                       </li>
                                       <li
@@ -7824,7 +7824,7 @@ export const loanStatusUpdateHTML=`
                                             font-size: 14px;
                                           "
                                         >
-                                          👤Individual's Name- {{member_name}}
+                                          👤Individual's Name- {{firstname}}
                                         </p>
                                       </li>
                                       <li

@@ -4,10 +4,9 @@ import {
   fetchBeneficiariesByStatus,
   fileFormatter,
   getBankList,
-  getInstitutionsInOrg,
   pdfBuilder,
   updateBeneficiaryStatus,
-  updateMemeberBatchListStatus,
+  updateBeneficiaryBatchListStatus,
   viewBeneficiaryProfile,
   viewBeneficiariesDashboardStats,
   viewBeneficiariesUploadedList
@@ -77,7 +76,7 @@ export const beneficiaryUpdateBatchListHandler = async (req, res) => {
   const { user, body, query } = req;
   const { beneficiary_batch_id } = query;
 
-  const updatedList = await updateMemeberBatchListStatus({ beneficiary_batch_id, body, user });
+  const updatedList = await updateBeneficiaryBatchListStatus({ beneficiary_batch_id, body, user });
 
   res.send(appResponse('Updated beneficiaries uploaded list successfully', updatedList));
 };

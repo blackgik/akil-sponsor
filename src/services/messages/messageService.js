@@ -1,16 +1,16 @@
-import organizationMemberModel from '../../models/members/organizationMemberModel.js';
+import organizationBeneficiaryModel from '../../models/beneficiaries/organizationBeneficiaryModel.js';
 import conversationModel from '../../models/messages/conversationModel.js';
 import messageModel from '../../models/messages/messageModel.js';
 import organizationModel from '../../models/organizationModel.js';
 
-export const createConversation = async ({ user, member_id }) => {
-  const checkExistingConvo = await existingConverstion({ user, member_id });
+export const createConversation = async ({ user, beneficiary_id }) => {
+  const checkExistingConvo = await existingConverstion({ user, beneficiary_id });
 
   if (checkExistingConvo) {
     return checkExistingConvo;
   }
   const data = {
-    members: [member_id],
+    beneficiaries: [beneficiary_id],
     organization_id: user._id
   };
 
@@ -19,10 +19,10 @@ export const createConversation = async ({ user, member_id }) => {
   return convo;
 };
 
-const existingConverstion = async ({ user, member_id }) => {
+const existingConverstion = async ({ user, beneficiary_id }) => {
   const findConvo = await conversationModel.findOne({
     organization_id: user._id,
-    members: { $all: [member_id] }
+    beneficiaries: { $all: [beneficiary_id] }
   });
 
   if (!findConvo) return false;
@@ -36,8 +36,8 @@ export const fetchAllConversations = async ({ user }) => {
       organization_id: user._id
     })
     .populate({
-      path: 'members',
-      model: 'Organization_Member',
+      path: 'beneficiaries',
+      model: 'Organization_Beneficiary',
       select: { personal: 1, avatar: 1 }
     });
 
@@ -50,8 +50,8 @@ export const fetchAllConversationMessages = async ({ conversation_id }) => {
   const convo = Promise.all(
     messages.map(async (sender) => {
       let sender_details = {};
-      const checkMember = await organizationMemberModel.findById(sender.sender_id);
-      if (checkMember) sender_details = checkMember;
+      const checkBeneficiary = await organizationBeneficiaryModel.findById(sender.sender_id);
+      if (checkBeneficiary) sender_details = checkBeneficiary;
 
       const checkOrganization = await organizationModel.findById(sender.sender_id);
       if (checkOrganization) sender_details = checkOrganization;
