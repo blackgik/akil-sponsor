@@ -2,8 +2,9 @@ import Joi from 'joi';
 
 export const validateOnboardingOrganizationSchema = Joi.object({
   language: Joi.string().optional().allow('', null),
-  avatar: Joi.object({ key: Joi.string().optional().allow('', null) }).optional(),
   name_of_cooperation: Joi.string().optional().allow('', null),
+  firstname: Joi.string().optional().allow('', null),
+  lastname: Joi.string().optional().allow('', null),
   email: Joi.string().email().required(),
   address: Joi.string().optional().allow('', null),
   admin_name: Joi.string().optional().allow('', null),
