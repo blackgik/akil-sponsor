@@ -28,12 +28,13 @@ import { encryptData } from '../../utils/vault.js';
 import { finance } from '../../config/general.js';
 import fs from "fs";
 import path from "path";
-import { URL } from 'url';
+import { fileURLToPath } from 'url';
 
-const __dirname = new URL('.', import.meta.url).pathname;
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
-const accessTokenPrivateKey = fs.readFileSync(path.join(__dirname, '../keys', 'accessTokenPrivateKey.key'), 'utf8')
-const accessTokenPublicKey = fs.readFileSync(path.join(__dirname, '../keys', 'accessTokenPublicKey.key.pub'), 'utf8')
+const accessTokenPrivateKey = fs.readFileSync(path.join(__dirname, '../../keys', 'accessTokenPrivateKey.key'), 'utf8')
+const accessTokenPublicKey = fs.readFileSync(path.join(__dirname, '../../keys', 'accessTokenPublicKey.key.pub'), 'utf8')
 
 export const onboardNewOrganization = async ({ body, start_trial, dbConnection }) => {
   if (!body.tosAgreement) throw new BadRequestError(`Terms and conditions not met`);
