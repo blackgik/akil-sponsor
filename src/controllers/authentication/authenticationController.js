@@ -19,7 +19,7 @@ export const onboardNewOrganizationHandler = async (req, res) => {
 
   const onboardedOrganization = await onboardNewOrganization({ body, dbConnection });
 
-  res.send(appResponse('onboarded organization successfully', onboardedOrganization));
+  res.send(appResponse('onboarded organization successfully, kindly check your emails to continue', onboardedOrganization));
 };
 
 

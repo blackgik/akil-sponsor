@@ -6,7 +6,7 @@ import axios from 'axios';
 import path from 'path';
 import env from '../../config/env.js';
 import organizationModel, { buildOrganizationSchema } from '../../models/organizationModel.js';
-import { forgotPasswordMail, beneficiaryBulkUpload, onboardinMail } from '../../config/mail.js';
+import { forgotPasswordMail, verifyOnbordingMail, beneficiaryBulkUpload, onboardinMail } from '../../config/mail.js';
 import {
   BadRequestError,
   DuplicateError,
@@ -28,9 +28,6 @@ import { plans } from '../../config/modules.js';
 import notificationsModel from '../../models/settings/notificationsModel.js';
 import { encryptData } from '../../utils/vault.js';
 
-const accessTokenPrivateKey = env.private_key;
-const accessTokenPublicKey = env.public_key;
-
 import { finance } from '../../config/general.js';
 
 export const onboardNewOrganization = async ({ body, dbConnection }) => {
@@ -40,18 +37,20 @@ export const onboardNewOrganization = async ({ body, dbConnection }) => {
   if (checkIfOnboarded) throw new DuplicateError('Sponsor already exists');
 
   let { company_code, password, api_key_live, api_key_test } = await generateEnterpriseCredentials(
-    body.firstname+''+body.lastname
+    body.firstname + '' + body.lastname
   );
 
-  const HashedPassword = await bcrypt.hash(password, 12);
-
-  if (!body.reg_fee )
+  if (!body.reg_fee)
     throw new BadRequestError(`Beneficiary registration fee is required`);
+
+  const otp = await codeGenerator(6, '1234567890');
+  const otpHash = buildOtpHash(newAccount.email, otp, customConfig.otpKey, 15);
 
   let organizationProfile = {
     ...body,
     company_code,
-    password: HashedPassword,
+    otp: otp,
+    password: otpHash,
     vault_access: {
       api_key_live,
       api_key_test
@@ -64,27 +63,40 @@ export const onboardNewOrganization = async ({ body, dbConnection }) => {
 
   if (!createOrganizationProfile) throw new InternalServerError('Server is being maintained');
 
+  // //create email profile here
+  // const onboardingData = {
+  //   email: createOrganizationProfile.email,
+  //   name_of_cooperation: createOrganizationProfile.name_of_cooperation,
+  //   password,
+  //   company_code
+  // };
+  // const mailData = {
+  //   email: createOrganizationProfile.email,
+  //   subject: 'MAJFINTECH ONBOARDING',
+  //   type: 'html',
+  //   html: onboardinMail(onboardingData).html,
+  //   text: onboardinMail(onboardingData).text
+  // };
+
   //create email profile here
   const onboardingData = {
-    email: createOrganizationProfile.email,
-    name_of_cooperation: createOrganizationProfile.name_of_cooperation,
-    password,
-    company_code
+    name: createOrganizationProfile.firstname + ' ' + createOrganizationProfile.lastname,
+    code: otp
   };
   const mailData = {
-    email: createOrganizationProfile.email,
+    email: newAccount.email,
     subject: 'MAJFINTECH ONBOARDING',
     type: 'html',
-    html: onboardinMail(onboardingData).html,
-    text: onboardinMail(onboardingData).text
+    html: verifyOnbordingMail(onboardingData).html,
+    text: verifyOnbordingMail(onboardingData).text
   };
   const msg = await formattMailInfo(mailData, env);
 
-    const msgDelivered = await messageBird(msg);
-    if (!msgDelivered)
-      throw new InternalServerError(
-        'server slip. Sponsor was created without mail being sent'
-      );
+  const msgDelivered = await messageBird(msg);
+  if (!msgDelivered)
+    throw new InternalServerError(
+      'server slip. Sponsor was created without mail being sent'
+    );
 
 
   if (env.node_env === 'production') {
@@ -96,7 +108,7 @@ export const onboardNewOrganization = async ({ body, dbConnection }) => {
 
     await createSecData.create(secondDbData);
   }
-  return { profileData: createOrganizationProfile };
+  return {code: otp,  hash: otpHash, email: createOrganizationProfile.email };
 };
 
 export const loginOrganization = async (body) => {
@@ -141,7 +153,7 @@ export const forgotPassword = async ({ body }) => {
   checkOrg.save();
 
   const onboardingData = {
-    name: checkOrg.firstname +' '+checkOrg.lastname,
+    name: checkOrg.firstname + ' ' + checkOrg.lastname,
     code: newPassword
   };
 
@@ -347,9 +359,8 @@ export const uploadOrganizationBeneficiariesInBulk = async ({ user, file, body }
   ];
 
   // Format date as "day, month, year"
-  const formattedDate = `${currentDate.getDate()}, ${
-    monthNames[currentDate.getMonth()]
-  }, ${currentDate.getFullYear()}`;
+  const formattedDate = `${currentDate.getDate()}, ${monthNames[currentDate.getMonth()]
+    }, ${currentDate.getFullYear()}`;
 
   //create email profile here
   const bulkUpload = {
