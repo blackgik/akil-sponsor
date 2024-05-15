@@ -111,6 +111,57 @@ export const onboardNewOrganization = async ({ body, dbConnection }) => {
   return {code: otp,  hash: otpHash, email: createOrganizationProfile.email };
 };
 
+export const verifyOtp = async (body)=> {
+  const { code, hash } = body;
+
+  const checkAcct = await Account.findOne({ otp: code });
+
+  if (!checkAcct) throw new NotFoundError(200, 'Account not found', '');
+
+  const verifyOtp = verifyOTP(checkAcct.email, code, hash, customConfig.otpKey);
+  if (!verifyOtp) throw new InvalidError(422, 'Invalid Input', '');
+
+  const generatePassword = checkAcct.hash;;
+
+  const hashedPwd = await argon.hash(checkAcct.hash);
+  checkAcct.email_verified = true;
+  checkAcct.otpHash = '';
+  checkAcct.hash = hashedPwd;
+  checkAcct.acctstatus = 'active';
+
+  let toVerifySponsor = await Sponsor.findById(checkAcct.ownerId);
+  if (toVerifySponsor) {
+      toVerifySponsor.email_verified = true;
+      toVerifySponsor.otpHash = '';
+      toVerifySponsor.password = hashedPwd;
+      toVerifySponsor.acctstatus = 'active';
+      checkAcct.ownerId = toVerifySponsor._id;
+      await Sponsor.updateSponsor(toVerifySponsor._id, toVerifySponsor);
+  }
+  await Account.updateAccount(checkAcct._id, checkAcct);
+  //create email profile here
+  const onboardingData = {
+      email: checkAcct.email,
+      password: generatePassword
+  };
+  const mailData = {
+      email: checkAcct.email,
+      subject: 'MAJFINTECH ONBOARDING',
+      type: 'html',
+      html: onboardinMail(onboardingData).html,
+      text: onboardinMail(onboardingData).text
+  };
+  const msg = await formattMailInfo(mailData, customConfig);
+
+  const msgDelivered = await messageBird(msg);
+  if (!msgDelivered)
+      throw new InternalServerError(500,
+          'server slip. Organization was created without mail being sent', ''
+      );
+  const tokens = await this.signJwt(checkAcct._id, checkAcct.email);
+  return tokens;
+};
+
 export const loginOrganization = async (body) => {
   const { email, password } = body;
   const checkOrg = await organizationModel.findOne({ email });
