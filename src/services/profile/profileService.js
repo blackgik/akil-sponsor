@@ -1,4 +1,5 @@
 import axios from 'axios';
+import bcrypt from 'bcrypt';
 import env from '../../config/env.js';
 import { BadRequestError } from './../../../lib/appErrors.js';
 
@@ -7,13 +8,23 @@ export const updateOrganizationProfile = async ({ body, user }) => {
     throw new BadRequestError('Bank details cannot be updated here. go to bank details section');
   }
 
+  if (body.password) {
+    if (!body.old_password) throw new BadRequestError('Old password is required');
+
+    const isMatch = await bcrypt.compare(body.old_password, user.password);
+
+    if (!isMatch) throw new BadRequestError('Incorrect old password');
+
+    body.password = await bcrypt.hash(body.password, 12);
+  }
+
   const updates = Object.keys(body);
 
   updates.forEach((update) => (user[update] = body[update]));
 
   await user.save();
 
-  return true;
+  return {};
 };
 
 export const addNewBankAccount = async ({ user, body }) => {
