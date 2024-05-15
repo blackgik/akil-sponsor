@@ -19,7 +19,8 @@ import {
   organizationLoginHandler,
   organizationBulkUploadBeneficiaryHandler,
   organizationProfileHandler,
-  resetPasswordHandler
+  resetPasswordHandler,
+  organizationResendOtpHandler
 } from '../controllers/authentication/authenticationController.js';
 import { authentication, dbconnection } from '../middlewares/authentication.js';
 import { upload } from '../../lib/multer.js';
@@ -50,6 +51,12 @@ const organizationRoute = () => {
     '/verify-onboarding-email',
     Validate(validateVerifyOnboardingEmailSchema),
     organizationEmailVerifyHandler
+  );
+
+  organizationRoutes.post(
+    '/resend-otp',
+    Validate(validateForgotPasswordSchema),
+    organizationResendOtpHandler
   );
   
   organizationRoutes.post(

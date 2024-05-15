@@ -114,6 +114,47 @@ export const onboardNewOrganization = async ({ body, dbConnection }) => {
   return { encrypedDataString };
 };
 
+export const resendOtp = async (body) => {
+
+  //const hash = await argon.hash(dto.password);
+  const checkIfNotVerified = await organizationModel.findOne({ email: body.email });
+  if (checkIfNotVerified.isApproved) throw new BadRequestError('Account already approved. Login!');
+
+  const otp = await codeGenerator(6, '1234567890');
+
+  const otpHash = buildOtpHash(checkIfNotVerified.email, otp, env.otpKey, 15);
+
+  checkIfNotVerified.password = otpHash;
+  checkIfNotVerified.otp = otp;
+  await checkIfNotVerified.save();
+  //create email profile here
+  const onboardingData = {
+    name: checkIfNotVerified.firstname + ' ' + checkIfNotVerified.lastname,
+    code: otp
+  };
+  const mailData = {
+    email: checkIfNotVerified.email,
+    subject: 'MAJFINTECH ONBOARDING',
+    type: 'html',
+    html: verifyOnbordingMail(onboardingData).html,
+    text: verifyOnbordingMail(onboardingData).text
+  };
+  const msg = await formattMailInfo(mailData, env);
+
+  const msgDelivered = await messageBird(msg);
+  if (!msgDelivered)
+    throw new InternalServerError(500,
+      'server slip. Organization was created without mail being sent',
+      ''
+    );
+  const encrypedDataString = await encryptData({
+    data2encrypt: { hash: otpHash, email: checkIfNotVerified.email },
+    pubKey: env.public_key
+  });
+  return { encrypedDataString };
+
+}
+
 export const verifyEmail = async (body) => {
   const { code, hash, email } = body;
 
