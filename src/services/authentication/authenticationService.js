@@ -1,7 +1,9 @@
 import bcrypt from 'bcrypt';
+import fs from 'fs';
 import jwt from 'jsonwebtoken';
 import XLSX from 'xlsx';
 import axios from 'axios';
+import path from 'path';
 import env from '../../config/env.js';
 import organizationModel, { buildOrganizationSchema } from '../../models/organizationModel.js';
 import { forgotPasswordMail, beneficiaryBulkUpload, onboardinMail } from '../../config/mail.js';
@@ -25,11 +27,9 @@ import beneficiaryBatchUploadModel from '../../models/beneficiaries/beneficiaryB
 import { plans } from '../../config/modules.js';
 import notificationsModel from '../../models/settings/notificationsModel.js';
 import { encryptData } from '../../utils/vault.js';
-import { finance } from '../../config/general.js';
-import fs from "fs";
 
-const accessTokenPrivateKey = fs.readFileSync(path.join(__dirname, '../keys', 'accessTokenPrivateKey.key'), 'utf8')
-const accessTokenPublicKey = fs.readFileSync(path.join(__dirname, '../keys', 'accessTokenPublicKey.key.pub'), 'utf8')
+const accessTokenPrivateKey = env.private_key;
+const accessTokenPublicKey = env.public_key;
 
 export const onboardNewOrganization = async ({ body, start_trial, dbConnection }) => {
   if (!body.tosAgreement) throw new BadRequestError(`Terms and conditions not met`);
@@ -480,7 +480,7 @@ export const uploadOrganizationBeneficiariesInBulk = async ({ user, file, body }
     'email',
     'address',
     'gender',
-    'country',
+    'country'
   ];
 
   let result = XLSX.utils.sheet_to_json(worksheet, {
@@ -515,7 +515,7 @@ export const uploadOrganizationBeneficiariesInBulk = async ({ user, file, body }
       firstname: beneficiary.firstname,
       lastname: beneficiary.lastname,
       othername: beneficiary.othername,
-      phone:beneficiary.phone,
+      phone: beneficiary.phone,
       email: beneficiary.email,
       address: beneficiary.address,
       gender: beneficiary.gender,
@@ -532,9 +532,12 @@ export const uploadOrganizationBeneficiariesInBulk = async ({ user, file, body }
   }
 
   const count = batchList.length + user.total_number_of_beneficiaries_created;
-  const amountLeft = user.total_number_of_beneficiaries_chosen - user.total_number_of_beneficiaries_created;
+  const amountLeft =
+    user.total_number_of_beneficiaries_chosen - user.total_number_of_beneficiaries_created;
   if (count > user.total_number_of_beneficiaries_chosen)
-    throw new Error(`Beneficiaries in Organization left to be created is ${amountLeft} beneficiaries`);
+    throw new Error(
+      `Beneficiaries in Organization left to be created is ${amountLeft} beneficiaries`
+    );
 
   const createBatchList = await beneficiaryBatchUploadModel.insertMany(batchList);
 
@@ -558,8 +561,9 @@ export const uploadOrganizationBeneficiariesInBulk = async ({ user, file, body }
   ];
 
   // Format date as "day, month, year"
-  const formattedDate = `${currentDate.getDate()}, ${monthNames[currentDate.getMonth()]
-    }, ${currentDate.getFullYear()}`;
+  const formattedDate = `${currentDate.getDate()}, ${
+    monthNames[currentDate.getMonth()]
+  }, ${currentDate.getFullYear()}`;
 
   //create email profile here
   const bulkUpload = {
@@ -677,7 +681,8 @@ export const onboardingPayment = async ({ user, upgrade, body }) => {
         modules: body.modules,
         annual_plan: body?.annual_plan || false,
         total_number_of_beneficiaries_chosen:
-          body.total_number_of_beneficiaries_chosen || user.total_number_of_beneficiaries_chosen * amountToPay,
+          body.total_number_of_beneficiaries_chosen ||
+          user.total_number_of_beneficiaries_chosen * amountToPay,
         payment_plan: body.payment_plan,
         start_trial_ts: body.start_trial_ts,
         end_trial_ts: body.end_trial_ts,
