@@ -44,7 +44,7 @@ export const onboardNewOrganization = async ({ body, dbConnection }) => {
     throw new BadRequestError(`Beneficiary registration fee is required`);
 
   const otp = await codeGenerator(6, '1234567890');
-  const otpHash = buildOtpHash(newAccount.email, otp, customConfig.otpKey, 15);
+  const otpHash = buildOtpHash(body.email, otp, env.otpKey, 15);
 
   let organizationProfile = {
     ...body,
@@ -84,7 +84,7 @@ export const onboardNewOrganization = async ({ body, dbConnection }) => {
     code: otp
   };
   const mailData = {
-    email: newAccount.email,
+    email: createOrganizationProfile.email,
     subject: 'MAJFINTECH ONBOARDING',
     type: 'html',
     html: verifyOnbordingMail(onboardingData).html,
