@@ -156,7 +156,7 @@ export const verifyEmail = async (body) => {
     );
   const admin = checkAcct.toJSON();
   const encrypedDataString = await encryptData({
-    data2encrypt: { ...admin, is_first_time },
+    data2encrypt: { ...admin },
     pubKey: env.public_key
   });
 
