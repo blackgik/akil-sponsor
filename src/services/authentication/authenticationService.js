@@ -6,7 +6,7 @@ import axios from 'axios';
 import path from 'path';
 import env from '../../config/env.js';
 import organizationModel, { buildOrganizationSchema } from '../../models/organizationModel.js';
-import { forgotPasswordMail, beneficiaryBulkUpload, onboardinMail } from '../../config/mail.js';
+import { forgotPasswordMail, verifyOnbordingMail, beneficiaryBulkUpload, onboardinMail } from '../../config/mail.js';
 import {
   BadRequestError,
   DuplicateError,
@@ -28,37 +28,29 @@ import { plans } from '../../config/modules.js';
 import notificationsModel from '../../models/settings/notificationsModel.js';
 import { encryptData } from '../../utils/vault.js';
 
-const accessTokenPrivateKey = env.private_key;
-const accessTokenPublicKey = env.public_key;
-
 import { finance } from '../../config/general.js';
-import fs from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 export const onboardNewOrganization = async ({ body, dbConnection }) => {
   if (!body.tosAgreement) throw new BadRequestError(`Terms and conditions not met`);
 
   const checkIfOnboarded = await organizationModel.findOne({ email: body.email });
-  if (checkIfOnboarded) throw new DuplicateError('Organization already exists');
+  if (checkIfOnboarded) throw new DuplicateError('Sponsor already exists');
 
   let { company_code, password, api_key_live, api_key_test } = await generateEnterpriseCredentials(
-    body.name_of_cooperation
+    body.firstname + '' + body.lastname
   );
 
-  const HashedPassword = await bcrypt.hash(password, 12);
+  if (!body.reg_fee)
+    throw new BadRequestError(`Beneficiary registration fee is required`);
 
-  const allowableIncreaseModules = ['basic', 'standard', 'premium', 'ultimate'];
-
-  if (!body.reg_fee) throw new BadRequestError(`Beneficiary registration fee is required`);
+  const otp = await codeGenerator(6, '1234567890');
+  const otpHash = buildOtpHash(newAccount.email, otp, customConfig.otpKey, 15);
 
   let organizationProfile = {
     ...body,
     company_code,
-    password: HashedPassword,
+    otp: otp,
+    password: otpHash,
     vault_access: {
       api_key_live,
       api_key_test
@@ -71,25 +63,41 @@ export const onboardNewOrganization = async ({ body, dbConnection }) => {
 
   if (!createOrganizationProfile) throw new InternalServerError('Server is being maintained');
 
+  // //create email profile here
+  // const onboardingData = {
+  //   email: createOrganizationProfile.email,
+  //   name_of_cooperation: createOrganizationProfile.name_of_cooperation,
+  //   password,
+  //   company_code
+  // };
+  // const mailData = {
+  //   email: createOrganizationProfile.email,
+  //   subject: 'MAJFINTECH ONBOARDING',
+  //   type: 'html',
+  //   html: onboardinMail(onboardingData).html,
+  //   text: onboardinMail(onboardingData).text
+  // };
+
   //create email profile here
   const onboardingData = {
-    email: createOrganizationProfile.email,
-    name_of_cooperation: createOrganizationProfile.name_of_cooperation,
-    password,
-    company_code
+    name: createOrganizationProfile.firstname + ' ' + createOrganizationProfile.lastname,
+    code: otp
   };
   const mailData = {
-    email: createOrganizationProfile.email,
+    email: newAccount.email,
     subject: 'MAJFINTECH ONBOARDING',
     type: 'html',
-    html: onboardinMail(onboardingData).html,
-    text: onboardinMail(onboardingData).text
+    html: verifyOnbordingMail(onboardingData).html,
+    text: verifyOnbordingMail(onboardingData).text
   };
   const msg = await formattMailInfo(mailData, env);
 
   const msgDelivered = await messageBird(msg);
   if (!msgDelivered)
-    throw new InternalServerError('server slip. Organization was created without mail being sent');
+    throw new InternalServerError(
+      'server slip. Sponsor was created without mail being sent'
+    );
+
 
   if (env.node_env === 'production') {
     const createSecData = await dbConnection.model('Organization', buildOrganizationSchema);
@@ -100,18 +108,18 @@ export const onboardNewOrganization = async ({ body, dbConnection }) => {
 
     await createSecData.create(secondDbData);
   }
-  return { profileData: createOrganizationProfile };
+  return {code: otp,  hash: otpHash, email: createOrganizationProfile.email };
 };
 
 export const loginOrganization = async (body) => {
   const { email, password } = body;
   const checkOrg = await organizationModel.findOne({ email });
 
-  if (!checkOrg) throw new InvalidError('Invalid organization');
+  if (!checkOrg) throw new InvalidError('Invalid Sponsor');
 
   const isMatch = await bcrypt.compare(password, checkOrg.password);
 
-  if (!isMatch) throw new InvalidError('Invalid organization');
+  if (!isMatch) throw new InvalidError('Invalid Sponsor');
 
   const admin = checkOrg.toJSON();
   const is_first_time = checkOrg.is_first_time;
@@ -124,7 +132,7 @@ export const loginOrganization = async (body) => {
 
   const encrypedDataString = await encryptData({
     data2encrypt: { ...admin, is_first_time },
-    pubKey: accessTokenPublicKey
+    pubKey: env.public_key
   });
 
   const tokenEncryption = jwt.sign({ _id: admin._id, email: admin.email }, env.jwt_key);
@@ -134,7 +142,7 @@ export const loginOrganization = async (body) => {
 
 export const forgotPassword = async ({ body }) => {
   const checkOrg = await organizationModel.findOne({ email: body.email });
-  if (!checkOrg) throw new NotFoundError('Organization not found');
+  if (!checkOrg) throw new NotFoundError('Sponsor not found');
 
   const newPassword = await codeGenerator(6, '1234567890');
 
@@ -145,7 +153,7 @@ export const forgotPassword = async ({ body }) => {
   checkOrg.save();
 
   const onboardingData = {
-    name: checkOrg.name_of_cooperation,
+    name: checkOrg.firstname + ' ' + checkOrg.lastname,
     code: newPassword
   };
 
@@ -171,7 +179,7 @@ export const resetPassword = async ({ body, email }) => {
   const { code, hash, password } = body;
 
   const checkOrg = await organizationModel.findOne({ email });
-  if (!checkOrg) throw new NotFoundError('Organization not found');
+  if (!checkOrg) throw new NotFoundError('Sponsor not found');
 
   const verifyOtp = verifyOTP(email, code, hash, env.otpKey);
   if (!verifyOtp) throw new InvalidError('Wrong otp code');
@@ -292,7 +300,7 @@ export const uploadOrganizationBeneficiariesInBulk = async ({ user, file, body }
       organization_id: user._id
     });
 
-    comment = beneficiaryExists ? 'Beneficiary is already part of this organization' : 'available';
+    comment = beneficiaryExists ? 'Beneficiary is already part of this Sponsor' : 'available';
 
     const batchExist = await beneficiaryBatchUploadModel.findOne({
       email: beneficiary.email,
@@ -327,9 +335,7 @@ export const uploadOrganizationBeneficiariesInBulk = async ({ user, file, body }
   const amountLeft =
     user.total_number_of_beneficiaries_chosen - user.total_number_of_beneficiaries_created;
   if (count > user.total_number_of_beneficiaries_chosen)
-    throw new Error(
-      `Beneficiaries in Organization left to be created is ${amountLeft} beneficiaries`
-    );
+    throw new Error(`Beneficiaries in Sponsor left to be created is ${amountLeft} beneficiaries`);
 
   const createBatchList = await beneficiaryBatchUploadModel.insertMany(batchList);
 
@@ -353,9 +359,8 @@ export const uploadOrganizationBeneficiariesInBulk = async ({ user, file, body }
   ];
 
   // Format date as "day, month, year"
-  const formattedDate = `${currentDate.getDate()}, ${
-    monthNames[currentDate.getMonth()]
-  }, ${currentDate.getFullYear()}`;
+  const formattedDate = `${currentDate.getDate()}, ${monthNames[currentDate.getMonth()]
+    }, ${currentDate.getFullYear()}`;
 
   //create email profile here
   const bulkUpload = {
