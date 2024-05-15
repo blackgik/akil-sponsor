@@ -319,7 +319,7 @@ export const onboardinMail = (data) => {
                                                                           <span>
                                                                               <ul
                                                                                   style="font-size: 14px; line-height: 23.8px; color: #002366;">
-                                                                                  <li>Name of Organisation:
+                                                                                  <li>Name of Sponsor:
                                                                                       ${
                                                                                         data.name_of_cooperation
                                                                                       }
@@ -5865,7 +5865,7 @@ export const onboardAgentMail = (data) => {
           <td style="overflow-wrap:break-word;word-break:break-word;padding:10px 25px 15px;font-family:arial,helvetica,sans-serif;" align="left">
             
       <div class="v-line-height" style="font-size: 14px; line-height: 170%; text-align: left; word-wrap: break-word;">
-        <p style="font-size: 14px; line-height: 170%; text-align: justify;"><span style="font-size: 14px; line-height: 23.8px; color: #444444;">NAME OF ORGANISATION: ${
+        <p style="font-size: 14px; line-height: 170%; text-align: justify;"><span style="font-size: 14px; line-height: 23.8px; color: #444444;">Name of Sponsor: ${
           data.name_of_cooperation
         } <br>AGENT EMAIL: ${data.email}<br>AGENT ID: ${data.agent_id}<br>PASSWORD: ${
       data.password

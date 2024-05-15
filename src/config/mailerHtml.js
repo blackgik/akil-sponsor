@@ -165,7 +165,7 @@ span.MsoHyperlinkFollowed {
                         <li style="color:#333333;margin:0px 0px 15px;font-size:14px"><p style="Margin:0;mso-line-height-rule:exactly;font-family:arial, 'helvetica neue', helvetica, sans-serif;line-height:21px;letter-spacing:0;color:#333333;font-size:14px">💴Initial amount - {{initial_amount}}</p></li>
                         <li style="color:#333333;margin:0px 0px 15px;font-size:14px"><p style="Margin:0;mso-line-height-rule:exactly;font-family:arial, 'helvetica neue', helvetica, sans-serif;line-height:21px;letter-spacing:0;color:#333333;font-size:14px">💰Amount Paid - {{amount}}</p></li>
                         <li style="color:#333333;margin:0px 0px 15px;font-size:14px"><p style="Margin:0;mso-line-height-rule:exactly;font-family:arial, 'helvetica neue', helvetica, sans-serif;line-height:21px;letter-spacing:0;color:#333333;font-size:14px">📅Date of payment - {{date}}</p></li>
-                       </ul><p style="Margin:0;mso-line-height-rule:exactly;font-family:arial, 'helvetica neue', helvetica, sans-serif;line-height:21px;letter-spacing:0;color:#333333;font-size:14px">Note that if you did not initiate this transaction, you can immidiately reach out to your organization to fix all issues.</p><p style="Margin:0;mso-line-height-rule:exactly;font-family:arial, 'helvetica neue', helvetica, sans-serif;line-height:21px;letter-spacing:0;color:#333333;font-size:14px">​</p><p style="Margin:0;mso-line-height-rule:exactly;font-family:arial, 'helvetica neue', helvetica, sans-serif;line-height:21px;letter-spacing:0;color:#333333;font-size:14px">Thank your for trusting&nbsp;</p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp;</td>
+                       </ul><p style="Margin:0;mso-line-height-rule:exactly;font-family:arial, 'helvetica neue', helvetica, sans-serif;line-height:21px;letter-spacing:0;color:#333333;font-size:14px">Note that if you did not initiate this transaction, you can immidiately reach out to your Sponsor to fix all issues.</p><p style="Margin:0;mso-line-height-rule:exactly;font-family:arial, 'helvetica neue', helvetica, sans-serif;line-height:21px;letter-spacing:0;color:#333333;font-size:14px">​</p><p style="Margin:0;mso-line-height-rule:exactly;font-family:arial, 'helvetica neue', helvetica, sans-serif;line-height:21px;letter-spacing:0;color:#333333;font-size:14px">Thank your for trusting&nbsp;</p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp;</td>
                      </tr>
                    </table></td>
                  </tr>
@@ -401,13 +401,13 @@ span.MsoHyperlinkFollowed {
                   <td valign="top" align="center" style="padding:0;Margin:0;width:560px">
                    <table width="100%" cellspacing="0" cellpadding="0" style="mso-table-lspace:0pt;mso-table-rspace:0pt;border-collapse:collapse;border-spacing:0px">
                      <tr>
-                      <td align="left" style="padding:0;Margin:0"><p style="Margin:0;mso-line-height-rule:exactly;font-family:arial, 'helvetica neue', helvetica, sans-serif;line-height:21px;letter-spacing:0;color:#333333;font-size:14px">Your payment for this product module is almost due. Please do well to login into your portal to make such item. Open Items are there to guide you to what transactions that need to be paid this month.<br><br>If you need any assisstance please do well to reach out to your organization at {{cooperative_name}}.&nbsp;</p><p style="Margin:0;mso-line-height-rule:exactly;font-family:arial, 'helvetica neue', helvetica, sans-serif;line-height:21px;letter-spacing:0;color:#333333;font-size:14px">Your details are as follows:</p>
+                      <td align="left" style="padding:0;Margin:0"><p style="Margin:0;mso-line-height-rule:exactly;font-family:arial, 'helvetica neue', helvetica, sans-serif;line-height:21px;letter-spacing:0;color:#333333;font-size:14px">Your payment for this product module is almost due. Please do well to login into your portal to make such item. Open Items are there to guide you to what transactions that need to be paid this month.<br><br>If you need any assisstance please do well to reach out to your Sponsor at {{cooperative_name}}.&nbsp;</p><p style="Margin:0;mso-line-height-rule:exactly;font-family:arial, 'helvetica neue', helvetica, sans-serif;line-height:21px;letter-spacing:0;color:#333333;font-size:14px">Your details are as follows:</p>
                        <ul style="font-family:arial, 'helvetica neue', helvetica, sans-serif;padding:0px 0px 0px 40px;margin:15px 0px">
                         <li style="color:#333333;margin:0px 0px 15px;font-size:14px"><p style="Margin:0;mso-line-height-rule:exactly;font-family:arial, 'helvetica neue', helvetica, sans-serif;line-height:21px;letter-spacing:0;color:#333333;font-size:14px">🗜Product Module - {{product_name}}</p></li>
                         <li style="color:#333333;margin:0px 0px 15px;font-size:14px"><p style="Margin:0;mso-line-height-rule:exactly;font-family:arial, 'helvetica neue', helvetica, sans-serif;line-height:21px;letter-spacing:0;color:#333333;font-size:14px">💴Initial amount - {{initial_amount}}</p></li>
                         <li style="color:#333333;margin:0px 0px 15px;font-size:14px"><p style="Margin:0;mso-line-height-rule:exactly;font-family:arial, 'helvetica neue', helvetica, sans-serif;line-height:21px;letter-spacing:0;color:#333333;font-size:14px">💰Amount to be paid - {{amount}}</p></li>
                         <li style="color:#333333;margin:0px 0px 15px;font-size:14px"><p style="Margin:0;mso-line-height-rule:exactly;font-family:arial, 'helvetica neue', helvetica, sans-serif;line-height:21px;letter-spacing:0;color:#333333;font-size:14px">📅Date of payment - {{date}}</p></li>
-                       </ul><p style="Margin:0;mso-line-height-rule:exactly;font-family:arial, 'helvetica neue', helvetica, sans-serif;line-height:21px;letter-spacing:0;color:#333333;font-size:14px">Note that if you did not initiate this transaction, you can immidiately reach out to your organization to fix all issues.</p><p style="Margin:0;mso-line-height-rule:exactly;font-family:arial, 'helvetica neue', helvetica, sans-serif;line-height:21px;letter-spacing:0;color:#333333;font-size:14px">​</p><p style="Margin:0;mso-line-height-rule:exactly;font-family:arial, 'helvetica neue', helvetica, sans-serif;line-height:21px;letter-spacing:0;color:#333333;font-size:14px">Thank your for trusting us to keep you in check.</p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp;</td>
+                       </ul><p style="Margin:0;mso-line-height-rule:exactly;font-family:arial, 'helvetica neue', helvetica, sans-serif;line-height:21px;letter-spacing:0;color:#333333;font-size:14px">Note that if you did not initiate this transaction, you can immidiately reach out to your Sponsor to fix all issues.</p><p style="Margin:0;mso-line-height-rule:exactly;font-family:arial, 'helvetica neue', helvetica, sans-serif;line-height:21px;letter-spacing:0;color:#333333;font-size:14px">​</p><p style="Margin:0;mso-line-height-rule:exactly;font-family:arial, 'helvetica neue', helvetica, sans-serif;line-height:21px;letter-spacing:0;color:#333333;font-size:14px">Thank your for trusting us to keep you in check.</p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp;</td>
                      </tr>
                    </table></td>
                  </tr>
@@ -649,7 +649,7 @@ span.MsoHyperlinkFollowed {
                         <li style="color:#333333;margin:0px 0px 15px;font-size:14px"><p style="Margin:0;mso-line-height-rule:exactly;font-family:arial, 'helvetica neue', helvetica, sans-serif;line-height:21px;letter-spacing:0;color:#333333;font-size:14px">💴Initial amount - {{initial_amount}}</p></li>
                         <li style="color:#333333;margin:0px 0px 15px;font-size:14px"><p style="Margin:0;mso-line-height-rule:exactly;font-family:arial, 'helvetica neue', helvetica, sans-serif;line-height:21px;letter-spacing:0;color:#333333;font-size:14px">💰Amount to be paid - {{amount}}</p></li>
                         <li style="color:#333333;margin:0px 0px 15px;font-size:14px"><p style="Margin:0;mso-line-height-rule:exactly;font-family:arial, 'helvetica neue', helvetica, sans-serif;line-height:21px;letter-spacing:0;color:#333333;font-size:14px">📅Date of payment - {{date}}</p></li>
-                       </ul><p style="Margin:0;mso-line-height-rule:exactly;font-family:arial, 'helvetica neue', helvetica, sans-serif;line-height:21px;letter-spacing:0;color:#333333;font-size:14px">Note that if you did not initiate this transaction, you can immidiately reach out to your organization to fix all issues.</p><p style="Margin:0;mso-line-height-rule:exactly;font-family:arial, 'helvetica neue', helvetica, sans-serif;line-height:21px;letter-spacing:0;color:#333333;font-size:14px">​</p><p style="Margin:0;mso-line-height-rule:exactly;font-family:arial, 'helvetica neue', helvetica, sans-serif;line-height:21px;letter-spacing:0;color:#333333;font-size:14px">Thank your for trusting us to keep you in check.</p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp;</td>
+                       </ul><p style="Margin:0;mso-line-height-rule:exactly;font-family:arial, 'helvetica neue', helvetica, sans-serif;line-height:21px;letter-spacing:0;color:#333333;font-size:14px">Note that if you did not initiate this transaction, you can immidiately reach out to your Sponsor to fix all issues.</p><p style="Margin:0;mso-line-height-rule:exactly;font-family:arial, 'helvetica neue', helvetica, sans-serif;line-height:21px;letter-spacing:0;color:#333333;font-size:14px">​</p><p style="Margin:0;mso-line-height-rule:exactly;font-family:arial, 'helvetica neue', helvetica, sans-serif;line-height:21px;letter-spacing:0;color:#333333;font-size:14px">Thank your for trusting us to keep you in check.</p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp;</td>
                      </tr>
                    </table></td>
                  </tr>
@@ -891,7 +891,7 @@ span.MsoHyperlinkFollowed {
                         <li style="color:#333333;margin:0px 0px 15px;font-size:14px"><p style="Margin:0;mso-line-height-rule:exactly;font-family:arial, 'helvetica neue', helvetica, sans-serif;line-height:21px;letter-spacing:0;color:#333333;font-size:14px">💴Amount Collected - {{initial_amount}}</p></li>
                         <li style="color:#333333;margin:0px 0px 15px;font-size:14px"><p style="Margin:0;mso-line-height-rule:exactly;font-family:arial, 'helvetica neue', helvetica, sans-serif;line-height:21px;letter-spacing:0;color:#333333;font-size:14px">💰Balance - {{amount}}</p></li>
                         <li style="color:#333333;margin:0px 0px 15px;font-size:14px"><p style="Margin:0;mso-line-height-rule:exactly;font-family:arial, 'helvetica neue', helvetica, sans-serif;line-height:21px;letter-spacing:0;color:#333333;font-size:14px">📅Date of payment - {{date}}</p></li>
-                       </ul><p style="Margin:0;mso-line-height-rule:exactly;font-family:arial, 'helvetica neue', helvetica, sans-serif;line-height:21px;letter-spacing:0;color:#333333;font-size:14px">Note that if you did not initiate this transaction, you can immidiately reach out to your organization to fix all issues.</p><p style="Margin:0;mso-line-height-rule:exactly;font-family:arial, 'helvetica neue', helvetica, sans-serif;line-height:21px;letter-spacing:0;color:#333333;font-size:14px">Thank your for trusting us to keep you in check.</p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp;</td>
+                       </ul><p style="Margin:0;mso-line-height-rule:exactly;font-family:arial, 'helvetica neue', helvetica, sans-serif;line-height:21px;letter-spacing:0;color:#333333;font-size:14px">Note that if you did not initiate this transaction, you can immidiately reach out to your Sponsor to fix all issues.</p><p style="Margin:0;mso-line-height-rule:exactly;font-family:arial, 'helvetica neue', helvetica, sans-serif;line-height:21px;letter-spacing:0;color:#333333;font-size:14px">Thank your for trusting us to keep you in check.</p> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp;</td>
                      </tr>
                    </table></td>
                  </tr>
@@ -1847,7 +1847,7 @@ export const beneficiaryOnboardingHTML = `
                                       "
                                     >
                                       Note that if you did not initiate this transaction, you can
-                                      immidiately reach out to your organization to fix all issues.
+                                      immidiately reach out to your Sponsor to fix all issues.
                                     </p>
                                     <p
                                       style="
@@ -2174,7 +2174,7 @@ export const agentChooseorganizationOnboardingHTML = `
     <meta name="x-apple-disable-message-reformatting" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta content="telephone=no" name="format-detection" />
-    <title>Organization Onboarding</title>
+    <title>Sponsor Onboarding</title>
     <!--[if (mso 16)]>
       <style type="text/css">
         a {
@@ -2902,7 +2902,7 @@ export const agentChooseorganizationOnboardingHTML = `
                                         font-size: 14px;
                                       "
                                     >
-                                      With Akilaah, organizations and cooperatives can seamlessly
+                                      With Akilaah, Sponsors and cooperatives can seamlessly
                                       collaborate, streamline operations, and unlock their full
                                       potential.By combining cutting-edge technology with a focus on
                                       collaboration, Akilaah helps collaborative groups innovate and
@@ -3369,7 +3369,7 @@ export const organizationChoosesAgentOnboardingHTML = `
     <meta name="x-apple-disable-message-reformatting" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta content="telephone=no" name="format-detection" />
-    <title>Organization Onboarding</title>
+    <title>Sponsor Onboarding</title>
     <!--[if (mso 16)]>
       <style type="text/css">
         a {
@@ -4097,7 +4097,7 @@ export const organizationChoosesAgentOnboardingHTML = `
                                         font-size: 14px;
                                       "
                                     >
-                                      With Akilaah, organizations and cooperatives can seamlessly
+                                      With Akilaah, Sponsors and cooperatives can seamlessly
                                       collaborate, streamline operations, and unlock their full
                                       potential.By combining cutting-edge technology with a focus on
                                       collaboration, Akilaah helps collaborative groups innovate and
@@ -4128,7 +4128,7 @@ export const organizationChoosesAgentOnboardingHTML = `
                                         font-size: 14px;
                                       "
                                     >
-                                      Organization details are as follows:
+                                      Sponsor details are as follows:
                                     </p>
                                     <ul
                                       style="
@@ -4156,7 +4156,7 @@ export const organizationChoosesAgentOnboardingHTML = `
                                             font-size: 14px;
                                           "
                                         >
-                                          Organization Name- {{org_name}}
+                                          Sponsor Name- {{org_name}}
                                         </p>
                                       </li>
                                       <li

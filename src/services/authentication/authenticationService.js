@@ -26,29 +26,18 @@ import { plans } from '../../config/modules.js';
 import notificationsModel from '../../models/settings/notificationsModel.js';
 import { encryptData } from '../../utils/vault.js';
 import { finance } from '../../config/general.js';
-import fs from "fs";
-import path from "path";
-import { fileURLToPath } from 'url';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-const accessTokenPrivateKey = fs.readFileSync(path.join(__dirname, '../../keys', 'accessTokenPrivateKey.key'), 'utf8')
-const accessTokenPublicKey = fs.readFileSync(path.join(__dirname, '../../keys', 'accessTokenPublicKey.key.pub'), 'utf8')
 
 export const onboardNewOrganization = async ({ body, dbConnection }) => {
   if (!body.tosAgreement) throw new BadRequestError(`Terms and conditions not met`);
 
   const checkIfOnboarded = await organizationModel.findOne({ email: body.email });
-  if (checkIfOnboarded) throw new DuplicateError('Organization already exists');
+  if (checkIfOnboarded) throw new DuplicateError('Sponsor already exists');
 
   let { company_code, password, api_key_live, api_key_test } = await generateEnterpriseCredentials(
-    body.name_of_cooperation
+    body.firstname+''+body.lastname
   );
 
   const HashedPassword = await bcrypt.hash(password, 12);
-
-  const allowableIncreaseModules = ['basic', 'standard', 'premium', 'ultimate'];
 
   if (!body.reg_fee )
     throw new BadRequestError(`Beneficiary registration fee is required`);
@@ -64,7 +53,6 @@ export const onboardNewOrganization = async ({ body, dbConnection }) => {
     start_trial_ts: new Date(),
     end_trial_ts: new Date(new Date().getTime() + 1000 * 24 * 60 * 60 * 14)
   };
-
 
     const createOrganizationProfile = await organizationModel.create(organizationProfile);
 
@@ -89,7 +77,7 @@ export const onboardNewOrganization = async ({ body, dbConnection }) => {
     const msgDelivered = await messageBird(msg);
     if (!msgDelivered)
       throw new InternalServerError(
-        'server slip. Organization was created without mail being sent'
+        'server slip. Sponsor was created without mail being sent'
       );
 
 
@@ -109,11 +97,11 @@ export const loginOrganization = async (body) => {
   const { email, password } = body;
   const checkOrg = await organizationModel.findOne({ email });
 
-  if (!checkOrg) throw new InvalidError('Invalid organization');
+  if (!checkOrg) throw new InvalidError('Invalid Sponsor');
 
   const isMatch = await bcrypt.compare(password, checkOrg.password);
 
-  if (!isMatch) throw new InvalidError('Invalid organization');
+  if (!isMatch) throw new InvalidError('Invalid Sponsor');
 
   const admin = checkOrg.toJSON();
   const is_first_time = checkOrg.is_first_time;
@@ -126,7 +114,7 @@ export const loginOrganization = async (body) => {
 
   const encrypedDataString = await encryptData({
     data2encrypt: { ...admin, is_first_time },
-    pubKey: accessTokenPublicKey
+    pubKey: env.public_key
   });
 
   const tokenEncryption = jwt.sign({ _id: admin._id, email: admin.email }, env.jwt_key);
@@ -136,7 +124,7 @@ export const loginOrganization = async (body) => {
 
 export const forgotPassword = async ({ body }) => {
   const checkOrg = await organizationModel.findOne({ email: body.email });
-  if (!checkOrg) throw new NotFoundError('Organization not found');
+  if (!checkOrg) throw new NotFoundError('Sponsor not found');
 
   const newPassword = await codeGenerator(6, '1234567890');
 
@@ -147,7 +135,7 @@ export const forgotPassword = async ({ body }) => {
   checkOrg.save();
 
   const onboardingData = {
-    name: checkOrg.name_of_cooperation,
+    name: checkOrg.firstname +' '+checkOrg.lastname,
     code: newPassword
   };
 
@@ -173,7 +161,7 @@ export const resetPassword = async ({ body, email }) => {
   const { code, hash, password } = body;
 
   const checkOrg = await organizationModel.findOne({ email });
-  if (!checkOrg) throw new NotFoundError('Organization not found');
+  if (!checkOrg) throw new NotFoundError('Sponsor not found');
 
   const verifyOtp = verifyOTP(email, code, hash, env.otpKey);
   if (!verifyOtp) throw new InvalidError('Wrong otp code');
@@ -294,7 +282,7 @@ export const uploadOrganizationBeneficiariesInBulk = async ({ user, file, body }
       organization_id: user._id
     });
 
-    comment = beneficiaryExists ? 'Beneficiary is already part of this organization' : 'available';
+    comment = beneficiaryExists ? 'Beneficiary is already part of this Sponsor' : 'available';
 
     const batchExist = await beneficiaryBatchUploadModel.findOne({
       email: beneficiary.email,
@@ -328,7 +316,7 @@ export const uploadOrganizationBeneficiariesInBulk = async ({ user, file, body }
   const count = batchList.length + user.total_number_of_beneficiaries_created;
   const amountLeft = user.total_number_of_beneficiaries_chosen - user.total_number_of_beneficiaries_created;
   if (count > user.total_number_of_beneficiaries_chosen)
-    throw new Error(`Beneficiaries in Organization left to be created is ${amountLeft} beneficiaries`);
+    throw new Error(`Beneficiaries in Sponsor left to be created is ${amountLeft} beneficiaries`);
 
   const createBatchList = await beneficiaryBatchUploadModel.insertMany(batchList);
 
