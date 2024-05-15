@@ -17,7 +17,7 @@ export const onboardNewOrganizationHandler = async (req, res) => {
   const { body, query, dbConnection } = req;
   const { start_trial } = query;
 
-  const onboardedOrganization = await onboardNewOrganization({ body, start_trial, dbConnection });
+  const onboardedOrganization = await onboardNewOrganization({ body, dbConnection });
 
   res.send(appResponse('onboarded organization successfully', onboardedOrganization));
 };

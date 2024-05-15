@@ -2,8 +2,9 @@ import Joi from 'joi';
 
 export const validateOnboardingOrganizationSchema = Joi.object({
   language: Joi.string().optional().allow('', null),
-  avatar: Joi.object({ key: Joi.string().optional().allow('', null) }).optional(),
   name_of_cooperation: Joi.string().optional().allow('', null),
+  firstname: Joi.string().optional().allow('', null),
+  lastname: Joi.string().optional().allow('', null),
   email: Joi.string().email().required(),
   address: Joi.string().optional().allow('', null),
   admin_name: Joi.string().optional().allow('', null),
@@ -66,9 +67,8 @@ export const validateOrganizationBeneficiarySchema = Joi.object({
   othername: Joi.string().optional().allow('', null),
   phone: Joi.string().required(),
   email: Joi.string().required(),
-  address: Joi.string().optional().allow('', null),
   gender: Joi.string().required(),
-  country: Joi.string().optional().allow('', null),
+  country: Joi.string().optional().allow('', null)
 });
 
 export const validateBeneficiaryUpdateSchema = Joi.object({
@@ -80,7 +80,6 @@ export const validateBeneficiaryUpdateSchema = Joi.object({
   othername: Joi.string().optional().allow('', null),
   phone: Joi.string().required(),
   email: Joi.string().required(),
-  address: Joi.string().optional().allow('', null),
   gender: Joi.string().required(),
   country: Joi.string().optional().allow('', null),
 });

@@ -31,7 +31,15 @@ import { encryptData } from '../../utils/vault.js';
 const accessTokenPrivateKey = env.private_key;
 const accessTokenPublicKey = env.public_key;
 
-export const onboardNewOrganization = async ({ body, start_trial, dbConnection }) => {
+import { finance } from '../../config/general.js';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+export const onboardNewOrganization = async ({ body, dbConnection }) => {
   if (!body.tosAgreement) throw new BadRequestError(`Terms and conditions not met`);
 
   const checkIfOnboarded = await organizationModel.findOne({ email: body.email });
@@ -43,84 +51,9 @@ export const onboardNewOrganization = async ({ body, start_trial, dbConnection }
 
   const HashedPassword = await bcrypt.hash(password, 12);
 
-  const paymentPackage = plans[body.payment_plan];
-  let amountToPay = paymentPackage.base_pay;
-
-  if (body.total_number_of_beneficiaries_chosen > paymentPackage.max_users)
-    throw new BadRequestError(
-      `your package has a maximum of ${paymentPackage.max_users} beneficiaries. you cannot exceed it`
-    );
-
   const allowableIncreaseModules = ['basic', 'standard', 'premium', 'ultimate'];
 
-  body.modules.forEach((element) => {
-    if (
-      !paymentPackage.modules.includes(element) &&
-      allowableIncreaseModules.includes(body.payment_plan)
-    ) {
-      amountToPay = amountToPay + 5;
-    }
-  });
-
-  let amount =
-    body.payment_plan === 'third_party_api'
-      ? paymentPackage.base_pay
-      : body.total_number_of_beneficiaries_chosen * amountToPay;
-
-  if (body.annual_plan === true) {
-    amount = body.payment_plan === 'third_party_api' ? amount : amount * 12;
-  }
-
-  if (amount !== body.organization_reg_fee && allowableIncreaseModules.includes(body.payment_plan))
-    throw new BadRequestError(`Amount for selected Models will be ${amount}`);
-
-  // if (body?.bank_details?.bank_code) {
-  //   const subacctData = {
-  //     business_name: body.name_of_cooperation,
-  //     bank_code: body?.bank_details?.bank_code,
-  //     account_number: body?.bank_details?.acct_no,
-  //     percentage_charge: 2
-  //   };
-
-  //   const config = {
-  //     headers: {
-  //       'Content-Type': 'application/json',
-  //       Authorization: `Bearer ${env.paystack_secret_key}`
-  //     }
-  //   };
-
-  //   try {
-  //     const subacctURL = `${env.paystack_api_url}/subaccount/`;
-
-  //     const subDetails = await axios.post(subacctURL, subacctData, config);
-
-  //     body.paystack_subacct = subDetails.data.data;
-
-  //     body.other_bank_details = [
-  //       {
-  //         bank_name: body.bank_details.bank_name,
-  //         acct_no: body.bank_details.acct_no,
-  //         acct_name: body.bank_details.acct_name,
-  //         bank_code: body.bank_details.bank_code,
-  //         kyc: {
-  //           id_type: 'main',
-  //           id_avatar: { key: 'main' },
-  //           utility_avatar: { key: 'main' },
-  //           cac_avatar: { key: 'main' }
-  //         },
-  //         approval: 'approved',
-  //         metadata: subDetails.data.data
-  //       }
-  //     ];
-  //   } catch (e) {
-  //     throw new BadRequestError(e.response.data.message);
-  //   }
-  // }
-
-  let paystackAmount = 0.02 * amount;
-  if (paystackAmount > 500) paystackAmount = 500;
-
-  amount = amount + paystackAmount;
+  if (!body.reg_fee) throw new BadRequestError(`Beneficiary registration fee is required`);
 
   let organizationProfile = {
     ...body,
@@ -134,129 +67,40 @@ export const onboardNewOrganization = async ({ body, start_trial, dbConnection }
     end_trial_ts: new Date(new Date().getTime() + 1000 * 24 * 60 * 60 * 14)
   };
 
-  if (start_trial === 'on' && body.payment_plan !== 'third_party_api') {
-    const createOrganizationProfile = await organizationModel.create(organizationProfile);
+  const createOrganizationProfile = await organizationModel.create(organizationProfile);
 
-    if (!createOrganizationProfile) throw new InternalServerError('Server is being maintained');
+  if (!createOrganizationProfile) throw new InternalServerError('Server is being maintained');
 
-    //create email profile here
-    const onboardingData = {
-      email: createOrganizationProfile.email,
-      name_of_cooperation: createOrganizationProfile.name_of_cooperation,
-      password,
-      company_code
+  //create email profile here
+  const onboardingData = {
+    email: createOrganizationProfile.email,
+    name_of_cooperation: createOrganizationProfile.name_of_cooperation,
+    password,
+    company_code
+  };
+  const mailData = {
+    email: createOrganizationProfile.email,
+    subject: 'MAJFINTECH ONBOARDING',
+    type: 'html',
+    html: onboardinMail(onboardingData).html,
+    text: onboardinMail(onboardingData).text
+  };
+  const msg = await formattMailInfo(mailData, env);
+
+  const msgDelivered = await messageBird(msg);
+  if (!msgDelivered)
+    throw new InternalServerError('server slip. Organization was created without mail being sent');
+
+  if (env.node_env === 'production') {
+    const createSecData = await dbConnection.model('Organization', buildOrganizationSchema);
+
+    const secondDbData = {
+      ...createOrganizationProfile.toJSON()
     };
-    const mailData = {
-      email: createOrganizationProfile.email,
-      subject: 'MAJFINTECH ONBOARDING',
-      type: 'html',
-      html: onboardinMail(onboardingData).html,
-      text: onboardinMail(onboardingData).text
-    };
-    const msg = await formattMailInfo(mailData, env);
 
-    const msgDelivered = await messageBird(msg);
-    if (!msgDelivered)
-      throw new InternalServerError(
-        'server slip. Organization was created without mail being sent'
-      );
-
-    const createDefaultInstitution = await institutionModel.create({
-      code: company_code,
-      name_of_institution: createOrganizationProfile.name_of_cooperation,
-      telephone: createOrganizationProfile.phone,
-      email: createOrganizationProfile.email,
-      address: createOrganizationProfile.address || 'N?A',
-      organization_id: createOrganizationProfile._id
-    });
-
-    if (!createDefaultInstitution)
-      throw new InternalServerError(
-        'Server slip. Organization was created and mail was sent. but default institution is missing'
-      );
-
-    if (body.payment_plan === 'third_party_api' && env.node_env === 'production') {
-      const createSecData = await dbConnection.model('Organization', buildOrganizationSchema);
-
-      const secondDbData = {
-        ...createOrganizationProfile.toJSON()
-      };
-
-      await createSecData.create(secondDbData);
-    }
-
-    return {};
-  } else if (start_trial === 'off' && body.payment_plan !== 'third_party_api') {
-    let total_amount = amount;
-
-    if (body.credit_balance > 0) {
-      total_amount = total_amount + body.credit_balance * 3.5;
-    }
-
-    if (body.deduction_uploads > 0) {
-      total_amount =
-        total_amount + body.deduction_uploads * 20 * body.total_number_of_beneficiaries_chosen;
-    }
-
-    const data = {
-      amount: total_amount * 100,
-      email: body.email,
-      callback_url: 'https://sponsor.akilaah.com/',
-      metadata: {
-        ...organizationProfile,
-        start_trial_ts: new Date(),
-        end_trial_ts:
-          body?.annual_plan === true
-            ? new Date(new Date().getTime() + 1000 * 24 * 60 * 60 * 365)
-            : new Date(new Date().getTime() + 1000 * 24 * 60 * 60 * 30),
-        amount,
-        type: 'onboarding_fee',
-        rawpassword: password,
-        on_trial: false,
-        hasPaid: true,
-        acctstatus: 'active'
-      }
-    };
-    const url = `${env.paystack_api_url}/transaction/initialize`;
-
-    const gateway = await axios.post(url, data, {
-      headers: {
-        Authorization: `Bearer ${env.paystack_secret_key}`,
-        'Content-Type': 'application/json'
-      }
-    });
-
-    return { gateway: gateway.data.data.authorization_url };
-  } else if (start_trial === 'off' && body.payment_plan === 'third_party_api') {
-    const data = {
-      amount: amount * 100,
-      email: body.email,
-      metadata: {
-        ...organizationProfile,
-        start_trial_ts: new Date(),
-        end_trial_ts:
-          body?.annual_plan === true
-            ? new Date(new Date().getTime() + 1000 * 24 * 60 * 60 * 365)
-            : new Date(new Date().getTime() + 1000 * 24 * 60 * 60 * 30),
-        amount,
-        type: 'third_party_onboarding_fee',
-        rawpassword: password,
-        on_trial: false,
-        hasPaid: true,
-        acctstatus: 'active'
-      }
-    };
-    const url = `${env.paystack_api_url}/transaction/initialize`;
-
-    const gateway = await axios.post(url, data, {
-      headers: {
-        Authorization: `Bearer ${env.paystack_secret_key}`,
-        'Content-Type': 'application/json'
-      }
-    });
-
-    return { gateway: gateway.data.data.authorization_url };
+    await createSecData.create(secondDbData);
   }
+  return { profileData: createOrganizationProfile };
 };
 
 export const loginOrganization = async (body) => {
@@ -368,31 +212,6 @@ export const onboardNewOrganizationBeneficiary = async ({ body, user }) => {
     .substring(0, 3)
     .toUpperCase()}${await codeGenerator(7, 'ABCDEFGHIJKLMN1234567890')}`;
 
-  // if (body?.bank_details?.bank?.bank_code) {
-  //   const subacctData = {
-  //     business_name: body.personal.beneficiary_name,
-  //     bank_code: body?.bank_details?.bank?.bank_code,
-  //     account_number: body?.bank_details?.bank?.acct_number,
-  //     percentage_charge: 0.98
-  //   };
-
-  //   const config = {
-  //     headers: {
-  //       'Content-Type': 'application/json',
-  //       Authorization: `Bearer ${env.paystack_secret_key}`
-  //     }
-  //   };
-
-  //   try {
-  //     const subacctURL = `${env.paystack_api_url}/subaccount`;
-  //     const data = await axios.post(subacctURL, subacctData, config);
-
-  //     body.bank_details.bank.metadata = data?.data?.data || {};
-  //   } catch (e) {
-  //     throw new BadRequestError(e.response.data.message);
-  //   }
-  // }
-
   const data = {
     organization_id: user._id,
     password: await bcrypt.hash(generatePassword, 12),
@@ -427,33 +246,6 @@ export const onboardNewOrganizationBeneficiary = async ({ body, user }) => {
   const msgDelivered = await messageBird(msg);
   if (!msgDelivered)
     throw new InternalServerError('server slip. Beneficiary was created without mail being sent');
-
-  // send sms to the user
-  try {
-    const smsUrl = env.termii_api_url + '/api/sms/send';
-    const smsData = {
-      to: createBeneficiary.phone,
-      from: env.termii_sender_id,
-      sms: `Hi there, your credentials are as follows:
-    NAME OF COOPERATION: ${onboardingData.name_of_cooperation}\n
-    PASSWORD: ${onboardingData.password}\n
-    COMPANY CODE: ${onboardingData.company_code}
-    `,
-      type: 'plain',
-      api_key: env.termii_api_secret,
-      channel: 'generic'
-    };
-
-    const config = {
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    };
-
-    const smsResponse = await axios.post(smsUrl, smsData, config);
-  } catch (e) {
-    console.log(e);
-  }
 
   // create notification for beneficiary
   await notificationsModel.create({
