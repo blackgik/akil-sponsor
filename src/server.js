@@ -22,6 +22,7 @@ const app = express();
 
 const server = http.createServer(app);
 
+
 let routePath;
 if (env.node_env === 'production') {
   routePath = '/prod/sockets';
