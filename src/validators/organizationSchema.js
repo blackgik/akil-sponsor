@@ -5,9 +5,11 @@ export const validateOnboardingOrganizationSchema = Joi.object({
   name_of_cooperation: Joi.string().optional().allow('', null),
   firstname: Joi.string().optional().allow('', null),
   lastname: Joi.string().optional().allow('', null),
+  gender: Joi.string().optional().allow('', null),
   email: Joi.string().email().required(),
   address: Joi.string().optional().allow('', null),
   admin_name: Joi.string().optional().allow('', null),
+  country: Joi.string().optional().allow('', null),
   phone: Joi.string().optional().required(),
   website: Joi.string().optional().allow('', null),
   modules: Joi.array().items(Joi.string().optional().allow('', null)),
@@ -51,6 +53,12 @@ export const updateOrganizationProfileSchema = Joi.object({
 export const validateLoginOrganizationSchema = Joi.object({
   email: Joi.string().email().required(),
   password: Joi.string().optional().allow('', null).min(6)
+});
+
+export const validateVerifyOnboardingEmailSchema = Joi.object({
+  hash: Joi.string().required(),
+  email: Joi.string().email().required(),
+  code: Joi.string().min(6).required()
 });
 
 export const validateOrganizationBeneficiarySchema = Joi.object({

@@ -44,12 +44,11 @@ export const onboardNewOrganization = async ({ body, dbConnection }) => {
     throw new BadRequestError(`Beneficiary registration fee is required`);
 
   const otp = await codeGenerator(6, '1234567890');
-  const otpHash = buildOtpHash(newAccount.email, otp, customConfig.otpKey, 15);
+  const otpHash = buildOtpHash(body.email, otp, env.otpKey, 15);
 
   let organizationProfile = {
     ...body,
     company_code,
-    otp: otp,
     password: otpHash,
     vault_access: {
       api_key_live,
@@ -84,7 +83,7 @@ export const onboardNewOrganization = async ({ body, dbConnection }) => {
     code: otp
   };
   const mailData = {
-    email: newAccount.email,
+    email: createOrganizationProfile.email,
     subject: 'MAJFINTECH ONBOARDING',
     type: 'html',
     html: verifyOnbordingMail(onboardingData).html,
@@ -108,7 +107,104 @@ export const onboardNewOrganization = async ({ body, dbConnection }) => {
 
     await createSecData.create(secondDbData);
   }
-  return {code: otp,  hash: otpHash, email: createOrganizationProfile.email };
+  const encrypedDataString = await encryptData({
+    data2encrypt: { hash: otpHash, email: createOrganizationProfile.email },
+    pubKey: env.public_key
+  });
+  return { encrypedDataString };
+};
+
+export const resendOtp = async (body) => {
+
+  //const hash = await argon.hash(dto.password);
+  const checkIfNotVerified = await organizationModel.findOne({ email: body.email });
+  if (checkIfNotVerified.isApproved) throw new BadRequestError('Account already approved. Login!');
+
+  const otp = await codeGenerator(6, '1234567890');
+
+  const otpHash = buildOtpHash(checkIfNotVerified.email, otp, env.otpKey, 15);
+
+  checkIfNotVerified.password = otpHash;
+  checkIfNotVerified.otp = otp;
+  await checkIfNotVerified.save();
+  //create email profile here
+  const onboardingData = {
+    name: checkIfNotVerified.firstname + ' ' + checkIfNotVerified.lastname,
+    code: otp
+  };
+  const mailData = {
+    email: checkIfNotVerified.email,
+    subject: 'MAJFINTECH ONBOARDING',
+    type: 'html',
+    html: verifyOnbordingMail(onboardingData).html,
+    text: verifyOnbordingMail(onboardingData).text
+  };
+  const msg = await formattMailInfo(mailData, env);
+
+  const msgDelivered = await messageBird(msg);
+  if (!msgDelivered)
+    throw new InternalServerError(500,
+      'server slip. Organization was created without mail being sent',
+      ''
+    );
+  const encrypedDataString = await encryptData({
+    data2encrypt: { hash: otpHash, email: checkIfNotVerified.email },
+    pubKey: env.public_key
+  });
+  return { encrypedDataString };
+
+}
+
+export const verifyEmail = async (body) => {
+  const { code, hash, email } = body;
+
+  const checkAcct = await organizationModel.findOne({ email: email });
+
+  if (!checkAcct) throw new BadRequestError('User not found');
+
+  const verifyOtp = verifyOTP(checkAcct.email, code, hash, env.otpKey);
+  if (!verifyOtp) throw new BadRequestError('Invalid Input');
+
+  const generatePassword = await codeGenerator(9, 'ABCDEFGHI&*$%#1234567890');
+
+  const hashedPwd = await bcrypt.hash(generatePassword, 12);
+  checkAcct.isApproved = true;
+  checkAcct.password = hashedPwd;
+  checkAcct.acctstatus = 'active';
+
+
+  await checkAcct.save();
+  //create email profile here
+  const onboardingData = {
+    email: checkAcct.email,
+    company_code: checkAcct.company_code,
+    name_of_cooperation: checkAcct.firstname + ' ' + checkAcct.lastname,
+    password: generatePassword
+  };
+  const mailData = {
+    email: checkAcct.email,
+    subject: 'MAJFINTECH ONBOARDING',
+    type: 'html',
+    html: onboardinMail(onboardingData).html,
+    text: onboardinMail(onboardingData).text
+  };
+  const msg = await formattMailInfo(mailData, env);
+
+  const msgDelivered = await messageBird(msg);
+  if (!msgDelivered)
+    throw new InternalServerError(500,
+      'server slip. Organization was created without mail being sent', ''
+    );
+  const admin = checkAcct.toJSON();
+  const encrypedDataString = await encryptData({
+    data2encrypt: { ...admin },
+    pubKey: env.public_key
+  });
+
+
+  const tokenEncryption = jwt.sign({ _id: admin._id, email: admin.email }, env.jwt_key);
+
+  return { encrypedDataString, tokenEncryption };
 };
 
 export const loginOrganization = async (body) => {
