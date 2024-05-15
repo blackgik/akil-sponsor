@@ -49,7 +49,6 @@ export const onboardNewOrganization = async ({ body, dbConnection }) => {
   let organizationProfile = {
     ...body,
     company_code,
-    otp: otp,
     password: otpHash,
     vault_access: {
       api_key_live,
@@ -108,58 +107,63 @@ export const onboardNewOrganization = async ({ body, dbConnection }) => {
 
     await createSecData.create(secondDbData);
   }
-  return {code: otp,  hash: otpHash, email: createOrganizationProfile.email };
+  const encrypedDataString = await encryptData({
+    data2encrypt: { hash: otpHash, email: createOrganizationProfile.email },
+    pubKey: env.public_key
+  });
+  return { encrypedDataString };
 };
 
-export const verifyOtp = async (body)=> {
-  const { code, hash } = body;
+export const verifyEmail = async (body) => {
+  const { code, hash, email } = body;
 
-  const checkAcct = await Account.findOne({ otp: code });
+  const checkAcct = await organizationModel.findOne({ email: email });
 
-  if (!checkAcct) throw new NotFoundError(200, 'Account not found', '');
+  if (!checkAcct) throw new BadRequestError('User not found');
 
-  const verifyOtp = verifyOTP(checkAcct.email, code, hash, customConfig.otpKey);
-  if (!verifyOtp) throw new InvalidError(422, 'Invalid Input', '');
+  const verifyOtp = verifyOTP(checkAcct.email, code, hash, env.otpKey);
+  if (!verifyOtp) throw new BadRequestError('Invalid Input');
 
-  const generatePassword = checkAcct.hash;;
+  const generatePassword = await codeGenerator(9, 'ABCDEFGHI&*$%#1234567890');
 
-  const hashedPwd = await argon.hash(checkAcct.hash);
-  checkAcct.email_verified = true;
-  checkAcct.otpHash = '';
-  checkAcct.hash = hashedPwd;
+  const hashedPwd = await bcrypt.hash(generatePassword, 12);
+  checkAcct.isApproved = true;
+  checkAcct.password = hashedPwd;
   checkAcct.acctstatus = 'active';
 
-  let toVerifySponsor = await Sponsor.findById(checkAcct.ownerId);
-  if (toVerifySponsor) {
-      toVerifySponsor.email_verified = true;
-      toVerifySponsor.otpHash = '';
-      toVerifySponsor.password = hashedPwd;
-      toVerifySponsor.acctstatus = 'active';
-      checkAcct.ownerId = toVerifySponsor._id;
-      await Sponsor.updateSponsor(toVerifySponsor._id, toVerifySponsor);
-  }
-  await Account.updateAccount(checkAcct._id, checkAcct);
+
+  await checkAcct.save();
   //create email profile here
   const onboardingData = {
-      email: checkAcct.email,
-      password: generatePassword
+    email: checkAcct.email,
+    company_code: checkAcct.company_code,
+    name_of_cooperation: checkAcct.firstname + ' ' + checkAcct.lastname,
+    password: generatePassword
   };
   const mailData = {
-      email: checkAcct.email,
-      subject: 'MAJFINTECH ONBOARDING',
-      type: 'html',
-      html: onboardinMail(onboardingData).html,
-      text: onboardinMail(onboardingData).text
+    email: checkAcct.email,
+    subject: 'MAJFINTECH ONBOARDING',
+    type: 'html',
+    html: onboardinMail(onboardingData).html,
+    text: onboardinMail(onboardingData).text
   };
-  const msg = await formattMailInfo(mailData, customConfig);
+  const msg = await formattMailInfo(mailData, env);
 
   const msgDelivered = await messageBird(msg);
   if (!msgDelivered)
-      throw new InternalServerError(500,
-          'server slip. Organization was created without mail being sent', ''
-      );
-  const tokens = await this.signJwt(checkAcct._id, checkAcct.email);
-  return tokens;
+    throw new InternalServerError(500,
+      'server slip. Organization was created without mail being sent', ''
+    );
+  const admin = checkAcct.toJSON();
+  const encrypedDataString = await encryptData({
+    data2encrypt: { ...admin, is_first_time },
+    pubKey: env.public_key
+  });
+
+
+  const tokenEncryption = jwt.sign({ _id: admin._id, email: admin.email }, env.jwt_key);
+
+  return { encrypedDataString, tokenEncryption };
 };
 
 export const loginOrganization = async (body) => {

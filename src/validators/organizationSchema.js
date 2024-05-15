@@ -60,6 +60,12 @@ export const validateLoginOrganizationSchema = Joi.object({
   password: Joi.string().optional().allow('', null).min(6)
 });
 
+export const validateVerifyOnboardingEmailSchema = Joi.object({
+  hash: Joi.string().required(),
+  email: Joi.string().email().required(),
+  code: Joi.string().min(6).required()
+});
+
 export const validateOrganizationBeneficiarySchema = Joi.object({
   avatar: Joi.object({
     key: Joi.string().optional().allow('', null)

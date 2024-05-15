@@ -9,7 +9,8 @@ import {
   onboardNewOrganizationBeneficiary,
   onboardingPayment,
   resetPassword,
-  uploadOrganizationBeneficiariesInBulk
+  uploadOrganizationBeneficiariesInBulk,
+  verifyEmail
 } from '../../services/authentication/authenticationService.js';
 import { encryptData } from '../../utils/vault.js';
 
@@ -29,6 +30,14 @@ export const organizationLoginHandler = async (req, res) => {
   const loggedIn = await loginOrganization(body);
 
   res.send(appResponse('Logged in successfully', loggedIn));
+};
+
+export const organizationEmailVerifyHandler = async (req, res) => {
+  const { body } = req;
+
+  const userData = await verifyEmail(body);
+
+  res.send(appResponse('Email verified successfully', userData));
 };
 
 export const forgotPasswordHandler = async (req, res) => {

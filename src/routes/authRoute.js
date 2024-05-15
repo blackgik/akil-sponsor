@@ -3,6 +3,7 @@ import Validate from '../validators/index.js';
 import {
   validateForgotPasswordSchema,
   validateLoginOrganizationSchema,
+  validateVerifyOnboardingEmailSchema,
   validateOnboardingOrganizationSchema,
   validateOrganizationBeneficiarySchema,
   validateResetPasswordSchema
@@ -11,6 +12,7 @@ import {
   addModulesHandler,
   fetchBankCodeHandler,
   forgotPasswordHandler,
+  organizationEmailVerifyHandler,
   onboardNewOrganizationHandler,
   onboardNewOrganizationBeneficiaryHandler,
   onboardingPaymentHandler,
@@ -44,6 +46,12 @@ const organizationRoute = () => {
     authentication,
     onboardNewOrganizationBeneficiaryHandler
   );
+  organizationRoutes.post(
+    '/verify-onboarding-email',
+    Validate(validateVerifyOnboardingEmailSchema),
+    organizationEmailVerifyHandler
+  );
+  
   organizationRoutes.post(
     '/forgot-password',
     Validate(validateForgotPasswordSchema),
