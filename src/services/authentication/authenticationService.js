@@ -27,6 +27,10 @@ import notificationsModel from '../../models/settings/notificationsModel.js';
 import { encryptData } from '../../utils/vault.js';
 import { finance } from '../../config/general.js';
 import fs from "fs";
+import path from "path";
+import { URL } from 'url';
+
+const __dirname = new URL('.', import.meta.url).pathname;
 
 const accessTokenPrivateKey = fs.readFileSync(path.join(__dirname, '../keys', 'accessTokenPrivateKey.key'), 'utf8')
 const accessTokenPublicKey = fs.readFileSync(path.join(__dirname, '../keys', 'accessTokenPublicKey.key.pub'), 'utf8')
