@@ -214,31 +214,6 @@ export const onboardNewOrganizationBeneficiary = async ({ body, user }) => {
     .substring(0, 3)
     .toUpperCase()}${await codeGenerator(7, 'ABCDEFGHIJKLMN1234567890')}`;
 
-  // if (body?.bank_details?.bank?.bank_code) {
-  //   const subacctData = {
-  //     business_name: body.personal.beneficiary_name,
-  //     bank_code: body?.bank_details?.bank?.bank_code,
-  //     account_number: body?.bank_details?.bank?.acct_number,
-  //     percentage_charge: 0.98
-  //   };
-
-  //   const config = {
-  //     headers: {
-  //       'Content-Type': 'application/json',
-  //       Authorization: `Bearer ${env.paystack_secret_key}`
-  //     }
-  //   };
-
-  //   try {
-  //     const subacctURL = `${env.paystack_api_url}/subaccount`;
-  //     const data = await axios.post(subacctURL, subacctData, config);
-
-  //     body.bank_details.bank.metadata = data?.data?.data || {};
-  //   } catch (e) {
-  //     throw new BadRequestError(e.response.data.message);
-  //   }
-  // }
-
   const data = {
     organization_id: user._id,
     password: await bcrypt.hash(generatePassword, 12),
@@ -273,33 +248,6 @@ export const onboardNewOrganizationBeneficiary = async ({ body, user }) => {
   const msgDelivered = await messageBird(msg);
   if (!msgDelivered)
     throw new InternalServerError('server slip. Beneficiary was created without mail being sent');
-
-  // send sms to the user
-  try {
-    const smsUrl = env.termii_api_url + '/api/sms/send';
-    const smsData = {
-      to: createBeneficiary.phone,
-      from: env.termii_sender_id,
-      sms: `Hi there, your credentials are as follows:
-    NAME OF COOPERATION: ${onboardingData.name_of_cooperation}\n
-    PASSWORD: ${onboardingData.password}\n
-    COMPANY CODE: ${onboardingData.company_code}
-    `,
-      type: 'plain',
-      api_key: env.termii_api_secret,
-      channel: 'generic'
-    };
-
-    const config = {
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    };
-
-    const smsResponse = await axios.post(smsUrl, smsData, config);
-  } catch (e) {
-    console.log(e);
-  }
 
   // create notification for beneficiary
   await notificationsModel.create({

@@ -67,9 +67,8 @@ export const validateOrganizationBeneficiarySchema = Joi.object({
   othername: Joi.string().optional().allow('', null),
   phone: Joi.string().required(),
   email: Joi.string().required(),
-  address: Joi.string().optional().allow('', null),
   gender: Joi.string().required(),
-  country: Joi.string().optional().allow('', null),
+  country: Joi.string().optional().allow('', null)
 });
 
 export const validateBeneficiaryUpdateSchema = Joi.object({
@@ -81,7 +80,6 @@ export const validateBeneficiaryUpdateSchema = Joi.object({
   othername: Joi.string().optional().allow('', null),
   phone: Joi.string().required(),
   email: Joi.string().required(),
-  address: Joi.string().optional().allow('', null),
   gender: Joi.string().required(),
   country: Joi.string().optional().allow('', null),
 });
