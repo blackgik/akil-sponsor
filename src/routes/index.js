@@ -4,6 +4,7 @@ import productRoot from './products/productRoute.js';
 import messageRoot from './messages/messageRoute.js';
 import profileRoot from './profile/profileRoute.js';
 import notificationRoots from './settings/notificationRoute.js';
+import rolesRouteRoute from './settings/rolespermission.route.js';
 
 export default (router) => {
   router.use('/auth', organizationRoute());
@@ -12,6 +13,7 @@ export default (router) => {
   router.use('/messages', messageRoot());
   router.use('/profile', profileRoot());
   router.use('/notifications', notificationRoots());
+  router.use('/roles', rolesRouteRoute);
 
   return router;
 };
