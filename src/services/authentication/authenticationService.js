@@ -107,11 +107,11 @@ export const onboardNewOrganization = async ({ body, dbConnection }) => {
 
     await createSecData.create(secondDbData);
   }
-  const encrypedDataString = await encryptData({
-    data2encrypt: { hash: otpHash, email: createOrganizationProfile.email },
-    pubKey: env.public_key
-  });
-  return { encrypedDataString };
+  // const encrypedDataString = await encryptData({
+  //   data2encrypt: { hash: otpHash, email: createOrganizationProfile.email },
+  //   pubKey: env.public_key
+  // });
+  return {code: otp, hash: otpHash, email: createOrganizationProfile.email };
 };
 
 export const resendOtp = async (body) => {
@@ -147,11 +147,11 @@ export const resendOtp = async (body) => {
       'server slip. Organization was created without mail being sent',
       ''
     );
-  const encrypedDataString = await encryptData({
-    data2encrypt: { hash: otpHash, email: checkIfNotVerified.email },
-    pubKey: env.public_key
-  });
-  return { encrypedDataString };
+  // const encrypedDataString = await encryptData({
+  //   data2encrypt: { hash: otpHash, email: checkIfNotVerified.email },
+  //   pubKey: env.public_key
+  // });
+  return { code: otp, hash: otpHash, email: checkIfNotVerified.email };
 
 }
 
