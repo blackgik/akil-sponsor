@@ -40,7 +40,7 @@ app.use(cors());
 app.use(express.json());
 app.use(urlencoded({ extended: false }));
 app.use(morgan('combined'));
-app.use(`/api/v1/sponsor/stag/documentation`, swaggerUi.serve, swaggerUi.setup(apiDocumentation));
+app.use(`/api/v1/sponsors/stag/documentation`, swaggerUi.serve, swaggerUi.setup(apiDocumentation));
 const port = env.port;
 
 onboardingTrialCheck();
@@ -49,10 +49,10 @@ socketBlock({ io });
 
 if (env.node_env === 'production') {
   // routes
-  app.use('/api/v1/sponsor', rootRouter);
+  app.use('/api/v1/sponsors', rootRouter);
 } else {
   // routes
-  app.use('/api/v1/sponsor/stag', rootRouter);
+  app.use('/api/v1/sponsors/stag', rootRouter);
 }
 
 app.use('*', (req, res) => {
