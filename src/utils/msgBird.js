@@ -1,7 +1,6 @@
 import sgMail from '@sendgrid/mail';
 import env from '../config/env.js';
 
-env;
 sgMail.setApiKey(env.sendgrid_key);
 
 export const messageBird = async (msg) => {
@@ -13,6 +12,7 @@ export const messageBird = async (msg) => {
     })
     .catch((error) => {
       console.error(error);
+      console.error(error.response.body.errors);
       return false;
     });
 };

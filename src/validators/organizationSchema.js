@@ -12,15 +12,30 @@ export const validateOnboardingOrganizationSchema = Joi.object({
   slug: Joi.string().required(),
   tosAgreement: Joi.boolean().required(),
   pdsAgreement: Joi.boolean().required(),
+
+  organization_reg_fee: Joi.number().optional().allow(0, null),
+  payment_plan: Joi.string()
+    .optional()
+    .valid('basic', 'standard', 'premium', 'ultimate', 'third_party_api')
+    .default('basic'),
+  annual_plan: Joi.boolean().optional().default(false)
 });
 
 export const updateOrganizationProfileSchema = Joi.object({
-  language: Joi.string().optional().allow('', null),
   avatar: Joi.object({ key: Joi.string().optional().allow('', null) }).optional(),
   address: Joi.string().optional().allow('', null),
   phone: Joi.string().optional().allow('', null),
   slug: Joi.string().optional().allow('', null),
-  reg_fee: Joi.number().optional()
+  reg_fee: Joi.number().optional(),
+
+  email: Joi.string().optional().allow('', null),
+  lastname: Joi.string().optional().allow('', null),
+  firstname: Joi.string().optional().allow('', null),
+  country: Joi.string().optional().allow('', null),
+  state: Joi.string().optional().allow('', null),
+  profession: Joi.string().optional().allow('', null),
+  old_password: Joi.string().optional().allow('', null),
+  password: Joi.string().optional().allow('', null)
 });
 
 export const validateLoginOrganizationSchema = Joi.object({
@@ -57,7 +72,7 @@ export const validateBeneficiaryUpdateSchema = Joi.object({
   phone: Joi.string().required(),
   email: Joi.string().required(),
   gender: Joi.string().required(),
-  country: Joi.string().optional().allow('', null),
+  country: Joi.string().optional().allow('', null)
 });
 
 export const validateResetPasswordSchema = Joi.object({
@@ -97,4 +112,29 @@ export const AccountRecoveryboxSchema = Joi.object({
   alternative_email: Joi.string().required().lowercase().trim(),
   date_of_incooperation: Joi.date().required(),
   account_creation_month: Joi.date().required()
+});
+
+export const personalizationSchema = Joi.object({
+  general_info: Joi.object({
+    organization_name: Joi.string().required(),
+    title: Joi.string().optional(),
+    about_you: Joi.string().required(),
+    about_organization: Joi.string().optional().allow('', null),
+    goals: Joi.string(),
+    url_name: Joi.string().optional().allow('', null),
+    language: Joi.string().optional().allow('', null)
+  }),
+  brand_info: Joi.object({
+    logo: Joi.string().optional().allow('', null),
+    personal_image: Joi.string().optional().allow('', null),
+    colors: Joi.object().optional().allow({})
+  }),
+  social_media: Joi.object({
+    fb_url: Joi.string().optional().allow('', null),
+    x_url: Joi.string().optional().allow('', null),
+    linkedin_url: Joi.string().optional().allow('', null),
+    youtube_url: Joi.string().optional().allow('', null),
+    tiktok_url: Joi.string().optional().allow('', null),
+    other_url: Joi.string().optional().allow('', null)
+  })
 });

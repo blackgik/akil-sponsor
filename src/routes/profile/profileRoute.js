@@ -27,6 +27,7 @@ const profileRoot = () => {
     authentication,
     addNewBankAccountHandler
   );
+
   return profileRooute;
 };
 
