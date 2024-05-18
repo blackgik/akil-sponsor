@@ -125,3 +125,28 @@ export const AccountRecoveryboxSchema = Joi.object({
   date_of_incooperation: Joi.date().required(),
   account_creation_month: Joi.date().required()
 });
+
+export const personalizationSchema = Joi.object({
+  general_info: Joi.object({
+    organization_name: Joi.string().required(),
+    title: Joi.string().optional(),
+    about_you: Joi.string().required(),
+    about_organization: Joi.string().optional().allow('', null),
+    goals: Joi.string(),
+    url_name: Joi.string().optional().allow('', null),
+    language: Joi.string().optional().allow('', null)
+  }),
+  brand_info: Joi.object({
+    logo: Joi.string().optional().allow('', null),
+    personal_image: Joi.string().optional().allow('', null),
+    colors: Joi.object().optional().allow({})
+  }),
+  social_media: Joi.object({
+    fb_url: Joi.string().optional().allow('', null),
+    x_url: Joi.string().optional().allow('', null),
+    linkedin_url: Joi.string().optional().allow('', null),
+    youtube_url: Joi.string().optional().allow('', null),
+    tiktok_url: Joi.string().optional().allow('', null),
+    other_url: Joi.string().optional().allow('', null)
+  })
+});
