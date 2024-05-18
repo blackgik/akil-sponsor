@@ -10,9 +10,9 @@ import {
 export const createNewProductHandler = async (req, res) => {
   const { user, body } = req;
 
-  const newContributionProduct = await createNewProduct({ user, body });
+  const newProduct = await createNewProduct({ user, body });
 
-  res.send(appResponse('created product successfully', newContributionProduct));
+  res.send(appResponse('created product successfully', newProduct));
 };
 
 export const fetchProductHandler = async (req, res) => {
@@ -38,18 +38,18 @@ export const getAllProductsHandler = async (req, res) => {
 
 export const getSingleProductHandler = async (req, res) => {
   const { user, params } = req;
-  const { product_id, product_type } = params;
+  const { product_id } = params;
 
-  const product = await getSingleProduct({ user, product_id, product_type });
+  const product = await getSingleProduct({ user, product_id });
 
   res.send(appResponse('fetched product successfully', product));
 };
 
 export const updateSingleProductHandler = async (req, res) => {
   const { user, params, body } = req;
-  const { product_id, product_type } = params;
+  const { product_id} = params;
 
-  const updated = await updateSingleProduct({ product_id, product_type, body, user });
+  const updated = await updateSingleProduct({ product_id, body, user });
 
   res.send(appResponse('updated product successfully', updated));
 };
