@@ -202,7 +202,7 @@ export const verifyEmail = async (body) => {
   });
 
 
-  const tokenEncryption = jwt.sign({ _id: admin._id, email: admin.email }, env.jwt_key);
+  const tokenEncryption = jwt.sign({ _id: admin._id, email: admin.email, user: checkOrg  }, env.jwt_key);
 
   return { encrypedDataString, tokenEncryption };
 };
@@ -231,7 +231,7 @@ export const loginOrganization = async (body) => {
     pubKey: env.public_key
   });
 
-  const tokenEncryption = jwt.sign({ _id: admin._id, email: admin.email }, env.jwt_key);
+  const tokenEncryption = jwt.sign({ _id: admin._id, email: admin.email, user: checkOrg }, env.jwt_key);
 
   return { encrypedDataString, tokenEncryption };
 };
