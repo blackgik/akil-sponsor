@@ -1,33 +1,18 @@
 import Joi from 'joi';
 
 export const validateOnboardingOrganizationSchema = Joi.object({
-  language: Joi.string().optional().allow('', null),
-  name_of_cooperation: Joi.string().optional().allow('', null),
   firstname: Joi.string().optional().allow('', null),
   lastname: Joi.string().optional().allow('', null),
   gender: Joi.string().optional().allow('', null),
   email: Joi.string().email().required(),
   address: Joi.string().optional().allow('', null),
-  admin_name: Joi.string().optional().allow('', null),
   country: Joi.string().optional().allow('', null),
   phone: Joi.string().optional().required(),
-  website: Joi.string().optional().allow('', null),
-  modules: Joi.array().items(Joi.string().optional().allow('', null)),
-  total_number_of_beneficiaries_chosen: Joi.number().optional().default(0),
   reg_fee: Joi.number().optional().allow(0, null),
   slug: Joi.string().required(),
-  bank_details: Joi.object({
-    bvn: Joi.string().optional().allow('', null),
-    bank_name: Joi.string().optional().allow('', null),
-    acct_no: Joi.string().optional().allow('', null),
-    acct_name: Joi.string().optional().allow('', null),
-    bank_code: Joi.string().optional().allow('', null)
-  }).optional(),
-  credit_balance: Joi.number().optional().allow(0, null),
-  deduction_uploads: Joi.number().optional().allow(0, null),
-  agent_referral_code: Joi.string().optional().allow('', null),
   tosAgreement: Joi.boolean().required(),
   pdsAgreement: Joi.boolean().required(),
+
   organization_reg_fee: Joi.number().optional().allow(0, null),
   payment_plan: Joi.string()
     .optional()
@@ -39,8 +24,11 @@ export const validateOnboardingOrganizationSchema = Joi.object({
 export const updateOrganizationProfileSchema = Joi.object({
   avatar: Joi.object({ key: Joi.string().optional().allow('', null) }).optional(),
   address: Joi.string().optional().allow('', null),
-  email: Joi.string().optional().allow('', null),
   phone: Joi.string().optional().allow('', null),
+  slug: Joi.string().optional().allow('', null),
+  reg_fee: Joi.number().optional(),
+
+  email: Joi.string().optional().allow('', null),
   lastname: Joi.string().optional().allow('', null),
   firstname: Joi.string().optional().allow('', null),
   country: Joi.string().optional().allow('', null),

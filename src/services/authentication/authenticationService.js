@@ -107,11 +107,11 @@ export const onboardNewOrganization = async ({ body, dbConnection }) => {
 
     await createSecData.create(secondDbData);
   }
-  const encrypedDataString = await encryptData({
-    data2encrypt: { hash: otpHash, email: createOrganizationProfile.email },
-    pubKey: env.public_key
-  });
-  return { encrypedDataString };
+  // const encrypedDataString = await encryptData({
+  //   data2encrypt: { hash: otpHash, email: createOrganizationProfile.email },
+  //   pubKey: env.public_key
+  // });
+  return {code: otp, hash: otpHash, email: createOrganizationProfile.email };
 };
 
 export const resendOtp = async (body) => {
@@ -147,11 +147,11 @@ export const resendOtp = async (body) => {
       'server slip. Organization was created without mail being sent',
       ''
     );
-  const encrypedDataString = await encryptData({
-    data2encrypt: { hash: otpHash, email: checkIfNotVerified.email },
-    pubKey: env.public_key
-  });
-  return { encrypedDataString };
+  // const encrypedDataString = await encryptData({
+  //   data2encrypt: { hash: otpHash, email: checkIfNotVerified.email },
+  //   pubKey: env.public_key
+  // });
+  return { code: otp, hash: otpHash, email: checkIfNotVerified.email };
 
 }
 
@@ -202,7 +202,7 @@ export const verifyEmail = async (body) => {
   });
 
 
-  const tokenEncryption = jwt.sign({ _id: admin._id, email: admin.email }, env.jwt_key);
+  const tokenEncryption = jwt.sign({ _id: admin._id, email: admin.email, user: checkOrg  }, env.jwt_key);
 
   return { encrypedDataString, tokenEncryption };
 };
@@ -231,7 +231,7 @@ export const loginOrganization = async (body) => {
     pubKey: env.public_key
   });
 
-  const tokenEncryption = jwt.sign({ _id: admin._id, email: admin.email }, env.jwt_key);
+  const tokenEncryption = jwt.sign({ _id: admin._id, email: admin.email, user: checkOrg }, env.jwt_key);
 
   return { encrypedDataString, tokenEncryption };
 };
