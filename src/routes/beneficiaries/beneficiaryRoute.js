@@ -24,11 +24,7 @@ const beneficiaryRoute = () => {
   beneficiaryRoutes.get('/fetch-beneficiaries-by-status', authentication, fetchBeneficiariesByStatusHandler);
   beneficiaryRoutes.patch('/update-beneficiary-status/:beneficiary_id', authentication, updateBeneficiaryStatusHandler);
   beneficiaryRoutes.get('/view-beneficiaries-profile/:beneficiary_id', authentication, viewBeneficiaryProfileHandler);
-  beneficiaryRoutes.post(
-    '/verify-beneficiary-email',
-    Validate(validateVerifyBeneficiaryEmailSchema),
-    beneficiaryEmailVerifyHandler
-  );
+ 
   beneficiaryRoutes.patch(
     '/edit-beneficiary-profile/:beneficiary_id',
     Validate(validateBeneficiaryUpdateSchema),

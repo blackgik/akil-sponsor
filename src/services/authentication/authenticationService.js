@@ -197,6 +197,13 @@ export const verifyEmail = async (body) => {
       'server slip. Organization was created without mail being sent', ''
     );
   const admin = checkAcct.toJSON();
+  admin.onboardingSetting = {
+    organization_reg_fee: plans.sponsor_onboarding_settings.organization_reg_fee,
+    sup_beneficiary_fee: plans.sponsor_onboarding_settings.sup_beneficiary_fee,
+    personalization_fee: plans.sponsor_onboarding_settings.personalization_fee,
+    max_users: plans.sponsor_onboarding_settings.max_users,
+    total_admin: plans.sponsor_onboarding_settings.total_admin,
+  };
   const encrypedDataString = await encryptData({
     data2encrypt: { ...admin },
     pubKey: env.public_key
@@ -221,6 +228,13 @@ export const loginOrganization = async (body) => {
   if (!isMatch) throw new InvalidError('Invalid Sponsor');
 
   const admin = checkOrg.toJSON();
+  admin.onboardingSetting = {
+    organization_reg_fee: plans.sponsor_onboarding_settings.organization_reg_fee,
+    sup_beneficiary_fee: plans.sponsor_onboarding_settings.sup_beneficiary_fee,
+    personalization_fee: plans.sponsor_onboarding_settings.personalization_fee,
+    max_users: plans.sponsor_onboarding_settings.max_users,
+    total_admin: plans.sponsor_onboarding_settings.total_admin,
+  };
   const is_first_time = checkOrg.is_first_time;
 
   if (checkOrg.is_first_time === true) {
@@ -234,7 +248,7 @@ export const loginOrganization = async (body) => {
     pubKey: env.public_key
   });
 
-  const tokenEncryption = jwt.sign({ _id: admin._id, email: admin.email, user: checkOrg }, env.jwt_key);
+  const tokenEncryption = jwt.sign({ _id: admin._id, email: admin.email, user: admin }, env.jwt_key);
 
   return { encrypedDataString, tokenEncryption };
 };

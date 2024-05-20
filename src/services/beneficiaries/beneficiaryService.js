@@ -271,8 +271,8 @@ export const updateBeneficiaryStatus = async ({ user, status, beneficiary_id, no
 
 export const viewBeneficiaryProfile = async ({ beneficiary_id }) => {
   const beneficiary = await organizationBeneficiaryModel
-    .findById(beneficiary_id)
-    .populate({ path: 'organization', model: 'Organization' });
+    .findById(beneficiary_id);
+    //.populate({ path: 'organization', model: 'Organization', strictPopulate: false });
   if (!beneficiary) throw new NotFoundError('Beneficiary not found in Organization Directory');  
   const data = beneficiary.toJSON();
 

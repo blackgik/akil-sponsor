@@ -24,7 +24,7 @@ const organizationBeneficiarySchema = new Schema(
     },
     otpCode: { type: String, default: '' },
     otpHash: { type: String, default: '' },
-    isApproved: { type: Boolean, default: false },
+    isVerified: { type: Boolean, default: false },
     has_paid_reg: { type: Boolean, default: false },
     password: { type: String, required: true },
     acct_expiry: { type: Date },
