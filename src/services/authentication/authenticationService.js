@@ -120,7 +120,8 @@ export const resendOtp = async (body) => {
 
   //const hash = await argon.hash(dto.password);
   const checkIfNotVerified = await organizationModel.findOne({ email: body.email });
-  if (checkIfNotVerified.isApproved) throw new BadRequestError('Account already approved. Login!');
+  if (!checkIfNotVerified) throw new BadRequestError('Account not found!');
+  if (checkIfNotVerified.isApproved) throw new BadRequestError('Account already verified! Login!');
 
   const otp = await codeGenerator(6, '1234567890');
 
