@@ -7,6 +7,7 @@ export const buildOrganizationSchema = new Schema(
     avatar: { key: { type: String, default: '' } },
     language: { type: String, default: 'english' },
     name_of_cooperation: { type: String, lowercase: true, trim: true, index: true },
+
     email: { type: String, required: true, trim: true, lowercase: true, index: true },
     firstname: { type: String, required: false, trim: true, lowercase: true },
     lastname: { type: String, required: false, trim: true, lowercase: true },
@@ -15,6 +16,8 @@ export const buildOrganizationSchema = new Schema(
     company_code: { type: String, trim: true },
     address: { type: String,  lowercase: true, trim: true },
     admin_name: { type: String, trim: true, lowercase: true},
+
+    profession: { type: String, trim: true, lowercase: true, default: '' },
     country: { type: String, required: false, trim: true, lowercase: true },
     state: { type: String, required: false, trim: true, lowercase: true },
     phone: { type: String, trim: true, required: true },
@@ -56,22 +59,26 @@ export const buildOrganizationSchema = new Schema(
         metadata: { type: Schema.Types.Mixed }
       }
     ],
-    psdAgreement:  { 
+    psdAgreement: {
       type: Boolean,
       required: true,
       default: false
     },
-    isPreferenceSet: { 
-      type: Boolean, 
-      default: false 
+    isPreferenceSet: {
+      type: Boolean,
+      default: false
     },
-    isPackageBuilt: { 
-      type: Boolean, 
-      default: false 
+    isPackageBuilt: {
+      type: Boolean,
+      default: false
     },
-    isProfileUpdated: { 
-      type: Boolean, 
-      default: false 
+    isProfileUpdated: {
+      type: Boolean,
+      default: false
+    },
+    chat_enabled: {
+      type: Boolean,
+      default: true
     },
     acctstatus: {
       type: String,

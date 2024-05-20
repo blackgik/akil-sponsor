@@ -32,3 +32,11 @@ export const marksAsUnread = async ({ user, notification_id }) => {
 
   return {};
 };
+
+export const enableChat = async ({ user, status }) => {
+  user.chat_enabled = status;
+
+  await user.save();
+
+  return {};
+};
