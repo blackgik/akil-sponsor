@@ -39,6 +39,53 @@ export const fileFormatter = async (files) => {
   return bucket;
 };
 
+export const verifyEmail = async (body) => {
+  const { code, hash, email } = body;
+
+  const checkAcct = await organizationBeneficiaryModel.findOne({ email: email });
+
+  if (!checkAcct) throw new BadRequestError('User not found');
+
+  const verifyOtp = verifyOTP(checkAcct.email, code, hash, env.otpKey);
+  if (!verifyOtp) throw new BadRequestError('Invalid Input');
+
+  checkAcct.isApproved = true;
+  checkAcct.acctstatus = 'active';
+
+
+  await checkAcct.save();
+  //create email profile here
+  const onboardingData = {
+    email: checkAcct.email,
+    company_code: checkAcct.company_code,
+    name_of_cooperation: checkAcct.firstname + ' ' + checkAcct.lastname
+  };
+  const mailData = {
+    email: checkAcct.email,
+    subject: 'MAJFINTECH ONBOARDING',
+    type: 'html',
+    html: onboardinMail(onboardingData).html,
+    text: onboardinMail(onboardingData).text
+  };
+  const msg = await formattMailInfo(mailData, env);
+
+  const msgDelivered = await messageBird(msg);
+  if (!msgDelivered)
+    throw new InternalServerError(500,
+      'server slip. Beneficiary was created without mail being sent', ''
+    );
+  const admin = checkAcct.toJSON();
+  const encrypedDataString = await encryptData({
+    data2encrypt: { ...admin },
+    pubKey: env.public_key
+  });
+
+
+  const tokenEncryption = jwt.sign({ _id: admin._id, email: admin.email, user: checkAcct  }, env.jwt_key);
+
+  return { encrypedDataString, tokenEncryption };
+};
+
 export const fetchBeneficiariesByStatus = async ({ user, params }) => {
   let { page_no, no_of_requests, search, status, has_paid,institution, beneficiary_id } = params;
 
@@ -226,10 +273,7 @@ export const viewBeneficiaryProfile = async ({ beneficiary_id }) => {
   const beneficiary = await organizationBeneficiaryModel
     .findById(beneficiary_id)
     .populate({ path: 'organization', model: 'Organization' });
-  if (!beneficiary) throw new NotFoundError('Beneficiary not found in Organization Directory');
-
-  let pocket;
-  
+  if (!beneficiary) throw new NotFoundError('Beneficiary not found in Organization Directory');  
   const data = beneficiary.toJSON();
 
   return data;

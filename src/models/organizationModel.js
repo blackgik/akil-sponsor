@@ -35,6 +35,8 @@ export const buildOrganizationSchema = new Schema(
     hasPaid: { type: Boolean, default: false },
     tosAgreement: { type: Boolean },
     reg_fee: { type: Number, default: 0 },
+    personalization_fee: { type: Number, default: 0 },
+    hasPaid_personalization_fee: { type: Boolean, default: false },
     otpHash: { type: String, default: '' },
     slug: { type: String, default: '', lowercase: true },
     date_of_incooperation: { type: Date, deafault: '2000-10-01' },
@@ -75,6 +77,16 @@ export const buildOrganizationSchema = new Schema(
     isProfileUpdated: {
       type: Boolean,
       default: false
+    },
+    isOnboardingOn: {
+      type: Boolean,
+      default: false
+    },
+    currentStep: {
+      type: String,
+      trim: true,
+      default: 'preference',
+      enum: ['preference', 'package', 'profile', 'payment']
     },
     chat_enabled: {
       type: Boolean,
