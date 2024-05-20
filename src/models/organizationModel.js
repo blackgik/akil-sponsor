@@ -35,6 +35,7 @@ export const buildOrganizationSchema = new Schema(
     hasPaid: { type: Boolean, default: false },
     tosAgreement: { type: Boolean },
     reg_fee: { type: Number, default: 0 },
+    otpHash: { type: String, default: '' },
     slug: { type: String, default: '', lowercase: true },
     date_of_incooperation: { type: Date, deafault: '2000-10-01' },
     bank_details: {

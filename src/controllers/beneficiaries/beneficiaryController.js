@@ -10,7 +10,7 @@ import {
   viewBeneficiaryProfile,
   viewBeneficiariesDashboardStats,
   viewBeneficiariesUploadedList
-} from '../../services/beneficiaryServices/beneficiaryService.js';
+} from '../../services/beneficiaries/beneficiaryService.js';
 
 export const fetchedUploadedFilesHandler = async (req, res) => {
   const formatFile = await fileFormatter(req.files);

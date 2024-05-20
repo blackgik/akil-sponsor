@@ -6,6 +6,8 @@ import axios from 'axios';
 import path from 'path';
 import env from '../../config/env.js';
 import organizationModel, { buildOrganizationSchema } from '../../models/organizationModel.js';
+import ProductCategoryModel from '../../models/products/ProductCategoryModel.js';
+import OccupationModel from '../../models/occupations/occupationModel.js';
 import { forgotPasswordMail, verifyOnbordingMail, beneficiaryBulkUpload, onboardinMail } from '../../config/mail.js';
 import {
   BadRequestError,
@@ -28,7 +30,6 @@ import { plans } from '../../config/modules.js';
 import notificationsModel from '../../models/settings/notificationsModel.js';
 import { encryptData } from '../../utils/vault.js';
 
-import { finance } from '../../config/general.js';
 
 export const onboardNewOrganization = async ({ body, dbConnection }) => {
   if (!body.tosAgreement) throw new BadRequestError(`Terms and conditions not met`);
@@ -45,11 +46,12 @@ export const onboardNewOrganization = async ({ body, dbConnection }) => {
 
   const otp = await codeGenerator(6, '1234567890');
   const otpHash = buildOtpHash(body.email, otp, env.otpKey, 15);
-
+  const hashedPwd = await bcrypt.hash(body.password, 12);
   let organizationProfile = {
     ...body,
     company_code,
-    password: otpHash,
+    password: hashedPwd,
+    otpHash: otpHash,
     vault_access: {
       api_key_live,
       api_key_test
@@ -118,13 +120,14 @@ export const resendOtp = async (body) => {
 
   //const hash = await argon.hash(dto.password);
   const checkIfNotVerified = await organizationModel.findOne({ email: body.email });
-  if (checkIfNotVerified.isApproved) throw new BadRequestError('Account already approved. Login!');
+  if (!checkIfNotVerified) throw new BadRequestError('Account not found!');
+  if (checkIfNotVerified.isApproved) throw new BadRequestError('Account already verified! Login!');
 
   const otp = await codeGenerator(6, '1234567890');
 
   const otpHash = buildOtpHash(checkIfNotVerified.email, otp, env.otpKey, 15);
 
-  checkIfNotVerified.password = otpHash;
+  checkIfNotVerified.otpHash = otpHash;
   checkIfNotVerified.otp = otp;
   await checkIfNotVerified.save();
   //create email profile here
@@ -165,11 +168,7 @@ export const verifyEmail = async (body) => {
   const verifyOtp = verifyOTP(checkAcct.email, code, hash, env.otpKey);
   if (!verifyOtp) throw new BadRequestError('Invalid Input');
 
-  const generatePassword = await codeGenerator(9, 'ABCDEFGHI&*$%#1234567890');
-
-  const hashedPwd = await bcrypt.hash(generatePassword, 12);
   checkAcct.isApproved = true;
-  checkAcct.password = hashedPwd;
   checkAcct.acctstatus = 'active';
 
 
@@ -178,8 +177,7 @@ export const verifyEmail = async (body) => {
   const onboardingData = {
     email: checkAcct.email,
     company_code: checkAcct.company_code,
-    name_of_cooperation: checkAcct.firstname + ' ' + checkAcct.lastname,
-    password: generatePassword
+    name_of_cooperation: checkAcct.firstname + ' ' + checkAcct.lastname
   };
   const mailData = {
     email: checkAcct.email,
@@ -202,7 +200,7 @@ export const verifyEmail = async (body) => {
   });
 
 
-  const tokenEncryption = jwt.sign({ _id: admin._id, email: admin.email, user: checkOrg  }, env.jwt_key);
+  const tokenEncryption = jwt.sign({ _id: admin._id, email: admin.email, user: checkAcct  }, env.jwt_key);
 
   return { encrypedDataString, tokenEncryption };
 };
@@ -212,6 +210,8 @@ export const loginOrganization = async (body) => {
   const checkOrg = await organizationModel.findOne({ email });
 
   if (!checkOrg) throw new InvalidError('Invalid Sponsor');
+
+  if (!checkOrg.isApproved) throw new InvalidError('Account not verified');
 
   const isMatch = await bcrypt.compare(password, checkOrg.password);
 
@@ -496,6 +496,13 @@ export const fetchBankCode = async ({ bank_code }) => {
   const response = await axios.get(bnkcodeurl, config);
 
   return { codes: response.data.data };
+};
+
+export const fetchPreferencesData = async () => {
+  const categories = await ProductCategoryModel.find({is_active: true});
+  const occupations = await OccupationModel.find({is_active: true});
+
+  return { categories: categories, occupations:occupations };
 };
 
 export const onboardingPayment = async ({ user, upgrade, body }) => {
