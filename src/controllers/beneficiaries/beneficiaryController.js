@@ -27,6 +27,14 @@ export const fetchBeneficiariesByStatusHandler = async (req, res) => {
   res.send(appResponse('fetched organization beneficiaries successfully', beneficiaries));
 };
 
+export const beneficiaryEmailVerifyHandler = async (req, res) => {
+  const { body } = req;
+
+  const userData = await verifyEmail(body);
+
+  res.send(appResponse('Email verified successfully', userData));
+};
+
 export const updateBeneficiaryStatusHandler = async (req, res) => {
   const { user, body } = req;
   const { beneficiary_id } = req.params;

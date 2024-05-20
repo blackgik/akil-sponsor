@@ -1,9 +1,7 @@
 import bcrypt from 'bcrypt';
-import fs from 'fs';
 import jwt from 'jsonwebtoken';
 import XLSX from 'xlsx';
 import axios from 'axios';
-import path from 'path';
 import env from '../../config/env.js';
 import organizationModel, { buildOrganizationSchema } from '../../models/organizationModel.js';
 import ProductCategoryModel from '../../models/products/ProductCategoryModel.js';
@@ -56,6 +54,7 @@ export const onboardNewOrganization = async ({ body, dbConnection }) => {
     company_code,
     password: hashedPwd,
     otpHash: otpHash,
+    organization_reg_fee: plans.sponsor_onboarding_settings.organization_reg_fee,
     vault_access: {
       api_key_live,
       api_key_test
@@ -63,6 +62,10 @@ export const onboardNewOrganization = async ({ body, dbConnection }) => {
     start_trial_ts: new Date(),
     end_trial_ts: new Date(new Date().getTime() + 1000 * 24 * 60 * 60 * 14)
   };
+
+  if (body.psdAgreement) {
+    organizationProfile.personalization_fee = plans.sponsor_onboarding_settings.personalization_fee;
+  }
 
   const createOrganizationProfile = await organizationModel.create(organizationProfile);
 
@@ -195,6 +198,13 @@ export const verifyEmail = async (body) => {
       ''
     );
   const admin = checkAcct.toJSON();
+  admin.onboardingSetting = {
+    organization_reg_fee: plans.sponsor_onboarding_settings.organization_reg_fee,
+    sup_beneficiary_fee: plans.sponsor_onboarding_settings.sup_beneficiary_fee,
+    personalization_fee: plans.sponsor_onboarding_settings.personalization_fee,
+    max_users: plans.sponsor_onboarding_settings.max_users,
+    total_admin: plans.sponsor_onboarding_settings.total_admin,
+  };
   const encrypedDataString = await encryptData({
     data2encrypt: { ...admin },
     pubKey: env.public_key
@@ -221,6 +231,13 @@ export const loginOrganization = async (body) => {
   if (!isMatch) throw new InvalidError('Invalid Sponsor');
 
   const admin = checkOrg.toJSON();
+  admin.onboardingSetting = {
+    organization_reg_fee: plans.sponsor_onboarding_settings.organization_reg_fee,
+    sup_beneficiary_fee: plans.sponsor_onboarding_settings.sup_beneficiary_fee,
+    personalization_fee: plans.sponsor_onboarding_settings.personalization_fee,
+    max_users: plans.sponsor_onboarding_settings.max_users,
+    total_admin: plans.sponsor_onboarding_settings.total_admin,
+  };
   const is_first_time = checkOrg.is_first_time;
 
   if (checkOrg.is_first_time === true) {
@@ -234,10 +251,8 @@ export const loginOrganization = async (body) => {
     pubKey: env.public_key
   });
 
-  const tokenEncryption = jwt.sign(
-    { _id: admin._id, email: admin.email, user: checkOrg },
-    env.jwt_key
-  );
+
+  const tokenEncryption = jwt.sign({ _id: admin._id, email: admin.email, user: admin }, env.jwt_key);
 
   return { encrypedDataString, tokenEncryption };
 };
