@@ -7,9 +7,11 @@ export const validateOnboardingOrganizationSchema = Joi.object({
   email: Joi.string().email().required(),
   address: Joi.string().optional().allow('', null),
   country: Joi.string().optional().allow('', null),
+  state: Joi.string().optional().allow('', null),
   phone: Joi.string().optional().required(),
   reg_fee: Joi.number().optional().allow(0, null),
   slug: Joi.string().required(),
+  password: Joi.string().required(),
   tosAgreement: Joi.boolean().required(),
   pdsAgreement: Joi.boolean().required(),
 });

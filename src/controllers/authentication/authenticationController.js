@@ -3,6 +3,7 @@ import env from '../../config/env.js';
 import {
   addModules,
   fetchBankCode,
+  fetchPreferencesData,
   forgotPassword,
   loginOrganization,
   onboardNewOrganization,
@@ -31,6 +32,13 @@ export const organizationLoginHandler = async (req, res) => {
   const loggedIn = await loginOrganization(body);
 
   res.send(appResponse('Logged in successfully', loggedIn));
+};
+
+export const fetchPrerenceDataHandler = async (req, res) => {
+
+  const preferencesData = await fetchPreferencesData();
+
+  res.send(appResponse('Preferences data fetched successfully', preferencesData));
 };
 
 export const organizationEmailVerifyHandler = async (req, res) => {

@@ -327,9 +327,6 @@ export const onboardinMail = (data) => {
                                                                                   <li>Email: ${
                                                                                     data.email
                                                                                   }</li>
-                                                                                  <li>Password: ${
-                                                                                    data.password
-                                                                                  }</li>
                                                                                   <li>Organisation Unique Code: ${
                                                                                     data.company_code
                                                                                   } (This is your secret pass into your

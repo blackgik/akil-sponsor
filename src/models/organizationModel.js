@@ -16,6 +16,7 @@ export const buildOrganizationSchema = new Schema(
     address: { type: String,  lowercase: true, trim: true },
     admin_name: { type: String, trim: true, lowercase: true},
     country: { type: String, required: false, trim: true, lowercase: true },
+    state: { type: String, required: false, trim: true, lowercase: true },
     phone: { type: String, trim: true, required: true },
     website: { type: String, trim: true, lowercase: true, default: '' },
     modules: Array,
@@ -31,6 +32,7 @@ export const buildOrganizationSchema = new Schema(
     hasPaid: { type: Boolean, default: false },
     tosAgreement: { type: Boolean },
     reg_fee: { type: Number, default: 0 },
+    otpHash: { type: String, default: '' },
     slug: { type: String, default: '', lowercase: true },
     date_of_incooperation: { type: Date, deafault: '2000-10-01' },
     bank_details: {

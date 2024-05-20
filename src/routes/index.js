@@ -1,5 +1,5 @@
 import organizationRoute from './authRoute.js';
-import beneficiaryRoute from './beneficiariesRoutes/beneficiaryRoute.js';
+import beneficiaryRoute from './beneficiaries/beneficiaryRoute.js';
 import productRoot from './products/productRoute.js';
 import messageRoot from './messages/messageRoute.js';
 import profileRoot from './profile/profileRoute.js';
