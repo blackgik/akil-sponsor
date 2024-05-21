@@ -21,7 +21,8 @@ import {
   organizationProfileHandler,
   resetPasswordHandler,
   organizationResendOtpHandler,
-  fetchPrerenceDataHandler
+  fetchPrerenceDataHandler,
+  inviteBeneficiaryHandler
 } from '../controllers/authentication/authenticationController.js';
 import { authentication, dbconnection } from '../middlewares/authentication.js';
 import { upload } from '../../lib/multer.js';
@@ -60,7 +61,9 @@ const organizationRoute = () => {
     Validate(validateForgotPasswordSchema),
     organizationResendOtpHandler
   );
-  
+
+  organizationRoutes.post('/invitation', authentication, inviteBeneficiaryHandler);
+
   organizationRoutes.post(
     '/forgot-password',
     Validate(validateForgotPasswordSchema),
@@ -80,7 +83,6 @@ const organizationRoute = () => {
   );
   organizationRoutes.patch('/make-onboarding-payments', authentication, onboardingPaymentHandler);
   organizationRoutes.patch('/add-modules', authentication, addModulesHandler);
- 
 
   return organizationRoutes;
 };
