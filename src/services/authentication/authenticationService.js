@@ -33,6 +33,7 @@ import beneficiaryBatchUploadModel from '../../models/beneficiaries/beneficiaryB
 import { plans } from '../../config/modules.js';
 import notificationsModel from '../../models/settings/notificationsModel.js';
 import { encryptData } from '../../utils/vault.js';
+import personalizationModel from '../../models/settings/personalization.model.js';
 
 export const onboardNewOrganization = async ({ body, dbConnection }) => {
   if (!body.tosAgreement) throw new BadRequestError(`Terms and conditions not met`);
@@ -203,7 +204,7 @@ export const verifyEmail = async (body) => {
     sup_beneficiary_fee: plans.sponsor_onboarding_settings.sup_beneficiary_fee,
     personalization_fee: plans.sponsor_onboarding_settings.personalization_fee,
     max_users: plans.sponsor_onboarding_settings.max_users,
-    total_admin: plans.sponsor_onboarding_settings.total_admin,
+    total_admin: plans.sponsor_onboarding_settings.total_admin
   };
   const encrypedDataString = await encryptData({
     data2encrypt: { ...admin },
@@ -236,7 +237,7 @@ export const loginOrganization = async (body) => {
     sup_beneficiary_fee: plans.sponsor_onboarding_settings.sup_beneficiary_fee,
     personalization_fee: plans.sponsor_onboarding_settings.personalization_fee,
     max_users: plans.sponsor_onboarding_settings.max_users,
-    total_admin: plans.sponsor_onboarding_settings.total_admin,
+    total_admin: plans.sponsor_onboarding_settings.total_admin
   };
   const is_first_time = checkOrg.is_first_time;
 
@@ -251,8 +252,10 @@ export const loginOrganization = async (body) => {
     pubKey: env.public_key
   });
 
-
-  const tokenEncryption = jwt.sign({ _id: admin._id, email: admin.email, user: admin }, env.jwt_key);
+  const tokenEncryption = jwt.sign(
+    { _id: admin._id, email: admin.email, user: admin },
+    env.jwt_key
+  );
 
   return { encrypedDataString, tokenEncryption };
 };
@@ -712,7 +715,7 @@ export const addModules = async ({ user, body }) => {
   return { gateway: gateway.data.data.authorization_url };
 };
 
-export const inviteBeneficiary = async ({beneficiary_id, user}) => {
+export const inviteBeneficiary = async ({ beneficiary_id, user }) => {
   let beneficiaries;
 
   if (beneficiary_id) {
@@ -725,7 +728,7 @@ export const inviteBeneficiary = async ({beneficiary_id, user}) => {
   }
 
   for (const beneficiary of beneficiaries) {
-    const invitationData = { 
+    const invitationData = {
       firstname: beneficiary.firstname,
       lastname: beneficiary.lastname,
       email: beneficiary.email,
@@ -744,9 +747,26 @@ export const inviteBeneficiary = async ({beneficiary_id, user}) => {
     const msg = await formattMailInfo(mailData, env);
 
     const msgDelivered = await messageBird(msg);
-  
+
     if (!msgDelivered) throw new InternalServerError('Server error. Invitation email not sent');
   }
 
   return { success: true };
+};
+
+export const slugPersonalization = async ({ slug }) => {
+  const organization = await organizationModel.findOne({ slug }).select({ _id: 1 });
+
+  if (!organization) throw new BadRequestError('Organization not found');
+
+  const personalization = await personalizationModel
+    .findOne({ sponsor_id: organization._id })
+    .select({ brand_info: 1 });
+
+  if (!personalization) throw new BadRequestError('Personalization not found');
+
+  if (personalization.has_paid === false)
+    throw new BadRequestError('Your Personalization is not paid, Login through the normal route.');
+
+  return personalization;
 };
