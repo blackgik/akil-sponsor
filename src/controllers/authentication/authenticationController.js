@@ -12,6 +12,7 @@ import {
   onboardingPayment,
   resendOtp,
   resetPassword,
+  slugPersonalization,
   uploadOrganizationBeneficiariesInBulk,
   verifyEmail
 } from '../../services/authentication/authenticationService.js';
@@ -136,4 +137,14 @@ export const addModulesHandler = async (req, res) => {
   const gateway = await addModules({ user, body });
 
   res.send(appResponse('generated Gateway successfully', gateway));
+};
+
+export const slugPersonalizationHandler = async (req, res) => {
+  const { query } = req;
+
+  const { slug } = query;
+
+  const response = await slugPersonalization({ slug });
+
+  res.send(appResponse('fetched organization profile successfully', response));
 };

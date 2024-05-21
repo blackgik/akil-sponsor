@@ -87,7 +87,7 @@ export const verifyEmail = async (body) => {
 };
 
 export const fetchBeneficiariesByStatus = async ({ user, params }) => {
-  let { page_no, no_of_requests, search, status, has_paid,institution, beneficiary_id } = params;
+  let { page_no, no_of_requests, search, status, has_paid, beneficiary_id } = params;
 
   page_no = Number(page_no) || 1;
   no_of_requests = Number(no_of_requests) || 20;
@@ -115,10 +115,6 @@ export const fetchBeneficiariesByStatus = async ({ user, params }) => {
     filterData.has_paid_reg = false;
   }
 
-  if (institution) {
-    filterData.organization_id = mongoose.Types.ObjectId(institution);
-  }
-
   if (beneficiary_id) {
     filterData._id = { $nin: [mongoose.Types.ObjectId(beneficiary_id)] };
   }
@@ -130,6 +126,9 @@ export const fetchBeneficiariesByStatus = async ({ user, params }) => {
       avatar: 1,
       firstname: 1,
       lastname: 1,
+      othername: 1,
+      email: 1,
+      country: 1,
       gender: 1,
       has_paid_reg: 1,
       phone: 1,
@@ -271,8 +270,11 @@ export const updateBeneficiaryStatus = async ({ user, status, beneficiary_id, no
 
 export const viewBeneficiaryProfile = async ({ beneficiary_id }) => {
   const beneficiary = await organizationBeneficiaryModel
-    .findById(beneficiary_id);
-    //.populate({ path: 'organization', model: 'Organization', strictPopulate: false });
+    .findById(beneficiary_id)
+    .populate({
+      path: 'organization_id',
+      model: 'Organization'
+    })
   if (!beneficiary) throw new NotFoundError('Beneficiary not found in Organization Directory');  
   const data = beneficiary.toJSON();
 
@@ -504,15 +506,12 @@ export const updateBeneficiaryBatchListStatus = async ({ beneficiary_batch_id, b
             .substring(0, 3)
             .toUpperCase()}${await codeGenerator(7, 'ABCDEFGHIJKLMN1234567890')}`;
 
-          const institution = await institutionModel.findOne({ organization_id: user._id });
-
           delete beneficiaries._id;
 
           const beneficiaryObject = {
             ...beneficiaries.toJSON(),
             organization_id: user._id,
             acctstatus: 'pending',
-            institution: institution._id,
             password: await bcrypt.hash(password, 12),
             beneficiary_unique_id: beneficiaryUniqueId,
             has_paid_reg: false
@@ -569,12 +568,6 @@ export const updateBeneficiaryBatchListStatus = async ({ beneficiary_batch_id, b
     console.log(err);
     throw new InternalServerError(err.message || 'Server slippped. Please try again');
   }
-};
-
-export const getInstitutionsInOrg = async ({ user }) => {
-  const institutions = await institutionModel.find({ organization_id: user._id });
-
-  return institutions;
 };
 
 export const getBankList = async () => {

@@ -145,6 +145,16 @@ export const fetchUsers = async ({ user, param }) => {
   return { count, available_pages, page_no, fetched_data };
 };
 
+export const fetchUser = async ({ user_id, user }) => {
+  const userx = await usersModels
+    .findById(user_id)
+    .populate({ path: 'role_id', select: { role_name: 1 } });
+
+  if (!userx) throw new NotFoundError('User not found');
+
+  return userx;
+};
+
 export const editUser = async ({ user_id, body, user }) => {
   const userx = await usersModels.findById(user_id);
 
