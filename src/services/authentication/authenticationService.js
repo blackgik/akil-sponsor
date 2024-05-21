@@ -715,13 +715,16 @@ export const addModules = async ({ user, body }) => {
   return { gateway: gateway.data.data.authorization_url };
 };
 
-export const inviteBeneficiary = async ({ beneficiary_id, user }) => {
-  let beneficiaries;
+export const inviteBeneficiary = async ({beneficiary_ids = [], user}) => {
+  let beneficiaries = [];
 
-  if (beneficiary_id) {
-    beneficiaries = await organizationBeneficiaryModel.findById(beneficiary_id);
-    if (!beneficiaries) throw new NotFoundError('Beneficiary not found!');
-    beneficiaries = [beneficiaries]; // Convert single beneficiary to array for consistency
+  if (beneficiary_ids.length > 0) {
+    for (const id of beneficiary_ids) {
+      const beneficiary = await organizationBeneficiaryModel.findById(id);
+      if (!beneficiary) throw new NotFoundError(`Beneficiary with ID ${id} not found!`);
+      beneficiaries.push(beneficiary);
+    }
+
   } else {
     beneficiaries = await organizationBeneficiaryModel.find({});
     if (beneficiaries.length === 0) throw new NotFoundError('No beneficiaries found!');
@@ -770,3 +773,4 @@ export const slugPersonalization = async ({ slug }) => {
 
   return personalization;
 };
+
