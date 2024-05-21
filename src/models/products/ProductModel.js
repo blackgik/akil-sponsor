@@ -11,8 +11,8 @@ const ProductSchema = new Schema(
       required: true,
       index: true
     },
-    product_id: { type: String, trim: true, required: true },
     product_quantity: { type: Number, default: 0 },
+    product_value_amount: { type: Number, default: 0 },
     product_slug: { type: String, trim: true },
     product_unit: { type: String, trim: true },
     product_category_id: {

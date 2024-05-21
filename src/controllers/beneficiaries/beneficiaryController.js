@@ -10,7 +10,7 @@ import {
   viewBeneficiaryProfile,
   viewBeneficiariesDashboardStats,
   viewBeneficiariesUploadedList
-} from '../../services/beneficiaryServices/beneficiaryService.js';
+} from '../../services/beneficiaries/beneficiaryService.js';
 
 export const fetchedUploadedFilesHandler = async (req, res) => {
   const formatFile = await fileFormatter(req.files);
@@ -25,6 +25,14 @@ export const fetchBeneficiariesByStatusHandler = async (req, res) => {
   const beneficiaries = await fetchBeneficiariesByStatus({ user, params });
 
   res.send(appResponse('fetched organization beneficiaries successfully', beneficiaries));
+};
+
+export const beneficiaryEmailVerifyHandler = async (req, res) => {
+  const { body } = req;
+
+  const userData = await verifyEmail(body);
+
+  res.send(appResponse('Email verified successfully', userData));
 };
 
 export const updateBeneficiaryStatusHandler = async (req, res) => {

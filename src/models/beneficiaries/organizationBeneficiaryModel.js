@@ -23,6 +23,7 @@ const organizationBeneficiarySchema = new Schema(
       index: true
     },
     otpCode: { type: String, default: '' },
+    otpHash: { type: String, default: '' },
     isVerified: { type: Boolean, default: false },
     has_paid_reg: { type: Boolean, default: false },
     password: { type: String, required: true },

@@ -11,7 +11,8 @@ import {
   beneficiaryUploadedListHandler,
   pdfBuilderHandler,
   updateBeneficiaryStatusHandler,
-  viewBeneficiaryProfileHandler
+  viewBeneficiaryProfileHandler,
+  beneficiaryEmailVerifyHandler
 } from '../../controllers/beneficiaries/beneficiaryController.js';
 import { validateBeneficiaryUpdateSchema } from '../../validators/organizationSchema.js';
 import { uploadS3 } from '../../../lib/aws-cloud.js';
@@ -23,6 +24,7 @@ const beneficiaryRoute = () => {
   beneficiaryRoutes.get('/fetch-beneficiaries-by-status', authentication, fetchBeneficiariesByStatusHandler);
   beneficiaryRoutes.patch('/update-beneficiary-status/:beneficiary_id', authentication, updateBeneficiaryStatusHandler);
   beneficiaryRoutes.get('/view-beneficiaries-profile/:beneficiary_id', authentication, viewBeneficiaryProfileHandler);
+ 
   beneficiaryRoutes.patch(
     '/edit-beneficiary-profile/:beneficiary_id',
     Validate(validateBeneficiaryUpdateSchema),
