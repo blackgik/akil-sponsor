@@ -22,7 +22,8 @@ import {
   resetPasswordHandler,
   organizationResendOtpHandler,
   fetchPrerenceDataHandler,
-  inviteBeneficiaryHandler
+  inviteBeneficiaryHandler,
+  slugPersonalizationHandler
 } from '../controllers/authentication/authenticationController.js';
 import { authentication, dbconnection } from '../middlewares/authentication.js';
 import { upload } from '../../lib/multer.js';
@@ -37,6 +38,7 @@ const organizationRoute = () => {
     dbconnection,
     onboardNewOrganizationHandler
   );
+  organizationRoutes.get('/slug-personalization', slugPersonalizationHandler);
   organizationRoutes.get('/bank-codes/:bank_code', fetchBankCodeHandler);
   organizationRoutes.get('/fetch-preferences-data', fetchPrerenceDataHandler);
   organizationRoutes.post(
