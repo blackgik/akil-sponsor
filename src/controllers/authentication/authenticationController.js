@@ -41,9 +41,9 @@ export const organizationLoginHandler = async (req, res) => {
 
 export const inviteBeneficiaryHandler = async (req, res) => {
   const { user } = req;
-  const { beneficiary_id } = req.query;
+  const { beneficiary_ids } = req.body;
 
-  const invitation = await inviteBeneficiary({ beneficiary_id, user });
+  const invitation = await inviteBeneficiary({ beneficiary_ids, user });
 
   res.send(appResponse('Invitation sent succefully', invitation));
 };
