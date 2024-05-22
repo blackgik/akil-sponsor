@@ -5,11 +5,6 @@ import {
   NotFoundError
 } from '../../../lib/appErrors.js';
 import WarehouseModel from '../../models/products/WarehouseModel.js';
-import { formattMailInfo } from '../../utils/mailFormatter.js';
-import {
-  newWarehouseMail,
-} from '../../config/mail.js';
-import { messageBird } from '../../utils/msgBird.js';
 
 export const createNewWarehouse = async ({ user, body }) => {
   const warehouseData = {

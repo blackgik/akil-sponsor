@@ -1,15 +1,10 @@
-import env from '../../config/env.js';
 import {
   DuplicateError,
   InternalServerError,
   NotFoundError
 } from '../../../lib/appErrors.js';
 import ProductCategoryModel from '../../models/products/ProductCategoryModel.js';
-import { formattMailInfo } from '../../utils/mailFormatter.js';
-import {
-  newProductCategoryMail,
-} from '../../config/mail.js';
-import { messageBird } from '../../utils/msgBird.js';
+
 
 export const createNewProductCategory = async ({ user, body }) => {
   const productCategoryData = {
@@ -33,7 +28,7 @@ export const fetchProductCategory = async ({ user, params }) => {
   page_no = Number(page_no) || 1;
   no_of_requests = Number(no_of_requests) || Infinity;
 
-  const filterData = { organization_id: user._id };
+  const filterData = { is_active: true};
 
   const query = typeof search !== 'undefined' ? search : false;
   const rgx = (pattern) => new RegExp(`.*${pattern}.*`, 'i');
@@ -74,7 +69,7 @@ export const fetchAllProductCategories = async ({ user, params }) => {
   const rgx = (pattern) => new RegExp(`.*${pattern}.*`, 'i');
   const searchRgx = rgx(query);
 
-  const filterData = { organization_id: user._id };
+  const filterData = { is_active: true };
 
   if (query) {
     filterData['$or'] = [{ product_category_name: searchRgx }];
@@ -98,12 +93,6 @@ export const fetchAllProductCategories = async ({ user, params }) => {
   const available_pages = Math.ceil(count / no_of_requests);
 
   fetchedData = fetchedData.reduce(function (result, current) {
-    if (!result[current.productCategory_type]) {
-      result[current.productCategory_type] = [];
-    }
-
-    result[current.productCategory_type].push(current);
-
     return result;
   }, {});
 

@@ -13,7 +13,7 @@ const OccupationSchema = new Schema(
     },
     occupation_slug: { type: String, trim: true },
     occupation_description: { type: String, trim: true },
-    is_active: { type: Boolean, required: false, default: false},
+    is_active: { type: Boolean, required: false, default: true},
   },
   { timestamps: true }
 );

@@ -3,6 +3,8 @@ import Validate from '../validators/index.js';
 import {
   validateForgotPasswordSchema,
   validateLoginOrganizationSchema,
+  validateOrganizationPreferencesSchema,
+  validateOrganizationPackageSchema,
   validateVerifyOnboardingEmailSchema,
   validateOnboardingOrganizationSchema,
   validateOrganizationBeneficiarySchema,
@@ -11,7 +13,9 @@ import {
 import {
   addModulesHandler,
   fetchBankCodeHandler,
+  organizationPreferencesHandler,
   forgotPasswordHandler,
+  organizationPackageHandler,
   organizationEmailVerifyHandler,
   onboardNewOrganizationHandler,
   onboardNewOrganizationBeneficiaryHandler,
@@ -42,6 +46,18 @@ const organizationRoute = () => {
     '/organization-login',
     Validate(validateLoginOrganizationSchema),
     organizationLoginHandler
+  );
+  organizationRoutes.post(
+    '/set-sponsor-preferences',
+    Validate(validateOrganizationPreferencesSchema),
+    authentication,
+    organizationPreferencesHandler
+  );
+  organizationRoutes.post(
+    '/build-sponsor-package',
+    Validate(validateOrganizationPackageSchema),
+    authentication,
+    organizationPackageHandler
   );
   organizationRoutes.post(
     '/onboard-organization-beneficiary',

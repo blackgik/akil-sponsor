@@ -116,7 +116,7 @@ export const onboardNewOrganization = async ({ body, dbConnection }) => {
   //   data2encrypt: { hash: otpHash, email: createOrganizationProfile.email },
   //   pubKey: env.public_key
   // });
-  return {code: otp, hash: otpHash, email: createOrganizationProfile.email };
+  return { code: otp, hash: otpHash, email: createOrganizationProfile.email };
 };
 
 export const resendOtp = async (body) => {
@@ -210,7 +210,7 @@ export const verifyEmail = async (body) => {
   });
 
 
-  const tokenEncryption = jwt.sign({ _id: admin._id, email: admin.email, user: checkAcct  }, env.jwt_key);
+  const tokenEncryption = jwt.sign({ _id: admin._id, email: admin.email, user: checkAcct }, env.jwt_key);
 
   return { encrypedDataString, tokenEncryption };
 };
@@ -380,6 +380,75 @@ export const onboardNewOrganizationBeneficiary = async ({ body, user }) => {
   return true;
 };
 
+export const setOrganizationPreferences = async ({ body, user }) => {
+  const organizationExists = await organizationModel.findById(user._id);
+  if (!organizationExists) {
+    throw new BadRequestError('Organization doesn\'t exist!');
+  }
+
+  organizationExists.preferences = body.preferences;
+  await organizationExists.save();
+
+  return true;
+};
+
+export const setOrganizationPackageData = async ({ body, user }) => {
+  const organizationExists = await organizationModel.findById(user._id);
+  if (!organizationExists) {
+    throw new BadRequestError('Organization doesn\'t exist!');
+  }
+  let amountToPay = 0;
+  let supSmsFee = 0;
+  let supBeneficiaryFee = 0;
+  let personalizationFee = 0;
+  let dataCollectionFee = 0;
+  if (!organizationExists.hasPaid) {
+    amountToPay += plans.sponsor_onboarding_settings.organization_reg_fee;
+    organizationExists.organization_reg_fee = plans.sponsor_onboarding_settings.organization_reg_fee;
+  }
+  if (body.psdAgreement && !organizationExists.hasPaid_personalization_fee) {
+    amountToPay += plans.sponsor_onboarding_settings.personalization_fee;
+    personalizationFee = plans.sponsor_onboarding_settings.personalization_fee;
+    organizationExists.psdAgreement = true;
+    organizationExists.personalization_fee = plans.sponsor_onboarding_settings.personalization_fee;
+  }
+  if (body.total_number_of_beneficiaries_chosen > plans.sponsor_onboarding_settings.max_users) {
+    supBeneficiaryFee = body.total_number_of_beneficiaries_chosen - plans.sponsor_onboarding_settings.max_users;
+    amountToPay += supBeneficiaryFee;
+  }
+  if (body.total_number_of_sms > plans.sponsor_onboarding_settings.max_sms) {
+    supSmsFee = (body.total_number_of_sms - plans.sponsor_onboarding_settings.max_sms) * plans.sponsor_onboarding_settings.sup_sms_fee;
+    amountToPay += supSmsFee;
+  }
+  if (body.data_collection_quantity > 0) {
+    dataCollectionFee = body.data_collection_quantity * plans.sponsor_onboarding_settings.data_collection_fee;
+    amountToPay += dataCollectionFee;
+  }
+
+  await organizationExists.save();
+
+  return {
+    organization_reg_fee: plans.sponsor_onboarding_settings.organization_reg_fee,
+    beneficiaries:{
+      total_number_of_beneficiaries_chosen: body.total_number_of_beneficiaries_chosen,
+      sup_beneficiary_fee: supBeneficiaryFee
+    },
+    sms: {
+      total_number_of_sms: body.total_number_of_sms,
+      sup_sms_fee: supSmsFee
+    },
+    personalization: {
+      psdAgreement: body.psdAgreement,
+      personalization_fee: personalizationFee
+    },
+    data_collection: {
+      data_collection_quantity: body.data_collection_quantity,
+      data_collection_fee: dataCollectionFee
+    },
+    total_amount: amountToPay
+  };
+};
+
 export const uploadOrganizationBeneficiariesInBulk = async ({ user, file, body }) => {
   if (!body.batch_no) throw new BadRequestError('Please this upload requires a batch number');
 
@@ -516,10 +585,10 @@ export const fetchBankCode = async ({ bank_code }) => {
 };
 
 export const fetchPreferencesData = async () => {
-  const categories = await ProductCategoryModel.find({is_active: true});
-  const occupations = await OccupationModel.find({is_active: true});
+  const categories = await ProductCategoryModel.find({ is_active: true });
+  const occupations = await OccupationModel.find({ is_active: true });
 
-  return { categories: categories, occupations:occupations };
+  return { categories: categories, occupations: occupations };
 };
 
 export const onboardingPayment = async ({ user, upgrade, body }) => {

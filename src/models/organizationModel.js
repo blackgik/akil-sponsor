@@ -14,8 +14,8 @@ export const buildOrganizationSchema = new Schema(
     gender: { type: String, required: false, trim: true, lowercase: true, default: 'M' },
     password: { type: String },
     company_code: { type: String, trim: true },
-    address: { type: String,  lowercase: true, trim: true },
-    admin_name: { type: String, trim: true, lowercase: true},
+    address: { type: String, lowercase: true, trim: true },
+    admin_name: { type: String, trim: true, lowercase: true },
 
     profession: { type: String, trim: true, lowercase: true, default: '' },
     country: { type: String, required: false, trim: true, lowercase: true },
@@ -46,6 +46,10 @@ export const buildOrganizationSchema = new Schema(
       acct_name: String,
       bank_code: String,
       bvn: { type: String, default: '' }
+    },
+    preferences: {
+      occupations: Array,
+      categories: Array
     },
     other_bank_details: [
       {

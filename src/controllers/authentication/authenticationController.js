@@ -5,6 +5,8 @@ import {
   fetchBankCode,
   fetchPreferencesData,
   forgotPassword,
+  setOrganizationPackageData,
+  setOrganizationPreferences,
   loginOrganization,
   onboardNewOrganization,
   onboardNewOrganizationBeneficiary,
@@ -34,8 +36,24 @@ export const organizationLoginHandler = async (req, res) => {
   res.send(appResponse('Logged in successfully', loggedIn));
 };
 
-export const fetchPrerenceDataHandler = async (req, res) => {
+export const organizationPreferencesHandler = async (req, res) => {
+  const { body, user } = req;
 
+  const pref = await setOrganizationPreferences({ body, user });
+
+  res.send(appResponse('Preferences saved!', pref));
+};
+
+export const organizationPackageHandler  = async (req, res) => {
+  const { body, user } = req;
+
+  const packageData = await setOrganizationPackageData({ body, user });
+
+  res.send(appResponse('Package saved!', packageData));
+};
+
+export const fetchPrerenceDataHandler = async (req, res) => {
+  
   const preferencesData = await fetchPreferencesData();
 
   res.send(appResponse('Preferences data fetched successfully', preferencesData));
