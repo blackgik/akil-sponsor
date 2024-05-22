@@ -3,8 +3,11 @@ export const plans = {
     modules: [],
     organization_reg_fee: 1000000,
     sup_beneficiary_fee: 1,
+    data_collection_fee: 1000,
+    sup_sms_fee: 4,
     personalization_fee: 2500000,
     max_users: 500,
+    max_sms: 500,
     total_admin: 10,
     email_notifications: 'unlimited'
   }

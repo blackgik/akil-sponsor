@@ -5,6 +5,8 @@ import {
   fetchBankCode,
   fetchPreferencesData,
   forgotPassword,
+  setOrganizationPackageData,
+  setOrganizationPreferences,
   inviteBeneficiary,
   loginOrganization,
   onboardNewOrganization,
@@ -40,6 +42,22 @@ export const organizationLoginHandler = async (req, res) => {
   res.send(appResponse('Logged in successfully', loggedIn));
 };
 
+export const organizationPreferencesHandler = async (req, res) => {
+  const { body, user } = req;
+
+  const pref = await setOrganizationPreferences({ body, user });
+
+  res.send(appResponse('Preferences saved!', pref));
+};
+
+export const organizationPackageHandler  = async (req, res) => {
+  const { body, user } = req;
+
+  const packageData = await setOrganizationPackageData({ body, user });
+
+  res.send(appResponse('Package saved!', packageData));
+};
+  
 export const inviteBeneficiaryHandler = async (req, res) => {
   const { user } = req;
   const { beneficiary_ids } = req.body;

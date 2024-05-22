@@ -51,6 +51,13 @@ export const validateVerifyOnboardingEmailSchema = Joi.object({
   code: Joi.string().min(6).required()
 });
 
+export const validateOrganizationPackageSchema = Joi.object({
+  psdAgreement: Joi.boolean().required(),
+  total_number_of_beneficiaries_chosen: Joi.number().required(),
+  total_number_of_sms: Joi.number().required(),
+  data_collection_quantity: Joi.number().required(),
+});
+
 export const validateOrganizationBeneficiarySchema = Joi.object({
   avatar: Joi.object({
     key: Joi.string().optional().allow('', null)
@@ -62,6 +69,13 @@ export const validateOrganizationBeneficiarySchema = Joi.object({
   email: Joi.string().required(),
   gender: Joi.string().required(),
   country: Joi.string().optional().allow('', null)
+});
+
+export const validateOrganizationPreferencesSchema = Joi.object({
+  preferences: Joi.object({
+    occupations: Joi.array().items(Joi.string().optional().allow('', null)),
+    categories: Joi.array().items(Joi.string().optional().allow('', null)),
+  }),
 });
 
 export const validateBeneficiaryUpdateSchema = Joi.object({

@@ -21,7 +21,7 @@ export const fetchOccupationHandler = async (req, res) => {
 
   const fetchedData = await fetchOccupation({ user, params });
 
-  res.send(appResponse('fetched contribution occupations successfully', fetchedData));
+  res.send(appResponse('fetched occupations successfully', fetchedData));
 };
 //================================================================================================
 
