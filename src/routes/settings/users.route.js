@@ -1,9 +1,10 @@
 import express from 'express';
 import { authentication } from '../../middlewares/authentication.js';
 import {
-    checkIfBenficiaryHandler,
+  checkIfBenficiaryHandler,
   createNewuserHandler,
   editUserHandler,
+  fetchUserHandler,
   fetchUsersHandler,
   updateStatusHandler
 } from '../../controllers/settings/users.controllers.js';
@@ -19,6 +20,7 @@ userRoute.post(
   createNewuserHandler
 );
 userRoute.get('/fetch-users', authentication, fetchUsersHandler);
+userRoute.get('/fetch-user/:user_id', authentication, fetchUserHandler);
 userRoute.patch(
   '/edit-users/:user_id',
   validators(editNewUserSchema),
