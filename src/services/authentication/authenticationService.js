@@ -611,8 +611,8 @@ export const onboardingPayment = async ({ user, body }) => {
       email: user.email,
       callback_url:
         env.node_env === 'development'
-          ? `${env.dev_base_url_beneficiary}/${user.slug}/dashboard`
-          : `${env.prod_base_url_beneficiary}/${user.slug}/dashboard`,
+          ? `${env.dev_base_url_org}/${user.slug}/dashboard`
+          : `${env.prod_base_url_org}/${user.slug}/dashboard`,
       metadata: {
         userId: user._id,
         package: body,
