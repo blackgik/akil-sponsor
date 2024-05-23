@@ -1,5 +1,5 @@
 import appResponse from '../../../lib/appResponse.js';
-import { createRoles, editrole, fetchRoles } from '../../services/settings/roles.service.js';
+import { createRoles, editrole, fetchRoles, viewrole } from '../../services/settings/roles.service.js';
 
 export const createRolesHandler = async (req, res) => {
   const { user, body } = req;
@@ -22,7 +22,17 @@ export const editroleHandler = async (req, res) => {
 
   const { role_id } = params;
 
-  const response = await editrole({ user, body,role_id });
+  const response = await editrole({ user, body, role_id });
 
   res.send(appResponse('Edited Successfully', response));
+};
+
+export const viewroleHandler = async (req, res) => {
+  const { params } = req;
+
+  const { role_id } = params;
+
+  const response = await viewrole({ role_id });
+
+  res.send(appResponse('Fetched Successfully', response));
 };
