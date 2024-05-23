@@ -3,6 +3,7 @@ import { authentication } from '../../middlewares/authentication.js';
 import {
   checkIfBenficiaryHandler,
   createNewuserHandler,
+  deleteUserHandler,
   editUserHandler,
   fetchUserHandler,
   fetchUsersHandler,
@@ -29,5 +30,6 @@ userRoute.patch(
 );
 userRoute.patch('/update-status/:user_id', authentication, updateStatusHandler);
 userRoute.get('/check-if-beneficiary', authentication, checkIfBenficiaryHandler);
+userRoute.delete('/delete-user/:user_id', authentication, deleteUserHandler);
 
 export default userRoute;

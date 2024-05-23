@@ -15,14 +15,17 @@ export const craeteNewUser = async ({ user, body }) => {
 
   if (!role) throw new BadRequestError('Our system does not know this role id');
 
+  let checkMember;
+
   if (body.email) {
     filter['email'] = body.email;
 
-    const checkMember = await usersModels.findOne({
+    checkMember = await usersModels.findOne({
       ...filter
     });
 
-    if (checkMember) throw new BadRequestError('Member already exists');
+    if (checkMember && checkMember.acctstatus !== 'deleted')
+      throw new BadRequestError('Member already exists');
   }
 
   if (body.phone) {
@@ -30,17 +33,87 @@ export const craeteNewUser = async ({ user, body }) => {
 
     delete filter['email'];
 
-    const checkMember = await usersModels.findOne({
+    checkMember = await usersModels.findOne({
       ...filter
     });
 
-    if (checkMember) throw new BadRequestError('Member already exists');
+    if (checkMember && checkMember.acctstatus !== 'deleted')
+      throw new BadRequestError('Member already exists');
   }
 
   //check if they a beneficiary
   const beneficiaryCheck = await organizationBeneficiaryModel.findOne(filter);
 
   if (beneficiaryCheck) body.is_beneficiary = true;
+
+  if (checkMember && checkMember.acctstatus === 'deleted') {
+    const updates = Object.keys(body);
+
+    updates.forEach((update) => (checkMember[update] = body[update]));
+
+    checkMember.password = await bcrypt.hash(body.password, 12);
+    checkMember.sponsor_id = user._id;
+    checkMember.acctstatus = "active";
+
+    await checkMember.save();
+
+    const onboardingData = {
+      member_name: body.user_name,
+      email: body.email,
+      name_of_cooperation: `${user.firstname} ${user.lastname}`,
+      password: body.password,
+      company_code: user.company_code,
+      member_user:
+        env.node_env === 'development'
+          ? `https://akilaah-sponsor.vercel.app`
+          : `https://sponsor.akilaah.com`
+    };
+
+    if (body.email) {
+      const mailData = {
+        email: body.email,
+        subject: 'Welcome to Akilaah - Successful Registration',
+        type: 'html',
+        html: memberInvitehtmlFunction(onboardingData),
+        text: memberInvitehtmlFunction(onboardingData)
+      };
+
+      const msg = await formattMailInfo(mailData, env);
+
+      const msgDelivered = await messageBird(msg);
+
+      if (!msgDelivered)
+        throw new InternalServerError('server slip. Member was created without mail being sent');
+    } else {
+      try {
+        const smsUrl = env.termii_api_url + '/api/sms/send';
+        const smsData = {
+          to: user.phone,
+          from: env.termii_sender_id,
+          sms: `Hi there, your credentials are as follows:
+    NAME OF COOPERATION: ${onboardingData.name_of_cooperation}\n
+    PASSWORD: ${onboardingData.password}\n
+    COMPANY CODE: ${onboardingData.company_code}
+    `,
+          type: 'plain',
+          api_key: env.termii_api_secret,
+          channel: 'generic'
+        };
+
+        const config = {
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        };
+
+        await axios.post(smsUrl, smsData, config);
+      } catch (e) {
+        console.log(e);
+      }
+    }
+
+    return {};
+  }
 
   const data = {
     ...body,
@@ -114,7 +187,7 @@ export const fetchUsers = async ({ user, param }) => {
   page_no = parseInt(page_no, 10) || 1;
   no_of_request = parseInt(no_of_request, 10) || 20;
 
-  const filter = { sponsor_id: user._id };
+  const filter = { sponsor_id: user._id, acctstatus: { $nin: ['deleted'] } };
 
   const query = typeof search !== 'undefined' ? search : false;
   const rgx = (pattern) => new RegExp(`.*${pattern}.*`, 'i');
@@ -158,7 +231,7 @@ export const fetchUser = async ({ user_id, user }) => {
 export const editUser = async ({ user_id, body, user }) => {
   const userx = await usersModels.findById(user_id);
 
-  if (!userx) throw new NotFoundError('User not found');
+  if (!userx || userx.acctstatus === 'deleted') throw new NotFoundError('User not found');
 
   const updates = Object.keys(body);
 
@@ -190,4 +263,16 @@ export const checkIfBenficiary = async ({ user, email }) => {
   if (!beneficiary) return {};
 
   return beneficiary;
+};
+
+export const deleteUser = async ({ user_id }) => {
+  const userx = await usersModels.findById(user_id);
+
+  if (!userx) throw new NotFoundError('User not found');
+
+  userx.acctstatus = 'deleted';
+
+  await userx.save();
+
+  return {};
 };
