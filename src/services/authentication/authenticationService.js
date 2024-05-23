@@ -6,7 +6,13 @@ import env from '../../config/env.js';
 import organizationModel, { buildOrganizationSchema } from '../../models/organizationModel.js';
 import ProductCategoryModel from '../../models/products/ProductCategoryModel.js';
 import OccupationModel from '../../models/occupations/occupationModel.js';
-import { forgotPasswordMail, verifyOnbordingMail, beneficiaryBulkUpload, onboardinMail } from '../../config/mail.js';
+import {
+  forgotPasswordMail,
+  verifyOnbordingMail,
+  beneficiaryBulkUpload,
+  onboardinMail,
+  invitationMail
+} from '../../config/mail.js';
 import {
   BadRequestError,
   DuplicateError,
@@ -27,7 +33,7 @@ import beneficiaryBatchUploadModel from '../../models/beneficiaries/beneficiaryB
 import { plans } from '../../config/modules.js';
 import notificationsModel from '../../models/settings/notificationsModel.js';
 import { encryptData } from '../../utils/vault.js';
-
+import personalizationModel from '../../models/settings/personalization.model.js';
 
 export const onboardNewOrganization = async ({ body, dbConnection }) => {
   if (!body.tosAgreement) throw new BadRequestError(`Terms and conditions not met`);
@@ -95,10 +101,7 @@ export const onboardNewOrganization = async ({ body, dbConnection }) => {
 
   const msgDelivered = await messageBird(msg);
   if (!msgDelivered)
-    throw new InternalServerError(
-      'server slip. Sponsor was created without mail being sent'
-    );
-
+    throw new InternalServerError('server slip. Sponsor was created without mail being sent');
 
   if (env.node_env === 'production') {
     const createSecData = await dbConnection.model('Organization', buildOrganizationSchema);
@@ -117,7 +120,6 @@ export const onboardNewOrganization = async ({ body, dbConnection }) => {
 };
 
 export const resendOtp = async (body) => {
-
   //const hash = await argon.hash(dto.password);
   const checkIfNotVerified = await organizationModel.findOne({ email: body.email });
   if (!checkIfNotVerified) throw new BadRequestError('Account not found!');
@@ -146,7 +148,8 @@ export const resendOtp = async (body) => {
 
   const msgDelivered = await messageBird(msg);
   if (!msgDelivered)
-    throw new InternalServerError(500,
+    throw new InternalServerError(
+      500,
       'server slip. Organization was created without mail being sent',
       ''
     );
@@ -155,8 +158,7 @@ export const resendOtp = async (body) => {
   //   pubKey: env.public_key
   // });
   return { code: otp, hash: otpHash, email: checkIfNotVerified.email };
-
-}
+};
 
 export const verifyEmail = async (body) => {
   const { code, hash, email } = body;
@@ -170,7 +172,6 @@ export const verifyEmail = async (body) => {
 
   checkAcct.isApproved = true;
   checkAcct.acctstatus = 'active';
-
 
   await checkAcct.save();
   //create email profile here
@@ -190,8 +191,10 @@ export const verifyEmail = async (body) => {
 
   const msgDelivered = await messageBird(msg);
   if (!msgDelivered)
-    throw new InternalServerError(500,
-      'server slip. Organization was created without mail being sent', ''
+    throw new InternalServerError(
+      500,
+      'server slip. Organization was created without mail being sent',
+      ''
     );
   const admin = checkAcct.toJSON();
   admin.onboardingSetting = {
@@ -199,13 +202,12 @@ export const verifyEmail = async (body) => {
     sup_beneficiary_fee: plans.sponsor_onboarding_settings.sup_beneficiary_fee,
     personalization_fee: plans.sponsor_onboarding_settings.personalization_fee,
     max_users: plans.sponsor_onboarding_settings.max_users,
-    total_admin: plans.sponsor_onboarding_settings.total_admin,
+    total_admin: plans.sponsor_onboarding_settings.total_admin
   };
   const encrypedDataString = await encryptData({
     data2encrypt: { ...admin },
     pubKey: env.public_key
   });
-
 
   const tokenEncryption = jwt.sign({ _id: admin._id, email: admin.email, user: checkAcct }, env.jwt_key);
 
@@ -230,7 +232,7 @@ export const loginOrganization = async (body) => {
     sup_beneficiary_fee: plans.sponsor_onboarding_settings.sup_beneficiary_fee,
     personalization_fee: plans.sponsor_onboarding_settings.personalization_fee,
     max_users: plans.sponsor_onboarding_settings.max_users,
-    total_admin: plans.sponsor_onboarding_settings.total_admin,
+    total_admin: plans.sponsor_onboarding_settings.total_admin
   };
   const is_first_time = checkOrg.is_first_time;
 
@@ -245,7 +247,10 @@ export const loginOrganization = async (body) => {
     pubKey: env.public_key
   });
 
-  const tokenEncryption = jwt.sign({ _id: admin._id, email: admin.email, user: admin }, env.jwt_key);
+  const tokenEncryption = jwt.sign(
+    { _id: admin._id, email: admin.email, user: admin },
+    env.jwt_key
+  );
 
   return { encrypedDataString, tokenEncryption };
 };
@@ -538,8 +543,9 @@ export const uploadOrganizationBeneficiariesInBulk = async ({ user, file, body }
   ];
 
   // Format date as "day, month, year"
-  const formattedDate = `${currentDate.getDate()}, ${monthNames[currentDate.getMonth()]
-    }, ${currentDate.getFullYear()}`;
+  const formattedDate = `${currentDate.getDate()}, ${
+    monthNames[currentDate.getMonth()]
+  }, ${currentDate.getFullYear()}`;
 
   //create email profile here
   const bulkUpload = {
@@ -687,3 +693,63 @@ export const addModules = async ({ user, body }) => {
 
   return { gateway: gateway.data.data.authorization_url };
 };
+
+export const inviteBeneficiary = async ({beneficiary_ids = [], user}) => {
+  let beneficiaries = [];
+
+  if (beneficiary_ids.length > 0) {
+    for (const id of beneficiary_ids) {
+      const beneficiary = await organizationBeneficiaryModel.findById(id);
+      if (!beneficiary) throw new NotFoundError(`Beneficiary with ID ${id} not found!`);
+      beneficiaries.push(beneficiary);
+    }
+
+  } else {
+    beneficiaries = await organizationBeneficiaryModel.find({});
+    if (beneficiaries.length === 0) throw new NotFoundError('No beneficiaries found!');
+  }
+
+  for (const beneficiary of beneficiaries) {
+    const invitationData = {
+      firstname: beneficiary.firstname,
+      lastname: beneficiary.lastname,
+      email: beneficiary.email,
+      sponsor: user.name_of_cooperation,
+      company_code: user.company_code
+    };
+
+    const mailData = {
+      email: beneficiary.email,
+      subject: 'MAJFINTECH ONBOARDING',
+      type: 'html',
+      html: invitationMail(invitationData).html,
+      text: invitationMail(invitationData).text
+    };
+
+    const msg = await formattMailInfo(mailData, env);
+
+    const msgDelivered = await messageBird(msg);
+
+    if (!msgDelivered) throw new InternalServerError('Server error. Invitation email not sent');
+  }
+
+  return { success: true };
+};
+
+export const slugPersonalization = async ({ slug }) => {
+  const organization = await organizationModel.findOne({ slug }).select({ _id: 1 });
+
+  if (!organization) throw new BadRequestError('Organization not found');
+
+  const personalization = await personalizationModel
+    .findOne({ sponsor_id: organization._id })
+    .select({ brand_info: 1 });
+
+  if (!personalization) throw new BadRequestError('Personalization not found');
+
+  if (personalization.has_paid === false)
+    throw new BadRequestError('Your Personalization is not paid, Login through the normal route.');
+
+  return personalization;
+};
+

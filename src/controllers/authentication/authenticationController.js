@@ -7,12 +7,14 @@ import {
   forgotPassword,
   setOrganizationPackageData,
   setOrganizationPreferences,
+  inviteBeneficiary,
   loginOrganization,
   onboardNewOrganization,
   onboardNewOrganizationBeneficiary,
   onboardingPayment,
   resendOtp,
   resetPassword,
+  slugPersonalization,
   uploadOrganizationBeneficiariesInBulk,
   verifyEmail
 } from '../../services/authentication/authenticationService.js';
@@ -24,9 +26,13 @@ export const onboardNewOrganizationHandler = async (req, res) => {
 
   const onboardedOrganization = await onboardNewOrganization({ body, dbConnection });
 
-  res.send(appResponse('onboarded organization successfully, kindly check your emails to continue', onboardedOrganization));
+  res.send(
+    appResponse(
+      'onboarded organization successfully, kindly check your emails to continue',
+      onboardedOrganization
+    )
+  );
 };
-
 
 export const organizationLoginHandler = async (req, res) => {
   const { body } = req;
@@ -51,9 +57,17 @@ export const organizationPackageHandler  = async (req, res) => {
 
   res.send(appResponse('Package saved!', packageData));
 };
+  
+export const inviteBeneficiaryHandler = async (req, res) => {
+  const { user } = req;
+  const { beneficiary_ids } = req.body;
+
+  const invitation = await inviteBeneficiary({ beneficiary_ids, user });
+
+  res.send(appResponse('Invitation sent succefully', invitation));
+};
 
 export const fetchPrerenceDataHandler = async (req, res) => {
-  
   const preferencesData = await fetchPreferencesData();
 
   res.send(appResponse('Preferences data fetched successfully', preferencesData));
@@ -142,4 +156,12 @@ export const addModulesHandler = async (req, res) => {
   res.send(appResponse('generated Gateway successfully', gateway));
 };
 
+export const slugPersonalizationHandler = async (req, res) => {
+  const { query } = req;
 
+  const { slug } = query;
+
+  const response = await slugPersonalization({ slug });
+
+  res.send(appResponse('fetched organization profile successfully', response));
+};

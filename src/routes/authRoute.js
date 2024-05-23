@@ -25,7 +25,9 @@ import {
   organizationProfileHandler,
   resetPasswordHandler,
   organizationResendOtpHandler,
-  fetchPrerenceDataHandler
+  fetchPrerenceDataHandler,
+  inviteBeneficiaryHandler,
+  slugPersonalizationHandler
 } from '../controllers/authentication/authenticationController.js';
 import { authentication, dbconnection } from '../middlewares/authentication.js';
 import { upload } from '../../lib/multer.js';
@@ -40,6 +42,7 @@ const organizationRoute = () => {
     dbconnection,
     onboardNewOrganizationHandler
   );
+  organizationRoutes.get('/slug-personalization', slugPersonalizationHandler);
   organizationRoutes.get('/bank-codes/:bank_code', fetchBankCodeHandler);
   organizationRoutes.get('/fetch-preferences-data', fetchPrerenceDataHandler);
   organizationRoutes.post(
@@ -76,7 +79,9 @@ const organizationRoute = () => {
     Validate(validateForgotPasswordSchema),
     organizationResendOtpHandler
   );
-  
+
+  organizationRoutes.post('/invitation', authentication, inviteBeneficiaryHandler);
+
   organizationRoutes.post(
     '/forgot-password',
     Validate(validateForgotPasswordSchema),
@@ -96,7 +101,6 @@ const organizationRoute = () => {
   );
   organizationRoutes.patch('/make-onboarding-payments', authentication, onboardingPaymentHandler);
   organizationRoutes.patch('/add-modules', authentication, addModulesHandler);
- 
 
   return organizationRoutes;
 };

@@ -9,6 +9,7 @@ export const createNewUserSchema = Joi.object({
   date_of_birth: Joi.date().required(),
   role_id: Joi.string().required(),
   password: Joi.string().required(),
+  acctstatus: Joi.string().optional().valid(),
   is_beneficiary: Joi.boolean().required()
 });
 

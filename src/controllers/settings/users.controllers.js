@@ -1,8 +1,9 @@
 import appResponse from '../../../lib/appResponse.js';
 import {
-    checkIfBenficiary,
+  checkIfBenficiary,
   craeteNewUser,
   editUser,
+  fetchUser,
   fetchUsers,
   updateStatus
 } from '../../services/settings/users.service.js';
@@ -19,6 +20,16 @@ export const fetchUsersHandler = async (req, res) => {
   const { user, query } = req;
 
   const response = await fetchUsers({ user, param: query });
+
+  res.send(appResponse('Fetched successfully', response));
+};
+
+export const fetchUserHandler = async (req, res) => {
+  const { user, params } = req;
+
+  const { user_id } = params;
+
+  const response = await fetchUser({ user_id, user });
 
   res.send(appResponse('Fetched successfully', response));
 };
