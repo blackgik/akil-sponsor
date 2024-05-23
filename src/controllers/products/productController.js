@@ -21,7 +21,7 @@ export const fetchProductHandler = async (req, res) => {
 
   const fetchedData = await fetchProduct({ user, params });
 
-  res.send(appResponse('fetched contribution products successfully', fetchedData));
+  res.send(appResponse('fetched  products successfully', fetchedData));
 };
 //================================================================================================
 
