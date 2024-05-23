@@ -24,7 +24,7 @@ export const craeteNewUser = async ({ user, body }) => {
       ...filter
     });
 
-    if (checkMember || userx.acctstatus !== 'deleted')
+    if (checkMember && checkMember.acctstatus !== 'deleted')
       throw new BadRequestError('Member already exists');
   }
 
@@ -37,7 +37,7 @@ export const craeteNewUser = async ({ user, body }) => {
       ...filter
     });
 
-    if (checkMember || userx.acctstatus !== 'deleted')
+    if (checkMember && checkMember.acctstatus !== 'deleted')
       throw new BadRequestError('Member already exists');
   }
 
@@ -53,6 +53,7 @@ export const craeteNewUser = async ({ user, body }) => {
 
     checkMember.password = await bcrypt.hash(body.password, 12);
     checkMember.sponsor_id = user._id;
+    checkMember.acctstatus = "active";
 
     await checkMember.save();
 
@@ -222,7 +223,7 @@ export const fetchUser = async ({ user_id, user }) => {
     .findById(user_id)
     .populate({ path: 'role_id', select: { role_name: 1 } });
 
-  if (!userx || userx.acctstatus === 'deleted') throw new NotFoundError('User not found');
+  if (!userx) throw new NotFoundError('User not found');
 
   return userx;
 };
