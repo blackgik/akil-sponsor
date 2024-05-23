@@ -128,9 +128,8 @@ export const fetchBankCodeHandler = async (req, res) => {
 
 export const onboardingPaymentHandler = async (req, res) => {
   const { user, body } = req;
-  const { upgrade } = req.query;
 
-  const gateway = await onboardingPayment({ user, upgrade, body });
+  const gateway = await onboardingPayment({ user, body });
 
   res.send(appResponse('Updated payment successfully', gateway));
 };
