@@ -45,8 +45,6 @@ export const onboardNewOrganization = async ({ body, dbConnection }) => {
     body.firstname + '' + body.lastname
   );
 
-  if (!body.reg_fee) throw new BadRequestError(`Beneficiary registration fee is required`);
-
   const otp = await codeGenerator(6, '1234567890');
   const otpHash = buildOtpHash(body.email, otp, env.otpKey, 15);
   const hashedPwd = await bcrypt.hash(body.password, 12);
@@ -596,89 +594,29 @@ export const fetchPreferencesData = async () => {
   return { categories: categories, occupations: occupations };
 };
 
-export const onboardingPayment = async ({ user, upgrade, body }) => {
-  const packageTimeLapse =
-    user.start_trial_ts.getTime() / (1000 * 60 * 60 * 24) -
-    user.end_trial_ts.getTime() / (1000 * 60 * 60 * 24);
-  if (packageTimeLapse > 20) {
-    body.start_trial_ts = user.start_trial_ts;
-    body.end_trial_ts = user.end_trial_ts;
-  } else {
-    body.start_trial_ts = new Date();
-    body.end_trial_ts =
-      body?.annual_plan === true
-        ? new Date(new Date().getTime() + 1000 * 24 * 60 * 60 * 365)
-        : new Date(new Date().getTime() + 1000 * 24 * 60 * 60 * 30);
-  }
+export const onboardingPayment = async ({ user, body }) => {
 
-  if (upgrade === 'on') {
-    const paymentPackage = plans[body.payment_plan];
-    let amountToPay = paymentPackage.base_pay;
+    let amountToPay = body.total_amount;
 
-    if (user.total_number_of_beneficiaries_created > paymentPackage.max_users)
-      throw new BadRequestError(
-        'You cannot downgrade your package, your total beneficiaries has exceed the maximum'
-      );
-
-    if (body.total_number_of_beneficiaries_chosen > paymentPackage.max_users)
-      throw new BadRequestError(
-        `your package has a maximum of ${paymentPackage.max_users} beneficiaries. you cannot exceed it`
-      );
-
-    if (body?.modules?.length > 0) {
-      body.modules = [...new Set([...body.modules, ...user.modules])];
-    } else {
-      body.modules = [...user.modules];
-    }
-
-    body?.modules.forEach((element) => {
-      if (!paymentPackage.modules.includes(element)) {
-        amountToPay = amountToPay + 5;
-      }
-    });
-
-    let amount = body.total_number_of_beneficiaries_chosen
-      ? body.total_number_of_beneficiaries_chosen * amountToPay
-      : user.total_number_of_beneficiaries_chosen * amountToPay;
-
-    if (body.annual_plan === true) {
-      // I need to check how many months left in their previous plan then calculate the total
-      const startTime = new Date().getTime() / (1000 * 60 * 60 * 24 * 30);
-      const endTimes = user.end_trial_ts.getTime() / (1000 * 60 * 60 * 24 * 30);
-
-      const timeElapsed =
-        Math.floor(endTimes - startTime) > 1 ? Math.floor(endTimes - startTime) : 1;
-
-      amount = amount * (user.on_trial ? 12 : timeElapsed);
-    }
-
-    if (amount !== body.organization_reg_fee)
+    if (plans.sponsor_onboarding_settings.organization_reg_fee !== body.organization_reg_fee)
       throw new BadRequestError(`Amount for selected Models will be ${amount}`);
 
-    let paystackAmount = 0.02 * amount;
+    let paystackAmount = 0.02 * amountToPay;
     if (paystackAmount >= 2000) paystackAmount = 4000;
 
-    amount = amount + paystackAmount;
+    amountToPay = amountToPay + paystackAmount;
 
     const data = {
-      amount: amount * 100,
+      amount: amountToPay,
       email: user.email,
       callback_url:
         env.node_env === 'development'
-          ? `${env.dev_base_url_beneficiary}/${user.slug}/dashboard`
-          : `${env.prod_base_url_beneficiary}/${user.slug}/dashboard`,
+          ? `${env.dev_base_url_org}/${user.slug}/dashboard`
+          : `${env.prod_base_url_org}/${user.slug}/dashboard`,
       metadata: {
         userId: user._id,
-        modules: body.modules,
-        annual_plan: body?.annual_plan || false,
-        total_number_of_beneficiaries_chosen:
-          body.total_number_of_beneficiaries_chosen ||
-          user.total_number_of_beneficiaries_chosen * amountToPay,
-        payment_plan: body.payment_plan,
-        start_trial_ts: body.start_trial_ts,
-        end_trial_ts: body.end_trial_ts,
-        amount,
-        type: 'plan_upgrade',
+        package: body,
+        amountToPay,
         on_trial: false,
         hasPaid: true,
         acctstatus: 'active'
@@ -695,31 +633,6 @@ export const onboardingPayment = async ({ user, upgrade, body }) => {
     });
 
     return { gateway: gateway.data.data.authorization_url };
-  } else {
-    if (user.organization_reg_fee < 25) throw new BadRequestError('Upgrade your plan');
-
-    let paystackAmount = 0.02 * user.organization_reg_fee;
-    paystackAmount = paystackAmount >= 2000 ? 4000 : paystackAmount;
-
-    const data = {
-      email: user.email,
-      amount: (user.organization_reg_fee + paystackAmount) * 100,
-      metadata: {
-        userId: user._id,
-        type: 'onboardingpayment_update'
-      }
-    };
-    const url = `${env.paystack_api_url}/transaction/initialize`;
-
-    const gateway = await axios.post(url, data, {
-      headers: {
-        Authorization: `Bearer ${env.paystack_secret_key}`,
-        'Content-Type': 'application/json'
-      }
-    });
-
-    return { gateway: gateway.data.data.authorization_url };
-  }
 };
 
 export const addModules = async ({ user, body }) => {
