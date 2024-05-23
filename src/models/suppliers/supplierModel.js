@@ -18,6 +18,13 @@ const SupplierSchema = new Schema(
     supplier_avatar: { key: { type: String, default: '' } },
     supplier_business_name: { type: String, required: false, trim: true, lowercase: true },
     supplier_address: { type: String, required: false, trim: true, lowercase: true },
+    acctstatus: {
+      type: String,
+      trim: true,
+      default: 'pending',
+      index: true,
+      enum: ['pending', 'active', 'suspended']
+    },
     is_active: {
       type: Boolean,
       default: true
