@@ -38,7 +38,7 @@ const productCategoryRoot = () => {
   );
   productCategoryRoutes.patch(
     '/update-single-product-category/:product_category_id',
-    Validate(NewProductCategory, 'params'),
+    Validate(NewProductCategory),
     authentication,
     updateSingleProductCategoryHandler
   );

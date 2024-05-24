@@ -38,7 +38,7 @@ const warehouseRoot = () => {
   );
   warehouseRoutes.patch(
     '/update-single-warehouse/:warehouse_id',
-    Validate(newWarehouse, 'params'),
+    Validate(newWarehouse),
     authentication,
     updateSingleWarehouseHandler
   );
