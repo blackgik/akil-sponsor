@@ -28,6 +28,13 @@ const ProductSchema = new Schema(
       ref: 'Organization',
       required: true
     },
+    prdstatus: {
+      type: String,
+      trim: true,
+      default: 'draft',
+      index: true,
+      enum: ['draft', 'published']
+    },
     is_active: {
       type: Boolean,
       default: true

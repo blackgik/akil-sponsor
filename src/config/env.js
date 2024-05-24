@@ -20,8 +20,8 @@ export default {
   termii_api_secret: process.env.TERMII_API_SECRET,
   termii_api_url: process.env.TERMII_API_URL,
   termii_sender_id: process.env.TERMII_SENDER_ID,
-  dev_base_url_org: `http://localhost`,
-  dev_base_url_member: `http://localhost`,
-  prod_base_url_member: `http://localhost`,
-  prod_base_url_org: `http://localhost`
+  dev_base_url_org: `https://akilaah-sponsor.vercel.app`,
+  dev_base_url_member: `https://akilaah-member.vercel.app`,
+  prod_base_url_member: `https://member.akilaah.com`,
+  prod_base_url_org: `https://sponsor.akilaah.com`
 };
