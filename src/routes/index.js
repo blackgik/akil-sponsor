@@ -5,6 +5,7 @@ import productCategoryRoot from './products/productCategoryRoute.js';
 import warehouseRoot from './products/warehouseRoute.js';
 import occupationRoot from './occupations/occupationRoute.js';
 import messageRoot from './messages/messageRoute.js';
+import supplierRoot from './suppliers/supplierRoute.js';
 import profileRoot from './profile/profileRoute.js';
 import notificationRoots from './settings/notificationRoute.js';
 import rolesRouteRoute from './settings/rolespermission.route.js';
@@ -15,6 +16,7 @@ export default (router) => {
   router.use('/auth', organizationRoute());
   router.use('/beneficiary', beneficiaryRoute());
   router.use('/product', productRoot());
+  router.use('/supplier', supplierRoot());
   router.use('/warehouse', warehouseRoot());
   router.use('/occupation', occupationRoot());
   router.use('/product-category', productCategoryRoot());
