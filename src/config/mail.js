@@ -335,7 +335,7 @@ export const onboardinMail = (data) => {
                                                                                       every login of your beneficiaries)</li>
                                                                                   <li>Organisation Login URL: <a
                                                                                           style="color: red;"
-                                                                                          href="https://organization.akilaah.com/login">https://organization.akilaah.com</a>
+                                                                                          href="https://sponsor.akilaah.com/login">https://sponsor.akilaah.com</a>
                                                                                   </li>
                                                                               </ul>
                                                                               <br>
@@ -386,8 +386,8 @@ export const onboardinMail = (data) => {
 
                                                                   <!--[if mso]><style>.v-button {background: transparent !important;}</style><![endif]-->
                                                                   <div align="center">
-                                                                      <!--[if mso]><v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="https://organization.akilaah.com" style="height:37px; v-text-anchor:middle; width:122px;" arcsize="11%"  stroke="f" fillcolor="#e67e23"><w:anchorlock/><center style="color:#FFFFFF;"><![endif]-->
-                                                                      <a href="https://organization.akilaah.com/login"
+                                                                      <!--[if mso]><v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="https://sponsor.akilaah.com" style="height:37px; v-text-anchor:middle; width:122px;" arcsize="11%"  stroke="f" fillcolor="#e67e23"><w:anchorlock/><center style="color:#FFFFFF;"><![endif]-->
+                                                                      <a href="https://sponsor.akilaah.com/login"
                                                                           target="_blank" class="v-button v-button-colors"
                                                                           style="box-sizing: border-box;display: inline-block;text-decoration: none;-webkit-text-size-adjust: none;text-align: center;color: #FFFFFF; background-color: #002366; border-radius: 4px;-webkit-border-radius: 4px; -moz-border-radius: 4px; width:auto; max-width:100%; overflow-wrap: break-word; word-break: break-word; word-wrap:break-word; mso-border-alt: none;font-size: 14px;">
                                                                           <span class="v-line-height"
@@ -562,7 +562,7 @@ export const onboardinMail = (data) => {
   email: ${data.email}\n
   password:${data.password}\n
   company Unique Code:${data.company_code}\n
-  Login url: https://organization.akilaah.com \n\n
+  Login url: https://sponsor.akilaah.com \n\n
   NB: You Company Unique code should be share to beneficiaries `
   };
 };
@@ -1021,7 +1021,7 @@ export const invitationMail = (data) => {
     email: ${data.email}\n
     password:${data.password}\n
     company Unique Code:${data.company_code}\n
-    Login url: https://organization.akilaah.com \n\n
+    Login url: https://sponsor.akilaah.com \n\n
     NB: You Company Unique code should be share to beneficiaries `
     };
   };
@@ -1538,7 +1538,7 @@ export const beneficiaryBulkUpload = (data) => {
   email: ${data.email}\n
   password:${data.password}\n
   company Unique Code:${data.company_code}\n
-  Login url: https://organization.akilaah.com \n\n
+  Login url: https://sponsor.akilaah.com \n\n
   NB: You Company Unique code should be share to beneficiaries `
   };
 };
@@ -2051,7 +2051,7 @@ export const contributionBulkUpload = (data) => {
   email: ${data.email}\n
   password:${data.password}\n
   company Unique Code:${data.company_code}\n
-  Login url: https://organization.akilaah.com \n\n
+  Login url: https://sponsor.akilaah.com \n\n
   NB: You Company Unique code should be share to beneficiaries `
   };
 };
@@ -2563,7 +2563,7 @@ export const loanBulkUpload = (data) => {
   email: ${data.email}\n
   password:${data.password}\n
   company Unique Code:${data.company_code}\n
-  Login url: https://organization.akilaah.com \n\n
+  Login url: https://sponsor.akilaah.com \n\n
   NB: You Company Unique code should be share to beneficiaries `
   };
 };
@@ -3452,7 +3452,7 @@ export const verifyOnbordingMail = (data) => {
   
                                                                     <!--[if mso]><style>.v-button {background: transparent !important;}</style><![endif]-->
                                                                     <div align="center">
-                                                                        <!--[if mso]><v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="https://organization.mmcoop.org" style="height:37px; v-text-anchor:middle; width:122px;" arcsize="11%"  stroke="f" fillcolor="#e67e23"><w:anchorlock/><center style="color:#FFFFFF;"><![endif]-->
+                                                                        <!--[if mso]><v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="https://sponsor.mmcoop.org" style="height:37px; v-text-anchor:middle; width:122px;" arcsize="11%"  stroke="f" fillcolor="#e67e23"><w:anchorlock/><center style="color:#FFFFFF;"><![endif]-->
                                                                         <a href="mailto:ask@akilaah.com" target="_blank"
                                                                             class="v-button v-button-colors"
                                                                             style="box-sizing: border-box;display: inline-block;text-decoration: none;-webkit-text-size-adjust: none;text-align: center;color: #FFFFFF; background-color: #002366; border-radius: 4px;-webkit-border-radius: 4px; -moz-border-radius: 4px; width:auto; max-width:100%; overflow-wrap: break-word; word-break: break-word; word-wrap:break-word; mso-border-alt: none;font-size: 18px;">
@@ -3972,7 +3972,7 @@ export const forgotPasswordMail = (data) => {
 
                                                                   <!--[if mso]><style>.v-button {background: transparent !important;}</style><![endif]-->
                                                                   <div align="center">
-                                                                      <!--[if mso]><v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="https://organization.mmcoop.org" style="height:37px; v-text-anchor:middle; width:122px;" arcsize="11%"  stroke="f" fillcolor="#e67e23"><w:anchorlock/><center style="color:#FFFFFF;"><![endif]-->
+                                                                      <!--[if mso]><v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="https://sponsor.mmcoop.org" style="height:37px; v-text-anchor:middle; width:122px;" arcsize="11%"  stroke="f" fillcolor="#e67e23"><w:anchorlock/><center style="color:#FFFFFF;"><![endif]-->
                                                                       <a href="mailto:ask@akilaah.com" target="_blank"
                                                                           class="v-button v-button-colors"
                                                                           style="box-sizing: border-box;display: inline-block;text-decoration: none;-webkit-text-size-adjust: none;text-align: center;color: #FFFFFF; background-color: #002366; border-radius: 4px;-webkit-border-radius: 4px; -moz-border-radius: 4px; width:auto; max-width:100%; overflow-wrap: break-word; word-break: break-word; word-wrap:break-word; mso-border-alt: none;font-size: 18px;">
@@ -4471,7 +4471,7 @@ export const beneficiaryApprovedStatusAgentUpdate = (data) => {
                                                                             <li>Member ID: ${
                                                                                 data.beneficiary_id
                                                                                 }</li>
-                                                                            <li>Organization: ${
+                                                                            <li>Sponsor: ${
                                                                                 data.name_of_cooperation
                                                                                 }</li>
                                                                         </ul>
@@ -5502,7 +5502,7 @@ return {
                                                                             <li>Organisation Unique ID: ${
                                                                                 data.organization_code
                                                                                 }</li>
-                                                                            <li>Organization Name: ${
+                                                                            <li>Sponsor Name: ${
                                                                                 data.name_of_cooperation
                                                                                 }</li>
                                                                         </ul>

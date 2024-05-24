@@ -3,6 +3,9 @@ import {
   createNewProduct,
   fetchAllProducts,
   fetchProduct,
+  publishProduct,
+  cancelProduct,
+  createNewProductDraft,
   getSingleProduct,
   updateSingleProduct
 } from '../../services/product/productService.js';
@@ -15,6 +18,14 @@ export const createNewProductHandler = async (req, res) => {
   res.send(appResponse('created product successfully', newProduct));
 };
 
+export const createNewDraftProductHandler = async (req, res) => {
+  const { user, body } = req;
+
+  const newProduct = await createNewProductDraft({ user, body });
+
+  res.send(appResponse('created product successfully', newProduct));
+};
+
 export const fetchProductHandler = async (req, res) => {
   const { user } = req;
   const params = req.query;
@@ -23,6 +34,8 @@ export const fetchProductHandler = async (req, res) => {
 
   res.send(appResponse('fetched  products successfully', fetchedData));
 };
+
+
 //================================================================================================
 
 //------ commeon product handlers --------------------\\
@@ -43,6 +56,24 @@ export const getSingleProductHandler = async (req, res) => {
   const product = await getSingleProduct({ user, product_id });
 
   res.send(appResponse('fetched product successfully', product));
+};
+
+export const cancelProductHandler = async (req, res) => {
+  const { user, params } = req;
+  const { product_id } = params;
+
+  const product = await cancelProduct({ user, product_id });
+
+  res.send(appResponse('product canceled successfully', product));
+};
+
+export const publishProductHandler = async (req, res) => {
+  const { user, params } = req;
+  const { product_id } = params;
+
+  const product = await publishProduct({ user, product_id });
+
+  res.send(appResponse('product published successfully', product));
 };
 
 export const updateSingleProductHandler = async (req, res) => {

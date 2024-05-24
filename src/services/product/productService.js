@@ -34,7 +34,49 @@ export const createNewProduct = async ({ user, body }) => {
     product_name: body.product_name,
     product_id: created.product_id,
     date: created.updatedAt.toUTCString(),
-    status: 'processing'
+    status: 'published'
+  };
+  const mailData = {
+    email: user.email,
+    subject: 'Successful Creation of Product on Akilaah',
+    type: 'html',
+    html: newProductMail(creationData).html,
+    text: newProductMail(creationData).text
+  };
+  const msg = await formattMailInfo(mailData, env);
+
+  const msgDelivered = await messageBird(msg);
+  if (!msgDelivered)
+    throw new InternalServerError('server slip. Bulk Upload was made without mail being sent');
+
+  return true;
+};
+
+export const createNewProductDraft = async ({ user, body }) => {
+  const productData = {
+    ...body,
+    organization_id: user._id
+  };
+  const product = await ProductModel.findOne({
+    product_name: body.product_name,
+    organization_id: user._id,
+    prdstatus: 'draft'
+  });
+
+  if (product) throw new DuplicateError('Duplicate product found');
+
+  const created = await ProductModel.create(productData);
+  if (!created)
+    throw new InternalServerError('server slip error. Please Check your Input properly');
+
+  //create email profile here
+  const creationData = {
+    email: user.email,
+    name_of_cooperation: user.name_of_cooperation,
+    product_name: body.product_name,
+    product_id: created.product_id,
+    date: created.updatedAt.toUTCString(),
+    status: 'draft'
   };
   const mailData = {
     email: user.email,
@@ -155,6 +197,36 @@ export const updateSingleProduct = async ({ product_id, body, user }) => {
   if (!productInView) throw new NotFoundError('product  does not exist');
 
   updates.forEach((update) => (productInView[update] = body[update]));
+
+  await productInView.save();
+
+  return true;
+};
+
+export const cancelProduct = async ({ user, product_id }) => {
+
+  let productInView;
+
+  productInView = await ProductModel.findById(product_id);
+
+  if (!productInView) throw new NotFoundError('product  does not exist');
+
+  productInView.prdstatus = 'draft';
+
+  await productInView.save();
+
+  return true;
+};
+
+export const publishProduct = async ({ user, product_id }) => {
+
+  let productInView;
+
+  productInView = await ProductModel.findById(product_id);
+
+  if (!productInView) throw new NotFoundError('product  does not exist');
+
+  productInView.prdstatus = 'published';
 
   await productInView.save();
 

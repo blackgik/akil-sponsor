@@ -389,6 +389,7 @@ export const setOrganizationPreferences = async ({ body, user }) => {
   }
 
   organizationExists.preferences = body.preferences;
+  organizationExists.isPreferenceSet = true;
   await organizationExists.save();
 
   return true;

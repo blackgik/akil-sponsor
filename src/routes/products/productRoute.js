@@ -7,10 +7,13 @@ import {
 } from '../../validators/productsSchema.js';
 import {
   createNewProductHandler,
+  createNewDraftProductHandler,
   fetchProductHandler,
   getAllProductsHandler,
   getSingleProductHandler,
-  updateSingleProductHandler
+  updateSingleProductHandler,
+  cancelProductHandler,
+  publishProductHandler
 } from '../../controllers/products/productController.js';
 
 const productRoutes = router.Router();
@@ -21,6 +24,12 @@ const productRoot = () => {
     Validate(organizationNewProduction),
     authentication,
     createNewProductHandler
+  );
+  productRoutes.post(
+    '/create-draft-products',
+    Validate(organizationNewProduction),
+    authentication,
+    createNewDraftProductHandler
   );
   productRoutes.get(
     '/fetch-products',
@@ -35,6 +44,18 @@ const productRoot = () => {
     Validate(viewSingleProductSchema, 'params'),
     authentication,
     getSingleProductHandler
+  );
+  productRoutes.get(
+    '/cancel-product/:product_id',
+    Validate(viewSingleProductSchema, 'params'),
+    authentication,
+    cancelProductHandler
+  );
+  productRoutes.get(
+    '/publish-product/:product_id',
+    Validate(viewSingleProductSchema, 'params'),
+    authentication,
+    publishProductHandler
   );
   productRoutes.patch(
     '/update-single-product/:product_id',
