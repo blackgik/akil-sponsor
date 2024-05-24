@@ -9,11 +9,11 @@ import WarehouseModel from '../../models/products/WarehouseModel.js';
 export const createNewWarehouse = async ({ user, body }) => {
   const warehouseData = {
     ...body,
-    overseer_id: user._id
+    sponsor_id: user._id
   };
   const warehouse = await WarehouseModel.findOne({
     warehouse_name: body.warehouse_name,
-    overseer_id: user._id
+    sponsor_id: user._id
   });
 
   if (warehouse) throw new DuplicateError('Duplicate warehouse found');
@@ -31,7 +31,7 @@ export const fetchWarehouse = async ({ user, params }) => {
   page_no = Number(page_no) || 1;
   no_of_requests = Number(no_of_requests) || Infinity;
 
-  const filterData = { overseer_id: user._id };
+  const filterData = { sponsor_id: user._id };
 
   const query = typeof search !== 'undefined' ? search : false;
   const rgx = (pattern) => new RegExp(`.*${pattern}.*`, 'i');
@@ -72,7 +72,7 @@ export const fetchAllWarehouses = async ({ user, params }) => {
   const rgx = (pattern) => new RegExp(`.*${pattern}.*`, 'i');
   const searchRgx = rgx(query);
 
-  const filterData = { overseer_id: user._id };
+  const filterData = { sponsor_id: user._id };
 
   if (query) {
     filterData['$or'] = [{ warehouse_name: searchRgx }];
@@ -96,12 +96,6 @@ export const fetchAllWarehouses = async ({ user, params }) => {
   const available_pages = Math.ceil(count / no_of_requests);
 
   fetchedData = fetchedData.reduce(function (result, current) {
-    if (!result[current.warehouse_type]) {
-      result[current.warehouse_type] = [];
-    }
-
-    result[current.warehouse_type].push(current);
-
     return result;
   }, {});
 

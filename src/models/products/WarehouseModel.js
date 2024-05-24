@@ -17,9 +17,14 @@ const WarehouseSchema = new Schema(
     warehouse_address: { type: String, trim: true },
     warehouse_description: { type: String, trim: true },
     warehouse_googlemaps_url: { type: String, trim: true },
-    warehouse_overseer_id: {
+    sponsor_id: {
       type: Schema.Types.ObjectId,
       ref: 'Organization',
+      required: true
+    },
+    warehouse_overseer_id: {
+      type: Schema.Types.ObjectId,
+      ref: 'Organization_Beneficiary',
       required: true
     },
     wrhstatus: {

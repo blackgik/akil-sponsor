@@ -59,7 +59,7 @@ const productRoot = () => {
   );
   productRoutes.patch(
     '/update-single-product/:product_id',
-    Validate(organizationNewProduction, 'params'),
+    Validate(organizationNewProduction),
     authentication,
     updateSingleProductHandler
   );

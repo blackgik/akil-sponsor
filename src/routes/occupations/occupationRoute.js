@@ -38,7 +38,7 @@ const occupationRoot = () => {
   );
   occupationRoutes.patch(
     '/update-single-occupation/:occupation_id',
-    Validate(createNewOccupation, 'params'),
+    Validate(createNewOccupation),
     authentication,
     updateSingleOccupationHandler
   );
