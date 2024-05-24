@@ -3,14 +3,17 @@ import Validate from '../../validators/index.js';
 import { authentication } from '../../middlewares/authentication.js';
 import {
   productNewSupplier,
+  updateSupplierStatusSchema,
   viewSingleSupplierSchema
 } from '../../validators/suppliersSchema.js';
 import {
+  createNewDraftSupplierHandler,
   createNewSupplierHandler,
   fetchSupplierHandler,
   getAllSuppliersHandler,
   getSingleSupplierHandler,
-  updateSingleSupplierHandler
+  updateSingleSupplierHandler,
+  updateSupplierStatusHandler
 } from '../../controllers/suppliers/supplierController.js';
 
 const supplierRoutes = router.Router();
@@ -21,6 +24,12 @@ const supplierRoot = () => {
     Validate(productNewSupplier),
     authentication,
     createNewSupplierHandler
+  );
+  supplierRoutes.post(
+    '/create-draft-suppliers',
+    Validate(productNewSupplier),
+    authentication,
+    createNewDraftSupplierHandler
   );
   supplierRoutes.get(
     '/fetch-suppliers',
@@ -38,9 +47,15 @@ const supplierRoot = () => {
   );
   supplierRoutes.patch(
     '/update-single-supplier/:supplier_id',
-    Validate(viewSingleSupplierSchema, 'params'),
+    Validate(productNewSupplier, 'params'),
     authentication,
     updateSingleSupplierHandler
+  );
+  supplierRoutes.patch(
+    '/update-supplier-status/:supplier_id',
+    Validate(updateSupplierStatusSchema, 'params'),
+    authentication,
+    updateSupplierStatusHandler
   );
 
   return supplierRoutes;
