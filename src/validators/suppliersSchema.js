@@ -16,3 +16,7 @@ export const productNewSupplier = Joi.object({
 export const viewSingleSupplierSchema = Joi.object({
     supplier_id: Joi.string().required()
 });
+
+export const updateSupplierStatusSchema = Joi.object({
+    acctstatus: Joi.string().required()
+});

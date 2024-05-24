@@ -8,7 +8,48 @@ import SupplierModel from '../../models/suppliers/supplierModel.js';
 
 export const createNewSupplier = async ({ user, body }) => {
   const supplierData = {
-    ...body
+    ...body,
+    acctstatus: 'active'
+  };
+  const supplier = await SupplierModel.findOne({
+    supplier_name: body.supplier_name
+  });
+
+  if (supplier) throw new DuplicateError('Duplicate supplier found');
+
+  const created = await SupplierModel.create(supplierData);
+  if (!created)
+    throw new InternalServerError('server slip error. Please Check your Input properly');
+
+  //create email profile here
+//   const creationData = {
+//     email: user.email,
+//     name_of_cooperation: user.name_of_cooperation,
+//     supplier_name: body.supplier_name,
+//     supplier_id: created.supplier_id,
+//     date: created.updatedAt.toUTCString(),
+//     status: 'processing'
+//   };
+//   const mailData = {
+//     email: user.email,
+//     subject: 'Successful Creation of Supplier on Akilaah',
+//     type: 'html',
+//     html: newSupplierMail(creationData).html,
+//     text: newSupplierMail(creationData).text
+//   };
+//   const msg = await formattMailInfo(mailData, env);
+
+//   const msgDelivered = await messageBird(msg);
+//   if (!msgDelivered)
+//     throw new InternalServerError('server slip. Bulk Upload was made without mail being sent');
+
+  return true;
+};
+
+export const createNewDraftSupplier = async ({ user, body }) => {
+  const supplierData = {
+    ...body,    
+    acctstatus: 'draft',
   };
   const supplier = await SupplierModel.findOne({
     supplier_name: body.supplier_name
@@ -133,6 +174,22 @@ export const getSingleSupplier = async ({ user, supplier_id }) => {
 };
 
 export const updateSingleSupplier = async ({ supplier_id, body, user }) => {
+  const updates = Object.keys(body);
+
+  let supplierInView;
+
+  supplierInView = await SupplierModel.findById(supplier_id);
+
+  if (!supplierInView) throw new NotFoundError('supplier  does not exist');
+
+  updates.forEach((update) => (supplierInView[update] = body[update]));
+
+  await supplierInView.save();
+
+  return true;
+};
+
+export const updateSupplierStatus = async ({ supplier_id, body, user }) => {
   const updates = Object.keys(body);
 
   let supplierInView;

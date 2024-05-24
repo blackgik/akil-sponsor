@@ -21,9 +21,9 @@ const SupplierSchema = new Schema(
     acctstatus: {
       type: String,
       trim: true,
-      default: 'pending',
+      default: 'active',
       index: true,
-      enum: ['pending', 'active', 'suspended']
+      enum: ['draft', 'active', 'suspended']
     },
     is_active: {
       type: Boolean,

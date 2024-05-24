@@ -1,8 +1,10 @@
 import appResponse from '../../../lib/appResponse.js';
 import {
   createNewSupplier,
+  createNewDraftSupplier,
   fetchAllSuppliers,
   fetchSupplier,
+  updateSupplierStatus,
   getSingleSupplier,
   updateSingleSupplier
 } from '../../services/suppliers/supplierService.js';
@@ -11,6 +13,14 @@ export const createNewSupplierHandler = async (req, res) => {
   const { user, body } = req;
 
   const newSupplier = await createNewSupplier({ user, body });
+
+  res.send(appResponse('created supplier successfully', newSupplier));
+};
+
+export const createNewDraftSupplierHandler = async (req, res) => {
+  const { user, body } = req;
+
+  const newSupplier = await createNewDraftSupplier({ user, body });
 
   res.send(appResponse('created supplier successfully', newSupplier));
 };
@@ -52,4 +62,14 @@ export const updateSingleSupplierHandler = async (req, res) => {
   const updated = await updateSingleSupplier({ supplier_id, body, user });
 
   res.send(appResponse('updated supplier successfully', updated));
+};
+
+
+export const updateSupplierStatusHandler = async (req, res) => {
+  const { user, params, body } = req;
+  const { supplier_id} = params;
+
+  const updated = await updateSupplierStatus({ supplier_id, body, user });
+
+  res.send(appResponse(' supplier status updated successfully', updated));
 };
