@@ -92,7 +92,14 @@ export const validateBeneficiaryUpdateSchema = Joi.object({
 });
 
 export const validateResetPasswordSchema = Joi.object({
+  password: Joi.string().min(3).max(15).required(),
+  password_confirmation: Joi.any().valid(Joi.ref('password')).required().label('Confirm password')
+  .options({ messages: { 'any.only': '{{#label}} does not match'} })
+});
+
+export const validateForgotOtpSchema = Joi.object({
   code: Joi.string().required(),
+  email: Joi.string().email().required(),
   hash: Joi.string().required()
 });
 

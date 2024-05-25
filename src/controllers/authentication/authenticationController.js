@@ -16,7 +16,8 @@ import {
   resetPassword,
   slugPersonalization,
   uploadOrganizationBeneficiariesInBulk,
-  verifyEmail
+  verifyEmail,
+  verifyForgotOtp
 } from '../../services/authentication/authenticationService.js';
 import { encryptData } from '../../utils/vault.js';
 
@@ -97,11 +98,18 @@ export const forgotPasswordHandler = async (req, res) => {
   res.send(appResponse(`Reset Details successfully`, updatePassword));
 };
 
-export const resetPasswordHandler = async (req, res) => {
-  const { email } = req.query;
+export const forgotOtpHandler = async (req, res) => {
   const { body } = req;
 
-  const updatePassword = await resetPassword({ email, body });
+  const updatePassword = await verifyForgotOtp({ body });
+
+  res.send(appResponse(`Reset Details verified successfully`, updatePassword));
+};
+
+export const resetPasswordHandler = async (req, res) => {
+  const { body, user } = req;
+
+  const updatePassword = await resetPassword({body, user});
 
   res.send(appResponse(`Reset Password was successful`, updatePassword));
 };
