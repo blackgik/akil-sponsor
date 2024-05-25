@@ -87,7 +87,7 @@ export const createNewDraftSupplier = async ({ user, body }) => {
 };
 
 export const fetchSupplier = async ({ user, params }) => {
-  let { page_no, no_of_requests, search } = params;
+  let { page_no, no_of_requests, search, status } = params;
 
   page_no = Number(page_no) || 1;
   no_of_requests = Number(no_of_requests) || Infinity;
@@ -95,11 +95,15 @@ export const fetchSupplier = async ({ user, params }) => {
   const filterData = { is_active: true };
 
   const query = typeof search !== 'undefined' ? search : false;
+  const acctstatus = typeof status !== 'undefined' ? status : false;
   const rgx = (pattern) => new RegExp(`.*${pattern}.*`, 'i');
   const searchRgx = rgx(query);
 
   if (query) {
     filterData['$or'] = [{ supplier_name: searchRgx }];
+  }
+  if (acctstatus) {
+    filterData['$and'] = [{ acctstatus: acctstatus }];
   }
 
   const totalCount = await SupplierModel.countDocuments({
@@ -128,12 +132,13 @@ export const fetchSupplier = async ({ user, params }) => {
 //------ common supplier handlers --------------------\\
 
 export const fetchAllSuppliers = async ({ user, params }) => {
-  let { page_no, no_of_requests, search } = params;
+  let { page_no, no_of_requests, search, status } = params;
 
   page_no = Number(page_no) || 1;
   no_of_requests = Number(no_of_requests) || Infinity;
 
   const query = typeof search !== 'undefined' ? search : false;
+  const acctstatus = typeof status !== 'undefined' ? status : false;
   const rgx = (pattern) => new RegExp(`.*${pattern}.*`, 'i');
   const searchRgx = rgx(query);
 
@@ -141,6 +146,10 @@ export const fetchAllSuppliers = async ({ user, params }) => {
 
   if (query) {
     filterData['$or'] = [{ supplier_name: searchRgx }];
+  }
+
+  if (acctstatus) {
+    filterData['$and'] = [{ acctstatus: acctstatus }];
   }
 
   let fetchedData = [];
