@@ -425,14 +425,17 @@ export const setOrganizationPackageData = async ({ body, user }) => {
     organizationExists.personalization_fee = plans.sponsor_onboarding_settings.personalization_fee;
   }
   if (body.total_number_of_beneficiaries_chosen > plans.sponsor_onboarding_settings.max_users) {
+    organizationExists.total_number_of_beneficiaries_chosen = body.total_number_of_beneficiaries_chosen;
     supBeneficiaryFee = body.total_number_of_beneficiaries_chosen - plans.sponsor_onboarding_settings.max_users;
     amountToPay += supBeneficiaryFee;
   }
   if (body.total_number_of_sms > plans.sponsor_onboarding_settings.max_sms) {
+    organizationExists.total_number_of_sms = body.total_number_of_sms;
     supSmsFee = (body.total_number_of_sms - plans.sponsor_onboarding_settings.max_sms) * plans.sponsor_onboarding_settings.sup_sms_fee;
     amountToPay += supSmsFee;
   }
   if (body.data_collection_quantity > 0) {
+    organizationExists.data_collection_quantity = body.data_collection_quantity;
     dataCollectionFee = body.data_collection_quantity * plans.sponsor_onboarding_settings.data_collection_fee;
     amountToPay += dataCollectionFee;
   }

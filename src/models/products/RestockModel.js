@@ -14,11 +14,23 @@ const RestockSchema = new Schema(
       ref: 'Product',
       required: true
     },
+    warehouse_id: {
+      type: Schema.Types.ObjectId,
+      ref: 'Warehouse',
+      required: true
+    },
     supplier_id: {
-        type: Schema.Types.ObjectId,
-        ref: 'Supplier',
-        required: true
-      },
+      type: Schema.Types.ObjectId,
+      ref: 'Supplier',
+      required: true
+    },
+    rtkstatus: {
+      type: String,
+      trim: true,
+      default: 'active',
+      index: true,
+      enum: ['active', 'draft']
+    },
     is_active: {
       type: Boolean,
       default: true

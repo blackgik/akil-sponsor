@@ -26,19 +26,23 @@ export const createNewWarehouse = async ({ user, body }) => {
 };
 
 export const fetchWarehouse = async ({ user, params }) => {
-  let { page_no, no_of_requests, search } = params;
+  let { page_no, no_of_requests, search, status } = params;
 
   page_no = Number(page_no) || 1;
   no_of_requests = Number(no_of_requests) || Infinity;
 
   const filterData = { sponsor_id: user._id };
 
+  const wrhstatus = typeof status !== 'undefined' ? status : false;
   const query = typeof search !== 'undefined' ? search : false;
   const rgx = (pattern) => new RegExp(`.*${pattern}.*`, 'i');
   const searchRgx = rgx(query);
 
   if (query) {
     filterData['$or'] = [{ warehouse_name: searchRgx }];
+  }
+  if (wrhstatus) {
+    filterData['$and'] = [{ wrhstatus: wrhstatus }];
   }
 
   const totalCount = await WarehouseModel.countDocuments({
@@ -70,11 +74,12 @@ export const fetchWarehouse = async ({ user, params }) => {
 //------ common warehouse handlers --------------------\\
 
 export const fetchAllWarehouses = async ({ user, params }) => {
-  let { page_no, no_of_requests, search } = params;
+  let { page_no, no_of_requests, search, status } = params;
 
   page_no = Number(page_no) || 1;
   no_of_requests = Number(no_of_requests) || Infinity;
 
+  const wrhstatus = typeof status !== 'undefined' ? status : false;
   const query = typeof search !== 'undefined' ? search : false;
   const rgx = (pattern) => new RegExp(`.*${pattern}.*`, 'i');
   const searchRgx = rgx(query);
@@ -84,7 +89,9 @@ export const fetchAllWarehouses = async ({ user, params }) => {
   if (query) {
     filterData['$or'] = [{ warehouse_name: searchRgx }];
   }
-
+  if (wrhstatus) {
+    filterData['$and'] = [{ wrhstatus: wrhstatus }];
+  }
   let fetchedData = [];
 
   const warehouseCount = await WarehouseModel.countDocuments({ ...filterData });
