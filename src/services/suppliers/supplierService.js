@@ -109,6 +109,10 @@ export const fetchSupplier = async ({ user, params }) => {
 
   const fetchData = await SupplierModel
     .find({ ...filterData, is_active: true })
+    .populate({
+      path: 'supplier_product_category_id',
+      model: 'ProductCategory'
+    })
     .sort({ createdAt: -1 })
     .skip((page_no - 1) * no_of_requests)
     .limit(no_of_requests);
@@ -142,7 +146,10 @@ export const fetchAllSuppliers = async ({ user, params }) => {
   let fetchedData = [];
 
   const supplierCount = await SupplierModel.countDocuments({ ...filterData });
-  let supplierData = await SupplierModel.find({ ...filterData });
+  let supplierData = await SupplierModel.find({ ...filterData }).populate({
+    path: 'supplier_product_category_id',
+    model: 'ProductCategory'
+  });
 
   const count = supplierCount;
 
@@ -166,7 +173,10 @@ export const fetchAllSuppliers = async ({ user, params }) => {
 export const getSingleSupplier = async ({ user, supplier_id }) => {
   let supplierInView;
 
-  supplierInView = await SupplierModel.findById(supplier_id);
+  supplierInView = await SupplierModel.findById(supplier_id).populate({
+    path: 'supplier_product_category_id',
+    model: 'ProductCategory'
+  });
 
   if (!supplierInView) throw new NotFoundError('supplier  does not exist');
 

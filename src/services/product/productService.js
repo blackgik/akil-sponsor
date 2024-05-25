@@ -117,6 +117,10 @@ export const fetchProduct = async ({ user, params }) => {
 
   const fetchData = await ProductModel
     .find({ ...filterData, is_active: true })
+    .populate({
+      path: 'product_category_id',
+      model: 'ProductCategory'
+    })
     .sort({ createdAt: -1 })
     .skip((page_no - 1) * no_of_requests)
     .limit(no_of_requests);
@@ -150,7 +154,10 @@ export const fetchAllProducts = async ({ user, params }) => {
   let fetchedData = [];
 
   const productCount = await ProductModel.countDocuments({ ...filterData });
-  let productData = await ProductModel.find({ ...filterData });
+  let productData = await ProductModel.find({ ...filterData }).populate({
+    path: 'product_category_id',
+    model: 'ProductCategory'
+  });
 
   const count = productCount;
 
@@ -180,7 +187,10 @@ export const fetchAllProducts = async ({ user, params }) => {
 export const getSingleProduct = async ({ user, product_id }) => {
   let productInView;
 
-  productInView = await ProductModel.findById(product_id);
+  productInView = await ProductModel.findById(product_id).populate({
+    path: 'product_category_id',
+    model: 'ProductCategory'
+  });
 
   if (!productInView) throw new NotFoundError('product  does not exist');
 
