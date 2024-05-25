@@ -47,13 +47,13 @@ const supplierRoot = () => {
   );
   supplierRoutes.patch(
     '/update-single-supplier/:supplier_id',
-    Validate(productNewSupplier, 'params'),
+    Validate(productNewSupplier),
     authentication,
     updateSingleSupplierHandler
   );
   supplierRoutes.patch(
     '/update-supplier-status/:supplier_id',
-    Validate(updateSupplierStatusSchema, 'params'),
+    Validate(updateSupplierStatusSchema),
     authentication,
     updateSupplierStatusHandler
   );

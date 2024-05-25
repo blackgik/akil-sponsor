@@ -48,6 +48,13 @@ export const fetchWarehouse = async ({ user, params }) => {
 
   const fetchData = await WarehouseModel
     .find({ ...filterData, is_active: true })
+    .populate({
+      path: 'warehouse_overseer_id',
+      model: 'Organization_Beneficiary'
+    }).populate({
+      path: 'sponsor_id',
+      model: 'Organization'
+    })
     .sort({ createdAt: -1 })
     .skip((page_no - 1) * no_of_requests)
     .limit(no_of_requests);
@@ -81,7 +88,13 @@ export const fetchAllWarehouses = async ({ user, params }) => {
   let fetchedData = [];
 
   const warehouseCount = await WarehouseModel.countDocuments({ ...filterData });
-  let warehouseData = await WarehouseModel.find({ ...filterData });
+  let warehouseData = await WarehouseModel.find({ ...filterData }).populate({
+    path: 'warehouse_overseer_id',
+    model: 'Organization_Beneficiary'
+  }).populate({
+    path: 'sponsor_id',
+    model: 'Organization'
+  });
 
   const count = warehouseCount;
 
@@ -105,7 +118,13 @@ export const fetchAllWarehouses = async ({ user, params }) => {
 export const getSingleWarehouse = async ({ user, warehouse_id }) => {
   let warehouseInView;
 
-  warehouseInView = await WarehouseModel.findById(warehouse_id);
+  warehouseInView = await WarehouseModel.findById(warehouse_id).populate({
+    path: 'warehouse_overseer_id',
+    model: 'Organization_Beneficiary'
+  }).populate({
+    path: 'sponsor_id',
+    model: 'Organization'
+  });
 
   if (!warehouseInView) throw new NotFoundError('warehouse  does not exist');
 
