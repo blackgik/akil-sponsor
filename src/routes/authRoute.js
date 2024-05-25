@@ -8,7 +8,8 @@ import {
   validateVerifyOnboardingEmailSchema,
   validateOnboardingOrganizationSchema,
   validateOrganizationBeneficiarySchema,
-  validateResetPasswordSchema
+  validateResetPasswordSchema,
+  validateForgotOtpSchema
 } from '../validators/organizationSchema.js';
 import {
   addModulesHandler,
@@ -27,7 +28,8 @@ import {
   organizationResendOtpHandler,
   fetchPrerenceDataHandler,
   inviteBeneficiaryHandler,
-  slugPersonalizationHandler
+  slugPersonalizationHandler,
+  forgotOtpHandler
 } from '../controllers/authentication/authenticationController.js';
 import { authentication, dbconnection } from '../middlewares/authentication.js';
 import { upload } from '../../lib/multer.js';
@@ -87,8 +89,15 @@ const organizationRoute = () => {
     Validate(validateForgotPasswordSchema),
     forgotPasswordHandler
   );
-  organizationRoutes.patch(
+
+  organizationRoutes.post(
+    '/verify-forgot-otp',
+    Validate(validateForgotOtpSchema),
+    forgotOtpHandler
+  );
+  organizationRoutes.post(
     '/reset-password',
+    authentication,
     Validate(validateResetPasswordSchema),
     resetPasswordHandler
   );

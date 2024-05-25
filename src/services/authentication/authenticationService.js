@@ -197,13 +197,7 @@ export const verifyEmail = async (body) => {
       ''
     );
   const admin = checkAcct.toJSON();
-  admin.onboardingSetting = {
-    organization_reg_fee: plans.sponsor_onboarding_settings.organization_reg_fee,
-    sup_beneficiary_fee: plans.sponsor_onboarding_settings.sup_beneficiary_fee,
-    personalization_fee: plans.sponsor_onboarding_settings.personalization_fee,
-    max_users: plans.sponsor_onboarding_settings.max_users,
-    total_admin: plans.sponsor_onboarding_settings.total_admin
-  };
+  admin.onboardingSetting = plans.sponsor_onboarding_settings;
   const encrypedDataString = await encryptData({
     data2encrypt: { ...admin },
     pubKey: env.public_key
@@ -227,13 +221,7 @@ export const loginOrganization = async (body) => {
   if (!isMatch) throw new InvalidError('Invalid Sponsor');
 
   const admin = checkOrg.toJSON();
-  admin.onboardingSetting = {
-    organization_reg_fee: plans.sponsor_onboarding_settings.organization_reg_fee,
-    sup_beneficiary_fee: plans.sponsor_onboarding_settings.sup_beneficiary_fee,
-    personalization_fee: plans.sponsor_onboarding_settings.personalization_fee,
-    max_users: plans.sponsor_onboarding_settings.max_users,
-    total_admin: plans.sponsor_onboarding_settings.total_admin
-  };
+  admin.onboardingSetting = plans.sponsor_onboarding_settings;
   const is_first_time = checkOrg.is_first_time;
 
   if (checkOrg.is_first_time === true) {
@@ -290,14 +278,12 @@ export const forgotPassword = async ({ body }) => {
   return { hash: hash, email: checkOrg.email };
 };
 
-export const resetPassword = async ({ body, email }) => {
-  const { code, hash, password } = body;
+export const resetPassword = async ({ body, user }) => {
+  const { password } = body;
+  const email = user.email;
 
   const checkOrg = await organizationModel.findOne({ email });
   if (!checkOrg) throw new NotFoundError('Sponsor not found');
-
-  const verifyOtp = verifyOTP(email, code, hash, env.otpKey);
-  if (!verifyOtp) throw new InvalidError('Wrong otp code');
 
   const hashPassword = await bcrypt.hash(password, 12);
 
@@ -306,6 +292,29 @@ export const resetPassword = async ({ body, email }) => {
   await checkOrg.save();
 
   return true;
+};
+
+export const verifyForgotOtp = async ({body}) => {
+  const { code, hash, email } = body;
+
+  const checkOrg = await organizationModel.findOne({ email: email });
+  if (!checkOrg) throw new NotFoundError('Sponsor not found');
+
+  const verifyOtp = verifyOTP(email, code, hash, env.otpKey);
+  if (!verifyOtp) throw new InvalidError('Wrong otp code');
+  const generatePassword = await codeGenerator(9, 'ABCDEFGHI&*$%#1234567890');
+  const hashPassword = await bcrypt.hash(generatePassword, 12);
+
+  checkOrg.password = hashPassword;
+
+  await checkOrg.save();
+
+  const tokenEncryption = jwt.sign(
+    { _id: checkOrg._id, email: checkOrg.email, user: checkOrg },
+    env.jwt_key
+  );
+
+  return {tokenEncryption};
 };
 
 export const findOrganizationById = async (id) => {

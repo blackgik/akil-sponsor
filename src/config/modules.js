@@ -7,7 +7,7 @@ export const plans = {
     sup_sms_fee: 4,
     personalization_fee: 2500000,
     max_users: 500,
-    max_sms: 500,
+    max_sms: 1000,
     total_admin: 10,
     email_notifications: 'unlimited'
   }
