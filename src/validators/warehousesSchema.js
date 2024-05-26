@@ -8,8 +8,8 @@ export const newWarehouse = Joi.object({
   warehouse_address: Joi.string().required(),
   warehouse_googlemaps_url: Joi.string().optional().allow('', null),
   warehouse_description: Joi.string().optional().allow('', null),
+  warehouse_overseer_id: Joi.string().required()
 });
-
 
 export const viewSingleWarehouseSchema = Joi.object({
   warehouse_id: Joi.string().required()

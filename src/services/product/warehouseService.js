@@ -1,12 +1,12 @@
 import env from '../../config/env.js';
-import {
-  DuplicateError,
-  InternalServerError,
-  NotFoundError
-} from '../../../lib/appErrors.js';
+import { DuplicateError, InternalServerError, NotFoundError } from '../../../lib/appErrors.js';
 import WarehouseModel from '../../models/products/WarehouseModel.js';
+import usersModels from '../../models/settings/users.models.js';
 
 export const createNewWarehouse = async ({ user, body }) => {
+  const user = await usersModels.findById(body.warehouse_overseer_id);
+  if (!user) throw new NotFoundError('User not found');
+
   const warehouseData = {
     ...body,
     sponsor_id: user._id
@@ -50,12 +50,12 @@ export const fetchWarehouse = async ({ user, params }) => {
     is_active: true
   });
 
-  const fetchData = await WarehouseModel
-    .find({ ...filterData, is_active: true })
+  const fetchData = await WarehouseModel.find({ ...filterData, is_active: true })
     .populate({
       path: 'warehouse_overseer_id',
       model: 'Organization_Beneficiary'
-    }).populate({
+    })
+    .populate({
       path: 'sponsor_id',
       model: 'Organization'
     })
@@ -69,7 +69,6 @@ export const fetchWarehouse = async ({ user, params }) => {
 
   return { page_no, available_pages, fetchData };
 };
-
 
 //------ common warehouse handlers --------------------\\
 
@@ -95,13 +94,15 @@ export const fetchAllWarehouses = async ({ user, params }) => {
   let fetchedData = [];
 
   const warehouseCount = await WarehouseModel.countDocuments({ ...filterData });
-  let warehouseData = await WarehouseModel.find({ ...filterData }).populate({
-    path: 'warehouse_overseer_id',
-    model: 'Organization_Beneficiary'
-  }).populate({
-    path: 'sponsor_id',
-    model: 'Organization'
-  });
+  let warehouseData = await WarehouseModel.find({ ...filterData })
+    .populate({
+      path: 'warehouse_overseer_id',
+      model: 'Organization_Beneficiary'
+    })
+    .populate({
+      path: 'sponsor_id',
+      model: 'Organization'
+    });
 
   const count = warehouseCount;
 
@@ -125,13 +126,15 @@ export const fetchAllWarehouses = async ({ user, params }) => {
 export const getSingleWarehouse = async ({ user, warehouse_id }) => {
   let warehouseInView;
 
-  warehouseInView = await WarehouseModel.findById(warehouse_id).populate({
-    path: 'warehouse_overseer_id',
-    model: 'Organization_Beneficiary'
-  }).populate({
-    path: 'sponsor_id',
-    model: 'Organization'
-  });
+  warehouseInView = await WarehouseModel.findById(warehouse_id)
+    .populate({
+      path: 'warehouse_overseer_id',
+      model: 'Organization_Beneficiary'
+    })
+    .populate({
+      path: 'sponsor_id',
+      model: 'Organization'
+    });
 
   if (!warehouseInView) throw new NotFoundError('warehouse  does not exist');
 
