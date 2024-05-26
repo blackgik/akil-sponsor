@@ -4,8 +4,8 @@ import WarehouseModel from '../../models/products/WarehouseModel.js';
 import usersModels from '../../models/settings/users.models.js';
 
 export const createNewWarehouse = async ({ user, body }) => {
-  const user = await usersModels.findById(body.warehouse_overseer_id);
-  if (!user) throw new NotFoundError('User not found');
+  const userx = await usersModels.findById(body.warehouse_overseer_id);
+  if (!userx) throw new NotFoundError('User not found');
 
   const warehouseData = {
     ...body,
