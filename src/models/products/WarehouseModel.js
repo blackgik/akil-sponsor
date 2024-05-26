@@ -24,7 +24,7 @@ const WarehouseSchema = new Schema(
     },
     warehouse_overseer_id: {
       type: Schema.Types.ObjectId,
-      ref: 'Organization_Beneficiary',
+      ref: 'User',
       required: true
     },
     wrhstatus: {
