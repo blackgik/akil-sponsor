@@ -53,7 +53,7 @@ export const fetchWarehouse = async ({ user, params }) => {
   const fetchData = await WarehouseModel.find({ ...filterData, is_active: true })
     .populate({
       path: 'warehouse_overseer_id',
-      model: 'Organization_Beneficiary'
+      model: 'User'
     })
     .populate({
       path: 'sponsor_id',
