@@ -49,7 +49,8 @@ export const fetchWarehouse = async ({ user, params }) => {
     ...filterData
   });
 
-  const fetchData = await WarehouseModel.find({ ...filterData })
+  const fetchData = await WarehouseModel
+    .find({ ...filterData})
     .populate({
       path: 'warehouse_overseer_id',
       model: 'User'
@@ -93,15 +94,15 @@ export const fetchAllWarehouses = async ({ user, params }) => {
   let fetchedData = [];
 
   const warehouseCount = await WarehouseModel.countDocuments({ ...filterData });
-  let warehouseData = await WarehouseModel.find({ ...filterData })
-    .populate({
-      path: 'warehouse_overseer_id',
-      model: 'Organization_Beneficiary'
-    })
-    .populate({
-      path: 'sponsor_id',
-      model: 'Organization'
-    });
+
+  let warehouseData = await WarehouseModel.find({ ...filterData})
+  .populate({
+    path: 'warehouse_overseer_id',
+    model: 'Organization_Beneficiary'
+  }).populate({
+    path: 'sponsor_id',
+    model: 'Organization'
+  });
 
   const count = warehouseCount;
 
@@ -114,10 +115,6 @@ export const fetchAllWarehouses = async ({ user, params }) => {
   fetchedData = fetchedData.slice(startIndex, endIndex);
 
   const available_pages = Math.ceil(count / no_of_requests);
-
-  fetchedData = fetchedData.reduce(function (result, current) {
-    return result;
-  }, {});
 
   return { page_no, available_pages, fetchedData };
 };
