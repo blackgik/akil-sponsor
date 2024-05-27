@@ -51,14 +51,14 @@ export const organizationPreferencesHandler = async (req, res) => {
   res.send(appResponse('Preferences saved!', pref));
 };
 
-export const organizationPackageHandler  = async (req, res) => {
+export const organizationPackageHandler = async (req, res) => {
   const { body, user } = req;
 
   const packageData = await setOrganizationPackageData({ body, user });
 
   res.send(appResponse('Package saved!', packageData));
 };
-  
+
 export const inviteBeneficiaryHandler = async (req, res) => {
   const { user } = req;
   const { beneficiary_ids } = req.body;
@@ -109,7 +109,7 @@ export const forgotOtpHandler = async (req, res) => {
 export const resetPasswordHandler = async (req, res) => {
   const { body, user } = req;
 
-  const updatePassword = await resetPassword({body, user});
+  const updatePassword = await resetPassword({ body, user });
 
   res.send(appResponse(`Reset Password was successful`, updatePassword));
 };
@@ -125,12 +125,7 @@ export const onboardNewOrganizationBeneficiaryHandler = async (req, res) => {
 export const organizationProfileHandler = async (req, res) => {
   const { user } = req;
 
-  const encryptedData = await encryptData({
-    data2encrypt: { ...user.toJSON() },
-    pubKey: env.public_key
-  });
-
-  res.send(appResponse('fetched organization profile successfully', encryptedData));
+  res.send(appResponse('fetched organization profile successfully', user));
 };
 
 export const organizationBulkUploadBeneficiaryHandler = async (req, res) => {

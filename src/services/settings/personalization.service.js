@@ -3,7 +3,7 @@ import env from '../../config/env.js';
 import personalizationModel from '../../models/settings/personalization.model.js';
 
 export const buildPersonlaization = async ({ user, param, body }) => {
-  if (user.personalization_fee > 0) {
+  if (user.hasPaid_personalization_fee) {
     param.deferred = true;
   }
   const data = {
@@ -24,7 +24,7 @@ export const buildPersonlaization = async ({ user, param, body }) => {
   }
 
   if (param.deferred === 'true') {
-    if (user.personalization_fee > 0) {
+    if (user.hasPaid_personalization_fee) {
       check_personalization.has_paid = true;
 
       await check_personalization.save();
