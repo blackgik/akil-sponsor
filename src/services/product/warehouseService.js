@@ -46,11 +46,10 @@ export const fetchWarehouse = async ({ user, params }) => {
   }
 
   const totalCount = await WarehouseModel.countDocuments({
-    ...filterData,
-    is_active: true
+    ...filterData
   });
 
-  const fetchData = await WarehouseModel.find({ ...filterData, is_active: true })
+  const fetchData = await WarehouseModel.find({ ...filterData })
     .populate({
       path: 'warehouse_overseer_id',
       model: 'User'
