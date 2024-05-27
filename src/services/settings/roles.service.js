@@ -26,7 +26,7 @@ export const createRoles = async ({ user, body }) => {
 
 export const fetchRoles = async ({ user }) => {
   const roles = await rolepermissionModel.find({ sponsor_id: user._id });
-  console.log(roles);
+
   return roles;
 };
 
@@ -40,6 +40,14 @@ export const editrole = async ({ user, body, role_id }) => {
   updates.forEach((update) => (role[update] = body[update]));
 
   await role.save();
+
+  return role;
+};
+
+export const viewrole = async ({ role_id }) => {
+  const role = await rolepermissionModel.findById(role_id);
+
+  if (!role) throw new NotFoundError('Role not found');
 
   return role;
 };

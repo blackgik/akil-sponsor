@@ -1,12 +1,12 @@
 import env from '../../config/env.js';
-import {
-  DuplicateError,
-  InternalServerError,
-  NotFoundError
-} from '../../../lib/appErrors.js';
+import { DuplicateError, InternalServerError, NotFoundError } from '../../../lib/appErrors.js';
 import WarehouseModel from '../../models/products/WarehouseModel.js';
+import usersModels from '../../models/settings/users.models.js';
 
 export const createNewWarehouse = async ({ user, body }) => {
+  const userx = await usersModels.findById(body.warehouse_overseer_id);
+  if (!userx) throw new NotFoundError('User not found');
+
   const warehouseData = {
     ...body,
     sponsor_id: user._id
@@ -53,8 +53,9 @@ export const fetchWarehouse = async ({ user, params }) => {
     .find({ ...filterData})
     .populate({
       path: 'warehouse_overseer_id',
-      model: 'Organization_Beneficiary'
-    }).populate({
+      model: 'User'
+    })
+    .populate({
       path: 'sponsor_id',
       model: 'Organization'
     })
@@ -68,7 +69,6 @@ export const fetchWarehouse = async ({ user, params }) => {
 
   return { page_no, available_pages, fetchData };
 };
-
 
 //------ common warehouse handlers --------------------\\
 
@@ -94,6 +94,7 @@ export const fetchAllWarehouses = async ({ user, params }) => {
   let fetchedData = [];
 
   const warehouseCount = await WarehouseModel.countDocuments({ ...filterData });
+
   let warehouseData = await WarehouseModel.find({ ...filterData})
   .populate({
     path: 'warehouse_overseer_id',
@@ -102,6 +103,7 @@ export const fetchAllWarehouses = async ({ user, params }) => {
     path: 'sponsor_id',
     model: 'Organization'
   });
+
   const count = warehouseCount;
 
   let startIndex = (page_no - 1) * no_of_requests;
@@ -120,13 +122,15 @@ export const fetchAllWarehouses = async ({ user, params }) => {
 export const getSingleWarehouse = async ({ user, warehouse_id }) => {
   let warehouseInView;
 
-  warehouseInView = await WarehouseModel.findById(warehouse_id).populate({
-    path: 'warehouse_overseer_id',
-    model: 'Organization_Beneficiary'
-  }).populate({
-    path: 'sponsor_id',
-    model: 'Organization'
-  });
+  warehouseInView = await WarehouseModel.findById(warehouse_id)
+    .populate({
+      path: 'warehouse_overseer_id',
+      model: 'Organization_Beneficiary'
+    })
+    .populate({
+      path: 'sponsor_id',
+      model: 'Organization'
+    });
 
   if (!warehouseInView) throw new NotFoundError('warehouse  does not exist');
 
