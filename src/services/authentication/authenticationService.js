@@ -102,7 +102,7 @@ export const resendOtp = async (body) => {
 
   if (!checkIfNotVerified) throw new BadRequestError('Account not found!');
 
-  if (checkIfNotVerified.isApproved) throw new BadRequestError('Account already verified! Login!');
+  // if (checkIfNotVerified.isApproved) throw new BadRequestError('Account already verified! Login!');
 
   const otp = await codeGenerator(6);
 
