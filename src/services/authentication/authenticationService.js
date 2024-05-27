@@ -617,15 +617,15 @@ export const onboardingPayment = async ({ user, body }) => {
     let paystackAmount = 0.02 * amountToPay;
     if (paystackAmount >= 2000) paystackAmount = 4000;
 
-    amountToPay = amountToPay + paystackAmount;
+    amountToPay = (amountToPay + paystackAmount)*100;
 
     const data = {
       amount: amountToPay,
       email: user.email,
       callback_url:
         env.node_env === 'development'
-          ? `${env.dev_base_url_org}/${user.slug}/dashboard`
-          : `${env.prod_base_url_org}/${user.slug}/dashboard`,
+          ? `${env.dev_base_url_org}/onboarding/success-payment`
+          : `${env.prod_base_url_org}/onboarding/success-payment`,
       metadata: {
         userId: user._id,
         package: body,
