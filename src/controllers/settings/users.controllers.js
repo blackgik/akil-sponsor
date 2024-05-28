@@ -2,6 +2,7 @@ import appResponse from '../../../lib/appResponse.js';
 import {
   checkIfBenficiary,
   craeteNewUser,
+  deleteUser,
   editUser,
   fetchUser,
   fetchUsers,
@@ -62,4 +63,14 @@ export const checkIfBenficiaryHandler = async (req, res) => {
   const response = await checkIfBenficiary({ user, email });
 
   res.send(appResponse('Fetched successfully', response));
+};
+
+export const deleteUserHandler = async (req, res) => {
+  const { params } = req;
+
+  const { user_id } = params;
+
+  const response = await deleteUser({ user_id });
+
+  res.send(appResponse('Deleted successfully', response));
 };

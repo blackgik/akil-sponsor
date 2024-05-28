@@ -15,7 +15,7 @@ const UserSchema = new Schema(
     is_beneficiary: { type: Boolean, default: false },
     acctstatus: {
       type: String,
-      enum: ['active', 'suspended', 'pending'],
+      enum: ['active', 'suspended', 'pending', 'deleted'],
       default: 'active'
     },
     sponsor_id: { type: Schema.Types.ObjectId, required: true, ref: 'Organizzation' }
