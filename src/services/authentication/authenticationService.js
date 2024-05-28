@@ -34,6 +34,7 @@ import { plans } from '../../config/modules.js';
 import notificationsModel from '../../models/settings/notificationsModel.js';
 import { encryptData } from '../../utils/vault.js';
 import personalizationModel from '../../models/settings/personalization.model.js';
+import validator from 'validator';
 
 export const onboardNewOrganization = async ({ body, dbConnection }) => {
   if (!body.tosAgreement) throw new BadRequestError(`Terms and conditions not met`);
@@ -324,32 +325,32 @@ export const onboardNewOrganizationBeneficiary = async ({ body, user }) => {
   const filter = { organization_id: user._id };
 
   if (body.contact.email) {
-    filter["contact.email"] = body.contact.email;
-  
+    filter['contact.email'] = body.contact.email;
+
     const checkMember = await organizationBeneficiaryModel.findOne({
-      ...filter,
+      ...filter
     });
-  
-    if (checkMember) throw new BadRequestError("Beneficiary already exists");
+
+    if (checkMember) throw new BadRequestError('Beneficiary already exists');
   }
-  
+
   if (body.contact.phone) {
-    filter["contact.phone"] = body.contact.phone;
-  
-    delete filter["contact.email"];
-  
+    filter['contact.phone'] = body.contact.phone;
+
+    delete filter['contact.email'];
+
     const checkMember = await organizationBeneficiaryModel.findOne({
-      ...filter,
+      ...filter
     });
-  
-    if (checkMember) throw new BadRequestError("Beneficiary already exists");
+
+    if (checkMember) throw new BadRequestError('Beneficiary already exists');
   }
-  
+
   const checkMember = await organizationBeneficiaryModel.findOne({
-    ...filter,
+    ...filter
   });
-  
-  if (checkMember) throw new BadRequestError("Beneficiary already exists");
+
+  if (checkMember) throw new BadRequestError('Beneficiary already exists');
   const generatePassword = await codeGenerator(9, 'ABCDEFGHI&*$%#1234567890');
   const beneficiaryUniqueId = `${user.name_of_cooperation
     .substring(0, 3)
@@ -363,7 +364,6 @@ export const onboardNewOrganizationBeneficiary = async ({ body, user }) => {
   };
 
   const createBeneficiary = await organizationBeneficiaryModel.create(data);
-  console.log("user", createBeneficiary)
 
   if (!createBeneficiary) throw new InternalServerError('server slip. Please try again in bit');
 
@@ -371,25 +371,27 @@ export const onboardNewOrganizationBeneficiary = async ({ body, user }) => {
 
   await user.save();
 
-  // send beneficiary login credentials
-  const onboardingData = {
-    email: createBeneficiary.contact.email,
-    name_of_cooperation: user.name_of_cooperation,
-    password: generatePassword,
-    company_code: user.company_code
-  };
-  const mailData = {
-    email: createBeneficiary.contact.email,
-    subject: 'BENEFICIARY ONBOARDING',
-    type: 'html',
-    html: onboardinMail(onboardingData).html,
-    text: onboardinMail(onboardingData).text
-  };
-  const msg = await formattMailInfo(mailData, env);
+  if (validator.isEmail(body.contact.email)) {
+    // send beneficiary login credentials
+    const onboardingData = {
+      email: createBeneficiary.contact.email,
+      name_of_cooperation: user.name_of_cooperation,
+      password: generatePassword,
+      company_code: user.company_code
+    };
+    const mailData = {
+      email: createBeneficiary.contact.email,
+      subject: 'BENEFICIARY ONBOARDING',
+      type: 'html',
+      html: onboardinMail(onboardingData).html,
+      text: onboardinMail(onboardingData).text
+    };
+    const msg = await formattMailInfo(mailData, env);
 
-  const msgDelivered = await messageBird(msg);
-  if (!msgDelivered)
-    throw new InternalServerError('server slip. Beneficiary was created without mail being sent');
+    const msgDelivered = await messageBird(msg);
+    if (!msgDelivered)
+      throw new InternalServerError('server slip. Beneficiary was created without mail being sent');
+  }
 
   // create notification for beneficiary
   await notificationsModel.create({
