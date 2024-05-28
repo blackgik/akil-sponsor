@@ -35,6 +35,7 @@ import { plans } from '../../config/modules.js';
 import notificationsModel from '../../models/settings/notificationsModel.js';
 import { encryptData } from '../../utils/vault.js';
 import personalizationModel from '../../models/settings/personalization.model.js';
+import paymentModel from '../../models/paymentModel.js';
 
 export const onboardNewOrganization = async ({ body, dbConnection }) => {
   if (!body.tosAgreement) throw new BadRequestError(`Terms and conditions not met`);
@@ -319,7 +320,7 @@ export const sendSponsorEmail = async ({ body, user }) => {
   return true;
 };
 
-export const verifyForgotOtp = async ({body}) => {
+export const verifyForgotOtp = async ({ body }) => {
   const { code, hash, email } = body;
 
   const checkOrg = await organizationModel.findOne({ email: email });
@@ -339,7 +340,7 @@ export const verifyForgotOtp = async ({body}) => {
     env.jwt_key
   );
 
-  return {tokenEncryption};
+  return { tokenEncryption };
 };
 
 export const findOrganizationById = async (id) => {
@@ -469,7 +470,7 @@ export const setOrganizationPackageData = async ({ body, user }) => {
 
   return {
     organization_reg_fee: plans.sponsor_onboarding_settings.organization_reg_fee,
-    beneficiaries:{
+    beneficiaries: {
       total_number_of_beneficiaries_chosen: body.total_number_of_beneficiaries_chosen,
       sup_beneficiary_fee: supBeneficiaryFee
     },
@@ -582,9 +583,8 @@ export const uploadOrganizationBeneficiariesInBulk = async ({ user, file, body }
   ];
 
   // Format date as "day, month, year"
-  const formattedDate = `${currentDate.getDate()}, ${
-    monthNames[currentDate.getMonth()]
-  }, ${currentDate.getFullYear()}`;
+  const formattedDate = `${currentDate.getDate()}, ${monthNames[currentDate.getMonth()]
+    }, ${currentDate.getFullYear()}`;
 
   //create email profile here
   const bulkUpload = {
@@ -635,50 +635,77 @@ export const fetchPreferencesData = async () => {
 
 export const onboardingPayment = async ({ user, body }) => {
 
-    let amountToPay = body.total_amount;
+  let amountToPay = body.total_amount;
 
-    if (plans.sponsor_onboarding_settings.organization_reg_fee !== body.organization_reg_fee)
-      throw new BadRequestError(`Amount for selected Models will be ${amount}`);
+  if (plans.sponsor_onboarding_settings.organization_reg_fee !== body.organization_reg_fee)
+    throw new BadRequestError(`Amount for selected Models will be ${amount}`);
 
-    let paystackAmount = 0.02 * amountToPay;
-    if (paystackAmount >= 2000) paystackAmount = 4000;
+  let paystackAmount = 0.02 * amountToPay;
+  if (paystackAmount >= 2000) paystackAmount = 4000;
 
-    amountToPay = (amountToPay + paystackAmount)*100;
+  amountToPay = (amountToPay + paystackAmount) * 100;
 
-    const data = {
-      amount: amountToPay,
-      email: user.email,
-      callback_url:
-        env.node_env === 'development'
-          ? `${env.dev_base_url_org}/onboarding/success-payment`
-          : `${env.prod_base_url_org}/onboarding/success-payment`,
-      metadata: {
-        userId: user._id,
-        package: body,
-        amountToPay,
-        on_trial: false,
-        hasPaid: true,
-        acctstatus: 'active'
-      }
-    };
+  const data = {
+    amount: amountToPay,
+    email: user.email,
+    callback_url:
+      env.node_env === 'development'
+        ? `${env.dev_base_url_org}/onboarding/success-payment`
+        : `${env.prod_base_url_org}/onboarding/success-payment`,
+    metadata: {
+      userId: user._id,
+      package: body,
+      amountToPay,
+      on_trial: false,
+      hasPaid: true,
+      acctstatus: 'active'
+    }
+  };
 
-    const url = `${env.paystack_api_url}/transaction/initialize`;
+  const url = `${env.paystack_api_url}/transaction/initialize`;
 
-    const gateway = await axios.post(url, data, {
-      headers: {
-        Authorization: `Bearer ${env.paystack_secret_key}`,
-        'Content-Type': 'application/json'
-      }
-    });
+  const gateway = await axios.post(url, data, {
+    headers: {
+      Authorization: `Bearer ${env.paystack_secret_key}`,
+      'Content-Type': 'application/json'
+    }
+  });
 
-    return { gateway: gateway.data.data.authorization_url };
+  return { gateway: gateway.data.data.authorization_url };
 };
 
 export const onboardingPaymentInfo = async ({ user, params }) => {
+  let { trxref, reference } = params;
+  // check if user is already here
+  const checkPayment = await paymentModel.findOne({
+    $or: [{ reference: reference }, { trxref: trxref }]
+  });
+  if (checkPayment) return {checkPayment};
+  const url = `${env.paystack_api_url}transaction/verify/` + encodeURIComponent(reference);
 
+  const result = await axios.get(url, {
+    headers: {
+      Authorization: `Bearer ${env.paystack_secret_key}`,
+      'Content-Type': 'application/json'
+    }
+  });
+console.log('====================================');
+console.log(response);
+console.log('====================================');
+  const response = JSON.parse(result);
+  const { amount, status } = response.data;
+  const { email } = response.data.customer;
+  const full_name = response.data.metadata.full_name;
+  const operation = 'onboarding';
+  const newPayment = { full_name, email, amount, reference, trxref, operation, status };
+  const payment = Payment.create(newPayment);
 
+  const checkIfOnboarded = await organizationModel.findOne({ email: email });
+  checkIfOnboarded.hasPaid = true;
+  checkIfOnboarded.hasPaid_personalization_fee = true;
+  await checkIfOnboarded.save();
 
-  return { gateway: gateway.data.data.authorization_url };
+  return { payment };
 };
 
 export const addModules = async ({ user, body }) => {
@@ -740,7 +767,7 @@ export const addModules = async ({ user, body }) => {
   return { gateway: gateway.data.data.authorization_url };
 };
 
-export const inviteBeneficiary = async ({beneficiary_ids = [], user}) => {
+export const inviteBeneficiary = async ({ beneficiary_ids = [], user }) => {
   let beneficiaries = [];
 
   if (beneficiary_ids.length > 0) {

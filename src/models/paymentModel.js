@@ -21,7 +21,7 @@ export const PaymentSchema = new Schema(
         required: true,
         unique: true
     },
-    trx : {
+    trxref : {
         type: String
     },
     operation : {
