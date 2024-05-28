@@ -12,15 +12,16 @@ import {
   validateForgotOtpSchema
 } from '../validators/organizationSchema.js';
 import {
-  addModulesHandler,
   fetchBankCodeHandler,
   organizationPreferencesHandler,
   forgotPasswordHandler,
+  sendEmailHandler,
   organizationPackageHandler,
   organizationEmailVerifyHandler,
   onboardNewOrganizationHandler,
   onboardNewOrganizationBeneficiaryHandler,
   onboardingPaymentHandler,
+  onboardingPaymentInfoHandler,
   organizationLoginHandler,
   organizationBulkUploadBeneficiaryHandler,
   organizationProfileHandler,
@@ -34,6 +35,7 @@ import {
 import { authentication, dbconnection } from '../middlewares/authentication.js';
 import { upload } from '../../lib/multer.js';
 import validators from '../validators/index.js';
+import { sendContactMailSchema } from '../validators/sendContactMailSchema.js';
 
 const organizationRoutes = router.Router();
 
@@ -109,7 +111,8 @@ const organizationRoute = () => {
     organizationBulkUploadBeneficiaryHandler
   );
   organizationRoutes.patch('/make-onboarding-payments', authentication, onboardingPaymentHandler);
-  organizationRoutes.patch('/add-modules', authentication, addModulesHandler);
+  organizationRoutes.get('/onboarding-payment-info', authentication, onboardingPaymentInfoHandler);
+  organizationRoutes.post('/contact-sponsor-through-mail', authentication, Validate(sendContactMailSchema), sendEmailHandler);
 
   return organizationRoutes;
 };

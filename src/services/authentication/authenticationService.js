@@ -8,6 +8,7 @@ import ProductCategoryModel from '../../models/products/ProductCategoryModel.js'
 import OccupationModel from '../../models/occupations/occupationModel.js';
 import {
   forgotPasswordMail,
+  paymentVerificationMail,
   verifyOnbordingMail,
   beneficiaryBulkUpload,
   onboardinMail,
@@ -212,13 +213,13 @@ export const loginOrganization = async (body) => {
   const { email, password } = body;
   const checkOrg = await organizationModel.findOne({ email });
 
-  if (!checkOrg) throw new InvalidError('Invalid Sponsor');
+  if (!checkOrg) throw new BadRequestError('Invalid Sponsor');
 
-  if (!checkOrg.isApproved) throw new InvalidError('Account not verified');
+  if (!checkOrg.isApproved) throw new BadRequestError('Account not verified');
 
   const isMatch = await bcrypt.compare(password, checkOrg.password);
 
-  if (!isMatch) throw new InvalidError('Invalid Sponsor');
+  if (!isMatch) throw new BadRequestError('Invalid Sponsor');
 
   const admin = checkOrg.toJSON();
   admin.onboardingSetting = plans.sponsor_onboarding_settings;
@@ -290,6 +291,30 @@ export const resetPassword = async ({ body, user }) => {
   checkOrg.password = hashPassword;
 
   await checkOrg.save();
+
+  return true;
+};
+
+export const sendSponsorEmail = async ({ body, user }) => {
+
+  const onboardingData = {
+    name: user.firstname + ' ' + user.lastname,
+    data: body
+  };
+
+  const mailData = {
+    email: 'maqom.bc@gmail.com',
+    subject: 'Payment Verification',
+    type: 'html',
+    html: paymentVerificationMail(onboardingData).html,
+    text: paymentVerificationMail(onboardingData).text
+  };
+
+  const msg = await formattMailInfo(mailData, env);
+
+  const msgDelivered = await messageBird(msg);
+
+  if (!msgDelivered) throw new InternalServerError('server slip. Payment verification mail not sent');
 
   return true;
 };
@@ -477,7 +502,8 @@ export const uploadOrganizationBeneficiariesInBulk = async ({ user, file, body }
     'email',
     'address',
     'gender',
-    'country'
+    'country',
+    'has_paid'
   ];
 
   let result = XLSX.utils.sheet_to_json(worksheet, {
@@ -646,6 +672,13 @@ export const onboardingPayment = async ({ user, body }) => {
     });
 
     return { gateway: gateway.data.data.authorization_url };
+};
+
+export const onboardingPaymentInfo = async ({ user, params }) => {
+
+
+
+  return { gateway: gateway.data.data.authorization_url };
 };
 
 export const addModules = async ({ user, body }) => {
