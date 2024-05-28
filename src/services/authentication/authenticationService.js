@@ -320,15 +320,36 @@ export const onboardNewOrganizationBeneficiary = async ({ body, user }) => {
     throw new BadRequestError(
       `Chosen beneficiaries count cannot be greater than ${user.total_number_of_beneficiaries_chosen}`
     );
-
   // check if user is already here
-  const checkBeneficiary = await organizationBeneficiaryModel.findOne({
-    $or: [{ email: body.email }, { phone: body.phone }],
-    organization_id: user._id
+  const filter = { organization_id: user._id };
+
+  if (body.contact.email) {
+    filter["contact.email"] = body.contact.email;
+  
+    const checkMember = await organizationBeneficiaryModel.findOne({
+      ...filter,
+    });
+  
+    if (checkMember) throw new BadRequestError("Beneficiary already exists");
+  }
+  
+  if (body.contact.phone) {
+    filter["contact.phone"] = body.contact.phone;
+  
+    delete filter["contact.email"];
+  
+    const checkMember = await organizationBeneficiaryModel.findOne({
+      ...filter,
+    });
+  
+    if (checkMember) throw new BadRequestError("Beneficiary already exists");
+  }
+  
+  const checkMember = await organizationBeneficiaryModel.findOne({
+    ...filter,
   });
-
-  if (checkBeneficiary) throw new BadRequestError('Beneficiary already exists');
-
+  
+  if (checkMember) throw new BadRequestError("Beneficiary already exists");
   const generatePassword = await codeGenerator(9, 'ABCDEFGHI&*$%#1234567890');
   const beneficiaryUniqueId = `${user.name_of_cooperation
     .substring(0, 3)
@@ -342,6 +363,7 @@ export const onboardNewOrganizationBeneficiary = async ({ body, user }) => {
   };
 
   const createBeneficiary = await organizationBeneficiaryModel.create(data);
+  console.log("user", createBeneficiary)
 
   if (!createBeneficiary) throw new InternalServerError('server slip. Please try again in bit');
 
@@ -351,13 +373,13 @@ export const onboardNewOrganizationBeneficiary = async ({ body, user }) => {
 
   // send beneficiary login credentials
   const onboardingData = {
-    email: createBeneficiary.email,
+    email: createBeneficiary.contact.email,
     name_of_cooperation: user.name_of_cooperation,
     password: generatePassword,
     company_code: user.company_code
   };
   const mailData = {
-    email: createBeneficiary.email,
+    email: createBeneficiary.contact.email,
     subject: 'BENEFICIARY ONBOARDING',
     type: 'html',
     html: onboardinMail(onboardingData).html,
