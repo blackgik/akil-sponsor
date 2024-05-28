@@ -43,13 +43,16 @@ export const onboardNewOrganization = async ({ body, dbConnection }) => {
   const checkIfOnboarded = await organizationModel.findOne({ email: body.email });
   if (checkIfOnboarded) throw new DuplicateError('Sponsor already exists');
 
-  let { company_code, password, api_key_live, api_key_test } = await generateEnterpriseCredentials(
+  let { company_code, api_key_live, api_key_test } = await generateEnterpriseCredentials(
     body.firstname + '' + body.lastname
   );
 
   const otp = await codeGenerator(6, '1234567890');
+
   const otpHash = buildOtpHash(body.email, otp, env.otpKey, 15);
+
   const hashedPwd = await bcrypt.hash(body.password, 12);
+
   let organizationProfile = {
     ...body,
     company_code,
@@ -72,68 +75,46 @@ export const onboardNewOrganization = async ({ body, dbConnection }) => {
 
   if (!createOrganizationProfile) throw new InternalServerError('Server is being maintained');
 
-  // //create email profile here
-  // const onboardingData = {
-  //   email: createOrganizationProfile.email,
-  //   name_of_cooperation: createOrganizationProfile.name_of_cooperation,
-  //   password,
-  //   company_code
-  // };
-  // const mailData = {
-  //   email: createOrganizationProfile.email,
-  //   subject: 'MAJFINTECH ONBOARDING',
-  //   type: 'html',
-  //   html: onboardinMail(onboardingData).html,
-  //   text: onboardinMail(onboardingData).text
-  // };
-
   //create email profile here
   const onboardingData = {
     name: createOrganizationProfile.firstname + ' ' + createOrganizationProfile.lastname,
     code: otp
   };
+
   const mailData = {
     email: createOrganizationProfile.email,
-    subject: 'MAJFINTECH ONBOARDING',
+    subject: 'SPONSOR ONBOARDING',
     type: 'html',
     html: verifyOnbordingMail(onboardingData).html,
     text: verifyOnbordingMail(onboardingData).text
   };
+
   const msg = await formattMailInfo(mailData, env);
 
   const msgDelivered = await messageBird(msg);
   if (!msgDelivered)
     throw new InternalServerError('server slip. Sponsor was created without mail being sent');
 
-  if (env.node_env === 'production') {
-    const createSecData = await dbConnection.model('Organization', buildOrganizationSchema);
-
-    const secondDbData = {
-      ...createOrganizationProfile.toJSON()
-    };
-
-    await createSecData.create(secondDbData);
-  }
-  // const encrypedDataString = await encryptData({
-  //   data2encrypt: { hash: otpHash, email: createOrganizationProfile.email },
-  //   pubKey: env.public_key
-  // });
   return { code: otp, hash: otpHash, email: createOrganizationProfile.email };
 };
 
 export const resendOtp = async (body) => {
   //const hash = await argon.hash(dto.password);
   const checkIfNotVerified = await organizationModel.findOne({ email: body.email });
-  if (!checkIfNotVerified) throw new BadRequestError('Account not found!');
-  if (checkIfNotVerified.isApproved) throw new BadRequestError('Account already verified! Login!');
 
-  const otp = await codeGenerator(6, '1234567890');
+  if (!checkIfNotVerified) throw new BadRequestError('Account not found!');
+
+  // if (checkIfNotVerified.isApproved) throw new BadRequestError('Account already verified! Login!');
+
+  const otp = await codeGenerator(6);
 
   const otpHash = buildOtpHash(checkIfNotVerified.email, otp, env.otpKey, 15);
 
-  checkIfNotVerified.otpHash = otpHash;
-  checkIfNotVerified.otp = otp;
-  await checkIfNotVerified.save();
+  // checkIfNotVerified.otpHash = otpHash;
+  // checkIfNotVerified.otp = otp;
+
+  // await checkIfNotVerified.save();
+
   //create email profile here
   const onboardingData = {
     name: checkIfNotVerified.firstname + ' ' + checkIfNotVerified.lastname,
@@ -141,7 +122,7 @@ export const resendOtp = async (body) => {
   };
   const mailData = {
     email: checkIfNotVerified.email,
-    subject: 'MAJFINTECH ONBOARDING',
+    subject: 'SPONSOR ONBOARDING',
     type: 'html',
     html: verifyOnbordingMail(onboardingData).html,
     text: verifyOnbordingMail(onboardingData).text
@@ -155,10 +136,7 @@ export const resendOtp = async (body) => {
       'server slip. Organization was created without mail being sent',
       ''
     );
-  // const encrypedDataString = await encryptData({
-  //   data2encrypt: { hash: otpHash, email: checkIfNotVerified.email },
-  //   pubKey: env.public_key
-  // });
+
   return { code: otp, hash: otpHash, email: checkIfNotVerified.email };
 };
 
@@ -170,25 +148,29 @@ export const verifyEmail = async (body) => {
   if (!checkAcct) throw new BadRequestError('User not found');
 
   const verifyOtp = verifyOTP(checkAcct.email, code, hash, env.otpKey);
+
   if (!verifyOtp) throw new BadRequestError('Invalid Input');
 
   checkAcct.isApproved = true;
   checkAcct.acctstatus = 'active';
 
   await checkAcct.save();
+
   //create email profile here
   const onboardingData = {
     email: checkAcct.email,
     company_code: checkAcct.company_code,
     name_of_cooperation: checkAcct.firstname + ' ' + checkAcct.lastname
   };
+
   const mailData = {
     email: checkAcct.email,
-    subject: 'MAJFINTECH ONBOARDING',
+    subject: 'SPONSOR ONBOARDING',
     type: 'html',
     html: onboardinMail(onboardingData).html,
     text: onboardinMail(onboardingData).text
   };
+
   const msg = await formattMailInfo(mailData, env);
 
   const msgDelivered = await messageBird(msg);
@@ -205,7 +187,10 @@ export const verifyEmail = async (body) => {
     pubKey: env.public_key
   });
 
-  const tokenEncryption = jwt.sign({ _id: admin._id, email: admin.email, user: checkAcct }, env.jwt_key);
+  const tokenEncryption = jwt.sign(
+    { _id: admin._id, email: admin.email, user: checkAcct },
+    env.jwt_key
+  );
 
   return { encrypedDataString, tokenEncryption };
 };
@@ -247,9 +232,11 @@ export const loginOrganization = async (body) => {
 
 export const forgotPassword = async ({ body }) => {
   const checkOrg = await organizationModel.findOne({ email: body.email });
-  if (!checkOrg) throw new NotFoundError('Sponsor not found');
+  if (!checkOrg) {
+    return {};
+  }
 
-  const newPassword = await codeGenerator(6, '1234567890');
+  const newPassword = await codeGenerator(6);
 
   const hash = buildOtpHash(body.email, newPassword, env.otpKey, 15);
 
@@ -296,6 +283,7 @@ export const resetPassword = async ({ body, user }) => {
   return true;
 };
 
+
 export const sendSponsorEmail = async ({ body, user }) => {
 
   const onboardingData = {
@@ -320,20 +308,24 @@ export const sendSponsorEmail = async ({ body, user }) => {
   return true;
 };
 
-export const verifyForgotOtp = async ({ body }) => {
+export const verifyForgotOtp = async ({body}) => {
+
   const { code, hash, email } = body;
 
   const checkOrg = await organizationModel.findOne({ email: email });
   if (!checkOrg) throw new NotFoundError('Sponsor not found');
 
   const verifyOtp = verifyOTP(email, code, hash, env.otpKey);
+
   if (!verifyOtp) throw new InvalidError('Wrong otp code');
+
   const generatePassword = await codeGenerator(9, 'ABCDEFGHI&*$%#1234567890');
+
   const hashPassword = await bcrypt.hash(generatePassword, 12);
 
   checkOrg.password = hashPassword;
 
-  await checkOrg.save();
+  // await checkOrg.save();
 
   const tokenEncryption = jwt.sign(
     { _id: checkOrg._id, email: checkOrg.email, user: checkOrg },
@@ -420,7 +412,7 @@ export const onboardNewOrganizationBeneficiary = async ({ body, user }) => {
 export const setOrganizationPreferences = async ({ body, user }) => {
   const organizationExists = await organizationModel.findById(user._id);
   if (!organizationExists) {
-    throw new BadRequestError('Organization doesn\'t exist!');
+    throw new BadRequestError("Organization doesn't exist!");
   }
 
   organizationExists.preferences = body.preferences;
@@ -433,7 +425,7 @@ export const setOrganizationPreferences = async ({ body, user }) => {
 export const setOrganizationPackageData = async ({ body, user }) => {
   const organizationExists = await organizationModel.findById(user._id);
   if (!organizationExists) {
-    throw new BadRequestError('Organization doesn\'t exist!');
+    throw new BadRequestError("Organization doesn't exist!");
   }
   let amountToPay = 0;
   let supSmsFee = 0;
@@ -442,7 +434,8 @@ export const setOrganizationPackageData = async ({ body, user }) => {
   let dataCollectionFee = 0;
   if (!organizationExists.hasPaid) {
     amountToPay += plans.sponsor_onboarding_settings.organization_reg_fee;
-    organizationExists.organization_reg_fee = plans.sponsor_onboarding_settings.organization_reg_fee;
+    organizationExists.organization_reg_fee =
+      plans.sponsor_onboarding_settings.organization_reg_fee;
   }
   if (body.psdAgreement && !organizationExists.hasPaid_personalization_fee) {
     amountToPay += plans.sponsor_onboarding_settings.personalization_fee;
@@ -451,18 +444,23 @@ export const setOrganizationPackageData = async ({ body, user }) => {
     organizationExists.personalization_fee = plans.sponsor_onboarding_settings.personalization_fee;
   }
   if (body.total_number_of_beneficiaries_chosen > plans.sponsor_onboarding_settings.max_users) {
-    organizationExists.total_number_of_beneficiaries_chosen = body.total_number_of_beneficiaries_chosen;
-    supBeneficiaryFee = body.total_number_of_beneficiaries_chosen - plans.sponsor_onboarding_settings.max_users;
+    organizationExists.total_number_of_beneficiaries_chosen =
+      body.total_number_of_beneficiaries_chosen;
+    supBeneficiaryFee =
+      body.total_number_of_beneficiaries_chosen - plans.sponsor_onboarding_settings.max_users;
     amountToPay += supBeneficiaryFee;
   }
   if (body.total_number_of_sms > plans.sponsor_onboarding_settings.max_sms) {
     organizationExists.total_number_of_sms = body.total_number_of_sms;
-    supSmsFee = (body.total_number_of_sms - plans.sponsor_onboarding_settings.max_sms) * plans.sponsor_onboarding_settings.sup_sms_fee;
+    supSmsFee =
+      (body.total_number_of_sms - plans.sponsor_onboarding_settings.max_sms) *
+      plans.sponsor_onboarding_settings.sup_sms_fee;
     amountToPay += supSmsFee;
   }
   if (body.data_collection_quantity > 0) {
     organizationExists.data_collection_quantity = body.data_collection_quantity;
-    dataCollectionFee = body.data_collection_quantity * plans.sponsor_onboarding_settings.data_collection_fee;
+    dataCollectionFee =
+      body.data_collection_quantity * plans.sponsor_onboarding_settings.data_collection_fee;
     amountToPay += dataCollectionFee;
   }
 
@@ -776,7 +774,6 @@ export const inviteBeneficiary = async ({ beneficiary_ids = [], user }) => {
       if (!beneficiary) throw new NotFoundError(`Beneficiary with ID ${id} not found!`);
       beneficiaries.push(beneficiary);
     }
-
   } else {
     beneficiaries = await organizationBeneficiaryModel.find({});
     if (beneficiaries.length === 0) throw new NotFoundError('No beneficiaries found!');
@@ -825,4 +822,3 @@ export const slugPersonalization = async ({ slug }) => {
 
   return personalization;
 };
-

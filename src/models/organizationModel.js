@@ -16,7 +16,6 @@ export const buildOrganizationSchema = new Schema(
     company_code: { type: String, trim: true },
     address: { type: String, lowercase: true, trim: true },
     admin_name: { type: String, trim: true, lowercase: true },
-
     profession: { type: String, trim: true, lowercase: true, default: '' },
     country: { type: String, required: false, trim: true, lowercase: true },
     state: { type: String, required: false, trim: true, lowercase: true },
