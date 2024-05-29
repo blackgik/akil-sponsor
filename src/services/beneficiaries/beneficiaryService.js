@@ -128,11 +128,11 @@ export const fetchBeneficiariesByStatus = async ({ user, params }) => {
     .select({
       avatar: 1,
       'personal.member_name': 1,
-      email: 1,
-      country: 1,
-      gender: 1,
+      'contact.email': 1,
+      'contact.country_of_residence': 1,
+      'personal.gender': 1,
       has_paid_reg: 1,
-      phone: 1,
+      'contact.phone': 1,
       createdAt: 1,
       acctstatus: 1
     })
