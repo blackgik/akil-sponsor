@@ -330,9 +330,10 @@ export const onboardNewOrganizationBeneficiary = async ({ body, user }) => {
   if (checkBeneficiary) throw new BadRequestError('Beneficiary already exists');
 
   const generatePassword = await codeGenerator(9, 'ABCDEFGHI&*$%#1234567890');
-  const beneficiaryUniqueId = `${user.name_of_cooperation
-    .substring(0, 3)
-    .toUpperCase()}${await codeGenerator(7, 'ABCDEFGHIJKLMN1234567890')}`;
+  const beneficiaryUniqueId = `${user.firstname.substring(0, 3).toUpperCase()}${await codeGenerator(
+    7,
+    'ABCDEFGHIJKLMN1234567890'
+  )}`;
 
   const data = {
     organization_id: user._id,
@@ -352,7 +353,7 @@ export const onboardNewOrganizationBeneficiary = async ({ body, user }) => {
   // send beneficiary login credentials
   const onboardingData = {
     email: createBeneficiary.email,
-    name_of_cooperation: user.name_of_cooperation,
+    name_of_cooperation: user.firstname,
     password: generatePassword,
     company_code: user.company_code
   };
@@ -371,7 +372,7 @@ export const onboardNewOrganizationBeneficiary = async ({ body, user }) => {
 
   // create notification for beneficiary
   await notificationsModel.create({
-    note: `You have been successfully onboarded to  ${user.name_of_cooperation}`,
+    note: `You have been successfully onboarded to  ${user.firstname}`,
     who_is_reading: 'beneficiary',
     compliment_obj: { status: 'pending' },
     organization_id: user._id,
@@ -382,14 +383,9 @@ export const onboardNewOrganizationBeneficiary = async ({ body, user }) => {
 };
 
 export const setOrganizationPreferences = async ({ body, user }) => {
-  const organizationExists = await organizationModel.findById(user._id);
-  if (!organizationExists) {
-    throw new BadRequestError("Organization doesn't exist!");
-  }
-
-  organizationExists.preferences = body.preferences;
-  organizationExists.isPreferenceSet = true;
-  await organizationExists.save();
+  user.preferences = body.preferences;
+  user.isPreferenceSet = true;
+  await user.save();
 
   return true;
 };
