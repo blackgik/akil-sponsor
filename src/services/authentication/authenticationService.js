@@ -39,7 +39,6 @@ import personalizationModel from '../../models/settings/personalization.model.js
 import paymentModel from '../../models/paymentModel.js';
 import validator from 'validator';
 
-
 export const onboardNewOrganization = async ({ body, dbConnection }) => {
   if (!body.tosAgreement) throw new BadRequestError(`Terms and conditions not met`);
 
@@ -286,9 +285,7 @@ export const resetPassword = async ({ body, user }) => {
   return true;
 };
 
-
 export const sendSponsorEmail = async ({ body, user }) => {
-
   const onboardingData = {
     name: user.firstname + ' ' + user.lastname,
     data: body
@@ -306,13 +303,13 @@ export const sendSponsorEmail = async ({ body, user }) => {
 
   const msgDelivered = await messageBird(msg);
 
-  if (!msgDelivered) throw new InternalServerError('server slip. Payment verification mail not sent');
+  if (!msgDelivered)
+    throw new InternalServerError('server slip. Payment verification mail not sent');
 
   return true;
 };
 
-export const verifyForgotOtp = async ({body}) => {
-
+export const verifyForgotOtp = async ({ body }) => {
   const { code, hash, email } = body;
 
   const checkOrg = await organizationModel.findOne({ email: email });
@@ -382,9 +379,10 @@ export const onboardNewOrganizationBeneficiary = async ({ body, user }) => {
 
   if (checkMember) throw new BadRequestError('Beneficiary already exists');
   const generatePassword = await codeGenerator(9, 'ABCDEFGHI&*$%#1234567890');
-  const beneficiaryUniqueId = `${user.name_of_cooperation
-    .substring(0, 3)
-    .toUpperCase()}${await codeGenerator(7, 'ABCDEFGHIJKLMN1234567890')}`;
+  const beneficiaryUniqueId = `${user.firstname.substring(0, 3).toUpperCase()}${await codeGenerator(
+    7,
+    'ABCDEFGHIJKLMN1234567890'
+  )}`;
 
   const data = {
     organization_id: user._id,
@@ -405,7 +403,7 @@ export const onboardNewOrganizationBeneficiary = async ({ body, user }) => {
     // send beneficiary login credentials
     const onboardingData = {
       email: createBeneficiary.contact.email,
-      name_of_cooperation: user.name_of_cooperation,
+      name_of_cooperation: user.firstname,
       password: generatePassword,
       company_code: user.company_code
     };
@@ -425,7 +423,7 @@ export const onboardNewOrganizationBeneficiary = async ({ body, user }) => {
 
   // create notification for beneficiary
   await notificationsModel.create({
-    note: `You have been successfully onboarded to  ${user.name_of_cooperation}`,
+    note: `You have been successfully onboarded to  ${user.firstname}`,
     who_is_reading: 'beneficiary',
     compliment_obj: { status: 'pending' },
     organization_id: user._id,
@@ -436,14 +434,9 @@ export const onboardNewOrganizationBeneficiary = async ({ body, user }) => {
 };
 
 export const setOrganizationPreferences = async ({ body, user }) => {
-  const organizationExists = await organizationModel.findById(user._id);
-  if (!organizationExists) {
-    throw new BadRequestError("Organization doesn't exist!");
-  }
-
-  organizationExists.preferences = body.preferences;
-  organizationExists.isPreferenceSet = true;
-  await organizationExists.save();
+  user.preferences = body.preferences;
+  user.isPreferenceSet = true;
+  await user.save();
 
   return true;
 };
@@ -607,13 +600,14 @@ export const uploadOrganizationBeneficiariesInBulk = async ({ user, file, body }
   ];
 
   // Format date as "day, month, year"
-  const formattedDate = `${currentDate.getDate()}, ${monthNames[currentDate.getMonth()]
-    }, ${currentDate.getFullYear()}`;
+  const formattedDate = `${currentDate.getDate()}, ${
+    monthNames[currentDate.getMonth()]
+  }, ${currentDate.getFullYear()}`;
 
   //create email profile here
   const bulkUpload = {
     email: user.email,
-    name_of_cooperation: user.name_of_cooperation,
+    name_of_cooperation: user.firstname,
     number_uploaded: batchList.length,
     date: formattedDate
   };
@@ -658,7 +652,6 @@ export const fetchPreferencesData = async () => {
 };
 
 export const onboardingPayment = async ({ user, body }) => {
-
   let amountToPay = body.total_amount;
 
   if (plans.sponsor_onboarding_settings.organization_reg_fee !== body.organization_reg_fee)
@@ -704,7 +697,7 @@ export const onboardingPaymentInfo = async ({ user, params }) => {
   const checkPayment = await paymentModel.findOne({
     $or: [{ reference: reference }, { trxref: trxref }]
   });
-  if (checkPayment) return {checkPayment};
+  if (checkPayment) return { checkPayment };
   const url = `${env.paystack_api_url}transaction/verify/` + encodeURIComponent(reference);
 
   const result = await axios.get(url, {
@@ -713,9 +706,7 @@ export const onboardingPaymentInfo = async ({ user, params }) => {
       'Content-Type': 'application/json'
     }
   });
-console.log('====================================');
-console.log(response);
-console.log('====================================');
+
   const response = JSON.parse(result);
   const { amount, status } = response.data;
   const { email } = response.data.customer;
@@ -810,7 +801,7 @@ export const inviteBeneficiary = async ({ beneficiary_ids = [], user }) => {
       firstname: beneficiary.firstname,
       lastname: beneficiary.lastname,
       email: beneficiary.email,
-      sponsor: user.name_of_cooperation,
+      sponsor: `${user.firstname} ${user.lastname}`,
       company_code: user.company_code
     };
 
