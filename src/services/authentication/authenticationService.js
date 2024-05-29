@@ -8,6 +8,7 @@ import ProductCategoryModel from '../../models/products/ProductCategoryModel.js'
 import OccupationModel from '../../models/occupations/occupationModel.js';
 import {
   forgotPasswordMail,
+  paymentVerificationMail,
   verifyOnbordingMail,
   beneficiaryBulkUpload,
   onboardinMail,
@@ -34,7 +35,10 @@ import { plans } from '../../config/modules.js';
 import notificationsModel from '../../models/settings/notificationsModel.js';
 import { encryptData } from '../../utils/vault.js';
 import personalizationModel from '../../models/settings/personalization.model.js';
+
+import paymentModel from '../../models/paymentModel.js';
 import validator from 'validator';
+
 
 export const onboardNewOrganization = async ({ body, dbConnection }) => {
   if (!body.tosAgreement) throw new BadRequestError(`Terms and conditions not met`);
@@ -198,13 +202,13 @@ export const loginOrganization = async (body) => {
   const { email, password } = body;
   const checkOrg = await organizationModel.findOne({ email });
 
-  if (!checkOrg) throw new InvalidError('Invalid Sponsor');
+  if (!checkOrg) throw new BadRequestError('Invalid Sponsor');
 
-  if (!checkOrg.isApproved) throw new InvalidError('Account not verified');
+  if (!checkOrg.isApproved) throw new BadRequestError('Account not verified');
 
   const isMatch = await bcrypt.compare(password, checkOrg.password);
 
-  if (!isMatch) throw new InvalidError('Invalid Sponsor');
+  if (!isMatch) throw new BadRequestError('Invalid Sponsor');
 
   const admin = checkOrg.toJSON();
   admin.onboardingSetting = plans.sponsor_onboarding_settings;
@@ -282,7 +286,33 @@ export const resetPassword = async ({ body, user }) => {
   return true;
 };
 
-export const verifyForgotOtp = async ({ body }) => {
+
+export const sendSponsorEmail = async ({ body, user }) => {
+
+  const onboardingData = {
+    name: user.firstname + ' ' + user.lastname,
+    data: body
+  };
+
+  const mailData = {
+    email: 'maqom.bc@gmail.com',
+    subject: 'Payment Verification',
+    type: 'html',
+    html: paymentVerificationMail(onboardingData).html,
+    text: paymentVerificationMail(onboardingData).text
+  };
+
+  const msg = await formattMailInfo(mailData, env);
+
+  const msgDelivered = await messageBird(msg);
+
+  if (!msgDelivered) throw new InternalServerError('server slip. Payment verification mail not sent');
+
+  return true;
+};
+
+export const verifyForgotOtp = async ({body}) => {
+
   const { code, hash, email } = body;
 
   const checkOrg = await organizationModel.findOne({ email: email });
@@ -497,7 +527,8 @@ export const uploadOrganizationBeneficiariesInBulk = async ({ user, file, body }
     'email',
     'address',
     'gender',
-    'country'
+    'country',
+    'has_paid'
   ];
 
   let result = XLSX.utils.sheet_to_json(worksheet, {
@@ -576,9 +607,8 @@ export const uploadOrganizationBeneficiariesInBulk = async ({ user, file, body }
   ];
 
   // Format date as "day, month, year"
-  const formattedDate = `${currentDate.getDate()}, ${
-    monthNames[currentDate.getMonth()]
-  }, ${currentDate.getFullYear()}`;
+  const formattedDate = `${currentDate.getDate()}, ${monthNames[currentDate.getMonth()]
+    }, ${currentDate.getFullYear()}`;
 
   //create email profile here
   const bulkUpload = {
@@ -628,6 +658,7 @@ export const fetchPreferencesData = async () => {
 };
 
 export const onboardingPayment = async ({ user, body }) => {
+
   let amountToPay = body.total_amount;
 
   if (plans.sponsor_onboarding_settings.organization_reg_fee !== body.organization_reg_fee)
@@ -643,16 +674,15 @@ export const onboardingPayment = async ({ user, body }) => {
     email: user.email,
     callback_url:
       env.node_env === 'development'
-        ? `${env.dev_base_url_org}/home`
-        : `${env.prod_base_url_org}/home`,
+        ? `${env.dev_base_url_org}/onboarding/success-payment`
+        : `${env.prod_base_url_org}/onboarding/success-payment`,
     metadata: {
       userId: user._id,
       package: body,
       amountToPay,
       on_trial: false,
       hasPaid: true,
-      acctstatus: 'active',
-      type: 'sponsor-onboarding'
+      acctstatus: 'active'
     }
   };
 
@@ -666,6 +696,40 @@ export const onboardingPayment = async ({ user, body }) => {
   });
 
   return { gateway: gateway.data.data.authorization_url };
+};
+
+export const onboardingPaymentInfo = async ({ user, params }) => {
+  let { trxref, reference } = params;
+  // check if user is already here
+  const checkPayment = await paymentModel.findOne({
+    $or: [{ reference: reference }, { trxref: trxref }]
+  });
+  if (checkPayment) return {checkPayment};
+  const url = `${env.paystack_api_url}transaction/verify/` + encodeURIComponent(reference);
+
+  const result = await axios.get(url, {
+    headers: {
+      Authorization: `Bearer ${env.paystack_secret_key}`,
+      'Content-Type': 'application/json'
+    }
+  });
+console.log('====================================');
+console.log(response);
+console.log('====================================');
+  const response = JSON.parse(result);
+  const { amount, status } = response.data;
+  const { email } = response.data.customer;
+  const full_name = response.data.metadata.full_name;
+  const operation = 'onboarding';
+  const newPayment = { full_name, email, amount, reference, trxref, operation, status };
+  const payment = Payment.create(newPayment);
+
+  const checkIfOnboarded = await organizationModel.findOne({ email: email });
+  checkIfOnboarded.hasPaid = true;
+  checkIfOnboarded.hasPaid_personalization_fee = true;
+  await checkIfOnboarded.save();
+
+  return { payment };
 };
 
 export const addModules = async ({ user, body }) => {
