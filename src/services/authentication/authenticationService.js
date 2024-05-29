@@ -292,7 +292,7 @@ export const sendSponsorEmail = async ({ body, user }) => {
   };
 
   const mailData = {
-    email: 'maqom.bc@gmail.com',
+    email: 'ask@akilaah.com',
     subject: 'Payment Verification',
     type: 'html',
     html: paymentVerificationMail(onboardingData).html,
@@ -351,8 +351,8 @@ export const onboardNewOrganizationBeneficiary = async ({ body, user }) => {
   // check if user is already here
   const filter = { organization_id: user._id };
 
-  if (body.contact.email) {
-    filter['contact.email'] = body.contact.email;
+  if (body.email) {
+    filter['contact.email'] = body.email;
 
     const checkMember = await organizationBeneficiaryModel.findOne({
       ...filter
@@ -361,8 +361,8 @@ export const onboardNewOrganizationBeneficiary = async ({ body, user }) => {
     if (checkMember) throw new BadRequestError('Beneficiary already exists');
   }
 
-  if (body.contact.phone) {
-    filter['contact.phone'] = body.contact.phone;
+  if (body.phone) {
+    filter['contact.phone'] = body.phone;
 
     delete filter['contact.email'];
 
@@ -514,14 +514,23 @@ export const uploadOrganizationBeneficiariesInBulk = async ({ user, file, body }
   const workbook = XLSX.readFile(file.path);
   const worksheet = workbook.Sheets[workbook.SheetNames[0]];
   const header = [
-    'firstname',
-    'lastname',
-    'othername',
+    'name',
+    'gender',
+    'marital_status',
+    'nationality',
+    'state_of_origin',
+    'language',
+    'lga',
+    'country_of_residence',
+    'state_of_residence',
+    'resident_address',
+    'city_of_residence',
     'phone',
     'email',
-    'address',
-    'gender',
-    'country',
+    'bank_name',
+    'acct_name',
+    'bank_code',
+    'acct_number',
     'has_paid'
   ];
 
@@ -534,18 +543,18 @@ export const uploadOrganizationBeneficiariesInBulk = async ({ user, file, body }
 
   let batchList = [];
 
-  for (let beneficiary of result) {
+  for (let member of result) {
     let comment;
     // check if email address is already available
-    const beneficiaryExists = await organizationBeneficiaryModel.findOne({
-      email: beneficiary.email,
+    const memberExists = await organizationBeneficiaryModel.findOne({
+      'contact.email': member.email,
       organization_id: user._id
     });
 
-    comment = beneficiaryExists ? 'Beneficiary is already part of this Sponsor' : 'available';
+    comment = memberExists ? 'Member is already part of this organization' : 'available';
 
     const batchExist = await beneficiaryBatchUploadModel.findOne({
-      email: beneficiary.email,
+      'contact.email': member.email,
       organization_id: user._id
     });
 
@@ -554,30 +563,46 @@ export const uploadOrganizationBeneficiariesInBulk = async ({ user, file, body }
     }
 
     const batchListData = {
-      firstname: beneficiary.firstname,
-      lastname: beneficiary.lastname,
-      othername: beneficiary.othername,
-      phone: beneficiary.phone,
-      email: beneficiary.email,
-      address: beneficiary.address,
-      gender: beneficiary.gender,
-      country: beneficiary.country,
-      acctstatus: 'pending',
+      personal: {
+        member_name: member.name,
+        gender: member.gender,
+        marital_status: member.marital_status,
+        nationality: member.nationality,
+        state_of_origin: member.state_of_origin,
+        language: member.language,
+        lga: member.lga
+      },
+      contact: {
+        country_of_residence: member.country_of_residence,
+        state: member.state_of_residence,
+        phone: String(member.phone),
+        email: member.email,
+        city: member.city_of_residence,
+        resident_address: member.resident_address
+      },
+      bank_details: {
+        bank: {
+          bank_name: member?.bank_name || '',
+          acct_name: member?.acct_name || '',
+          bank_code: member?.bank_code || '',
+          acct_number: member?.acct_number || ''
+        }
+      },
       organization_id: user._id,
       batch_no: body.batch_no,
       batch_no_id: `${body.batch_no}-${await codeGenerator(6, 'ABCDEFGHIJ1234567890')}`,
-      has_paid: beneficiary?.has_paid?.toLowerCase === 'yes' ? true : false,
-      reg_fee: user.reg_fee
+      has_paid: member?.has_paid?.toLowerCase === 'yes' ? true : false,
+      reg_fee: user.reg_fee,
+      comment
     };
 
     batchList.push(batchListData);
   }
 
-  const count = batchList.length + user.total_number_of_beneficiaries_created;
-  const amountLeft =
-    user.total_number_of_beneficiaries_chosen - user.total_number_of_beneficiaries_created;
-  if (count > user.total_number_of_beneficiaries_chosen)
-    throw new Error(`Beneficiaries in Sponsor left to be created is ${amountLeft} beneficiaries`);
+  const count = batchList.length + user.total_number_of_members_created;
+  const amountLeft = user.total_number_of_members_chosen - user.total_number_of_members_created;
+  if (count > user.total_number_of_members_chosen)
+    throw new Error(`Members in Organization left to be created is ${amountLeft} members`);
 
   const createBatchList = await beneficiaryBatchUploadModel.insertMany(batchList);
 
@@ -614,10 +639,10 @@ export const uploadOrganizationBeneficiariesInBulk = async ({ user, file, body }
   };
   const mailData = {
     email: user.email,
-    subject: 'CONFIRMATION OF BULK BENEFICIARY UPLOAD',
+    subject: 'CONFIRMATION OF BULK MEMBER UPLOAD',
     type: 'html',
-    html: beneficiaryBulkUpload(bulkUpload).html,
-    text: beneficiaryBulkUpload(bulkUpload).text
+    html: memberBulkUpload(bulkUpload).html,
+    text: memberBulkUpload(bulkUpload).text
   };
   const msg = await formattMailInfo(mailData, env);
 
@@ -629,6 +654,7 @@ export const uploadOrganizationBeneficiariesInBulk = async ({ user, file, body }
 
   return true;
 };
+
 
 export const fetchBankCode = async ({ bank_code }) => {
   const config = {
