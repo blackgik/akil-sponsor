@@ -675,7 +675,8 @@ export const onboardingPayment = async ({ user, body }) => {
       amountToPay,
       on_trial: false,
       hasPaid: true,
-      acctstatus: 'active'
+      acctstatus: 'active',
+      type: "sponsor-onboarding"
     }
   };
 
