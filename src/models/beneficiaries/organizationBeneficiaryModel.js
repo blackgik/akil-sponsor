@@ -117,4 +117,4 @@ organizationBeneficiarySchema.methods.toJSON = function () {
   return userObject;
 };
 
-export default model('Organization_Beneficiary', organizationBeneficiarySchema);
+export default model('Organization_Member', organizationBeneficiarySchema);
