@@ -7,9 +7,11 @@ import {
   forgotPassword,
   setOrganizationPackageData,
   setOrganizationPreferences,
+  onboardingPaymentInfo,
   inviteBeneficiary,
   loginOrganization,
   onboardNewOrganization,
+  sendSponsorEmail,
   onboardNewOrganizationBeneficiary,
   onboardingPayment,
   resendOtp,
@@ -149,6 +151,23 @@ export const onboardingPaymentHandler = async (req, res) => {
   const gateway = await onboardingPayment({ user, body });
 
   res.send(appResponse('Updated payment successfully', gateway));
+};
+
+export const onboardingPaymentInfoHandler = async (req, res) => {
+  const { user, query } = req;
+  const params = query;
+
+  const gateway = await onboardingPaymentInfo({user, params});
+
+  res.send(appResponse('Updated payment successfully', gateway));
+};
+
+export const sendEmailHandler = async (req, res) => {
+  const { user, body } = req;
+
+  const data = await sendSponsorEmail({ user, body });
+
+  res.send(appResponse('Mail sent successfully', data));
 };
 
 export const addModulesHandler = async (req, res) => {

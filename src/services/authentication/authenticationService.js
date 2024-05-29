@@ -8,6 +8,7 @@ import ProductCategoryModel from '../../models/products/ProductCategoryModel.js'
 import OccupationModel from '../../models/occupations/occupationModel.js';
 import {
   forgotPasswordMail,
+  paymentVerificationMail,
   verifyOnbordingMail,
   beneficiaryBulkUpload,
   onboardinMail,
@@ -34,6 +35,9 @@ import { plans } from '../../config/modules.js';
 import notificationsModel from '../../models/settings/notificationsModel.js';
 import { encryptData } from '../../utils/vault.js';
 import personalizationModel from '../../models/settings/personalization.model.js';
+
+import paymentModel from '../../models/paymentModel.js';
+import validator from 'validator';
 
 export const onboardNewOrganization = async ({ body, dbConnection }) => {
   if (!body.tosAgreement) throw new BadRequestError(`Terms and conditions not met`);
@@ -197,13 +201,13 @@ export const loginOrganization = async (body) => {
   const { email, password } = body;
   const checkOrg = await organizationModel.findOne({ email });
 
-  if (!checkOrg) throw new InvalidError('Invalid Sponsor');
+  if (!checkOrg) throw new BadRequestError('Invalid Sponsor');
 
-  if (!checkOrg.isApproved) throw new InvalidError('Account not verified');
+  if (!checkOrg.isApproved) throw new BadRequestError('Account not verified');
 
   const isMatch = await bcrypt.compare(password, checkOrg.password);
 
-  if (!isMatch) throw new InvalidError('Invalid Sponsor');
+  if (!isMatch) throw new BadRequestError('Invalid Sponsor');
 
   const admin = checkOrg.toJSON();
   admin.onboardingSetting = plans.sponsor_onboarding_settings;
@@ -281,6 +285,30 @@ export const resetPassword = async ({ body, user }) => {
   return true;
 };
 
+export const sendSponsorEmail = async ({ body, user }) => {
+  const onboardingData = {
+    name: user.firstname + ' ' + user.lastname,
+    data: body
+  };
+
+  const mailData = {
+    email: 'maqom.bc@gmail.com',
+    subject: 'Payment Verification',
+    type: 'html',
+    html: paymentVerificationMail(onboardingData).html,
+    text: paymentVerificationMail(onboardingData).text
+  };
+
+  const msg = await formattMailInfo(mailData, env);
+
+  const msgDelivered = await messageBird(msg);
+
+  if (!msgDelivered)
+    throw new InternalServerError('server slip. Payment verification mail not sent');
+
+  return true;
+};
+
 export const verifyForgotOtp = async ({ body }) => {
   const { code, hash, email } = body;
 
@@ -320,15 +348,36 @@ export const onboardNewOrganizationBeneficiary = async ({ body, user }) => {
     throw new BadRequestError(
       `Chosen beneficiaries count cannot be greater than ${user.total_number_of_beneficiaries_chosen}`
     );
-
   // check if user is already here
-  const checkBeneficiary = await organizationBeneficiaryModel.findOne({
-    $or: [{ email: body.email }, { phone: body.phone }],
-    organization_id: user._id
+  const filter = { organization_id: user._id };
+
+  if (body.contact.email) {
+    filter['contact.email'] = body.contact.email;
+
+    const checkMember = await organizationBeneficiaryModel.findOne({
+      ...filter
+    });
+
+    if (checkMember) throw new BadRequestError('Beneficiary already exists');
+  }
+
+  if (body.contact.phone) {
+    filter['contact.phone'] = body.contact.phone;
+
+    delete filter['contact.email'];
+
+    const checkMember = await organizationBeneficiaryModel.findOne({
+      ...filter
+    });
+
+    if (checkMember) throw new BadRequestError('Beneficiary already exists');
+  }
+
+  const checkMember = await organizationBeneficiaryModel.findOne({
+    ...filter
   });
 
-  if (checkBeneficiary) throw new BadRequestError('Beneficiary already exists');
-
+  if (checkMember) throw new BadRequestError('Beneficiary already exists');
   const generatePassword = await codeGenerator(9, 'ABCDEFGHI&*$%#1234567890');
   const beneficiaryUniqueId = `${user.firstname.substring(0, 3).toUpperCase()}${await codeGenerator(
     7,
@@ -350,25 +399,27 @@ export const onboardNewOrganizationBeneficiary = async ({ body, user }) => {
 
   await user.save();
 
-  // send beneficiary login credentials
-  const onboardingData = {
-    email: createBeneficiary.email,
-    name_of_cooperation: user.firstname,
-    password: generatePassword,
-    company_code: user.company_code
-  };
-  const mailData = {
-    email: createBeneficiary.email,
-    subject: 'BENEFICIARY ONBOARDING',
-    type: 'html',
-    html: onboardinMail(onboardingData).html,
-    text: onboardinMail(onboardingData).text
-  };
-  const msg = await formattMailInfo(mailData, env);
+  if (validator.isEmail(body.contact.email)) {
+    // send beneficiary login credentials
+    const onboardingData = {
+      email: createBeneficiary.contact.email,
+      name_of_cooperation: user.firstname,
+      password: generatePassword,
+      company_code: user.company_code
+    };
+    const mailData = {
+      email: createBeneficiary.contact.email,
+      subject: 'BENEFICIARY ONBOARDING',
+      type: 'html',
+      html: onboardinMail(onboardingData).html,
+      text: onboardinMail(onboardingData).text
+    };
+    const msg = await formattMailInfo(mailData, env);
 
-  const msgDelivered = await messageBird(msg);
-  if (!msgDelivered)
-    throw new InternalServerError('server slip. Beneficiary was created without mail being sent');
+    const msgDelivered = await messageBird(msg);
+    if (!msgDelivered)
+      throw new InternalServerError('server slip. Beneficiary was created without mail being sent');
+  }
 
   // create notification for beneficiary
   await notificationsModel.create({
@@ -469,7 +520,8 @@ export const uploadOrganizationBeneficiariesInBulk = async ({ user, file, body }
     'email',
     'address',
     'gender',
-    'country'
+    'country',
+    'has_paid'
   ];
 
   let result = XLSX.utils.sheet_to_json(worksheet, {
@@ -555,7 +607,7 @@ export const uploadOrganizationBeneficiariesInBulk = async ({ user, file, body }
   //create email profile here
   const bulkUpload = {
     email: user.email,
-    name_of_cooperation: user.name_of_cooperation,
+    name_of_cooperation: user.firstname,
     number_uploaded: batchList.length,
     date: formattedDate
   };
@@ -615,16 +667,15 @@ export const onboardingPayment = async ({ user, body }) => {
     email: user.email,
     callback_url:
       env.node_env === 'development'
-        ? `${env.dev_base_url_org}/home`
-        : `${env.prod_base_url_org}/home`,
+        ? `${env.dev_base_url_org}/onboarding/success-payment`
+        : `${env.prod_base_url_org}/onboarding/success-payment`,
     metadata: {
       userId: user._id,
       package: body,
       amountToPay,
       on_trial: false,
       hasPaid: true,
-      acctstatus: 'active',
-      type: 'sponsor-onboarding'
+      acctstatus: 'active'
     }
   };
 
@@ -638,6 +689,38 @@ export const onboardingPayment = async ({ user, body }) => {
   });
 
   return { gateway: gateway.data.data.authorization_url };
+};
+
+export const onboardingPaymentInfo = async ({ user, params }) => {
+  let { trxref, reference } = params;
+  // check if user is already here
+  const checkPayment = await paymentModel.findOne({
+    $or: [{ reference: reference }, { trxref: trxref }]
+  });
+  if (checkPayment) return { checkPayment };
+  const url = `${env.paystack_api_url}transaction/verify/` + encodeURIComponent(reference);
+
+  const result = await axios.get(url, {
+    headers: {
+      Authorization: `Bearer ${env.paystack_secret_key}`,
+      'Content-Type': 'application/json'
+    }
+  });
+
+  const response = JSON.parse(result);
+  const { amount, status } = response.data;
+  const { email } = response.data.customer;
+  const full_name = response.data.metadata.full_name;
+  const operation = 'onboarding';
+  const newPayment = { full_name, email, amount, reference, trxref, operation, status };
+  const payment = Payment.create(newPayment);
+
+  const checkIfOnboarded = await organizationModel.findOne({ email: email });
+  checkIfOnboarded.hasPaid = true;
+  checkIfOnboarded.hasPaid_personalization_fee = true;
+  await checkIfOnboarded.save();
+
+  return { payment };
 };
 
 export const addModules = async ({ user, body }) => {
@@ -718,7 +801,7 @@ export const inviteBeneficiary = async ({ beneficiary_ids = [], user }) => {
       firstname: beneficiary.firstname,
       lastname: beneficiary.lastname,
       email: beneficiary.email,
-      sponsor: user.name_of_cooperation,
+      sponsor: `${user.firstname} ${user.lastname}`,
       company_code: user.company_code
     };
 
