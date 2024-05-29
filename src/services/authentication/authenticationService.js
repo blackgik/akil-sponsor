@@ -463,6 +463,7 @@ export const setOrganizationPackageData = async ({ body, user }) => {
       body.data_collection_quantity * plans.sponsor_onboarding_settings.data_collection_fee;
     amountToPay += dataCollectionFee;
   }
+  organizationExists.isPackageBuilt = true;
 
   await organizationExists.save();
 
