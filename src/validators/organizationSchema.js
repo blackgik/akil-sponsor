@@ -55,27 +55,31 @@ export const validateOrganizationPackageSchema = Joi.object({
   psdAgreement: Joi.boolean().required(),
   total_number_of_beneficiaries_chosen: Joi.number().required(),
   total_number_of_sms: Joi.number().required(),
-  data_collection_quantity: Joi.number().required(),
+  data_collection_quantity: Joi.number().required()
 });
 
 export const validateOrganizationBeneficiarySchema = Joi.object({
   avatar: Joi.object({
     key: Joi.string().optional().allow('', null)
   }),
-  firstname: Joi.string().required(),
-  lastname: Joi.string().required(),
-  othername: Joi.string().optional().allow('', null),
-  phone: Joi.string().required(),
-  email: Joi.string().required(),
-  gender: Joi.string().required(),
-  country: Joi.string().optional().allow('', null)
+  personal: Joi.object({
+    dob: Joi.date().required().optional().allow('', null),
+    gender: Joi.string().required().optional().allow('', null),
+    member_name: Joi.string(),
+    marital_status: Joi.string().optional().allow('', null),
+    nationality: Joi.string().optional().allow('', null)
+  }),
+  contact: Joi.object({
+    phone: Joi.string().required(),
+    email: Joi.string().optional().allow('', null)
+  })
 });
 
 export const validateOrganizationPreferencesSchema = Joi.object({
   preferences: Joi.object({
     occupations: Joi.array().items(Joi.string().optional().allow('', null)),
-    categories: Joi.array().items(Joi.string().optional().allow('', null)),
-  }),
+    categories: Joi.array().items(Joi.string().optional().allow('', null))
+  })
 });
 
 export const validateBeneficiaryUpdateSchema = Joi.object({
@@ -93,8 +97,11 @@ export const validateBeneficiaryUpdateSchema = Joi.object({
 
 export const validateResetPasswordSchema = Joi.object({
   password: Joi.string().min(3).max(15).required(),
-  password_confirmation: Joi.any().valid(Joi.ref('password')).required().label('Confirm password')
-  .options({ messages: { 'any.only': '{{#label}} does not match'} })
+  password_confirmation: Joi.any()
+    .valid(Joi.ref('password'))
+    .required()
+    .label('Confirm password')
+    .options({ messages: { 'any.only': '{{#label}} does not match' } })
 });
 
 export const validateForgotOtpSchema = Joi.object({

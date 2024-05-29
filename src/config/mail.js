@@ -278,12 +278,9 @@ export const onboardinMail = (data) => {
                                                                   <div class="v-line-height"
                                                                       style="font-size: 18px; line-height: 150%; text-align: left; word-wrap: break-word;color:#002366;">
                                                                       <p style="font-size: 18px; line-height: 150%;"></p>
-                                                                      Congratulations! You have successfully onboarded your
-                                                                      organisation
-                                                                      <strong>${data.name_of_cooperation.toUpperCase()}</strong>
-                                                                      on
-                                                                      AKILAAH. We are
-                                                                      thrilled to welcome you to our community.
+                                                                      Congratulations! You have successfully onboarded as a
+beneficiary and We are thrilled to welcome you to our
+community.
                                                                       ,
                                                                       </p>
 
@@ -293,7 +290,7 @@ export const onboardinMail = (data) => {
                                                                       style="font-size: 18px; line-height: 150%; text-align: left; word-wrap: break-word;color:#002366;">
                                                                       <p
                                                                           style="font-size: 18px; line-height: 150%; text-align: justify;">
-                                                                          Below, you will find your organisation login
+                                                                          Below, you will find your login
                                                                           credentials. It is imperative to keep this
                                                                           information secure for your personal use.
                                                                       </p>
@@ -330,12 +327,12 @@ export const onboardinMail = (data) => {
                                                                                   <li>Organisation Unique Code: ${
                                                                                     data.company_code
                                                                                   } (This is your secret pass into your
-                                                                                      organisation; please ensure its
+                                                                                      beneficiary; please ensure its
                                                                                       confidentiality as it is required for
                                                                                       every login of your beneficiaries)</li>
                                                                                   <li>Organisation Login URL: <a
                                                                                           style="color: red;"
-                                                                                          href="https://sponsor.akilaah.com/login">https://sponsor.akilaah.com</a>
+                                                                                          href="https://beneficiary.akilaah.com/login">https://beneficiary.akilaah.com</a>
                                                                                   </li>
                                                                               </ul>
                                                                               <br>
@@ -568,8 +565,8 @@ export const onboardinMail = (data) => {
 };
 
 export const invitationMail = (data) => {
-    return {
-      html: `
+  return {
+    html: `
       <!DOCTYPE HTML
     PUBLIC "-//W3C//DTD XHTML 1.0 Transitional //EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml"
@@ -1014,7 +1011,7 @@ export const invitationMail = (data) => {
 
 </html>
        `,
-      text: `welcome to MAJFINTECH Onboarding\n
+    text: `welcome to MAJFINTECH Onboarding\n
     Your login Credentials can be seen below\n
     \n
     Name of Coopoeration</strong>: ${data.name_of_cooperation}\n
@@ -1023,8 +1020,8 @@ export const invitationMail = (data) => {
     company Unique Code:${data.company_code}\n
     Login url: https://sponsor.akilaah.com \n\n
     NB: You Company Unique code should be share to beneficiaries `
-    };
   };
+};
 
 export const beneficiaryBulkUpload = (data) => {
   return {
@@ -1850,7 +1847,7 @@ export const contributionBulkUpload = (data) => {
                                                                                 </li>
                                                                                 <li>Number of Contributions Uploaded: ${
                                                                                   data.number
-                                                                                  }</li>
+                                                                                }</li>
                                                                                 <li>Status: ${
                                                                                   data.status
                                                                                 }</li>
@@ -2361,11 +2358,11 @@ export const loanBulkUpload = (data) => {
                                                                                     ${data.date}
                                                                                 </li>
                                                                                 <li>Number of Loans Uploaded: ${
-                                                                                    data.number
-                                                                                    }</li>
+                                                                                  data.number
+                                                                                }</li>
                                                                                 <li>Status: ${
-                                                                                    data.status
-                                                                                    }</li>
+                                                                                  data.status
+                                                                                }</li>
                                                                             </ul>
                                                                             <br>
                                                                         </span>
@@ -2899,17 +2896,19 @@ export const loanDisbuersmenttMail = (data) => {
                                                                                 ${data.product_name}
                                                                             </li>
                                                                             <li>Member Name:
-                                                                                ${data.beneficiary_name}
+                                                                                ${
+                                                                                  data.beneficiary_name
+                                                                                }
                                                                             </li>
                                                                             <li>Loan Request ID: ${
-                                                                                data.request_id
-                                                                                }</li>
+                                                                              data.request_id
+                                                                            }</li>
                                                                             <li>Approved Loan Amount: ${
-                                                                                data.amount
-                                                                                }</li>
+                                                                              data.amount
+                                                                            }</li>
                                                                             <li>Approval Date: ${
-                                                                                data.date
-                                                                                }</li>
+                                                                              data.date
+                                                                            }</li>
                                                                         </ul>
                                                                         <br>
                                                                     </span>
@@ -3119,8 +3118,8 @@ export const loanDisbuersmenttMail = (data) => {
 };
 
 export const verifyOnbordingMail = (data) => {
-    return {
-      html: `
+  return {
+    html: `
       <!DOCTYPE HTML
       PUBLIC "-//W3C//DTD XHTML 1.0 Transitional //EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
       <html xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml"
@@ -3627,7 +3626,7 @@ export const verifyOnbordingMail = (data) => {
   
       </html>
       `,
-      text: `Dear ${data.name}\n
+    text: `Dear ${data.name}\n
       This is your verification code ${data.code}\n
       
       NB: OTP is needed to verify that you own this email address.\n
@@ -3635,7 +3634,7 @@ export const verifyOnbordingMail = (data) => {
       The verification code will only be valid for 15 minutes. please do not share this code with anyone.\n
       Note: if you did not initiate this request, please contact customer service immediately
       `
-    };
+  };
 };
 
 export const paymentVerificationMail = (data) => {
@@ -4951,14 +4950,14 @@ export const beneficiaryApprovedStatusAgentUpdate = (data) => {
                                                                                 ${data.beneficiary_name.toUpperCase()}
                                                                             </li>
                                                                             <li>Email: ${
-                                                                                data.email
-                                                                                }</li>
+                                                                              data.email
+                                                                            }</li>
                                                                             <li>Member ID: ${
-                                                                                data.beneficiary_id
-                                                                                }</li>
+                                                                              data.beneficiary_id
+                                                                            }</li>
                                                                             <li>Sponsor: ${
-                                                                                data.name_of_cooperation
-                                                                                }</li>
+                                                                              data.name_of_cooperation
+                                                                            }</li>
                                                                         </ul>
                                                                         <br>
                                                                     </span>
@@ -5161,8 +5160,8 @@ export const beneficiaryApprovedStatusAgentUpdate = (data) => {
 };
 
 export const beneficiaryApprovedStatusOrgUpdate = (data) => {
-    return {
-      html: `
+  return {
+    html: `
       <!DOCTYPE HTML
     PUBLIC "-//W3C//DTD XHTML 1.0 Transitional //EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml"
@@ -5464,11 +5463,11 @@ export const beneficiaryApprovedStatusOrgUpdate = (data) => {
                                                                                 ${data.beneficiary_name.toUpperCase()}
                                                                             </li>
                                                                             <li>Member ID: ${
-                                                                                data.beneficiary_id
-                                                                                }</li>
+                                                                              data.beneficiary_id
+                                                                            }</li>
                                                                             <li>Registration Date: ${
-                                                                                data.date
-                                                                                }</li>
+                                                                              data.date
+                                                                            }</li>
                                                                         </ul>
                                                                         <br>
                                                                     </span>
@@ -5667,14 +5666,14 @@ export const beneficiaryApprovedStatusOrgUpdate = (data) => {
 
 </html>
       `,
-      text: `You account has been ${data.status === 'pending' ? 'set to Pending' : data.status} on ${
-        data.name_of_cooperation
-      }`
-    };
+    text: `You account has been ${data.status === 'pending' ? 'set to Pending' : data.status} on ${
+      data.name_of_cooperation
+    }`
   };
+};
 
 export const beneficiaryApprovedStatusUpdate = (data) => {
-return {
+  return {
     html: `
     <!DOCTYPE HTML
     PUBLIC "-//W3C//DTD XHTML 1.0 Transitional //EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -5979,17 +5978,17 @@ return {
                                                                                 ${data.beneficiary_name.toUpperCase()}
                                                                             </li>
                                                                             <li>Email: ${
-                                                                                data.email
-                                                                                }</li>
+                                                                              data.email
+                                                                            }</li>
                                                                             <li>Member ID: ${
-                                                                                data.beneficiary_id
-                                                                                }</li>
+                                                                              data.beneficiary_id
+                                                                            }</li>
                                                                             <li>Organisation Unique ID: ${
-                                                                                data.organization_code
-                                                                                }</li>
+                                                                              data.organization_code
+                                                                            }</li>
                                                                             <li>Sponsor Name: ${
-                                                                                data.name_of_cooperation
-                                                                                }</li>
+                                                                              data.name_of_cooperation
+                                                                            }</li>
                                                                         </ul>
                                                                         <br>
                                                                     </span>
@@ -6191,9 +6190,9 @@ return {
 </html>
     `,
     text: `You account has been ${data.status === 'pending' ? 'set to Pending' : data.status} on ${
-    data.name_of_cooperation
+      data.name_of_cooperation
     }`
-};
+  };
 };
 
 export const declinedAcountMail = (data) => {
@@ -6673,8 +6672,8 @@ export const declinedAcountMail = (data) => {
 };
 
 export const agentDeclinedAcountMail = (data) => {
-    return {
-      html: `
+  return {
+    html: `
       <!DOCTYPE HTML
     PUBLIC "-//W3C//DTD XHTML 1.0 Transitional //EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml"
@@ -7142,9 +7141,9 @@ export const agentDeclinedAcountMail = (data) => {
 
 </html>
       `,
-      text: `You account has been ${data.status} on ${data.name_of_cooperation}`
-    };
+    text: `You account has been ${data.status} on ${data.name_of_cooperation}`
   };
+};
 
 export const onboardAgentMail = (data) => {
   return {
@@ -7626,7 +7625,9 @@ export const newProductMail = (data) => {
                                                                   style="font-size: 18px; line-height: 150%; text-align: left; word-wrap: break-word;color:#002366;">
                                                                   <p style="font-size: 18px; line-height: 150%;"></p>
                                                                   We are pleased to inform you that a new contribution
-                                                                  product <strong>${data.product_name}</strong> has been successfully created on
+                                                                  product <strong>${
+                                                                    data.product_name
+                                                                  }</strong> has been successfully created on
                                                                   Akilaah. This product is now available within the
                                                                   Contribution Module for beneficiaries to engage with.
                                                               </div>
@@ -8143,7 +8144,9 @@ export const newSubscriptionProductMail = (data) => {
                                                                   style="font-size: 18px; line-height: 150%; text-align: left; word-wrap: break-word;color:#002366;">
                                                                   <p style="font-size: 18px; line-height: 150%;"></p>
                                                                   We are pleased to inform you that a new subscription
-                                                                  product <strong>${data.product_name}</strong> has been successfully created on
+                                                                  product <strong>${
+                                                                    data.product_name
+                                                                  }</strong> has been successfully created on
                                                                   Akilaah. This product is now available within the
                                                                   Subscription Module for beneficiaries to engage with.
                                                               </div>
@@ -8689,12 +8692,8 @@ export const newSavingsProductMail = (data) => {
                                         <li>Upload Date:
                                           ${data.date}
                                         </li>
-                                        <li>Number of Savings Uploaded: ${
-                                          data.number
-                                          }</li>
-                                        <li>Status: ${
-                                          data.status
-                                          }</li>
+                                        <li>Number of Savings Uploaded: ${data.number}</li>
+                                        <li>Status: ${data.status}</li>
                                       </ul>
                                       <br>
                                     </span>
