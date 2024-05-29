@@ -56,4 +56,5 @@ const bulkBeneficiaryBatchUploadSchema = new Schema(
   { timestamps: true }
 );
 
-export default model('Bulk_Beneficiary_Data', bulkBeneficiaryBatchUploadSchema);
+export default model('Bulk_Member_Data', bulkBeneficiaryBatchUploadSchema);
+

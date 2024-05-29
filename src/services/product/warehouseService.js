@@ -98,7 +98,7 @@ export const fetchAllWarehouses = async ({ user, params }) => {
   let warehouseData = await WarehouseModel.find({ ...filterData})
   .populate({
     path: 'warehouse_overseer_id',
-    model: 'Organization_Beneficiary'
+    model: 'Organization_Member'
   }).populate({
     path: 'sponsor_id',
     model: 'Organization'
@@ -125,7 +125,7 @@ export const getSingleWarehouse = async ({ user, warehouse_id }) => {
   warehouseInView = await WarehouseModel.findById(warehouse_id)
     .populate({
       path: 'warehouse_overseer_id',
-      model: 'Organization_Beneficiary'
+      model: 'Organization_Member'
     })
     .populate({
       path: 'sponsor_id',

@@ -292,7 +292,7 @@ export const sendSponsorEmail = async ({ body, user }) => {
   };
 
   const mailData = {
-    email: 'maqom.bc@gmail.com',
+    email: 'ask@akilaah.com',
     subject: 'Payment Verification',
     type: 'html',
     html: paymentVerificationMail(onboardingData).html,
@@ -351,8 +351,8 @@ export const onboardNewOrganizationBeneficiary = async ({ body, user }) => {
   // check if user is already here
   const filter = { organization_id: user._id };
 
-  if (body.contact.email) {
-    filter['contact.email'] = body.contact.email;
+  if (body.email) {
+    filter['contact.email'] = body.email;
 
     const checkMember = await organizationBeneficiaryModel.findOne({
       ...filter
@@ -361,8 +361,8 @@ export const onboardNewOrganizationBeneficiary = async ({ body, user }) => {
     if (checkMember) throw new BadRequestError('Beneficiary already exists');
   }
 
-  if (body.contact.phone) {
-    filter['contact.phone'] = body.contact.phone;
+  if (body.phone) {
+    filter['contact.phone'] = body.phone;
 
     delete filter['contact.email'];
 
@@ -482,6 +482,7 @@ export const setOrganizationPackageData = async ({ body, user }) => {
       body.data_collection_quantity * plans.sponsor_onboarding_settings.data_collection_fee;
     amountToPay += dataCollectionFee;
   }
+  organizationExists.isPackageBuilt = true;
 
   await organizationExists.save();
 
@@ -647,8 +648,8 @@ export const uploadOrganizationBeneficiariesInBulk = async ({ user, file, body }
     email: bulkUpload.email,
     subject: 'CONFIRMATION OF BULK BENEFICIARY UPLOAD',
     type: 'html',
-    html: beneficiaryBulkUpload(bulkUpload).html,
-    text: beneficiaryBulkUpload(bulkUpload).text
+    html: memberBulkUpload(bulkUpload).html,
+    text: memberBulkUpload(bulkUpload).text
   };
   const msg = await formattMailInfo(mailData, env);
 
@@ -658,6 +659,7 @@ export const uploadOrganizationBeneficiariesInBulk = async ({ user, file, body }
 
   return { errorLogs, createBatchList };
 };
+
 
 export const fetchBankCode = async ({ bank_code }) => {
   const config = {

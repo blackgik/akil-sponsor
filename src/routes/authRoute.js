@@ -36,6 +36,7 @@ import { authentication, dbconnection } from '../middlewares/authentication.js';
 import { upload } from '../../lib/multer.js';
 import validators from '../validators/index.js';
 import { sendContactMailSchema } from '../validators/sendContactMailSchema.js';
+import { BuildPackageSchema } from '../validators/packageSchema.js';
 
 const organizationRoutes = router.Router();
 
@@ -110,7 +111,7 @@ const organizationRoute = () => {
     upload.single('xls'),
     organizationBulkUploadBeneficiaryHandler
   );
-  organizationRoutes.patch('/make-onboarding-payments', authentication, onboardingPaymentHandler);
+  organizationRoutes.patch('/make-onboarding-payments', authentication,Validate(BuildPackageSchema), onboardingPaymentHandler);
   organizationRoutes.get('/onboarding-payment-info', authentication, onboardingPaymentInfoHandler);
   organizationRoutes.post('/contact-sponsor-through-mail', authentication, Validate(sendContactMailSchema), sendEmailHandler);
 

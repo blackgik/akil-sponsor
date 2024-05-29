@@ -37,7 +37,7 @@ export const fetchAllConversations = async ({ user }) => {
     })
     .populate({
       path: 'beneficiaries',
-      model: 'Organization_Beneficiary',
+      model: 'Organization_Member',
       select: { personal: 1, avatar: 1 }
     });
 
