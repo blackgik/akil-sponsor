@@ -52,7 +52,6 @@ export const verifyEmail = async (body) => {
   checkAcct.isApproved = true;
   checkAcct.acctstatus = 'active';
 
-
   await checkAcct.save();
   //create email profile here
   const onboardingData = {
@@ -71,8 +70,10 @@ export const verifyEmail = async (body) => {
 
   const msgDelivered = await messageBird(msg);
   if (!msgDelivered)
-    throw new InternalServerError(500,
-      'server slip. Beneficiary was created without mail being sent', ''
+    throw new InternalServerError(
+      500,
+      'server slip. Beneficiary was created without mail being sent',
+      ''
     );
   const admin = checkAcct.toJSON();
   const encrypedDataString = await encryptData({
@@ -80,8 +81,10 @@ export const verifyEmail = async (body) => {
     pubKey: env.public_key
   });
 
-
-  const tokenEncryption = jwt.sign({ _id: admin._id, email: admin.email, user: checkAcct  }, env.jwt_key);
+  const tokenEncryption = jwt.sign(
+    { _id: admin._id, email: admin.email, user: checkAcct },
+    env.jwt_key
+  );
 
   return { encrypedDataString, tokenEncryption };
 };
@@ -100,7 +103,7 @@ export const fetchBeneficiariesByStatus = async ({ user, params }) => {
   const searchRgx = rgx(query);
 
   if (query) {
-    filterData['$or'] = [{ firstname: searchRgx },{ lastname: searchRgx }];
+    filterData['$or'] = [{ firstname: searchRgx }, { lastname: searchRgx }];
   }
 
   if (status) {
@@ -124,9 +127,7 @@ export const fetchBeneficiariesByStatus = async ({ user, params }) => {
     .find({ ...filterData })
     .select({
       avatar: 1,
-      firstname: 1,
-      lastname: 1,
-      othername: 1,
+      'personal.member_name': 1,
       email: 1,
       country: 1,
       gender: 1,
@@ -208,9 +209,9 @@ export const updateBeneficiaryStatus = async ({ user, status, beneficiary_id, no
   const orgnizationOnboardingData = {
     name_of_cooperation: user.name_of_cooperation,
     organization_code: user.company_code,
-    beneficiary_name: beneficiary.firstname +' '+beneficiary.lastname,
+    beneficiary_name: beneficiary.firstname + ' ' + beneficiary.lastname,
     beneficiary_id: beneficiary._id,
-    name_of_agent:  'no agent',
+    name_of_agent: 'no agent',
     email: beneficiary.email,
     date: beneficiary.createdAt,
     status: status
@@ -236,7 +237,7 @@ export const updateBeneficiaryStatus = async ({ user, status, beneficiary_id, no
   const onboardingData = {
     name_of_cooperation: user.name_of_cooperation,
     organization_code: user.company_code,
-    beneficiary_name: beneficiary.firstname +' '+beneficiary.lastname,
+    beneficiary_name: beneficiary.firstname + ' ' + beneficiary.lastname,
     beneficiary_id: beneficiary._id,
     name_of_agent: 'no agent',
     email: beneficiary.email,
@@ -269,13 +270,11 @@ export const updateBeneficiaryStatus = async ({ user, status, beneficiary_id, no
 };
 
 export const viewBeneficiaryProfile = async ({ beneficiary_id }) => {
-  const beneficiary = await organizationBeneficiaryModel
-    .findById(beneficiary_id)
-    .populate({
-      path: 'organization_id',
-      model: 'Organization'
-    })
-  if (!beneficiary) throw new NotFoundError('Beneficiary not found in Organization Directory');  
+  const beneficiary = await organizationBeneficiaryModel.findById(beneficiary_id).populate({
+    path: 'organization_id',
+    model: 'Organization'
+  });
+  if (!beneficiary) throw new NotFoundError('Beneficiary not found in Organization Directory');
   const data = beneficiary.toJSON();
 
   return data;
@@ -305,7 +304,9 @@ export const editBeneficiaryProfile = async ({ user, beneficiary_id, body }) => 
 };
 
 export const viewBeneficiariesDashboardStats = async ({ user }) => {
-  const beneficiaryCount = await organizationBeneficiaryModel.countDocuments({ organization_id: user._id });
+  const beneficiaryCount = await organizationBeneficiaryModel.countDocuments({
+    organization_id: user._id
+  });
   const activeBeneficiaries = await organizationBeneficiaryModel.countDocuments({
     organization_id: user._id,
     acctstatus: 'active'
@@ -629,7 +630,7 @@ export const pdfBuilder = async ({ body, res }, fn) => {
 
 export const importUserGuideCreation = async (data, user) => {
   const checkBeneficiary = await organizationBeneficiaryModel.findOne({
-    $or: [{ email: data.email }, { 'phone': data.phone }]
+    $or: [{ email: data.email }, { phone: data.phone }]
   });
 
   if (checkBeneficiary) {
@@ -638,14 +639,14 @@ export const importUserGuideCreation = async (data, user) => {
 
   const generatePassword = await codeGenerator(9, 'ABCDEFGHI&*$%#1234567890');
 
-
   const createData = {
-      firstname: data.firstname,
-      lastname: data.lastname,
-      gender: data.gender,
-      country: data.country,
-      phone: data.phone,
-      email: data.email,ficiary_unique_id: `${data.name.substring(0, 3).toUpperCase()}${await codeGenerator(
+    firstname: data.firstname,
+    lastname: data.lastname,
+    gender: data.gender,
+    country: data.country,
+    phone: data.phone,
+    email: data.email,
+    ficiary_unique_id: `${data.name.substring(0, 3).toUpperCase()}${await codeGenerator(
       7,
       'ABCDEFGHIJKLMN1234567890'
     )}`,
@@ -655,7 +656,10 @@ export const importUserGuideCreation = async (data, user) => {
 
   // check if beneficiarieship has exceeded Limit
 
-  if (Number(user.total_number_of_beneficiaries_created) + 1 > user.total_number_of_beneficiaries_chosen)
+  if (
+    Number(user.total_number_of_beneficiaries_created) + 1 >
+    user.total_number_of_beneficiaries_chosen
+  )
     throw new BadRequestError('Total number of beneficiaries have exceeded Limit');
 
   const createBeneficiary = await organizationBeneficiaryModel.create(createData);
