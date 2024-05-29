@@ -836,15 +836,14 @@ export const inviteBeneficiary = async ({ beneficiary_ids = [], user }) => {
 
   for (const beneficiary of beneficiaries) {
     const invitationData = {
-      firstname: beneficiary.firstname,
-      lastname: beneficiary.lastname,
-      email: beneficiary.email,
+      member_name: beneficiary.personal.member_name,
+      email: beneficiary.contact.email,
       sponsor: `${user.firstname} ${user.lastname}`,
       company_code: user.company_code
     };
 
     const mailData = {
-      email: beneficiary.email,
+      email: beneficiary.contact.email,
       subject: 'MAJFINTECH ONBOARDING',
       type: 'html',
       html: invitationMail(invitationData).html,

@@ -811,7 +811,7 @@ export const invitationMail = (data) => {
                                                                                     style="line-height: 21px;">Dear
                                                                                 </span></strong></span><strong><span
                                                                                 style="line-height: 21px;"><span
-                                                                                    style="color: #CB6015; line-height: 21px;">${data.firstname.toUpperCase()}</span></span></strong></span>
+                                                                                    style="color: #CB6015; line-height: 21px;">${data.member_name.toUpperCase()}</span></span></strong></span>
 
                                                                 </p>
                                                             </div>
