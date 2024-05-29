@@ -648,8 +648,8 @@ export const uploadOrganizationBeneficiariesInBulk = async ({ user, file, body }
     email: bulkUpload.email,
     subject: 'CONFIRMATION OF BULK BENEFICIARY UPLOAD',
     type: 'html',
-    html: memberBulkUpload(bulkUpload).html,
-    text: memberBulkUpload(bulkUpload).text
+    html: beneficiaryBulkUpload(bulkUpload).html,
+    text: beneficiaryBulkUpload(bulkUpload).text
   };
   const msg = await formattMailInfo(mailData, env);
 
