@@ -52,7 +52,6 @@ export const verifyEmail = async (body) => {
   checkAcct.isApproved = true;
   checkAcct.acctstatus = 'active';
 
-
   await checkAcct.save();
   //create email profile here
   const onboardingData = {
@@ -71,8 +70,10 @@ export const verifyEmail = async (body) => {
 
   const msgDelivered = await messageBird(msg);
   if (!msgDelivered)
-    throw new InternalServerError(500,
-      'server slip. Beneficiary was created without mail being sent', ''
+    throw new InternalServerError(
+      500,
+      'server slip. Beneficiary was created without mail being sent',
+      ''
     );
   const admin = checkAcct.toJSON();
   const encrypedDataString = await encryptData({
@@ -80,8 +81,10 @@ export const verifyEmail = async (body) => {
     pubKey: env.public_key
   });
 
-
-  const tokenEncryption = jwt.sign({ _id: admin._id, email: admin.email, user: checkAcct  }, env.jwt_key);
+  const tokenEncryption = jwt.sign(
+    { _id: admin._id, email: admin.email, user: checkAcct },
+    env.jwt_key
+  );
 
   return { encrypedDataString, tokenEncryption };
 };
@@ -100,7 +103,7 @@ export const fetchBeneficiariesByStatus = async ({ user, params }) => {
   const searchRgx = rgx(query);
 
   if (query) {
-    filterData['$or'] = [{ firstname: searchRgx },{ lastname: searchRgx }];
+    filterData['$or'] = [{ firstname: searchRgx }, { lastname: searchRgx }];
   }
 
   if (status) {
@@ -124,14 +127,12 @@ export const fetchBeneficiariesByStatus = async ({ user, params }) => {
     .find({ ...filterData })
     .select({
       avatar: 1,
-      firstname: 1,
-      lastname: 1,
-      othername: 1,
-      email: 1,
-      country: 1,
-      gender: 1,
+      'personal.member_name': 1,
+      'contact.email': 1,
+      'contact.country_of_residence': 1,
+      'personal.gender': 1,
       has_paid_reg: 1,
-      phone: 1,
+      'contact.phone': 1,
       createdAt: 1,
       acctstatus: 1
     })
@@ -176,7 +177,7 @@ export const updateBeneficiaryStatus = async ({ user, status, beneficiary_id, no
 
     // create notification for beneficiary
     await notificationsModel.create({
-      note: `You are ${status} on ${user.name_of_cooperation}`,
+      note: `You are ${status} on ${user.firstname}`,
       who_is_reading: 'beneficiary',
       compliment_obj: { status: `${status}` },
       organization_id: user._id,
@@ -197,7 +198,7 @@ export const updateBeneficiaryStatus = async ({ user, status, beneficiary_id, no
 
   // create notification for beneficiary
   await notificationsModel.create({
-    note: `You are ${status} on ${user.name_of_cooperation}`,
+    note: `You are ${status} on ${user.firstname}`,
     who_is_reading: 'beneficiary',
     compliment_obj: { status: `${status}` },
     organization_id: user._id,
@@ -206,18 +207,18 @@ export const updateBeneficiaryStatus = async ({ user, status, beneficiary_id, no
 
   //create orgnization email profile here
   const orgnizationOnboardingData = {
-    name_of_cooperation: user.name_of_cooperation,
+    name_of_cooperation: user.firstname,
     organization_code: user.company_code,
-    beneficiary_name: beneficiary.firstname +' '+beneficiary.lastname,
+    beneficiary_name: beneficiary.firstname + ' ' + beneficiary.lastname,
     beneficiary_id: beneficiary._id,
-    name_of_agent:  'no agent',
+    name_of_agent: 'no agent',
     email: beneficiary.email,
     date: beneficiary.createdAt,
     status: status
   };
   const orgMailData = {
     email: user.email,
-    subject: `${user.name_of_cooperation.toUpperCase()} ACCOUNT UPDATE`,
+    subject: `${user.firstname.toUpperCase()} ACCOUNT UPDATE`,
     type: 'html',
     html: beneficiaryApprovedStatusOrgUpdate(orgnizationOnboardingData).html,
     text: beneficiaryApprovedStatusOrgUpdate(orgnizationOnboardingData).text
@@ -234,9 +235,9 @@ export const updateBeneficiaryStatus = async ({ user, status, beneficiary_id, no
 
   //create beneficiary email profile here
   const onboardingData = {
-    name_of_cooperation: user.name_of_cooperation,
+    name_of_cooperation: user.firstname,
     organization_code: user.company_code,
-    beneficiary_name: beneficiary.firstname +' '+beneficiary.lastname,
+    beneficiary_name: beneficiary.firstname + ' ' + beneficiary.lastname,
     beneficiary_id: beneficiary._id,
     name_of_agent: 'no agent',
     email: beneficiary.email,
@@ -245,7 +246,7 @@ export const updateBeneficiaryStatus = async ({ user, status, beneficiary_id, no
   };
   const mailData = {
     email: beneficiary.email,
-    subject: `${user.name_of_cooperation.toUpperCase()} ACCOUNT UPDATE`,
+    subject: `${user.firstname.toUpperCase()} ACCOUNT UPDATE`,
     type: 'html',
     html:
       status === 'active' || status === 'pending'
@@ -269,13 +270,11 @@ export const updateBeneficiaryStatus = async ({ user, status, beneficiary_id, no
 };
 
 export const viewBeneficiaryProfile = async ({ beneficiary_id }) => {
-  const beneficiary = await organizationBeneficiaryModel
-    .findById(beneficiary_id)
-    .populate({
-      path: 'organization_id',
-      model: 'Organization'
-    })
-  if (!beneficiary) throw new NotFoundError('Beneficiary not found in Organization Directory');  
+  const beneficiary = await organizationBeneficiaryModel.findById(beneficiary_id).populate({
+    path: 'organization_id',
+    model: 'Organization'
+  });
+  if (!beneficiary) throw new NotFoundError('Beneficiary not found in Organization Directory');
   const data = beneficiary.toJSON();
 
   return data;
@@ -305,7 +304,9 @@ export const editBeneficiaryProfile = async ({ user, beneficiary_id, body }) => 
 };
 
 export const viewBeneficiariesDashboardStats = async ({ user }) => {
-  const beneficiaryCount = await organizationBeneficiaryModel.countDocuments({ organization_id: user._id });
+  const beneficiaryCount = await organizationBeneficiaryModel.countDocuments({
+    organization_id: user._id
+  });
   const activeBeneficiaries = await organizationBeneficiaryModel.countDocuments({
     organization_id: user._id,
     acctstatus: 'active'
@@ -406,107 +407,115 @@ export const updateBeneficiaryBatchListStatus = async ({ beneficiary_batch_id, b
         batch_no: body.batch_no
       });
 
+      // Check for existing beneficiaries by email or phone
+      const existingBeneficiaries = await organizationBeneficiaryModel.find({
+        organization_id: user._id,
+        $or: [
+          { 'contact.email': { $in: beneficiaries.map((b) => b.contact.email) } },
+          { 'contact.phone': { $in: beneficiaries.map((b) => b.contact.phone) } }
+        ]
+      });
+
+      if (existingBeneficiaries.length > 0) {
+        throw new BadRequestError(
+          'One or more beneficiaries already exist with the provided email or phone number.'
+        );
+      }
+
       for (let beneficiary of beneficiaries) {
         if (body.status === 'declined') {
           await beneficiary.remove();
         } else if (body.status === 'approved') {
           beneficiary.status = body.status;
-
           await beneficiary.save();
 
-          const checkBeneficiary = await organizationBeneficiaryModel.findOne({
-            email: beneficiary.email,
-            organization_id: user._id
-          });
-          if (checkBeneficiary) {
-            continue;
-          } else {
-            // Build Beneficiary Object
-            const password = await codeGenerator(9, 'ABCDEFGHI&*$%#1234567890');
-            const beneficiaryUniqueId = `${user.name_of_cooperation
-              .substring(0, 3)
-              .toUpperCase()}${await codeGenerator(7, 'ABCDEFGHIJKLMN1234567890')}`;
+          const password = await codeGenerator(9, 'ABCDEFGHI&*$%#1234567890');
+          const beneficiaryUniqueId = `${user.firstname
+            .substring(0, 3)
+            .toUpperCase()}${await codeGenerator(7, 'ABCDEFGHIJKLMN1234567890')}`;
 
-            delete beneficiary._id;
+          const beneficiaryObject = {
+            ...beneficiary.toJSON(),
+            organization_id: user._id,
+            acctstatus: beneficiary.has_paid ? 'active' : 'pending',
+            password: await bcrypt.hash(password, 12),
+            beneficiary_unique_id: beneficiaryUniqueId,
+            has_paid_reg: beneficiary.has_paid,
+            acct_expiry: user.end_trial_ts
+          };
 
-            const beneficiaryObject = {
-              ...beneficiary.toJSON(),
-              organization_id: user._id,
-              acctstatus: beneficiary.has_paid === true ? 'active' : 'pending',
-              password: await bcrypt.hash(password, 12),
-              beneficiary_unique_id: beneficiaryUniqueId,
-              has_paid_reg: beneficiary.has_paid === true ? true : false,
-              acct_expiry: user.end_trial_ts
-            };
+          const activeBeneficiary = await organizationBeneficiaryModel.create(beneficiaryObject);
 
-            const activeBeneficiary = await organizationBeneficiaryModel.create(beneficiaryObject);
-
-            if (!activeBeneficiary) continue;
-
-            // email constructor
+          if (activeBeneficiary) {
+            // Email constructor
             const onboardingData = {
-              email: beneficiary.email,
-              name_of_cooperation: user.name_of_cooperation,
+              email: beneficiary.contact.email,
+              name: beneficiary.personal.member_name,
+              name_of_cooperation: user.firstname,
               password: password,
               company_code: user.company_code
             };
 
             const mailData = {
-              email: beneficiary.email,
+              email: onboardingData.email,
               subject: 'MAJFINTECH ONBOARDING',
               type: 'html',
               html: onboardinMail(onboardingData).html,
               text: onboardinMail(onboardingData).text
             };
+
             const msg = await formattMailInfo(mailData, env);
-
             const msgDelivered = await messageBird(msg);
-            if (!msgDelivered)
-              throw new InternalServerError(
-                'server slip. Beneficiary was created without mail being sent'
-              );
-          }
-          user.total_number_of_beneficiaries_created += 1;
-        }
 
-        // create notification for beneficiary
-        await notificationsModel.create({
-          note: `You are ${body.status} on  ${user.name_of_cooperation}`,
-          who_is_reading: 'beneficiary',
-          compliment_obj: { status: `${body.status}` },
-          organization_id: user._id,
-          beneficiary_id: beneficiary._id
-        });
+            if (!msgDelivered) {
+              throw new InternalServerError(
+                'Server slip. Beneficiary was created without mail being sent'
+              );
+            }
+
+            user.total_number_of_beneficiaries_created += 1;
+          } else {
+            throw new BadRequestError('Beneficiary already exists');
+          }
+
+          // Create notification for beneficiary
+          await notificationsModel.create({
+            note: `You are ${body.status} on ${user.firstname}`,
+            who_is_reading: 'beneficiary',
+            compliment_obj: { status: body.status },
+            organization_id: user._id,
+            beneficiary_id: beneficiary._id
+          });
+        }
       }
     } else {
-      beneficiary = await beneficiaryBatchUploadModel.findById(beneficiary_batch_id);
-      if (!beneficiary) throw new NotFoundError('Beneficiary not found');
+      beneficiaries = await beneficiaryBatchUploadModel.findById(beneficiary_batch_id);
+      if (!beneficiaries) throw new NotFoundError('Beneficiary not found');
 
-      if (beneficiary.comment.trim() === 'Beneficiary is already part of this organization')
+      if (beneficiaries.comment.trim() === 'Beneficiary is already part of this organization') {
         throw new DuplicateError('Beneficiary is already part of this organization');
+      }
 
       if (body.status === 'declined') {
-        await beneficiary.remove();
+        await beneficiaries.remove();
       } else if (body.status === 'approved') {
-        beneficiary.status = body.status;
-
-        await beneficiary.save();
+        beneficiaries.status = body.status;
+        await beneficiaries.save();
 
         const checkBeneficiary = await organizationBeneficiaryModel.findOne({
-          email: beneficiary.email,
+          $or: [
+            { 'contact.email': beneficiaries.contact.email },
+            { 'contact.phone': beneficiaries.contact.phone }
+          ],
           organization_id: user._id
         });
-
-        let activeBeneficiary;
 
         if (!checkBeneficiary) {
           // Build Beneficiary Object
           const password = await codeGenerator(9, 'ABCDEFGHI&*$%#1234567890');
-          const beneficiaryUniqueId = `${user.name_of_cooperation
+          const beneficiaryUniqueId = `${user.firstname
             .substring(0, 3)
             .toUpperCase()}${await codeGenerator(7, 'ABCDEFGHIJKLMN1234567890')}`;
-
-          delete beneficiaries._id;
 
           const beneficiaryObject = {
             ...beneficiaries.toJSON(),
@@ -517,47 +526,55 @@ export const updateBeneficiaryBatchListStatus = async ({ beneficiary_batch_id, b
             has_paid_reg: false
           };
 
-          activeBeneficiary = await organizationBeneficiaryModel.create(beneficiaryObject);
+          // const activeBeneficiary = await organizationBeneficiaryModel.create(beneficiaryObject);
 
-          if (!activeBeneficiary)
-            throw new InternalServerError(
-              `server slipped, beneficiary was approved but could be transfered to active beneficiaries`
-            );
+          // if (!activeBeneficiary) {
+          //   throw new InternalServerError(
+          //     'Server slipped, beneficiary was approved but could not be transferred to active beneficiaries'
+          //   );
+          // }
 
-          // email constructor
+          // Email constructor
           const onboardingData = {
-            email: beneficiaries.email,
-            name_of_cooperation: user.name_of_cooperation,
+            email: beneficiaries.contact.email,
+            name: beneficiaries.personal.member_name,
+            name_of_cooperation: user.firstname,
             password: password,
             company_code: user.company_code
           };
-
+        
           const mailData = {
-            email: beneficiaries.email,
+            email: beneficiaries.contact.email,
             subject: 'MAJFINTECH ONBOARDING',
             type: 'html',
             html: onboardinMail(onboardingData).html,
             text: onboardinMail(onboardingData).text
           };
+
           const msg = await formattMailInfo(mailData, env);
-
           const msgDelivered = await messageBird(msg);
-          if (!msgDelivered)
+
+          if (!msgDelivered) {
             throw new InternalServerError(
-              'server slip. Beneficiary was created without mail being sent'
+              'Server slip. Beneficiary was created without mail being sent'
             );
+          }
+
+          user.total_number_of_beneficiaries_created += 1;
+
+          // Create notification for beneficiary
+          await notificationsModel.create({
+            note: `You are ${body.status} on ${user.firstname}`,
+            who_is_reading: 'beneficiary',
+            compliment_obj: { status: body.status },
+            organization_id: user._id
+            // beneficiary_id: activeBeneficiary._id
+          });
+        } else {
+          throw new BadRequestError(
+            'Beneficiary already exists with the provided email or phone number.'
+          );
         }
-
-        user.total_number_of_beneficiaries_created += 1;
-
-        // create notification for beneficiary
-        await notificationsModel.create({
-          note: `You are ${body.status} on  ${user.name_of_cooperation}`,
-          who_is_reading: 'beneficiary',
-          compliment_obj: { status: `${body.status}` },
-          organization_id: user._id,
-          beneficiary_id: activeBeneficiary._id
-        });
       }
     }
 
@@ -565,8 +582,8 @@ export const updateBeneficiaryBatchListStatus = async ({ beneficiary_batch_id, b
 
     return true;
   } catch (err) {
-    console.log(err);
-    throw new InternalServerError(err.message || 'Server slippped. Please try again');
+    console.error(err);
+    throw new InternalServerError(err.message || 'Server slipped. Please try again');
   }
 };
 
@@ -629,7 +646,7 @@ export const pdfBuilder = async ({ body, res }, fn) => {
 
 export const importUserGuideCreation = async (data, user) => {
   const checkBeneficiary = await organizationBeneficiaryModel.findOne({
-    $or: [{ email: data.email }, { 'phone': data.phone }]
+    $or: [{ email: data.email }, { phone: data.phone }]
   });
 
   if (checkBeneficiary) {
@@ -638,14 +655,14 @@ export const importUserGuideCreation = async (data, user) => {
 
   const generatePassword = await codeGenerator(9, 'ABCDEFGHI&*$%#1234567890');
 
-
   const createData = {
-      firstname: data.firstname,
-      lastname: data.lastname,
-      gender: data.gender,
-      country: data.country,
-      phone: data.phone,
-      email: data.email,ficiary_unique_id: `${data.name.substring(0, 3).toUpperCase()}${await codeGenerator(
+    firstname: data.firstname,
+    lastname: data.lastname,
+    gender: data.gender,
+    country: data.country,
+    phone: data.phone,
+    email: data.email,
+    ficiary_unique_id: `${data.name.substring(0, 3).toUpperCase()}${await codeGenerator(
       7,
       'ABCDEFGHIJKLMN1234567890'
     )}`,
@@ -655,7 +672,10 @@ export const importUserGuideCreation = async (data, user) => {
 
   // check if beneficiarieship has exceeded Limit
 
-  if (Number(user.total_number_of_beneficiaries_created) + 1 > user.total_number_of_beneficiaries_chosen)
+  if (
+    Number(user.total_number_of_beneficiaries_created) + 1 >
+    user.total_number_of_beneficiaries_chosen
+  )
     throw new BadRequestError('Total number of beneficiaries have exceeded Limit');
 
   const createBeneficiary = await organizationBeneficiaryModel.create(createData);
@@ -665,7 +685,7 @@ export const importUserGuideCreation = async (data, user) => {
   // email constructor
   const onboardingData = {
     email: createData.email,
-    name_of_cooperation: user.name_of_cooperation,
+    name_of_cooperation: user.firstname,
     password: generatePassword,
     company_code: user.company_code
   };

@@ -86,13 +86,15 @@ export const validateBeneficiaryUpdateSchema = Joi.object({
   avatar: Joi.object({
     key: Joi.string().optional().allow('', null)
   }),
-  firstname: Joi.string().required(),
-  lastname: Joi.string().required(),
-  othername: Joi.string().optional().allow('', null),
-  phone: Joi.string().required(),
-  email: Joi.string().required(),
-  gender: Joi.string().required(),
-  country: Joi.string().optional().allow('', null)
+  personal: {
+    member_name: Joi.string().optional().allow('', null),
+    gender: Joi.string().optional().allow('', null),
+    nationality: Joi.string().optional().allow('', null)
+  },
+  contact: {
+    phone: Joi.string().optional().allow('', null),
+    email: Joi.string().optional().allow('', null)
+  }
 });
 
 export const validateResetPasswordSchema = Joi.object({
