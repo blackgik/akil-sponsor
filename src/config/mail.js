@@ -258,7 +258,7 @@ export const onboardinMail = (data) => {
                                                                                           style="line-height: 21px;">Dear
                                                                                       </span></strong></span><strong><span
                                                                                       style="line-height: 21px;"><span
-                                                                                          style="color: #CB6015; line-height: 21px;">${data.name.toUpperCase()}</span></span></strong></span>
+                                                                                          style="color: #CB6015; line-height: 21px;">${data.name}</span></span></strong></span>
 
                                                                       </p>
                                                                   </div>
@@ -317,19 +317,11 @@ community.
                                                                               <ul
                                                                                   style="font-size: 14px; line-height: 23.8px; color: #002366;">
                                                                                   <li>Name of Sponsor:
-                                                                                      ${
-                                                                                        data.name_of_cooperation
-                                                                                      }
+                                                                                      ${data.name_of_cooperation}
                                                                                   </li>
-                                                                                  <li>Email: ${
-                                                                                    data.email
-                                                                                  }</li>
-                                                                                  <li>Password: ${
-                                                                                    data.password
-                                                                                  }</li>
-                                                                                  <li>Organisation Unique Code: ${
-                                                                                    data.company_code
-                                                                                  } (This is your secret pass into your
+                                                                                  <li>Email: ${data.email}</li>
+                                                                                  <li>Password: ${data.password}</li>
+                                                                                  <li>Organisation Unique Code: ${data.company_code} (This is your secret pass into your
                                                                                       beneficiary; please ensure its
                                                                                       confidentiality as it is required for
                                                                                       every login of your beneficiaries)</li>
@@ -3641,8 +3633,8 @@ export const verifyOnbordingMail = (data) => {
 };
 
 export const paymentVerificationMail = (data) => {
-    return {
-      html: `
+  return {
+    html: `
       <!DOCTYPE HTML
       PUBLIC "-//W3C//DTD XHTML 1.0 Transitional //EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
       <html xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml"
@@ -3923,9 +3915,15 @@ export const paymentVerificationMail = (data) => {
   
                                                                     <div class="v-line-height"
                                                                         style="font-size: 18px; line-height: 170%; text-align: left; word-wrap: break-word; color:#002366;">
-                                                                        <p style="line-height: 170%;">Email: ${data.data.email}\n</p>
-                                                                        <p style="line-height: 170%;">Phone: ${data.data.phone}\n</p>
-                                                                        <p style="line-height: 170%;">Note: ${data.data.description}</p>
+                                                                        <p style="line-height: 170%;">Email: ${
+                                                                          data.data.email
+                                                                        }\n</p>
+                                                                        <p style="line-height: 170%;">Phone: ${
+                                                                          data.data.phone
+                                                                        }\n</p>
+                                                                        <p style="line-height: 170%;">Note: ${
+                                                                          data.data.description
+                                                                        }</p>
                                                                     </div>
   
                                                                 </td>
@@ -4116,14 +4114,15 @@ export const paymentVerificationMail = (data) => {
         </body>
   
       </html>
-      `,text: `Dear ${data.first_name} ${data.last_name}\n
+      `,
+    text: `Dear ${data.first_name} ${data.last_name}\n
       Email: ${data.email}\n
       Phone: ${data.phone}\n
       
       ${data.description}
       `
-    };
   };
+};
 
 export const forgotPasswordMail = (data) => {
   return {
@@ -4372,7 +4371,7 @@ export const forgotPasswordMail = (data) => {
                                                                                           style="line-height: 21px;">DEAR
                                                                                       </span></strong></span><strong><span
                                                                                       style="line-height: 21px;"><span
-                                                                                          style="color: #CB6015; line-height: 21px;">${data.name.toUpperCase()}</span></span></strong></span>
+                                                                                          style="color: #CB6015; line-height: 21px;">${data.name}</span></span></strong></span>
                                                                       </p>
                                                                   </div>
 
@@ -4413,9 +4412,7 @@ export const forgotPasswordMail = (data) => {
                                                                       style="font-size: 29px; line-height: 150%; text-align: center; word-wrap: break-word;">
                                                                       <p style="line-height: 150%;"><strong><span
                                                                                   style="color:#CB6015; line-height: 43.5px;">OTP:
-                                                                                  ${
-                                                                                    data.code
-                                                                                  }</span></strong></p>
+                                                                                  ${data.code}</span></strong></p>
                                                                   </div>
 
                                                               </td>

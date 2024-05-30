@@ -162,7 +162,7 @@ export const verifyEmail = async (body) => {
   const onboardingData = {
     email: checkAcct.email,
     company_code: checkAcct.company_code,
-    name_of_cooperation: checkAcct.firstname + ' ' + checkAcct.lastname
+    name: (checkAcct.firstname + ' ' + checkAcct.lastname).toUpperCase()
   };
 
   const mailData = {
