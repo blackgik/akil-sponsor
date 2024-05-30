@@ -95,7 +95,7 @@ export const createNewProductDraft = async ({ user, body }) => {
 };
 
 export const fetchProduct = async ({ user, params }) => {
-  let { page_no, no_of_requests, search } = params;
+  let { page_no, no_of_requests, search, status, cat_id, organization_id } = params;
 
   page_no = Number(page_no) || 1;
   no_of_requests = Number(no_of_requests) || Infinity;
@@ -103,11 +103,24 @@ export const fetchProduct = async ({ user, params }) => {
   const filterData = { organization_id: user._id };
 
   const query = typeof search !== 'undefined' ? search : false;
+  const prdstatus = typeof status !== 'undefined' ? status : false;
+  const catId = typeof cat_id !== 'undefined' ? cat_id : false;
+  const sponsorId = typeof organization_id !== 'undefined' ? organization_id : false;
   const rgx = (pattern) => new RegExp(`.*${pattern}.*`, 'i');
   const searchRgx = rgx(query);
 
   if (query) {
     filterData['$or'] = [{ product_name: searchRgx }];
+  }
+
+  if (prdstatus) {
+    filterData['$and'] = [{ prdstatus: prdstatus }];
+  }
+  if (catId) {
+    filterData['$and'] = [{ product_category_id: catId }];
+  }
+  if (sponsorId) {
+    filterData['$and'] = [{ organization_id: sponsorId }];
   }
 
   const totalCount = await ProductModel.countDocuments({
@@ -136,12 +149,15 @@ export const fetchProduct = async ({ user, params }) => {
 //------ common product handlers --------------------\\
 
 export const fetchAllProducts = async ({ user, params }) => {
-  let { page_no, no_of_requests, search } = params;
+  let { page_no, no_of_requests, search, status, cat_id, organization_id } = params;
 
   page_no = Number(page_no) || 1;
   no_of_requests = Number(no_of_requests) || Infinity;
 
   const query = typeof search !== 'undefined' ? search : false;
+  const prdstatus = typeof status !== 'undefined' ? status : false;
+  const catId = typeof cat_id !== 'undefined' ? cat_id : false;
+  const sponsorId = typeof organization_id !== 'undefined' ? organization_id : false;
   const rgx = (pattern) => new RegExp(`.*${pattern}.*`, 'i');
   const searchRgx = rgx(query);
 
@@ -149,6 +165,17 @@ export const fetchAllProducts = async ({ user, params }) => {
 
   if (query) {
     filterData['$or'] = [{ product_name: searchRgx }];
+  }
+
+  if (prdstatus) {
+    filterData['$and'] = [{ prdstatus: prdstatus }];
+  }
+
+  if (catId) {
+    filterData['$and'] = [{ product_category_id: catId }];
+  }
+  if (sponsorId) {
+    filterData['$and'] = [{ organization_id: sponsorId }];
   }
 
   let fetchedData = [];
@@ -171,16 +198,6 @@ export const fetchAllProducts = async ({ user, params }) => {
 
   const available_pages = Math.ceil(count / no_of_requests);
 
-  fetchedData = fetchedData.reduce(function (result, current) {
-    if (!result[current.product_type]) {
-      result[current.product_type] = [];
-    }
-
-    result[current.product_type].push(current);
-
-    return result;
-  }, {});
-
   return { page_no, available_pages, fetchedData };
 };
 
@@ -198,6 +215,22 @@ export const getSingleProduct = async ({ user, product_id }) => {
 };
 
 export const updateSingleProduct = async ({ product_id, body, user }) => {
+  const updates = Object.keys(body);
+
+  let productInView;
+
+  productInView = await ProductModel.findById(product_id);
+
+  if (!productInView) throw new NotFoundError('product  does not exist');
+
+  updates.forEach((update) => (productInView[update] = body[update]));
+
+  await productInView.save();
+
+  return true;
+};
+
+export const updateProductImage = async ({ product_id, body, user }) => {
   const updates = Object.keys(body);
 
   let productInView;
@@ -237,6 +270,21 @@ export const publishProduct = async ({ user, product_id }) => {
   if (!productInView) throw new NotFoundError('product  does not exist');
 
   productInView.prdstatus = 'published';
+
+  await productInView.save();
+
+  return true;
+};
+
+export const unPublishProduct = async ({ user, product_id }) => {
+
+  let productInView;
+
+  productInView = await ProductModel.findById(product_id);
+
+  if (!productInView) throw new NotFoundError('product  does not exist');
+
+  productInView.prdstatus = 'unpublished';
 
   await productInView.save();
 

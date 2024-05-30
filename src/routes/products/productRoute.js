@@ -3,6 +3,7 @@ import Validate from '../../validators/index.js';
 import { authentication } from '../../middlewares/authentication.js';
 import {
   organizationNewProduction,
+  updateProductImageSchema,
   viewSingleProductSchema
 } from '../../validators/productsSchema.js';
 import {
@@ -13,7 +14,9 @@ import {
   getSingleProductHandler,
   updateSingleProductHandler,
   cancelProductHandler,
-  publishProductHandler
+  publishProductHandler,
+  updateProductImageHandler,
+  unpublishProductHandler
 } from '../../controllers/products/productController.js';
 
 const productRoutes = router.Router();
@@ -57,11 +60,24 @@ const productRoot = () => {
     authentication,
     publishProductHandler
   );
+  productRoutes.get(
+    '/unpublish-product/:product_id',
+    Validate(viewSingleProductSchema, 'params'),
+    authentication,
+    unpublishProductHandler
+  );
   productRoutes.patch(
     '/update-single-product/:product_id',
     Validate(organizationNewProduction),
     authentication,
     updateSingleProductHandler
+  );
+
+  productRoutes.patch(
+    '/upload-product-image/:product_id',
+    Validate(updateProductImageSchema),
+    authentication,
+    updateProductImageHandler
   );
 
   return productRoutes;

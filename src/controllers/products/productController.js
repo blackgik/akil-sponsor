@@ -7,7 +7,9 @@ import {
   cancelProduct,
   createNewProductDraft,
   getSingleProduct,
-  updateSingleProduct
+  updateSingleProduct,
+  updateProductImage,
+  unPublishProduct
 } from '../../services/product/productService.js';
 
 export const createNewProductHandler = async (req, res) => {
@@ -76,6 +78,15 @@ export const publishProductHandler = async (req, res) => {
   res.send(appResponse('product published successfully', product));
 };
 
+export const unpublishProductHandler = async (req, res) => {
+  const { user, params } = req;
+  const { product_id } = params;
+
+  const product = await unPublishProduct({ user, product_id });
+
+  res.send(appResponse('product published successfully', product));
+};
+
 export const updateSingleProductHandler = async (req, res) => {
   const { user, params, body } = req;
   const { product_id} = params;
@@ -83,4 +94,13 @@ export const updateSingleProductHandler = async (req, res) => {
   const updated = await updateSingleProduct({ product_id, body, user });
 
   res.send(appResponse('updated product successfully', updated));
+};
+
+export const updateProductImageHandler = async (req, res) => {
+  const { user, params, body } = req;
+  const { product_id} = params;
+
+  const updated = await updateProductImage({ product_id, body, user });
+
+  res.send(appResponse('updated product image successfully', updated));
 };

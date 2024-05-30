@@ -453,11 +453,16 @@ export const setOrganizationPackageData = async ({ body, user }) => {
   if (!organizationExists) {
     throw new BadRequestError("Organization doesn't exist!");
   }
+
+  if (organizationExists.hasPaid || isPackageBuilt) {
+    throw new BadRequestError("Package already paid!");
+  }
   let amountToPay = 0;
   let supSmsFee = 0;
   let supBeneficiaryFee = 0;
   let personalizationFee = 0;
   let dataCollectionFee = 0;
+  
   if (!organizationExists.hasPaid) {
     amountToPay += plans.sponsor_onboarding_settings.organization_reg_fee;
     organizationExists.organization_reg_fee =
@@ -733,7 +738,7 @@ export const onboardingPaymentInfo = async ({ user, params }) => {
     $or: [{ reference: reference }, { trxref: trxref }]
   });
   if (checkPayment) return {checkPayment};
-  const url = `${env.paystack_api_url}transaction/verify/` + encodeURIComponent(reference);
+  const url = `${env.paystack_api_url}/transaction/verify/` + encodeURIComponent(reference);
 
   const result = await axios.get(url, {
     headers: {
