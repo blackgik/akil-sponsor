@@ -448,9 +448,10 @@ export const setOrganizationPackageData = async ({ body, user }) => {
     throw new BadRequestError("Organization doesn't exist!");
   }
 
-  if (organizationExists.hasPaid || isPackageBuilt) {
+  if (organizationExists.hasPaid || organizationExists.isPackageBuilt) {
     throw new BadRequestError('Package already paid!');
   }
+  
   let amountToPay = 0;
   let supSmsFee = 0;
   let supBeneficiaryFee = 0;
