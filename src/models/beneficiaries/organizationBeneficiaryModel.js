@@ -80,7 +80,7 @@ const organizationBeneficiarySchema = new Schema(
     paystack_subacct: { type: Schema.Types.Mixed, default: {} },
     acctstatus: {
       type: String,
-      enum: ['pending', 'active', 'declined', 'suspended'],
+      enum: ['pending', 'active', 'declined', 'suspended', 'invite'],
       default: 'pending',
       index: true
     },

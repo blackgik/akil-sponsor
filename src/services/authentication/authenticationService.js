@@ -825,32 +825,11 @@ export const addModules = async ({ user, body }) => {
 };
 
 export const inviteBeneficiary = async ({ beneficiary_ids = [], user }) => {
-  let beneficiaries = [];
-
   try {
-    if (beneficiary_ids.length > 0) {
-      for (const id of beneficiary_ids) {
-        const beneficiary = await organizationBeneficiaryModel.findOne({
-          _id: id,
-          organization_id: user._id,
-          acctstatus: 'pending'
-        });
-        if (!beneficiary) {
-          throw new NotFoundError(`Beneficiary with ID ${id} not found or not pending!`);
-        }
-        beneficiaries.push(beneficiary);
-      }
-    } else {
-      beneficiaries = await organizationBeneficiaryModel.find({
-        organization_id: user._id,
-        acctstatus: 'pending'
-      });
-      if (beneficiaries.length === 0) {
-        throw new NotFoundError('No pending beneficiaries found under this sponsor!');
-      }
-    }
+    for (const beneficiary_id of beneficiary_ids) {
+      const beneficiary = await organizationBeneficiaryModel.findById(beneficiary_id);
+      if (!beneficiary) continue;
 
-    for (const beneficiary of beneficiaries) {
       const invitationData = {
         member_name: beneficiary.personal.member_name,
         email: beneficiary.contact.email,
