@@ -20,7 +20,9 @@ const ProductSchema = new Schema(
       ref: 'ProductCategory',
       required: true
     },
-    product_image: { type: String, trim: true },
+    product_image: {
+      key: { type: String }
+    },
     product_description: { type: String, trim: true },
     
     organization_id: {
@@ -33,7 +35,7 @@ const ProductSchema = new Schema(
       trim: true,
       default: 'draft',
       index: true,
-      enum: ['draft', 'published']
+      enum: ['draft', 'published', 'unpublished']
     },
     is_active: {
       type: Boolean,

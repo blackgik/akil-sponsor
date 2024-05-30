@@ -15,3 +15,7 @@ export const organizationNewProduction = Joi.object({
 export const viewSingleProductSchema = Joi.object({
   product_id: Joi.string().required()
 });
+
+export const updateProductImageSchema = Joi.object({
+  product_image: Joi.object({ key: Joi.string().optional().allow('', null) }).optional(),
+});
