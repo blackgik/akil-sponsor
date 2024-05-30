@@ -836,21 +836,42 @@ export const inviteBeneficiary = async ({ beneficiary_ids = [], user }) => {
         sponsor: `${user.firstname} ${user.lastname}`,
         company_code: user.company_code
       };
+      if (beneficiary.contact.email) {
+        const mailData = {
+          email: beneficiary.contact.email,
+          subject: 'MAJFINTECH ONBOARDING',
+          type: 'html',
+          html: invitationMail(invitationData).html,
+          text: invitationMail(invitationData).text
+        };
 
-      const mailData = {
-        email: beneficiary.contact.email,
-        subject: 'MAJFINTECH ONBOARDING',
-        type: 'html',
-        html: invitationMail(invitationData).html,
-        text: invitationMail(invitationData).text
-      };
+        const msg = await formattMailInfo(mailData, env);
 
-      const msg = await formattMailInfo(mailData, env);
+        const msgDelivered = await messageBird(msg);
 
-      const msgDelivered = await messageBird(msg);
+        if (!msgDelivered) {
+          throw new InternalServerError('Server error. Invitation email not sent');
+        }
+      } else {
+        const smsUrl = env.termii_api_url + '/api/sms/send';
+        const smsData = {
+          to: beneficiary.contact.phone,
+          from: env.termii_sender_id,
+          sms: `Hi there, you have invited by ${invitationData.sponsor}\n use COMPANY CODE ${invitationData.company_code}
+    to  login into https://beneficiary.akilaah.com
+    `,
+          type: 'plain',
+          api_key: env.termii_api_secret,
+          channel: 'generic'
+        };
 
-      if (!msgDelivered) {
-        throw new InternalServerError('Server error. Invitation email not sent');
+        const config = {
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        };
+
+        await axios.post(smsUrl, smsData, config);
       }
     }
 
