@@ -826,41 +826,60 @@ export const addModules = async ({ user, body }) => {
 export const inviteBeneficiary = async ({ beneficiary_ids = [], user }) => {
   let beneficiaries = [];
 
-  if (beneficiary_ids.length > 0) {
-    for (const id of beneficiary_ids) {
-      const beneficiary = await organizationBeneficiaryModel.findById(id);
-      if (!beneficiary) throw new NotFoundError(`Beneficiary with ID ${id} not found!`);
-      beneficiaries.push(beneficiary);
+  try {
+    if (beneficiary_ids.length > 0) {
+      for (const id of beneficiary_ids) {
+        const beneficiary = await organizationBeneficiaryModel.findOne({ 
+          _id: id, 
+          organization_id: user._id, 
+          acctstatus: 'pending' 
+        });
+        if (!beneficiary) {
+          throw new NotFoundError(`Beneficiary with ID ${id} not found or not pending!`);
+        }
+        beneficiaries.push(beneficiary);
+      }
+    } else {
+      beneficiaries = await organizationBeneficiaryModel.find({ 
+        organization_id: user._id, 
+        acctstatus: 'pending' 
+      });
+      if (beneficiaries.length === 0) {
+        throw new NotFoundError('No pending beneficiaries found under this sponsor!');
+      }
     }
-  } else {
-    beneficiaries = await organizationBeneficiaryModel.find({});
-    if (beneficiaries.length === 0) throw new NotFoundError('No beneficiaries found!');
+
+    for (const beneficiary of beneficiaries) {
+      const invitationData = {
+        member_name: beneficiary.personal.member_name,
+        email: beneficiary.contact.email,
+        sponsor: `${user.firstname} ${user.lastname}`,
+        company_code: user.company_code
+      };
+
+      const mailData = {
+        email: beneficiary.contact.email,
+        subject: 'MAJFINTECH ONBOARDING',
+        type: 'html',
+        html: invitationMail(invitationData).html,
+        text: invitationMail(invitationData).text
+      };
+
+      const msg = await formattMailInfo(mailData, env);
+
+      const msgDelivered = await messageBird(msg);
+
+      if (!msgDelivered) {
+        throw new InternalServerError('Server error. Invitation email not sent');
+      }
+
+    }
+
+    return { success: true };
+  } catch (error) {
+    console.error('Error in inviteBeneficiary:', error.message);
+    throw new InternalServerError(error.message);
   }
-
-  for (const beneficiary of beneficiaries) {
-    const invitationData = {
-      member_name: beneficiary.personal.member_name,
-      email: beneficiary.contact.email,
-      sponsor: `${user.firstname} ${user.lastname}`,
-      company_code: user.company_code
-    };
-
-    const mailData = {
-      email: beneficiary.contact.email,
-      subject: 'MAJFINTECH ONBOARDING',
-      type: 'html',
-      html: invitationMail(invitationData).html,
-      text: invitationMail(invitationData).text
-    };
-
-    const msg = await formattMailInfo(mailData, env);
-
-    const msgDelivered = await messageBird(msg);
-
-    if (!msgDelivered) throw new InternalServerError('Server error. Invitation email not sent');
-  }
-
-  return { success: true };
 };
 
 export const slugPersonalization = async ({ slug }) => {
