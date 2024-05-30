@@ -209,10 +209,10 @@ export const updateBeneficiaryStatus = async ({ user, status, beneficiary_id, no
   const orgnizationOnboardingData = {
     name_of_cooperation: user.firstname,
     organization_code: user.company_code,
-    beneficiary_name: beneficiary.firstname + ' ' + beneficiary.lastname,
+    beneficiary_name: beneficiary.personal.member_name,
     beneficiary_id: beneficiary._id,
     name_of_agent: 'no agent',
-    email: beneficiary.email,
+    email: beneficiary.contact.email,
     date: beneficiary.createdAt,
     status: status
   };
@@ -237,15 +237,15 @@ export const updateBeneficiaryStatus = async ({ user, status, beneficiary_id, no
   const onboardingData = {
     name_of_cooperation: user.firstname,
     organization_code: user.company_code,
-    beneficiary_name: beneficiary.firstname + ' ' + beneficiary.lastname,
+    beneficiary_name: beneficiary.personal.member_name,
     beneficiary_id: beneficiary._id,
     name_of_agent: 'no agent',
-    email: beneficiary.email,
+    email: beneficiary.contact.email,
     date: beneficiary.createdAt,
     status: status
   };
   const mailData = {
-    email: beneficiary.email,
+    email: beneficiary.contact.email,
     subject: `${user.firstname.toUpperCase()} ACCOUNT UPDATE`,
     type: 'html',
     html:

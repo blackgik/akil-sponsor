@@ -351,8 +351,8 @@ export const onboardNewOrganizationBeneficiary = async ({ body, user }) => {
   // check if user is already here
   const filter = { organization_id: user._id };
 
-  if (body.email) {
-    filter['contact.email'] = body.email;
+  if (body.contact.email) {
+    filter['contact.email'] = body.contact.email;
 
     const checkMember = await organizationBeneficiaryModel.findOne({
       ...filter
@@ -361,8 +361,8 @@ export const onboardNewOrganizationBeneficiary = async ({ body, user }) => {
     if (checkMember) throw new BadRequestError('Beneficiary already exists');
   }
 
-  if (body.phone) {
-    filter['contact.phone'] = body.phone;
+  if (body.contact.phone) {
+    filter['contact.phone'] = body.contact.phone;
 
     delete filter['contact.email'];
 
@@ -404,6 +404,7 @@ export const onboardNewOrganizationBeneficiary = async ({ body, user }) => {
     const onboardingData = {
       email: createBeneficiary.contact.email,
       name_of_cooperation: user.firstname,
+      name: createBeneficiary.personal.member_name,
       password: generatePassword,
       company_code: user.company_code
     };
@@ -448,14 +449,14 @@ export const setOrganizationPackageData = async ({ body, user }) => {
   }
 
   if (organizationExists.hasPaid || isPackageBuilt) {
-    throw new BadRequestError("Package already paid!");
+    throw new BadRequestError('Package already paid!');
   }
   let amountToPay = 0;
   let supSmsFee = 0;
   let supBeneficiaryFee = 0;
   let personalizationFee = 0;
   let dataCollectionFee = 0;
-  
+
   if (!organizationExists.hasPaid) {
     amountToPay += plans.sponsor_onboarding_settings.organization_reg_fee;
     organizationExists.organization_reg_fee =
@@ -488,7 +489,7 @@ export const setOrganizationPackageData = async ({ body, user }) => {
     amountToPay += dataCollectionFee;
   }
   organizationExists.isPackageBuilt = true;
-  organizationExists.paymentstatus ='pending';
+  organizationExists.paymentstatus = 'pending';
 
   await organizationExists.save();
 
@@ -666,7 +667,6 @@ export const uploadOrganizationBeneficiariesInBulk = async ({ user, file, body }
   return { errorLogs, createBatchList };
 };
 
-
 export const fetchBankCode = async ({ bank_code }) => {
   const config = {
     headers: {
@@ -737,7 +737,7 @@ export const onboardingPaymentInfo = async ({ user, params }) => {
     $or: [{ reference: reference }, { trxref: trxref }]
   });
 
-  if (checkPayment) return {checkPayment};
+  if (checkPayment) return { checkPayment };
   const url = `${env.paystack_api_url}/transaction/verify/` + encodeURIComponent(reference);
 
   const result = await axios.get(url, {
@@ -758,7 +758,7 @@ export const onboardingPaymentInfo = async ({ user, params }) => {
   const checkIfOnboarded = await organizationModel.findOne({ email: email });
   checkIfOnboarded.hasPaid = true;
   checkIfOnboarded.hasPaid_personalization_fee = true;
-  checkIfOnboarded.paymentstatus ='paid'
+  checkIfOnboarded.paymentstatus = 'paid';
   await checkIfOnboarded.save();
 
   return { payment };
@@ -829,10 +829,10 @@ export const inviteBeneficiary = async ({ beneficiary_ids = [], user }) => {
   try {
     if (beneficiary_ids.length > 0) {
       for (const id of beneficiary_ids) {
-        const beneficiary = await organizationBeneficiaryModel.findOne({ 
-          _id: id, 
-          organization_id: user._id, 
-          acctstatus: 'pending' 
+        const beneficiary = await organizationBeneficiaryModel.findOne({
+          _id: id,
+          organization_id: user._id,
+          acctstatus: 'pending'
         });
         if (!beneficiary) {
           throw new NotFoundError(`Beneficiary with ID ${id} not found or not pending!`);
@@ -840,9 +840,9 @@ export const inviteBeneficiary = async ({ beneficiary_ids = [], user }) => {
         beneficiaries.push(beneficiary);
       }
     } else {
-      beneficiaries = await organizationBeneficiaryModel.find({ 
-        organization_id: user._id, 
-        acctstatus: 'pending' 
+      beneficiaries = await organizationBeneficiaryModel.find({
+        organization_id: user._id,
+        acctstatus: 'pending'
       });
       if (beneficiaries.length === 0) {
         throw new NotFoundError('No pending beneficiaries found under this sponsor!');
@@ -872,7 +872,6 @@ export const inviteBeneficiary = async ({ beneficiary_ids = [], user }) => {
       if (!msgDelivered) {
         throw new InternalServerError('Server error. Invitation email not sent');
       }
-
     }
 
     return { success: true };
