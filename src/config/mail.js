@@ -317,7 +317,7 @@ community.
                                                                               <ul
                                                                                   style="font-size: 14px; line-height: 23.8px; color: #002366;">
                                                                                   <li>Name of Sponsor:
-                                                                                      ${data.name_of_cooperation}
+                                                                                      ${data.name}
                                                                                   </li>
                                                                                   <li>Email: ${data.email}</li>
                                                                                   <li>Password: ${data.password}</li>
