@@ -104,6 +104,13 @@ export const buildOrganizationSchema = new Schema(
       index: true,
       enum: ['pending', 'active', 'suspended']
     },
+    paymentstatus: {
+      type: String,
+      trim: true,
+      default: 'pending',
+      index: true,
+      enum: ['pending', 'paid', 'canceled']
+    },
     vault_access: {
       api_key_live: { type: String, index: true, default: '' },
       api_key_test: { type: String, index: true, default: '' },

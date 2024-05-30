@@ -495,6 +495,7 @@ export const setOrganizationPackageData = async ({ body, user }) => {
     amountToPay += dataCollectionFee;
   }
   organizationExists.isPackageBuilt = true;
+  organizationExists.paymentstatus ='pending';
 
   await organizationExists.save();
 
@@ -746,9 +747,7 @@ export const onboardingPaymentInfo = async ({ user, params }) => {
       'Content-Type': 'application/json'
     }
   });
-console.log('====================================');
-console.log(response);
-console.log('====================================');
+
   const response = JSON.parse(result);
   const { amount, status } = response.data;
   const { email } = response.data.customer;
@@ -760,6 +759,7 @@ console.log('====================================');
   const checkIfOnboarded = await organizationModel.findOne({ email: email });
   checkIfOnboarded.hasPaid = true;
   checkIfOnboarded.hasPaid_personalization_fee = true;
+  checkIfOnboarded.paymentstatus ='paid'
   await checkIfOnboarded.save();
 
   return { payment };
