@@ -12,7 +12,8 @@ import {
   verifyOnbordingMail,
   beneficiaryBulkUpload,
   onboardinMail,
-  invitationMail
+  invitationMail,
+  beneficaryOnboardinMail
 } from '../../config/mail.js';
 import {
   BadRequestError,
@@ -161,6 +162,7 @@ export const verifyEmail = async (body) => {
   //create email profile here
   const onboardingData = {
     email: checkAcct.email,
+    name_of_cooperation: checkAcct.name_of_cooperation,
     company_code: checkAcct.company_code,
     name: (checkAcct.firstname + ' ' + checkAcct.lastname).toUpperCase()
   };
@@ -412,8 +414,8 @@ export const onboardNewOrganizationBeneficiary = async ({ body, user }) => {
       email: createBeneficiary.contact.email,
       subject: 'BENEFICIARY ONBOARDING',
       type: 'html',
-      html: onboardinMail(onboardingData).html,
-      text: onboardinMail(onboardingData).text
+      html: beneficaryOnboardinMail(onboardingData).html,
+      text: beneficaryOnboardinMail(onboardingData).text
     };
     const msg = await formattMailInfo(mailData, env);
 
@@ -522,22 +524,24 @@ export const uploadOrganizationBeneficiariesInBulk = async ({ user, file, body }
   const workbook = XLSX.readFile(file.path);
   const worksheet = workbook.Sheets[workbook.SheetNames[0]];
   const header = [
-    'firstname',
-    'lastname',
+    'name',
     'gender',
-    'othername',
-    'country',
-    'email',
-    'address',
-    'has_paid',
-    'phone',
-    'city',
-    'state',
-    'country_of_residence',
-    'lga',
-    'language',
+    'marital_status',
+    'nationality',
     'state_of_origin',
-    'marital_status'
+    'language',
+    'lga',
+    'country_of_residence',
+    'state_of_residence',
+    'resident_address',
+    'city_of_residence',
+    'phone',
+    'email',
+    'bank_name',
+    'acct_name',
+    'bank_code',
+    'acct_number',
+    'has_paid'
   ];
 
   let result = XLSX.utils.sheet_to_json(worksheet, {
@@ -551,7 +555,6 @@ export const uploadOrganizationBeneficiariesInBulk = async ({ user, file, body }
   const errorLogs = [];
 
   for (let beneficiary of result) {
-    beneficiary.name = `${beneficiary.firstname || ''} ${beneficiary.lastname || ''}`;
     let comment;
 
     const filter = { organization_id: user._id };
@@ -589,20 +592,28 @@ export const uploadOrganizationBeneficiariesInBulk = async ({ user, file, body }
     const batchListData = {
       personal: {
         member_name: beneficiary.name,
-        gender: beneficiary.gender || '',
-        nationality: beneficiary.country || '',
-        lga: beneficiary.lga || '',
-        language: beneficiary.language || '',
-        state_of_origin: beneficiary.state_of_origin || '',
-        marital_status: beneficiary.marital_status || ''
+        gender: beneficiary.gender,
+        marital_status: beneficiary.marital_status,
+        nationality: beneficiary.nationality,
+        state_of_origin: beneficiary.state_of_origin,
+        language: beneficiary.language,
+        lga: beneficiary.lga
       },
       contact: {
-        phone: String(beneficiary.phone || ''),
-        email: String(beneficiary.email || ''),
-        resident_address: beneficiary.address || '',
-        city: beneficiary.city || '',
-        state: beneficiary.state || '',
-        country_of_residence: beneficiary.country_of_residence || ''
+        country_of_residence: beneficiary.country_of_residence,
+        state: beneficiary.state_of_residence,
+        phone: String(beneficiary.phone),
+        email: beneficiary.email,
+        city: beneficiary.city_of_residence,
+        resident_address: beneficiary.resident_address
+      },
+      bank_details: {
+        bank: {
+          bank_name: beneficiary?.bank_name || '',
+          acct_name: beneficiary?.acct_name || '',
+          bank_code: beneficiary?.bank_code || '',
+          acct_number: beneficiary?.acct_number || ''
+        }
       },
       organization_id: user._id,
       batch_no: body.batch_no,

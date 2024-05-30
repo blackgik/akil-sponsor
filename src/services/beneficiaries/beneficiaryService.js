@@ -18,7 +18,8 @@ import {
   declinedAcountMail,
   beneficiaryApprovedStatusOrgUpdate,
   beneficiaryApprovedStatusUpdate,
-  onboardinMail
+  onboardinMail,
+  beneficaryOnboardinMail
 } from '../../config/mail.js';
 import { formattMailInfo } from '../../utils/mailFormatter.js';
 import { messageBird } from '../../utils/msgBird.js';
@@ -404,7 +405,8 @@ export const updateBeneficiaryBatchListStatus = async ({ beneficiary_batch_id, b
 
       beneficiaries = await beneficiaryBatchUploadModel.find({
         organization_id: user._id,
-        batch_no: body.batch_no
+        batch_no: body.batch_no,
+        status: 'pending'
       });
 
       // Check for existing beneficiaries by email or phone
@@ -460,8 +462,8 @@ export const updateBeneficiaryBatchListStatus = async ({ beneficiary_batch_id, b
               email: onboardingData.email,
               subject: 'MAJFINTECH ONBOARDING',
               type: 'html',
-              html: onboardinMail(onboardingData).html,
-              text: onboardinMail(onboardingData).text
+              html: beneficaryOnboardinMail(onboardingData).html,
+              text: beneficaryOnboardinMail(onboardingData).text
             };
 
             const msg = await formattMailInfo(mailData, env);
@@ -489,7 +491,11 @@ export const updateBeneficiaryBatchListStatus = async ({ beneficiary_batch_id, b
         }
       }
     } else {
-      beneficiaries = await beneficiaryBatchUploadModel.findById(beneficiary_batch_id);
+      const beneficiaries = await beneficiaryBatchUploadModel.findOne({
+        _id: beneficiary_batch_id,
+        status: "pending"
+      });
+      // beneficiaries = await beneficiaryBatchUploadModel.findById(beneficiary_batch_id);
       if (!beneficiaries) throw new NotFoundError('Beneficiary not found');
 
       if (beneficiaries.comment.trim() === 'Beneficiary is already part of this organization') {
@@ -542,7 +548,7 @@ export const updateBeneficiaryBatchListStatus = async ({ beneficiary_batch_id, b
             password: password,
             company_code: user.company_code
           };
-        
+
           const mailData = {
             email: beneficiaries.contact.email,
             subject: 'MAJFINTECH ONBOARDING',
