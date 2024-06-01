@@ -2,10 +2,12 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import XLSX from 'xlsx';
 import axios from 'axios';
+import request from 'request';
 import env from '../../config/env.js';
 import organizationModel, { buildOrganizationSchema } from '../../models/organizationModel.js';
 import ProductCategoryModel from '../../models/products/ProductCategoryModel.js';
 import OccupationModel from '../../models/occupations/occupationModel.js';
+import { initializePayment, verifyPayment } from '../../utils/payment.js';
 import {
   forgotPasswordMail,
   paymentVerificationMail,
@@ -652,9 +654,8 @@ export const uploadOrganizationBeneficiariesInBulk = async ({ user, file, body }
     'November',
     'December'
   ];
-  const formattedDate = `${currentDate.getDate()} ${
-    monthNames[currentDate.getMonth()]
-  } ${currentDate.getFullYear()}`;
+  const formattedDate = `${currentDate.getDate()} ${monthNames[currentDate.getMonth()]
+    } ${currentDate.getFullYear()}`;
 
   // Create email profile here
   const bulkUpload = {
@@ -720,6 +721,7 @@ export const onboardingPayment = async ({ user, body }) => {
         ? `${env.dev_base_url_org}/home`
         : `${env.prod_base_url_org}/home`,
     metadata: {
+      full_name: user.firstname + ' ' + user.lastname,
       userId: user._id,
       package: body,
       amountToPay,
@@ -730,16 +732,31 @@ export const onboardingPayment = async ({ user, body }) => {
     }
   };
 
-  const url = `${env.paystack_api_url}/transaction/initialize`;
+  // const url = `${env.paystack_api_url}/transaction/initialize`;
 
-  const gateway = await axios.post(url, data, {
-    headers: {
-      Authorization: `Bearer ${env.paystack_secret_key}`,
-      'Content-Type': 'application/json'
+  // const gateway = await axios.post(url, data, {
+  //   headers: {
+  //     Authorization: `Bearer ${env.paystack_secret_key}`,
+  //     'Content-Type': 'application/json'
+  //   }
+  // });
+  return new Promise(async (resolve, reject) => {
+    try {
+      initializePayment(data, (error, body) => {
+        if (error) {
+          reject(error.message)
+        }
+        const response = JSON.parse(body);
+
+        return resolve(response);
+
+      });
+
+    } catch (error) {
+      error.source = 'Start Payement Service';
+      return reject(error);
     }
-  });
-
-  return { gateway: gateway.data.data.authorization_url };
+  })
 };
 
 export const onboardingPaymentInfo = async ({ user, params }) => {
@@ -750,30 +767,43 @@ export const onboardingPaymentInfo = async ({ user, params }) => {
   });
 
   if (checkPayment) return { checkPayment };
-  const url = `${env.paystack_api_url}/transaction/verify/` + encodeURIComponent(reference);
 
-  const result = await axios.get(url, {
-    headers: {
-      Authorization: `Bearer ${env.paystack_secret_key}`,
-      'Content-Type': 'application/json'
+  return new Promise(async (resolve, reject) => {
+    try {
+
+      verifyPayment(reference, async (error, body) => {
+        if (error) {
+          reject(error.message)
+        }
+        const response = JSON.parse(body);
+        const { amount, status } = response.data;
+        if (status == 'success') {
+          const { email } = response.data.customer;
+          const full_name = response.data.metadata.full_name;
+          const metadata = response.data.metadata;
+          const operation = 'onboarding';
+          let newPayment = { full_name, email, amount, reference, trxref, operation, metadata, status };
+          const payment = paymentModel.create(newPayment);
+
+          const checkIfOnboarded = await organizationModel.findOne({ email: email });
+          checkIfOnboarded.hasPaid = true;
+          if (metadata.package.personalization.psdAgreement) {
+            checkIfOnboarded.hasPaid_personalization_fee = true;
+          }
+          
+          checkIfOnboarded.paymentstatus = 'paid';
+          await checkIfOnboarded.save();
+
+          return resolve(payment)
+        }
+        return reject(response.data.gateway_response)
+      })
+    } catch (error) {
+      error.source = 'Create Payment Service';
+      return reject(error)
     }
+
   });
-
-  const response = JSON.parse(result);
-  const { amount, status } = response.data;
-  const { email } = response.data.customer;
-  const full_name = response.data.metadata.full_name;
-  const operation = 'onboarding';
-  const newPayment = { full_name, email, amount, reference, trxref, operation, status };
-  const payment = Payment.create(newPayment);
-
-  const checkIfOnboarded = await organizationModel.findOne({ email: email });
-  checkIfOnboarded.hasPaid = true;
-  checkIfOnboarded.hasPaid_personalization_fee = true;
-  checkIfOnboarded.paymentstatus = 'paid';
-  await checkIfOnboarded.save();
-
-  return { payment };
 };
 
 export const addModules = async ({ user, body }) => {
