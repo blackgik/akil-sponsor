@@ -744,7 +744,7 @@ export const onboardingPayment = async ({ user, body }) => {
     try {
       initializePayment(data, (error, body) => {
         if (error) {
-          reject(error.message)
+          reject(new BadRequestError(error.message))
         }
         const response = JSON.parse(body);
 
@@ -753,8 +753,7 @@ export const onboardingPayment = async ({ user, body }) => {
       });
 
     } catch (error) {
-      error.source = 'Start Payement Service';
-      return reject(error);
+      return reject(new BadRequestError(error.message));
     }
   })
 };
@@ -773,34 +772,35 @@ export const onboardingPaymentInfo = async ({ user, params }) => {
 
       verifyPayment(reference, async (error, body) => {
         if (error) {
-          reject(error.message)
+          reject(new BadRequestError(error.message))
         }
         const response = JSON.parse(body);
-        const { amount, status } = response.data;
-        if (status == 'success') {
+        const { status } = (response.data) ? response.data : response;
+        if (status == 'success' && response.data.metadata?.full_name) {
           const { email } = response.data.customer;
           const full_name = response.data.metadata.full_name;
           const metadata = response.data.metadata;
+          const amount = response.data.amount;
           const operation = 'onboarding';
           let newPayment = { full_name, email, amount, reference, trxref, operation, metadata, status };
           const payment = paymentModel.create(newPayment);
 
           const checkIfOnboarded = await organizationModel.findOne({ email: email });
-          checkIfOnboarded.hasPaid = true;
-          if (metadata.package.personalization.psdAgreement) {
-            checkIfOnboarded.hasPaid_personalization_fee = true;
-          }
-          
-          checkIfOnboarded.paymentstatus = 'paid';
-          await checkIfOnboarded.save();
+          if (checkIfOnboarded) {
+            checkIfOnboarded.hasPaid = true;
+            if (metadata.package.personalization.psdAgreement) {
+              checkIfOnboarded.hasPaid_personalization_fee = true;
+            }
 
+            checkIfOnboarded.paymentstatus = 'paid';
+            await checkIfOnboarded.save();
+          }
           return resolve(payment)
         }
-        return reject(response.data.gateway_response)
+        return reject(new BadRequestError(response.message))
       })
     } catch (error) {
-      error.source = 'Create Payment Service';
-      return reject(error)
+      return reject( new BadRequestError(error.message))
     }
 
   });
