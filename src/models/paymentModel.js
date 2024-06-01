@@ -27,6 +27,7 @@ export const PaymentSchema = new Schema(
     operation : {
         type: String
     },
+    metadata: Array,
     status: {
         type: String,
         required: true
