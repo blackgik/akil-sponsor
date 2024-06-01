@@ -192,7 +192,7 @@ export const verifyEmail = async (body) => {
   });
 
   const tokenEncryption = jwt.sign(
-    { _id: admin._id, email: admin.email, user: checkAcct },
+    { _id: admin._id, email: admin.email, user: admin },
     env.jwt_key
   );
 
