@@ -33,7 +33,7 @@ const ProductSchema = new Schema(
     prdstatus: {
       type: String,
       trim: true,
-      default: 'draft',
+      default: 'published',
       index: true,
       enum: ['draft', 'published', 'unpublished']
     },
