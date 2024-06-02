@@ -2,8 +2,10 @@ import router from 'express';
 import Validate from '../../validators/index.js';
 import { authentication } from '../../middlewares/authentication.js';
 import {
-  organizationNewProduction,
+  createNewProduct,
+  restockProduct,
   updateProductImageSchema,
+  updateRestockSchema,
   viewSingleProductSchema
 } from '../../validators/productsSchema.js';
 import {
@@ -16,7 +18,10 @@ import {
   cancelProductHandler,
   publishProductHandler,
   updateProductImageHandler,
-  unpublishProductHandler
+  unpublishProductHandler,
+  restockProductHandler,
+  completeRestockHandler,
+  getProductRestockHistoryHandler
 } from '../../controllers/products/productController.js';
 
 const productRoutes = router.Router();
@@ -24,15 +29,22 @@ const productRoutes = router.Router();
 const productRoot = () => {
   productRoutes.post(
     '/create-products',
-    Validate(organizationNewProduction),
+    Validate(createNewProduct),
     authentication,
     createNewProductHandler
   );
   productRoutes.post(
     '/create-draft-products',
-    Validate(organizationNewProduction),
+    Validate(createNewProduct),
     authentication,
     createNewDraftProductHandler
+  );
+
+  productRoutes.post(
+    '/restock-product',
+    Validate(restockProduct),
+    authentication,
+    restockProductHandler
   );
   productRoutes.get(
     '/fetch-products',
@@ -47,6 +59,11 @@ const productRoot = () => {
     Validate(viewSingleProductSchema, 'params'),
     authentication,
     getSingleProductHandler
+  );
+  productRoutes.get(
+    '/view-product-restock-history',
+    authentication,
+    getProductRestockHistoryHandler
   );
   productRoutes.get(
     '/cancel-product/:product_id',
@@ -68,9 +85,16 @@ const productRoot = () => {
   );
   productRoutes.patch(
     '/update-single-product/:product_id',
-    Validate(organizationNewProduction),
+    Validate(createNewProduct),
     authentication,
     updateSingleProductHandler
+  );
+
+  productRoutes.patch(
+    '/complete-restock-operation/:restock_id',
+    Validate(updateRestockSchema),
+    authentication,
+    completeRestockHandler
   );
 
   productRoutes.patch(

@@ -6,6 +6,7 @@ const RestockSchema = new Schema(
   {
 
     restock_quantity: { type: Number, default: 0 },
+    quantity_per_warehouse: { type: Number, default: 0 },
     restock_value_amount: { type: Number, default: 0 },
     restock_unit: { type: String, trim: true },
     restock_start_date: { type: Date, trim: true },
@@ -14,11 +15,7 @@ const RestockSchema = new Schema(
       ref: 'Product',
       required: true
     },
-    warehouse_id: {
-      type: Schema.Types.ObjectId,
-      ref: 'Warehouse',
-      required: true
-    },
+    warehouses: Array,
     supplier_id: {
       type: Schema.Types.ObjectId,
       ref: 'Supplier',
@@ -27,9 +24,9 @@ const RestockSchema = new Schema(
     rtkstatus: {
       type: String,
       trim: true,
-      default: 'active',
+      default: 'complete',
       index: true,
-      enum: ['active', 'draft']
+      enum: ['complete', 'draft']
     },
     is_active: {
       type: Boolean,

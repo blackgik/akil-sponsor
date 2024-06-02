@@ -1,15 +1,19 @@
 import env from '../../config/env.js';
 import {
+  BadRequestError,
   DuplicateError,
   InternalServerError,
   NotFoundError
 } from '../../../lib/appErrors.js';
 import ProductModel from '../../models/products/ProductModel.js';
+import WarehouseModel from '../../models/products/WarehouseModel.js';
 import { formattMailInfo } from '../../utils/mailFormatter.js';
 import {
   newProductMail,
 } from '../../config/mail.js';
 import { messageBird } from '../../utils/msgBird.js';
+import warehouseProductModel from '../../models/products/warehouseProductModel.js';
+import RestockModel from '../../models/products/RestockModel.js';
 
 export const createNewProduct = async ({ user, body }) => {
   const productData = {
@@ -27,6 +31,12 @@ export const createNewProduct = async ({ user, body }) => {
   if (!created)
     throw new InternalServerError('server slip error. Please Check your Input properly');
 
+  body.warehouses.forEach(async element => {
+    let warehouse = await WarehouseModel.findById(element);
+    if (warehouse) {
+      await warehouseProductModel.create({product_id: created._id, warehouse_id: warehouse._id, quantity: created.product_quantity});
+    }
+  });
   //create email profile here
   const creationData = {
     email: user.email,
@@ -94,6 +104,57 @@ export const createNewProductDraft = async ({ user, body }) => {
   return true;
 };
 
+export const restockProductData = async ({ user, body }) => {
+  
+  const created = await RestockModel.create(body);
+  if (!created)
+    throw new InternalServerError('server slip error. Please Check your Input properly');
+
+  if (body.rtkstatus == 'complete') {
+    body.warehouses.forEach(async element => {
+      let restock = await warehouseProductModel.findOne({product_id: body.product_id, warehouse_id: element});
+      let product = await ProductModel.findById(body.product_id);
+      if (restock) {
+        restock.quantity += body.quantity_per_warehouse;
+        if(product){
+          product.product_quantity += body.quantity_per_warehouse;
+          await product.save();
+        }
+        await restock.save();
+      }
+    });
+  }
+
+  return true;
+};
+
+export const completeRestock = async ({ restock_id, body, user }) => {
+  
+  let restock = await RestockModel.findById(restock_id);
+  if (!restock) throw new BadRequestError('Restock  does not exist');
+
+  if (restock.rtkstatus =='complete') throw new BadRequestError('Restock  already completed!');
+
+  if (body.rtkstatus == 'complete') {
+    restock.warehouses.forEach(async element => {
+      let warehaouseProduct = await warehouseProductModel.findOne({product_id: restock.product_id, warehouse_id: element});
+      let product = await ProductModel.findById(restock.product_id);
+      if (warehaouseProduct) {
+        warehaouseProduct.quantity += restock.quantity_per_warehouse;
+        if(product){
+          product.product_quantity += restock.quantity_per_warehouse;
+          await product.save();
+        }
+        await warehaouseProduct.save();
+      }
+    });
+  }
+
+   restock.rtkstatus = body.rtkstatus;
+   await restock.save();
+  return true;
+};
+
 export const fetchProduct = async ({ user, params }) => {
   let { page_no, no_of_requests, search, status, cat_id, organization_id } = params;
 
@@ -133,6 +194,54 @@ export const fetchProduct = async ({ user, params }) => {
     .populate({
       path: 'product_category_id',
       model: 'ProductCategory'
+    })
+    .sort({ createdAt: -1 })
+    .skip((page_no - 1) * no_of_requests)
+    .limit(no_of_requests);
+
+  const available_pages = Math.ceil(totalCount / no_of_requests)
+    ? Math.ceil(totalCount / no_of_requests)
+    : 1;
+
+  return { page_no, available_pages, fetchData };
+};
+
+export const fetchProductRestockHistory = async ({ user, params }) => {
+  let { page_no, no_of_requests, search, status,  product_id } = params;
+
+  page_no = Number(page_no) || 1;
+  no_of_requests = Number(no_of_requests) || Infinity;
+  const product_idd = typeof product_id !== 'undefined' ? product_id : false;
+  if (!product_idd) throw new BadRequestError('A product Id is required');
+  const filterData = { product_id: product_id };
+
+  const query = typeof search !== 'undefined' ? search : false;
+  const rtkstatus = typeof status !== 'undefined' ? status : false;
+  const rgx = (pattern) => new RegExp(`.*${pattern}.*`, 'i');
+  const searchRgx = rgx(query);
+
+  if (query) {
+    filterData['$or'] = [{ product_name: searchRgx }];
+  }
+
+  if (rtkstatus) {
+    filterData['$and'] = [{ rtkstatus: rtkstatus }];
+  }
+
+  const totalCount = await RestockModel.countDocuments({
+    ...filterData,
+    is_active: true
+  });
+
+  const fetchData = await RestockModel
+    .find({ ...filterData, is_active: true })
+    .populate({
+      path: 'product_id',
+      model: 'Product'
+    })
+    .populate({
+      path: 'supplier_id',
+      model: 'Supplier'
     })
     .sort({ createdAt: -1 })
     .skip((page_no - 1) * no_of_requests)

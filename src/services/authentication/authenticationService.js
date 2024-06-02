@@ -2,17 +2,20 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import XLSX from 'xlsx';
 import axios from 'axios';
+import request from 'request';
 import env from '../../config/env.js';
 import organizationModel, { buildOrganizationSchema } from '../../models/organizationModel.js';
 import ProductCategoryModel from '../../models/products/ProductCategoryModel.js';
 import OccupationModel from '../../models/occupations/occupationModel.js';
+import { initializePayment, verifyPayment } from '../../utils/payment.js';
 import {
   forgotPasswordMail,
   paymentVerificationMail,
   verifyOnbordingMail,
   beneficiaryBulkUpload,
   onboardinMail,
-  invitationMail
+  invitationMail,
+  beneficaryOnboardinMail
 } from '../../config/mail.js';
 import {
   BadRequestError,
@@ -161,6 +164,7 @@ export const verifyEmail = async (body) => {
   //create email profile here
   const onboardingData = {
     email: checkAcct.email,
+    name_of_cooperation: checkAcct.name_of_cooperation,
     company_code: checkAcct.company_code,
     name: (checkAcct.firstname + ' ' + checkAcct.lastname).toUpperCase()
   };
@@ -190,7 +194,7 @@ export const verifyEmail = async (body) => {
   });
 
   const tokenEncryption = jwt.sign(
-    { _id: admin._id, email: admin.email, user: checkAcct },
+    { _id: admin._id, email: admin.email, user: admin },
     env.jwt_key
   );
 
@@ -412,8 +416,8 @@ export const onboardNewOrganizationBeneficiary = async ({ body, user }) => {
       email: createBeneficiary.contact.email,
       subject: 'BENEFICIARY ONBOARDING',
       type: 'html',
-      html: onboardinMail(onboardingData).html,
-      text: onboardinMail(onboardingData).text
+      html: beneficaryOnboardinMail(onboardingData).html,
+      text: beneficaryOnboardinMail(onboardingData).text
     };
     const msg = await formattMailInfo(mailData, env);
 
@@ -522,22 +526,24 @@ export const uploadOrganizationBeneficiariesInBulk = async ({ user, file, body }
   const workbook = XLSX.readFile(file.path);
   const worksheet = workbook.Sheets[workbook.SheetNames[0]];
   const header = [
-    'firstname',
-    'lastname',
+    'name',
     'gender',
-    'othername',
-    'country',
-    'email',
-    'address',
-    'has_paid',
-    'phone',
-    'city',
-    'state',
-    'country_of_residence',
-    'lga',
-    'language',
+    'marital_status',
+    'nationality',
     'state_of_origin',
-    'marital_status'
+    'language',
+    'lga',
+    'country_of_residence',
+    'state_of_residence',
+    'resident_address',
+    'city_of_residence',
+    'phone',
+    'email',
+    'bank_name',
+    'acct_name',
+    'bank_code',
+    'acct_number',
+    'has_paid'
   ];
 
   let result = XLSX.utils.sheet_to_json(worksheet, {
@@ -551,7 +557,6 @@ export const uploadOrganizationBeneficiariesInBulk = async ({ user, file, body }
   const errorLogs = [];
 
   for (let beneficiary of result) {
-    beneficiary.name = `${beneficiary.firstname || ''} ${beneficiary.lastname || ''}`;
     let comment;
 
     const filter = { organization_id: user._id };
@@ -589,20 +594,28 @@ export const uploadOrganizationBeneficiariesInBulk = async ({ user, file, body }
     const batchListData = {
       personal: {
         member_name: beneficiary.name,
-        gender: beneficiary.gender || '',
-        nationality: beneficiary.country || '',
-        lga: beneficiary.lga || '',
-        language: beneficiary.language || '',
-        state_of_origin: beneficiary.state_of_origin || '',
-        marital_status: beneficiary.marital_status || ''
+        gender: beneficiary.gender,
+        marital_status: beneficiary.marital_status,
+        nationality: beneficiary.nationality,
+        state_of_origin: beneficiary.state_of_origin,
+        language: beneficiary.language,
+        lga: beneficiary.lga
       },
       contact: {
-        phone: String(beneficiary.phone || ''),
-        email: String(beneficiary.email || ''),
-        resident_address: beneficiary.address || '',
-        city: beneficiary.city || '',
-        state: beneficiary.state || '',
-        country_of_residence: beneficiary.country_of_residence || ''
+        country_of_residence: beneficiary.country_of_residence,
+        state: beneficiary.state_of_residence,
+        phone: String(beneficiary.phone),
+        email: beneficiary.email,
+        city: beneficiary.city_of_residence,
+        resident_address: beneficiary.resident_address
+      },
+      bank_details: {
+        bank: {
+          bank_name: beneficiary?.bank_name || '',
+          acct_name: beneficiary?.acct_name || '',
+          bank_code: beneficiary?.bank_code || '',
+          acct_number: beneficiary?.acct_number || ''
+        }
       },
       organization_id: user._id,
       batch_no: body.batch_no,
@@ -641,9 +654,8 @@ export const uploadOrganizationBeneficiariesInBulk = async ({ user, file, body }
     'November',
     'December'
   ];
-  const formattedDate = `${currentDate.getDate()} ${
-    monthNames[currentDate.getMonth()]
-  } ${currentDate.getFullYear()}`;
+  const formattedDate = `${currentDate.getDate()} ${monthNames[currentDate.getMonth()]
+    } ${currentDate.getFullYear()}`;
 
   // Create email profile here
   const bulkUpload = {
@@ -709,6 +721,7 @@ export const onboardingPayment = async ({ user, body }) => {
         ? `${env.dev_base_url_org}/home`
         : `${env.prod_base_url_org}/home`,
     metadata: {
+      full_name: user.firstname + ' ' + user.lastname,
       userId: user._id,
       package: body,
       amountToPay,
@@ -719,16 +732,30 @@ export const onboardingPayment = async ({ user, body }) => {
     }
   };
 
-  const url = `${env.paystack_api_url}/transaction/initialize`;
+  // const url = `${env.paystack_api_url}/transaction/initialize`;
 
-  const gateway = await axios.post(url, data, {
-    headers: {
-      Authorization: `Bearer ${env.paystack_secret_key}`,
-      'Content-Type': 'application/json'
+  // const gateway = await axios.post(url, data, {
+  //   headers: {
+  //     Authorization: `Bearer ${env.paystack_secret_key}`,
+  //     'Content-Type': 'application/json'
+  //   }
+  // });
+  return new Promise(async (resolve, reject) => {
+    try {
+      initializePayment(data, (error, body) => {
+        if (error) {
+          reject(new BadRequestError(error.message))
+        }
+        const response = JSON.parse(body);
+
+        return resolve(response);
+
+      });
+
+    } catch (error) {
+      return reject(new BadRequestError(error.message));
     }
-  });
-
-  return { gateway: gateway.data.data.authorization_url };
+  })
 };
 
 export const onboardingPaymentInfo = async ({ user, params }) => {
@@ -739,30 +766,44 @@ export const onboardingPaymentInfo = async ({ user, params }) => {
   });
 
   if (checkPayment) return { checkPayment };
-  const url = `${env.paystack_api_url}/transaction/verify/` + encodeURIComponent(reference);
 
-  const result = await axios.get(url, {
-    headers: {
-      Authorization: `Bearer ${env.paystack_secret_key}`,
-      'Content-Type': 'application/json'
+  return new Promise(async (resolve, reject) => {
+    try {
+
+      verifyPayment(reference, async (error, body) => {
+        if (error) {
+          reject(new BadRequestError(error.message))
+        }
+        const response = JSON.parse(body);
+        const { status } = (response.data) ? response.data : response;
+        if (status == 'success' && response.data.metadata?.full_name) {
+          const { email } = response.data.customer;
+          const full_name = response.data.metadata.full_name;
+          const metadata = response.data.metadata;
+          const amount = response.data.amount;
+          const operation = 'onboarding';
+          let newPayment = { full_name, email, amount, reference, trxref, operation, metadata, status };
+          const payment = paymentModel.create(newPayment);
+
+          const checkIfOnboarded = await organizationModel.findOne({ email: email });
+          if (checkIfOnboarded) {
+            checkIfOnboarded.hasPaid = true;
+            if (metadata.package.personalization.psdAgreement) {
+              checkIfOnboarded.hasPaid_personalization_fee = true;
+            }
+
+            checkIfOnboarded.paymentstatus = 'paid';
+            await checkIfOnboarded.save();
+          }
+          return resolve(payment)
+        }
+        return reject(new BadRequestError(response.message))
+      })
+    } catch (error) {
+      return reject( new BadRequestError(error.message))
     }
+
   });
-
-  const response = JSON.parse(result);
-  const { amount, status } = response.data;
-  const { email } = response.data.customer;
-  const full_name = response.data.metadata.full_name;
-  const operation = 'onboarding';
-  const newPayment = { full_name, email, amount, reference, trxref, operation, status };
-  const payment = Payment.create(newPayment);
-
-  const checkIfOnboarded = await organizationModel.findOne({ email: email });
-  checkIfOnboarded.hasPaid = true;
-  checkIfOnboarded.hasPaid_personalization_fee = true;
-  checkIfOnboarded.paymentstatus = 'paid';
-  await checkIfOnboarded.save();
-
-  return { payment };
 };
 
 export const addModules = async ({ user, body }) => {
