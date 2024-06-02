@@ -7,7 +7,6 @@ export const buildOrganizationSchema = new Schema(
     avatar: { key: { type: String, default: '' } },
     language: { type: String, default: 'english' },
     name_of_cooperation: { type: String, lowercase: true, trim: true, index: true },
-
     email: { type: String, required: true, trim: true, lowercase: true, index: true },
     firstname: { type: String, required: false, trim: true, lowercase: true },
     lastname: { type: String, required: false, trim: true, lowercase: true },
