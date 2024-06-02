@@ -726,7 +726,6 @@ export const onboardingPayment = async ({ user, body }) => {
       package: body,
       amountToPay,
       on_trial: false,
-      hasPaid: true,
       acctstatus: 'active',
       type: 'sponsor-onboarding'
     }
@@ -747,8 +746,7 @@ export const onboardingPayment = async ({ user, body }) => {
           reject(new BadRequestError(error.message))
         }
         const response = JSON.parse(body);
-
-        return resolve(response);
+        return resolve({gateway: response.data.authorization_url});
 
       });
 
@@ -779,10 +777,12 @@ export const onboardingPaymentInfo = async ({ user, params }) => {
         if (status == 'success' && response.data.metadata?.full_name) {
           const { email } = response.data.customer;
           const full_name = response.data.metadata.full_name;
+          const channel = response.data.channel;
+          const currency = response.data.currency;
           const metadata = response.data.metadata;
           const amount = response.data.amount;
           const operation = 'onboarding';
-          let newPayment = { full_name, email, amount, reference, trxref, operation, metadata, status };
+          let newPayment = { full_name, email, amount, reference, trxref, operation, metadata,channel,currency, status };
           const payment = paymentModel.create(newPayment);
 
           const checkIfOnboarded = await organizationModel.findOne({ email: email });

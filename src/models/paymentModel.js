@@ -28,6 +28,12 @@ export const PaymentSchema = new Schema(
         type: String
     },
     metadata: Array,
+    channel : {
+        type: String
+    },
+    currency : {
+        type: String
+    },
     status: {
         type: String,
         required: true
