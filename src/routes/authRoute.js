@@ -12,7 +12,6 @@ import {
   validateForgotOtpSchema
 } from '../validators/organizationSchema.js';
 import {
-  fetchBankCodeHandler,
   organizationPreferencesHandler,
   forgotPasswordHandler,
   sendEmailHandler,
@@ -30,7 +29,8 @@ import {
   fetchPrerenceDataHandler,
   inviteBeneficiaryHandler,
   slugPersonalizationHandler,
-  forgotOtpHandler
+  forgotOtpHandler,
+  downloadReceiptHandler
 } from '../controllers/authentication/authenticationController.js';
 import { authentication, dbconnection } from '../middlewares/authentication.js';
 import { upload } from '../../lib/multer.js';
@@ -48,7 +48,6 @@ const organizationRoute = () => {
     onboardNewOrganizationHandler
   );
   organizationRoutes.get('/slug-personalization', slugPersonalizationHandler);
-  organizationRoutes.get('/bank-codes/:bank_code', fetchBankCodeHandler);
   organizationRoutes.get('/fetch-preferences-data', fetchPrerenceDataHandler);
   organizationRoutes.post(
     '/organization-login',
@@ -113,6 +112,11 @@ const organizationRoute = () => {
   );
   organizationRoutes.patch('/make-onboarding-payments', authentication,Validate(BuildPackageSchema), onboardingPaymentHandler);
   organizationRoutes.get('/onboarding-payment-info', authentication, onboardingPaymentInfoHandler);
+  organizationRoutes.get(
+    '/download-payment-receipt/:reference',
+    authentication,
+    downloadReceiptHandler
+  );
   organizationRoutes.post('/contact-sponsor-through-mail', authentication, Validate(sendContactMailSchema), sendEmailHandler);
 
   return organizationRoutes;

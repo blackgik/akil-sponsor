@@ -11,8 +11,6 @@ import baseRoutes from './routes/index.js';
 import { ErrorHandler } from './middlewares/errorHandler.js';
 import { socketBlock } from './jobs/socketio.js';
 import { onboardingTrialCheck } from './jobs/onboard.cronjob.js';
-import swaggerUi from 'swagger-ui-express';
-import { apiDocumentation } from './docs/apidocs.js';
 import { createKeys } from './utils/vault.js';
 
 const router = Router();
@@ -40,7 +38,6 @@ app.use(cors());
 app.use(express.json());
 app.use(urlencoded({ extended: false }));
 app.use(morgan('combined'));
-app.use(`/api/v1/sponsors/stag/documentation`, swaggerUi.serve, swaggerUi.setup(apiDocumentation));
 const port = env.port;
 
 onboardingTrialCheck();
