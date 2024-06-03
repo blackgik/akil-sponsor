@@ -772,7 +772,7 @@ export const onboardingPaymentInfo = async ({ user, params }) => {
           const channel = response.data.channel;
           const currency = response.data.currency;
           const metadata = response.data.metadata;
-          const amount = response.data.amount;
+          const amount = parseInt(response.data.amount)/100;
           const operation = 'onboarding';
           let newPayment = { full_name, email, phone, amount, reference, trxid, trxref, trxfee, operation, metadata, channel, currency, paid_at, status };
           const payment = paymentModel.create(newPayment);
