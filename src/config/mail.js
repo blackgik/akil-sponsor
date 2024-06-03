@@ -316,18 +316,13 @@ export const onboardinMail = (data) => {
                                                                             <span>
                                                                                 <ul
                                                                                     style="font-size: 14px; line-height: 23.8px; color: #002366;">
-                                                                                    <li>Name of Sponsor:
-                                                                                        ${data.name_of_cooperation}
-                                                                                    </li>
+                                                                                    
                                                                                     <li>Email: ${data.email}</li>
-                                                                                    <li>Organisation Unique Code: ${data.company_code} (This is your secret pass into your
+                                                                                    <li>Sponsor Unique Code: ${data.company_code} (This is your secret pass into your
                                                                                         portal; please ensure its
                                                                                         confidentiality as it is required for
                                                                                         every login of your beneficiaries)</li>
-                                                                                    <li>Organisation Login URL: <a
-                                                                                            style="color: red;"
-                                                                                            href="https://sponsor.akilaah.com/login">https://sponsor.akilaah.com</a>
-                                                                                    </li>
+                                                                                    
                                                                                 </ul>
                                                                                 <br>
                                                                             </span>
@@ -863,19 +858,14 @@ export const beneficaryOnboardinMail = (data) => {
                                                                               <span>
                                                                                   <ul
                                                                                       style="font-size: 14px; line-height: 23.8px; color: #002366;">
-                                                                                      <li>Name of Sponsor:
-                                                                                          ${data.name_of_cooperation}
-                                                                                      </li>
+                                                                                      
                                                                                       <li>Email: ${data.email}</li>
                                                                                       <li>Password: ${data.password}</li>
-                                                                                      <li>Organisation Unique Code: ${data.company_code} (This is your secret pass into your
+                                                                                      <li>Sponsor Unique Code: ${data.company_code} (This is your secret pass into your
                                                                                           beneficiary portal; please ensure its
                                                                                           confidentiality as it is required for
                                                                                           every login of your beneficiaries)</li>
-                                                                                      <li>Organisation Login URL: <a
-                                                                                              style="color: red;"
-                                                                                              href="https://beneficiary.akilaah.com/login">https://beneficiary.akilaah.com</a>
-                                                                                      </li>
+                                                                                     
                                                                                   </ul>
                                                                                   <br>
                                                                               </span>
@@ -6529,7 +6519,7 @@ export const beneficiaryApprovedStatusUpdate = (data) => {
                                                                             <li>Member ID: ${
                                                                               data.beneficiary_id
                                                                             }</li>
-                                                                            <li>Organisation Unique ID: ${
+                                                                            <li>Sponsor Unique ID: ${
                                                                               data.organization_code
                                                                             }</li>
                                                                             <li>Sponsor Name: ${
@@ -6558,7 +6548,7 @@ export const beneficiaryApprovedStatusUpdate = (data) => {
                                                                 <p style="font-size: 18px; line-height: 150%;">
                                                                     Feel free to log in to your account using the
                                                                     following link: [Login URL for beneficiaries]. Your
-                                                                    organisation unique ID will be your reference for
+                                                                    Sponsor unique ID will be your reference for
                                                                     all interactions within
                                                                     <strong>${data.name_of_cooperation.toUpperCase()}</strong>.
                                                                 </p> <br>
@@ -7859,7 +7849,7 @@ export const onboardAgentMail = (data) => {
           <td style="overflow-wrap:break-word;word-break:break-word;padding:10px 25px 15px;font-family:arial,helvetica,sans-serif;" align="left">
             
       <div class="v-line-height" style="font-size: 14px; line-height: 150%; text-align: left; word-wrap: break-word;">
-        <p style="font-size: 14px; line-height: 150%; text-align: justify;"><span style="font-size: 14px; line-height: 21px; color: #444444;">Congratulations! You just created an admin account on AKILAAH. Below are your Organisation credentials.</p>
+        <p style="font-size: 14px; line-height: 150%; text-align: justify;"><span style="font-size: 14px; line-height: 21px; color: #444444;">Congratulations! You just created an admin account on AKILAAH. Below are your Sponsorship credentials.</p>
       </div>
           </td>
         </tr>
@@ -7875,9 +7865,9 @@ export const onboardAgentMail = (data) => {
           data.name_of_cooperation
         } <br>AGENT EMAIL: ${data.email}<br>AGENT ID: ${data.agent_id}<br>PASSWORD: ${
       data.password
-    }<br>ORGANISATION UNIQUE CODE: ${
+    }<br>SPONSOR UNIQUE CODE: ${
       data.company_code
-    }<br>ORGANISATION LOGIN URL: <a href="https://agent.akilaah.com/login">Agent Portal</a> </span></p>
+    }<br>SPONSOR LOGIN URL: <a href="https://agent.akilaah.com/login">Agent Portal</a> </span></p>
       </div>
           </td>
         </tr>
