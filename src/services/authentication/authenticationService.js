@@ -306,6 +306,19 @@ export const sendSponsorEmail = async ({ body, user }) => {
     text: paymentVerificationMail(onboardingData).text
   };
 
+  const organizationExists = await organizationModel.findById(user._id);
+  if (!organizationExists) {
+    throw new BadRequestError("Sponsor doesn't exist!");
+  }
+
+  if (organizationExists.hasPaid || organizationExists.paymentstatus =='paid') {
+    throw new BadRequestError("Sponsor already paid!");
+  }
+
+  organizationExists.paymentstatus = 'pending'
+  organizationExists.hasPaid = false;
+  await organizationExists.save();
+
   const msg = await formattMailInfo(mailData, env);
 
   const msgDelivered = await messageBird(msg);
@@ -497,7 +510,7 @@ export const setOrganizationPackageData = async ({ body, user }) => {
     amountToPay += dataCollectionFee;
   }
   organizationExists.isPackageBuilt = true;
-  organizationExists.paymentstatus = 'pending';
+  organizationExists.paymentstatus = 'undefined';
   organizationExists.hasPaid = false;
 
   await organizationExists.save();
