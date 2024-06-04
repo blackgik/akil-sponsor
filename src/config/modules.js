@@ -4,7 +4,7 @@ export const plans = {
     organization_reg_fee: 1000000,
     sup_beneficiary_fee: 1,
     data_collection_fee: 1000,
-    sup_sms_fee: 4,
+    sup_sms_fee: 5,
     personalization_fee: 2500000,
     max_users: 500,
     max_sms: 1000,
