@@ -4178,13 +4178,13 @@ export const paymentVerificationMail = (data) => {
   
         <head>
             <!--[if gte mso 9]>
-          <xml>
-            <o:OfficeDocumentSettings>
-              <o:AllowPNG/>
-              <o:PixelsPerInch>96</o:PixelsPerInch>
-            </o:OfficeDocumentSettings>
-          </xml>
-          <![endif]-->
+        <xml>
+          <o:OfficeDocumentSettings>
+            <o:AllowPNG/>
+            <o:PixelsPerInch>96</o:PixelsPerInch>
+          </o:OfficeDocumentSettings>
+        </xml>
+        <![endif]-->
             <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
             <meta name="x-apple-disable-message-reformatting">
@@ -4412,10 +4412,11 @@ export const paymentVerificationMail = (data) => {
                                                                             <span
                                                                                 style="font-size: 24px; line-height: 36px;"><span
                                                                                     style="color:#002366; line-height: 21px;"><strong><span
-                                                                                            style="line-height: 21px;">MAIL FROM:
+                                                                                            style="line-height: 21px;">Dear
                                                                                         </span></strong></span><strong><span
                                                                                         style="line-height: 21px;"><span
-                                                                                            style="color: #CB6015; line-height: 21px;">${data.name.toUpperCase()}</span></span></strong></span>
+                                                                                            style="color: #CB6015; line-height: 21px;"> Akilaah Team</span></span></strong></span>
+  
                                                                         </p>
                                                                     </div>
   
@@ -4433,7 +4434,19 @@ export const paymentVerificationMail = (data) => {
   
                                                                     <div class="v-line-height"
                                                                         style="font-size: 18px; line-height: 150%; text-align: left; word-wrap: break-word;color:#002366;">
-                                                                        
+                                                                        <p style="font-size: 18px; line-height: 150%;"></p>
+                                                                        I am writing to confirm my decision to proceed with the sponsor subscription package. 
+                                                                        I have reviewed the details and believe this package best suits my needs,
+                                                                        </p>
+  
+                                                                    </div>
+                                                                    <br>
+                                                                    <div class="v-line-height"
+                                                                        style="font-size: 18px; line-height: 150%; text-align: left; word-wrap: break-word;color:#002366;">
+                                                                        <p
+                                                                            style="font-size: 18px; line-height: 150%; text-align: justify;">
+                                                                            My selection is as follows:
+                                                                        </p>
                                                                     </div>
   
                                                                 </td>
@@ -4450,22 +4463,53 @@ export const paymentVerificationMail = (data) => {
                                                                     align="left">
   
                                                                     <div class="v-line-height"
-                                                                        style="font-size: 18px; line-height: 170%; text-align: left; word-wrap: break-word; color:#002366;">
-                                                                        <p style="line-height: 170%;">Email: ${
-                                                                          data.data.email
-                                                                        }\n</p>
-                                                                        <p style="line-height: 170%;">Phone: ${
-                                                                          data.data.phone
-                                                                        }\n</p>
-                                                                        <p style="line-height: 170%;">Note: ${
-                                                                          data.data.description
-                                                                        }</p>
+                                                                        style="font-size: 14px; line-height: 170%; text-align: left; word-wrap: break-word;">
+                                                                        <p
+                                                                            style="font-size: 14px; line-height: 170%; text-align: justify;">
+                                                                            <span>
+                                                                                <ul
+                                                                                    style="font-size: 14px; line-height: 23.8px; color: #002366;">
+                                                                                    
+                                                                                    <li>Onboarding Fee: ${data.onboardingFee}</li>
+                                                                                    <li>Extra Member: ${data.supBeneficiaryFee} </li>
+                                                                                    <li>Data collection: ${data.dataCollectionFee} </li>
+                                                                                    <li>SMS: ${data.supSmsFee} </li>
+                                                                                    <li>Personalization Fee: ${data.personalizationFee} </li>
+                                                                                    <li>Total: NGN ${data.amountToPay} </li>
+                                                                                </ul>
+                                                                                <br>
+                                                                            </span>
+                                                                        </p>
                                                                     </div>
   
                                                                 </td>
                                                             </tr>
                                                         </tbody>
                                                     </table>
+  
+                                                    <table style="font-family:arial,helvetica,sans-serif;" role="presentation"
+                                                        cellpadding="0" cellspacing="0" width="100%" border="0">
+                                                        <tbody>
+                                                            <tr>
+                                                                <td style="overflow-wrap:break-word;word-break:break-word;padding:10px 25px 15px;font-family:arial,helvetica,sans-serif;"
+                                                                    align="left">
+  
+                                                                    <div class="v-line-height"
+                                                                        style="font-size: 18px; line-height: 150%; text-align: left; word-wrap: break-word;color:#002366;">
+                                                                        <p style="font-size: 18px; line-height: 150%;">
+                                                                        ${data.note}
+                                                                        </p>
+                                                                        <p style="font-size: 18px; line-height: 150%;">
+                                                                        Could you please provide me with the necessary payment details and instructions? 
+                                                                        </p> <br>
+                                                                        Thank you for your assistance. I look forward to your prompt response.
+  
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+  
                                                     <table id="u_content_button_2"
                                                         style="font-family:arial,helvetica,sans-serif;" role="presentation"
                                                         cellpadding="0" cellspacing="0" width="100%" border="0">
@@ -4476,15 +4520,14 @@ export const paymentVerificationMail = (data) => {
   
                                                                     <!--[if mso]><style>.v-button {background: transparent !important;}</style><![endif]-->
                                                                     <div align="center">
-                                                                        <!--[if mso]><v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="https://sponsor.mmcoop.org" style="height:37px; v-text-anchor:middle; width:122px;" arcsize="11%"  stroke="f" fillcolor="#e67e23"><w:anchorlock/><center style="color:#FFFFFF;"><![endif]-->
-                                                                        <a href="mailto:ask@akilaah.com" target="_blank"
-                                                                            class="v-button v-button-colors"
-                                                                            style="box-sizing: border-box;display: inline-block;text-decoration: none;-webkit-text-size-adjust: none;text-align: center;color: #FFFFFF; background-color: #002366; border-radius: 4px;-webkit-border-radius: 4px; -moz-border-radius: 4px; width:auto; max-width:100%; overflow-wrap: break-word; word-break: break-word; word-wrap:break-word; mso-border-alt: none;font-size: 18px;">
+                                                                        <!--[if mso]><v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="https://sponsor.akilaah.com" style="height:37px; v-text-anchor:middle; width:122px;" arcsize="11%"  stroke="f" fillcolor="#e67e23"><w:anchorlock/><center style="color:#FFFFFF;"><![endif]-->
+                                                                        <a href="https://sponsor.akilaah.com/login"
+                                                                            target="_blank" class="v-button v-button-colors"
+                                                                            style="box-sizing: border-box;display: inline-block;text-decoration: none;-webkit-text-size-adjust: none;text-align: center;color: #FFFFFF; background-color: #002366; border-radius: 4px;-webkit-border-radius: 4px; -moz-border-radius: 4px; width:auto; max-width:100%; overflow-wrap: break-word; word-break: break-word; word-wrap:break-word; mso-border-alt: none;font-size: 14px;">
                                                                             <span class="v-line-height"
                                                                                 style="display:block;padding:10px 20px;line-height:120%;"><strong><span
-                                                                                        style="line-height: 16.8px;">CONTACT
-                                                                                        CUSTOMER SERVICE
-                                                                                    </span></strong></span>
+                                                                                        style="line-height: 16.8px;">LOGIN
+                                                                                        NOW</span></strong></span>
                                                                         </a>
                                                                         <!--[if mso]></center></v:roundrect><![endif]-->
                                                                     </div>
@@ -4492,10 +4535,6 @@ export const paymentVerificationMail = (data) => {
                                                                 </td>
                                                             </tr>
                                                         </tbody>
-                                                    </table>
-                                                    <table id="u_content_button_2"
-                                                        style="font-family:arial,helvetica,sans-serif;" role="presentation"
-                                                        cellpadding="0" cellspacing="0" width="100%" border="0">
                                                         <tr style="border-collapse:collapse">
                                                             <td align="center" style="padding:5px;Margin:0;font-size:0">
                                                                 <table border="0" width="100%" height="100%" cellpadding="0"
@@ -4510,7 +4549,6 @@ export const paymentVerificationMail = (data) => {
                                                             </td>
                                                         </tr>
                                                     </table>
-  
                                                     <!--[if (!mso)&(!IE)]><!-->
                                                 </div><!--<![endif]-->
                                             </div>
@@ -4650,13 +4688,22 @@ export const paymentVerificationMail = (data) => {
         </body>
   
       </html>
-      `,
-    text: `Dear ${data.first_name} ${data.last_name}\n
-      Email: ${data.email}\n
-      Phone: ${data.phone}\n
+       `,
+      text: `Dear Akilaah Team,\n\n
+
+      I am writing to confirm my decision to proceed with the sponsor subscription package. \n
+      I have reviewed the details and believe this package best suits my needs.\n
       
-      ${data.description}
-      `
+      My selection is as follows:\n
+    \n
+    Onboarding Fee: ${data.onboardingFee}\n
+    Extra Member: ${data.supBeneficiaryFee} \n
+    Data collection: ${data.dataCollectionFee} \n
+    SMS: ${data.supSmsFee} \n
+    Personalization Fee: ${data.personalizationFee} \n
+    Total: NGN ${data.amountToPay} \n
+    ${data.note} \n\n
+    NB: You Company Unique code should be share to beneficiaries `
   };
 };
 
