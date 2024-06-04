@@ -456,7 +456,7 @@ export const setOrganizationPackageData = async ({ body, user }) => {
   }
 
   if (organizationExists.hasPaid || organizationExists.isPackageBuilt) {
-    throw new BadRequestError('Package already paid!');
+    throw new BadRequestError('Package already built!');
   }
 
   let amountToPay = 0;
