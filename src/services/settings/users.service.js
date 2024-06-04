@@ -11,6 +11,8 @@ import rolepermissionModel from '../../models/settings/rolepermission.model.js';
 export const craeteNewUser = async ({ user, body }) => {
   const filter = {};
 
+  const beneFilter = {};
+
   const role = await rolepermissionModel.findById(body.role_id);
 
   if (!role) throw new BadRequestError('Our system does not know this role id');
@@ -19,17 +21,19 @@ export const craeteNewUser = async ({ user, body }) => {
 
   if (body.email) {
     filter['email'] = body.email;
+    beneFilter['contact.email'] = body.email;
 
     checkMember = await usersModels.findOne({
       ...filter
     });
 
     if (checkMember && checkMember.acctstatus !== 'deleted')
-      throw new BadRequestError('Member already exists');
+      throw new BadRequestError('User already exists');
   }
 
   if (body.phone) {
     filter['phone'] = body.phone;
+    beneFilter['contact.phone'] = body.phone;
 
     delete filter['email'];
 
@@ -38,11 +42,11 @@ export const craeteNewUser = async ({ user, body }) => {
     });
 
     if (checkMember && checkMember.acctstatus !== 'deleted')
-      throw new BadRequestError('Member already exists');
+      throw new BadRequestError('User already exists');
   }
 
   //check if they a beneficiary
-  const beneficiaryCheck = await organizationBeneficiaryModel.findOne(filter);
+  const beneficiaryCheck = await organizationBeneficiaryModel.findOne(beneFilter);
 
   if (beneficiaryCheck) body.is_beneficiary = true;
 
