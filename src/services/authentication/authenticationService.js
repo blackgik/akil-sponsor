@@ -141,7 +141,7 @@ export const resendOtp = async (body) => {
   if (!msgDelivered)
     throw new InternalServerError(
       500,
-      'server slip. Organization was created without mail being sent',
+      'server slip. Sponsor was created without mail being sent',
       ''
     );
 
@@ -186,7 +186,7 @@ export const verifyEmail = async (body) => {
   if (!msgDelivered)
     throw new InternalServerError(
       500,
-      'server slip. Organization was created without mail being sent',
+      'server slip. Sponsor was created without mail being sent',
       ''
     );
   const admin = checkAcct.toJSON();
@@ -452,11 +452,11 @@ export const setOrganizationPreferences = async ({ body, user }) => {
 export const setOrganizationPackageData = async ({ body, user }) => {
   const organizationExists = await organizationModel.findById(user._id);
   if (!organizationExists) {
-    throw new BadRequestError("Organization doesn't exist!");
+    throw new BadRequestError("Sponsor doesn't exist!");
   }
 
-  if (organizationExists.hasPaid || organizationExists.isPackageBuilt) {
-    throw new BadRequestError('Package already built!');
+  if (organizationExists.hasPaid) {
+    throw new BadRequestError('Package already paid!');
   }
 
   let amountToPay = 0;
@@ -731,9 +731,6 @@ export const onboardingPayment = async ({ user, body }) => {
           reject(new BadRequestError(error.message))
         }
         const response = JSON.parse(body);
-        console.log('====================================');
-        console.log(response.data);
-        console.log('====================================');
         return resolve({ gateway: response.data.authorization_url });
 
       });
@@ -772,7 +769,7 @@ export const onboardingPaymentInfo = async ({ user, params }) => {
           const channel = response.data.channel;
           const currency = response.data.currency;
           const metadata = response.data.metadata;
-          const amount = parseInt(response.data.amount)/100;
+          const amount = parseInt(response.data.amount) / 100;
           const operation = 'onboarding';
           let newPayment = { full_name, email, phone, amount, reference, trxid, trxref, trxfee, operation, metadata, channel, currency, paid_at, status };
           const payment = paymentModel.create(newPayment);
@@ -797,6 +794,24 @@ export const onboardingPaymentInfo = async ({ user, params }) => {
 
   });
 };
+
+export const whatsappApiData = async ({ user, params }) => {
+  const organizationExists = await organizationModel.findById(user._id);
+  if (!organizationExists) {
+    throw new BadRequestError("Sponsor doesn't exist!");
+  }
+
+  if (organizationExists.hasPaid || organizationExists.paymentstatus =='paid') {
+    throw new BadRequestError("Sponsor already paid!");
+  }
+
+  organizationExists.paymentstatus = 'pending'
+  organizationExists.hasPaid = false;
+  await organizationExists.save();
+
+  return {whatsapUrl: `https://wa.me/+2347070701163?text=Hello%2C%20please%20can%20I%20make%20enquiry%20about%20subscription%20payment%3F`};
+};
+
 export const downloadReceipt = async ({ user, reference }) => {
   let receipt;
 
@@ -805,7 +820,7 @@ export const downloadReceipt = async ({ user, reference }) => {
   if (!receipt) throw new BadRequestError('Payment reference not found');
 
   let receiptData = receipt.metadata[0];
-  let totalAmount = receipt.amount/100;
+  let totalAmount = receipt.amount / 100;
 
   let parts = Array();
   if (parseInt(receiptData.package.organization_reg_fee) > 0) {
@@ -1047,7 +1062,7 @@ export const inviteBeneficiary = async ({ beneficiary_ids = [], user }) => {
 export const slugPersonalization = async ({ slug }) => {
   const organization = await organizationModel.findOne({ slug }).select({ _id: 1 });
 
-  if (!organization) throw new BadRequestError('Organization not found');
+  if (!organization) throw new BadRequestError('Sponsor not found');
 
   const personalization = await personalizationModel
     .findOne({ sponsor_id: organization._id })
