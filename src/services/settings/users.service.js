@@ -53,7 +53,7 @@ export const craeteNewUser = async ({ user, body }) => {
 
     checkMember.password = await bcrypt.hash(body.password, 12);
     checkMember.sponsor_id = user._id;
-    checkMember.acctstatus = "active";
+    checkMember.acctstatus = 'active';
 
     await checkMember.save();
 
@@ -256,7 +256,7 @@ export const updateStatus = async ({ user_id, body, user }) => {
 
 export const checkIfBenficiary = async ({ user, email }) => {
   const beneficiary = await organizationBeneficiaryModel.findOne({
-    email,
+    'contact.email': email,
     organization_id: user._id
   });
 
