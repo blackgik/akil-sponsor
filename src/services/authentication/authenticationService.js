@@ -3,6 +3,9 @@ import jwt from 'jsonwebtoken';
 import XLSX from 'xlsx';
 import axios from 'axios';
 import request from 'request';
+import path from 'path';
+import fs from 'fs';
+import Microinvoice from 'microinvoice';
 import env from '../../config/env.js';
 import organizationModel, { buildOrganizationSchema } from '../../models/organizationModel.js';
 import ProductCategoryModel from '../../models/products/ProductCategoryModel.js';
@@ -495,6 +498,7 @@ export const setOrganizationPackageData = async ({ body, user }) => {
   }
   organizationExists.isPackageBuilt = true;
   organizationExists.paymentstatus = 'pending';
+  organizationExists.hasPaid = false;
 
   await organizationExists.save();
 
@@ -680,20 +684,6 @@ export const uploadOrganizationBeneficiariesInBulk = async ({ user, file, body }
   return { errorLogs, createBatchList };
 };
 
-export const fetchBankCode = async ({ bank_code }) => {
-  const config = {
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${env.flutterwave_secret_key}`
-    }
-  };
-
-  const bnkcodeurl = `${env.flutterwave_api_key}/banks/${bank_code}`;
-
-  const response = await axios.get(bnkcodeurl, config);
-
-  return { codes: response.data.data };
-};
 
 export const fetchPreferencesData = async () => {
   const categories = await ProductCategoryModel.find({ is_active: true });
@@ -709,7 +699,7 @@ export const onboardingPayment = async ({ user, body }) => {
     throw new BadRequestError(`Amount for selected Models will be ${amount}`);
 
   let paystackAmount = 0.02 * amountToPay;
-  if (paystackAmount >= 2000) paystackAmount = 4000;
+  if (paystackAmount >= 2000) paystackAmount = 2000;
 
   amountToPay = (amountToPay + paystackAmount) * 100;
 
@@ -722,24 +712,18 @@ export const onboardingPayment = async ({ user, body }) => {
         : `${env.prod_base_url_org}/home`,
     metadata: {
       full_name: user.firstname + ' ' + user.lastname,
+      phone: user.phone,
       userId: user._id,
       package: body,
       amountToPay,
       on_trial: false,
+      paystackFee: paystackAmount,
       hasPaid: true,
       acctstatus: 'active',
       type: 'sponsor-onboarding'
     }
   };
 
-  // const url = `${env.paystack_api_url}/transaction/initialize`;
-
-  // const gateway = await axios.post(url, data, {
-  //   headers: {
-  //     Authorization: `Bearer ${env.paystack_secret_key}`,
-  //     'Content-Type': 'application/json'
-  //   }
-  // });
   return new Promise(async (resolve, reject) => {
     try {
       initializePayment(data, (error, body) => {
@@ -747,8 +731,10 @@ export const onboardingPayment = async ({ user, body }) => {
           reject(new BadRequestError(error.message))
         }
         const response = JSON.parse(body);
-
-        return resolve(response);
+        console.log('====================================');
+        console.log(response.data);
+        console.log('====================================');
+        return resolve({ gateway: response.data.authorization_url });
 
       });
 
@@ -779,10 +765,16 @@ export const onboardingPaymentInfo = async ({ user, params }) => {
         if (status == 'success' && response.data.metadata?.full_name) {
           const { email } = response.data.customer;
           const full_name = response.data.metadata.full_name;
+          const phone = response.data.metadata.phone;
+          const trxid = response.data.id;
+          const paid_at = response.data.paid_at;
+          const trxfee = response.data.metadata.paystackFee;
+          const channel = response.data.channel;
+          const currency = response.data.currency;
           const metadata = response.data.metadata;
-          const amount = response.data.amount;
+          const amount = parseInt(response.data.amount)/100;
           const operation = 'onboarding';
-          let newPayment = { full_name, email, amount, reference, trxref, operation, metadata, status };
+          let newPayment = { full_name, email, phone, amount, reference, trxid, trxref, trxfee, operation, metadata, channel, currency, paid_at, status };
           const payment = paymentModel.create(newPayment);
 
           const checkIfOnboarded = await organizationModel.findOne({ email: email });
@@ -800,69 +792,198 @@ export const onboardingPaymentInfo = async ({ user, params }) => {
         return reject(new BadRequestError(response.message))
       })
     } catch (error) {
-      return reject( new BadRequestError(error.message))
+      return reject(new BadRequestError(error.message))
     }
 
   });
 };
+export const downloadReceipt = async ({ user, reference }) => {
+  let receipt;
 
-export const addModules = async ({ user, body }) => {
-  if (user.acctstatus !== 'active') throw new BadRequestError('Your account is not active');
+  receipt = await paymentModel.findOne({ reference: reference });
 
-  if (body?.modules && body?.modules.length > 0) {
-    body.modules = [...new Set([...body.modules, ...user.modules])];
-  } else {
-    body.modules = [...user.modules];
-  }
-  const bodyLength = body.modules.length;
-  const existing = user.modules.length;
-  const diff = bodyLength - existing;
+  if (!receipt) throw new BadRequestError('Payment reference not found');
 
-  if (diff < 1) throw new BadRequestError('Add modules to proceed');
+  let receiptData = receipt.metadata[0];
+  let totalAmount = receipt.amount/100;
 
-  const base_pay = 5 * diff;
-  let total_pay = base_pay * user.total_number_of_beneficiaries_chosen;
-
-  // check if its a yearly contribution.
-  if (user.annual_plan) {
-    const nowTime = new Date().getTime() / (1000 * 60 * 60 * 24 * 30);
-    const endTime = new Date(user.end_trial_ts).getTime() / (1000 * 60 * 60 * 24 * 30);
-
-    total_pay = endTime - nowTime > 1 ? (endTime - nowTime) * total_pay : total_pay;
+  let parts = Array();
+  if (parseInt(receiptData.package.organization_reg_fee) > 0) {
+    parts.push([{
+      value: "Registration fee"
+    }, {
+      value: 1
+    }, {
+      value: receiptData.package.organization_reg_fee,
+      price: true
+    }]);
   }
 
-  total_pay = Math.ceil(total_pay);
+  if (parseInt(receiptData.package.beneficiaries.sup_beneficiary_fee) > 0) {
+    parts.push([{
+      value: "Additional Beneficiaries fee"
+    }, {
+      value: receiptData.package.beneficiaries.total_number_of_beneficiaries_chosen
+    }, {
+      value: receiptData.package.beneficiaries.sup_beneficiary_fee,
+      price: true
+    }]);
+  }
 
-  // if (body.amount !== total_pay) throw new BadRequestError(`Amount must be equal to ${total_pay}`);
+  if (parseInt(receiptData.package.sms.sup_sms_fee) > 0) {
+    parts.push([{
+      value: "Additional SMS fee"
+    }, {
+      value: receiptData.package.sms.total_number_of_sms
+    }, {
+      value: receiptData.package.sms.sup_sms_fee,
+      price: true
+    }]);
+  }
 
-  const charges = 0.02 * total_pay;
-  total_pay = total_pay + charges;
+  if (parseInt(receiptData.package.personalization.personalization_fee) > 0) {
+    parts.push([{
+      value: "Personalization fee"
+    }, {
+      value: 1
+    }, {
+      value: receiptData.package.personalization.personalization_fee,
+      price: true
+    }]);
+  }
 
-  const data = {
-    amount: Number(total_pay) * 100,
-    email: user.email,
-    callback_url:
-      env.node_env === 'development'
-        ? `${env.dev_base_url_org}/login`
-        : `${env.prod_base_url_org}/login`,
-    metadata: {
-      userId: user._id,
-      modules: body.modules,
-      diff,
-      type: 'add_modules'
-    }
-  };
+  if (parseInt(receiptData.package.data_collection.data_collection_fee) > 0) {
+    parts.push([{
+      value: "Data collection fee"
+    }, {
+      value: receiptData.package.data_collection.data_collection_quantity
+    }, {
+      value: receiptData.package.data_collection.data_collection_fee,
+      price: true
+    }]);
+  }
 
-  const url = `${env.paystack_api_url}/transaction/initialize`;
+  parts.push([{
+    value: "Transaction fee"
+  }, {
+    value: 1
+  }, {
+    value: receipt.trxfee,
+    price: true
+  }]);
+  // Create the new invoice
+  let myInvoice = new Microinvoice({
+    style: {
+      header: {
+        image: {
+          path: `./src/utils/akilaahlogo.png`,
+          width: 50,
+          height: 19
+        }
+      }
+    },
+    data: {
+      invoice: {
+        name: "Invoice",
 
-  const gateway = await axios.post(url, data, {
-    headers: {
-      Authorization: `Bearer ${env.paystack_secret_key}`,
-      'Content-Type': 'application/json'
+        header: [{
+          label: "Invoice Number",
+          value: receipt.trxid
+        }, {
+          label: "Status",
+          value: "Paid"
+        }, {
+          label: "Date",
+          value: receipt.paid_at
+        }],
+
+        currency: "NGN",
+
+        customer: [{
+          label: "Bill To",
+          value: [
+            receipt.full_name,
+            "Akilaah Client",
+            receipt.email,
+            receipt.phone,
+            receipt.trxid,
+            "Nigeria"
+          ]
+        }, {
+          label: "Tax Identifier",
+          value: ""
+        }
+        ],
+
+        seller: [{
+          label: "Bill From",
+          value: [
+            "Akilaah",
+            "2 Flowers Streets, Lagos",
+            "Nigeria",
+            "+234 809 535 5554",
+            "ask@akilaah.com"
+          ]
+        }, {
+          label: "Tax Identifier",
+          value: ""
+        }],
+
+        legal: [{
+          value: "Thanks for your purchase!",
+          weight: "bold",
+          color: "primary"
+        }, {
+          value: "Once again, welcome to AKILAAH! We look forward to achieving great things together",
+          weight: "bold",
+          color: "secondary"
+        }],
+
+        details: {
+          header: [{
+            value: "Description"
+          }, {
+            value: "Quantity"
+          }, {
+            value: "Subtotal"
+          }],
+
+          parts: parts,
+
+          total: [{
+            label: "Total without VAT",
+            value: totalAmount,
+            price: true
+          }, {
+            label: "VAT Rate",
+            value: "20%"
+          }, {
+            label: "VAT Paid",
+            value: "NA",
+            price: false
+          }, {
+            label: "Total paid with VAT",
+            value: totalAmount,
+            price: true
+          }]
+        }
+      }
     }
   });
 
-  return { gateway: gateway.data.data.authorization_url };
+  // Render invoice as PDF
+  if (fs.existsSync(`files/${receipt.reference}.pdf`)) {
+    return `files/${receipt.reference}.pdf`;
+  } else {
+    let response = await myInvoice.generate(`files/${receipt.reference}.pdf`);
+    console.log('====================================');
+    console.log(response);
+    console.log('====================================');
+    if (response) {
+      return `files/${receipt.reference}.pdf`;
+    }
+    throw new BadRequestError('Unable to download receipt');
+  }
 };
 
 export const inviteBeneficiary = async ({ beneficiary_ids = [], user }) => {

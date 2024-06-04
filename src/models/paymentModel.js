@@ -12,6 +12,9 @@ export const PaymentSchema = new Schema(
         type: String,
         required: true
     },
+    phone: {
+        type: String
+    },
     amount: {
         type: Number,
         required: true
@@ -21,13 +24,28 @@ export const PaymentSchema = new Schema(
         required: true,
         unique: true
     },
+    trxid : {
+        type: String
+    },
     trxref : {
         type: String
+    },
+    trxfee: {
+        type: Number
     },
     operation : {
         type: String
     },
     metadata: Array,
+    channel : {
+        type: String
+    },
+    currency : {
+        type: String
+    },
+    paid_at: {
+        type: Date
+    },
     status: {
         type: String,
         required: true

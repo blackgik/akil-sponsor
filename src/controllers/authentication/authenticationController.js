@@ -1,8 +1,6 @@
 import appResponse from '../../../lib/appResponse.js';
 import env from '../../config/env.js';
 import {
-  addModules,
-  fetchBankCode,
   fetchPreferencesData,
   forgotPassword,
   setOrganizationPackageData,
@@ -19,7 +17,8 @@ import {
   slugPersonalization,
   uploadOrganizationBeneficiariesInBulk,
   verifyEmail,
-  verifyForgotOtp
+  verifyForgotOtp,
+  downloadReceipt
 } from '../../services/authentication/authenticationService.js';
 import { encryptData } from '../../utils/vault.js';
 
@@ -139,10 +138,12 @@ export const organizationBulkUploadBeneficiaryHandler = async (req, res) => {
   res.send(appResponse('uploaded organization beneficiaries successfully', uploaded));
 };
 
-export const fetchBankCodeHandler = async (req, res) => {
-  const { bank_code } = req.params;
-  const bankCodes = await fetchBankCode({ bank_code });
-  res.send(appResponse('fetched bank code successfully', bankCodes));
+export const downloadReceiptHandler = async (req, res) => {
+  const { user, params } = req;
+  const { reference } = params;
+
+  const product = await downloadReceipt({ user, reference });
+  res.download(product);
 };
 
 export const onboardingPaymentHandler = async (req, res) => {
@@ -170,13 +171,6 @@ export const sendEmailHandler = async (req, res) => {
   res.send(appResponse('Mail sent successfully', data));
 };
 
-export const addModulesHandler = async (req, res) => {
-  const { user, body } = req;
-
-  const gateway = await addModules({ user, body });
-
-  res.send(appResponse('generated Gateway successfully', gateway));
-};
 
 export const slugPersonalizationHandler = async (req, res) => {
   const { query } = req;
