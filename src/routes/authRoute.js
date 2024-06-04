@@ -14,6 +14,7 @@ import {
 import {
   organizationPreferencesHandler,
   forgotPasswordHandler,
+  whatsappApiDataHandler,
   sendEmailHandler,
   organizationPackageHandler,
   organizationEmailVerifyHandler,
@@ -104,6 +105,7 @@ const organizationRoute = () => {
     resetPasswordHandler
   );
   organizationRoutes.get('/profile', authentication, organizationProfileHandler);
+  organizationRoutes.get('/get-whatsapp-api-data', authentication, whatsappApiDataHandler);
   organizationRoutes.post(
     '/bulk-upload-beneficiaries',
     authentication,
