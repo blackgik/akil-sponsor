@@ -208,6 +208,7 @@ export const verifyEmail = async (body) => {
 export const loginOrganization = async (body) => {
   const { email, password } = body;
   let checkOrg = await organizationModel.findOne({ email });
+
   let user;
 
   if (!checkOrg) {
@@ -237,21 +238,22 @@ export const loginOrganization = async (body) => {
     await admin.save();
   }
 
-  const encrypedDataString = await encryptData({
-    data2encrypt: { ...admin.toJSON(), is_first_time, user_info: user ? user : {} },
-    pubKey: env.public_key
-  });
+  // const encrypedDataString = await encryptData({
+  //   data2encrypt: { ...admin.toJSON(), is_first_time, user_info: user ? user : {} },
+  //   pubKey: env.public_key
+  // });
 
   const tokenEncryption = jwt.sign(
     {
       _id: checkOrg ? checkOrg._id : user._id,
       email: checkOrg ? checkOrg.email : user.email,
+      user: admin,
       adminType: checkOrg ? 'sponsor' : 'user'
     },
     env.jwt_key
   );
 
-  return { encrypedDataString, tokenEncryption };
+  return { tokenEncryption };
 };
 
 export const forgotPassword = async ({ body }) => {
@@ -308,15 +310,13 @@ export const resetPassword = async ({ body, user }) => {
 };
 
 export const sendSponsorEmail = async ({ body, user }) => {
-
-
   const organizationExists = await organizationModel.findById(user._id);
   if (!organizationExists) {
     throw new BadRequestError("Sponsor doesn't exist!");
   }
 
   if (organizationExists.hasPaid || organizationExists.paymentstatus == 'paid') {
-    throw new BadRequestError("Sponsor already paid!");
+    throw new BadRequestError('Sponsor already paid!');
   }
 
   let amountToPay = 0;
@@ -332,9 +332,13 @@ export const sendSponsorEmail = async ({ body, user }) => {
     amountToPay += plans.sponsor_onboarding_settings.personalization_fee;
     personalizationFee = plans.sponsor_onboarding_settings.personalization_fee;
   }
-  if (organizationExists.total_number_of_beneficiaries_chosen > plans.sponsor_onboarding_settings.max_users) {
+  if (
+    organizationExists.total_number_of_beneficiaries_chosen >
+    plans.sponsor_onboarding_settings.max_users
+  ) {
     supBeneficiaryFee =
-      organizationExists.total_number_of_beneficiaries_chosen - plans.sponsor_onboarding_settings.max_users;
+      organizationExists.total_number_of_beneficiaries_chosen -
+      plans.sponsor_onboarding_settings.max_users;
     amountToPay += supBeneficiaryFee;
   }
   if (organizationExists.total_number_of_sms > plans.sponsor_onboarding_settings.max_sms) {
@@ -345,13 +349,13 @@ export const sendSponsorEmail = async ({ body, user }) => {
   }
   if (organizationExists.data_collection_quantity > 0) {
     dataCollectionFee =
-      organizationExists.data_collection_quantity * plans.sponsor_onboarding_settings.data_collection_fee;
+      organizationExists.data_collection_quantity *
+      plans.sponsor_onboarding_settings.data_collection_fee;
     amountToPay += dataCollectionFee;
   }
-  organizationExists.paymentstatus = 'pending'
+  organizationExists.paymentstatus = 'pending';
   organizationExists.hasPaid = false;
   await organizationExists.save();
-
 
   const onboardingData = {
     amountToPay: amountToPay,
@@ -885,14 +889,16 @@ export const whatsappApiData = async ({ user, params }) => {
   }
 
   if (organizationExists.hasPaid || organizationExists.paymentstatus == 'paid') {
-    throw new BadRequestError("Sponsor already paid!");
+    throw new BadRequestError('Sponsor already paid!');
   }
 
-  organizationExists.paymentstatus = 'pending'
+  organizationExists.paymentstatus = 'pending';
   organizationExists.hasPaid = false;
   await organizationExists.save();
 
-  return { whatsapUrl: `https://wa.me/+2347070701163?text=Hello%2C%20please%20can%20I%20make%20enquiry%20about%20subscription%20payment%3F` };
+  return {
+    whatsapUrl: `https://wa.me/+2347070701163?text=Hello%2C%20please%20can%20I%20make%20enquiry%20about%20subscription%20payment%3F`
+  };
 };
 
 export const downloadReceipt = async ({ user, reference }) => {
@@ -1008,44 +1014,52 @@ export const downloadReceipt = async ({ user, reference }) => {
       invoice: {
         name: 'Invoice',
 
-        header: [{
-          label: "Invoice Number",
-          value: receipt.trxid
-        }, {
-          label: "Status",
-          value: "Paid"
-        }, {
-          label: "Date",
-          value: new Date(receipt.paid_at).toISOString().
-          replace(/T/, ' ').      // replace T with a space
-          replace(/\..+/, '')
-        }],
-
-        currency: "NGN",
-
-        customer: [{
-          label: "Bill To",
-          value: [
-            receipt.full_name,
-            "Akilaah Client",
-            receipt.email,
-            receipt.phone,
-            "",
-            "Nigeria"
-          ]
-        }
+        header: [
+          {
+            label: 'Invoice Number',
+            value: receipt.trxid
+          },
+          {
+            label: 'Status',
+            value: 'Paid'
+          },
+          {
+            label: 'Date',
+            value: new Date(receipt.paid_at)
+              .toISOString()
+              .replace(/T/, ' ') // replace T with a space
+              .replace(/\..+/, '')
+          }
         ],
 
-        seller: [{
-          label: "Bill From",
-          value: [
-            "Akilaah",
-            "+234 0707 01163",
-"NICON Plaza (5th Floor) Left wing, Mohammadu Buhari Way", 
-"Central Business District Abuja, Nigeria",
-"support@majfintech.com"
-          ]
-        }],
+        currency: 'NGN',
+
+        customer: [
+          {
+            label: 'Bill To',
+            value: [
+              receipt.full_name,
+              'Akilaah Client',
+              receipt.email,
+              receipt.phone,
+              '',
+              'Nigeria'
+            ]
+          }
+        ],
+
+        seller: [
+          {
+            label: 'Bill From',
+            value: [
+              'Akilaah',
+              '+234 0707 01163',
+              'NICON Plaza (5th Floor) Left wing, Mohammadu Buhari Way',
+              'Central Business District Abuja, Nigeria',
+              'support@majfintech.com'
+            ]
+          }
+        ],
 
         customer: [
           {
@@ -1111,11 +1125,13 @@ export const downloadReceipt = async ({ user, reference }) => {
 
           parts: parts,
 
-          total: [{
-            label: "Total",
-            value: totalAmount,
-            price: true
-          }]
+          total: [
+            {
+              label: 'Total',
+              value: totalAmount,
+              price: true
+            }
+          ]
         }
       }
     }
