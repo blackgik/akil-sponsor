@@ -5,7 +5,7 @@ export const permissions =
   ({ authorize, functions, permission }) =>
   async (req, res, next) => {
     const { user } = req;
-    if (Object.keys(user?.user_info).length === 0 || !user.user_info) {
+    if (!user.user_info) {
       return next();
     }
 
