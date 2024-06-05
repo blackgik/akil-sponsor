@@ -101,9 +101,6 @@ export const fetchAllWarehouses = async ({ user, params }) => {
     .populate({
       path: 'warehouse_overseer_id',
       model: 'User'
-    }).populate({
-      path: 'sponsor_id',
-      model: 'Organization'
     });
 
   const count = warehouseCount;
@@ -128,10 +125,6 @@ export const getSingleWarehouse = async ({ user, warehouse_id }) => {
     .populate({
       path: 'warehouse_overseer_id',
       model: 'User'
-    })
-    .populate({
-      path: 'sponsor_id',
-      model: 'Organization'
     });
 
   if (!warehouseInView) throw new BadRequestError('warehouse  does not exist')
