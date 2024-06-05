@@ -142,7 +142,7 @@ export const resendOtp = async (body) => {
   if (!msgDelivered)
     throw new InternalServerError(
       500,
-      'server slip. Organization was created without mail being sent',
+      'server slip. Sponsor was created without mail being sent',
       ''
     );
 
@@ -187,7 +187,7 @@ export const verifyEmail = async (body) => {
   if (!msgDelivered)
     throw new InternalServerError(
       500,
-      'server slip. Organization was created without mail being sent',
+      'server slip. Sponsor was created without mail being sent',
       ''
     );
   const admin = checkAcct.toJSON();
@@ -308,19 +308,68 @@ export const resetPassword = async ({ body, user }) => {
 };
 
 export const sendSponsorEmail = async ({ body, user }) => {
+
+
+  const organizationExists = await organizationModel.findById(user._id);
+  if (!organizationExists) {
+    throw new BadRequestError("Sponsor doesn't exist!");
+  }
+
+  if (organizationExists.hasPaid || organizationExists.paymentstatus == 'paid') {
+    throw new BadRequestError("Sponsor already paid!");
+  }
+
+  let amountToPay = 0;
+  let supSmsFee = 0;
+  let supBeneficiaryFee = 0;
+  let personalizationFee = 0;
+  let dataCollectionFee = 0;
+
+  if (!organizationExists.hasPaid) {
+    amountToPay += plans.sponsor_onboarding_settings.organization_reg_fee;
+  }
+  if (organizationExists.psdAgreement && !organizationExists.hasPaid_personalization_fee) {
+    amountToPay += plans.sponsor_onboarding_settings.personalization_fee;
+    personalizationFee = plans.sponsor_onboarding_settings.personalization_fee;
+  }
+  if (organizationExists.total_number_of_beneficiaries_chosen > plans.sponsor_onboarding_settings.max_users) {
+    supBeneficiaryFee =
+      organizationExists.total_number_of_beneficiaries_chosen - plans.sponsor_onboarding_settings.max_users;
+    amountToPay += supBeneficiaryFee;
+  }
+  if (organizationExists.total_number_of_sms > plans.sponsor_onboarding_settings.max_sms) {
+    supSmsFee =
+      (organizationExists.total_number_of_sms - plans.sponsor_onboarding_settings.max_sms) *
+      plans.sponsor_onboarding_settings.sup_sms_fee;
+    amountToPay += supSmsFee;
+  }
+  if (organizationExists.data_collection_quantity > 0) {
+    dataCollectionFee =
+      organizationExists.data_collection_quantity * plans.sponsor_onboarding_settings.data_collection_fee;
+    amountToPay += dataCollectionFee;
+  }
+  organizationExists.paymentstatus = 'pending'
+  organizationExists.hasPaid = false;
+  await organizationExists.save();
+
+
   const onboardingData = {
-    name: user.firstname + ' ' + user.lastname,
-    data: body
+    amountToPay: amountToPay,
+    onboardingFee: organizationExists.organization_reg_fee,
+    supSmsFee: supSmsFee,
+    supBeneficiaryFee: supBeneficiaryFee,
+    personalizationFee: personalizationFee,
+    dataCollectionFee: dataCollectionFee,
+    note: body.description
   };
 
   const mailData = {
-    email: 'ask@akilaah.com',
-    subject: 'Payment Verification',
+    email: 'support@majfintech.com',
+    subject: 'Onboarding Request',
     type: 'html',
     html: paymentVerificationMail(onboardingData).html,
     text: paymentVerificationMail(onboardingData).text
   };
-
   const msg = await formattMailInfo(mailData, env);
 
   const msgDelivered = await messageBird(msg);
@@ -475,10 +524,10 @@ export const setOrganizationPreferences = async ({ body, user }) => {
 export const setOrganizationPackageData = async ({ body, user }) => {
   const organizationExists = await organizationModel.findById(user._id);
   if (!organizationExists) {
-    throw new BadRequestError("Organization doesn't exist!");
+    throw new BadRequestError("Sponsor doesn't exist!");
   }
 
-  if (organizationExists.hasPaid || organizationExists.isPackageBuilt) {
+  if (organizationExists.hasPaid) {
     throw new BadRequestError('Package already paid!');
   }
 
@@ -520,7 +569,7 @@ export const setOrganizationPackageData = async ({ body, user }) => {
     amountToPay += dataCollectionFee;
   }
   organizationExists.isPackageBuilt = true;
-  organizationExists.paymentstatus = 'pending';
+  organizationExists.paymentstatus = 'undefined';
   organizationExists.hasPaid = false;
 
   await organizationExists.save();
@@ -754,9 +803,6 @@ export const onboardingPayment = async ({ user, body }) => {
           reject(new BadRequestError(error.message));
         }
         const response = JSON.parse(body);
-        console.log('====================================');
-        console.log(response.data);
-        console.log('====================================');
         return resolve({ gateway: response.data.authorization_url });
       });
     } catch (error) {
@@ -831,6 +877,24 @@ export const onboardingPaymentInfo = async ({ user, params }) => {
     }
   });
 };
+
+export const whatsappApiData = async ({ user, params }) => {
+  const organizationExists = await organizationModel.findById(user._id);
+  if (!organizationExists) {
+    throw new BadRequestError("Sponsor doesn't exist!");
+  }
+
+  if (organizationExists.hasPaid || organizationExists.paymentstatus == 'paid') {
+    throw new BadRequestError("Sponsor already paid!");
+  }
+
+  organizationExists.paymentstatus = 'pending'
+  organizationExists.hasPaid = false;
+  await organizationExists.save();
+
+  return { whatsapUrl: `https://wa.me/+2347070701163?text=Hello%2C%20please%20can%20I%20make%20enquiry%20about%20subscription%20payment%3F` };
+};
+
 export const downloadReceipt = async ({ user, reference }) => {
   let receipt;
 
@@ -839,7 +903,7 @@ export const downloadReceipt = async ({ user, reference }) => {
   if (!receipt) throw new BadRequestError('Payment reference not found');
 
   let receiptData = receipt.metadata[0];
-  let totalAmount = receipt.amount / 100;
+  let totalAmount = receipt.amount;
 
   let parts = Array();
   if (parseInt(receiptData.package.organization_reg_fee) > 0) {
@@ -935,8 +999,8 @@ export const downloadReceipt = async ({ user, reference }) => {
       header: {
         image: {
           path: `./src/utils/akilaahlogo.png`,
-          width: 50,
-          height: 19
+          width: 100,
+          height: 36
         }
       }
     },
@@ -944,22 +1008,44 @@ export const downloadReceipt = async ({ user, reference }) => {
       invoice: {
         name: 'Invoice',
 
-        header: [
-          {
-            label: 'Invoice Number',
-            value: receipt.trxid
-          },
-          {
-            label: 'Status',
-            value: 'Paid'
-          },
-          {
-            label: 'Date',
-            value: receipt.paid_at
-          }
+        header: [{
+          label: "Invoice Number",
+          value: receipt.trxid
+        }, {
+          label: "Status",
+          value: "Paid"
+        }, {
+          label: "Date",
+          value: new Date(receipt.paid_at).toISOString().
+          replace(/T/, ' ').      // replace T with a space
+          replace(/\..+/, '')
+        }],
+
+        currency: "NGN",
+
+        customer: [{
+          label: "Bill To",
+          value: [
+            receipt.full_name,
+            "Akilaah Client",
+            receipt.email,
+            receipt.phone,
+            "",
+            "Nigeria"
+          ]
+        }
         ],
 
-        currency: 'NGN',
+        seller: [{
+          label: "Bill From",
+          value: [
+            "Akilaah",
+            "+234 0707 01163",
+"NICON Plaza (5th Floor) Left wing, Mohammadu Buhari Way", 
+"Central Business District Abuja, Nigeria",
+"support@majfintech.com"
+          ]
+        }],
 
         customer: [
           {
@@ -1025,27 +1111,11 @@ export const downloadReceipt = async ({ user, reference }) => {
 
           parts: parts,
 
-          total: [
-            {
-              label: 'Total without VAT',
-              value: totalAmount,
-              price: true
-            },
-            {
-              label: 'VAT Rate',
-              value: '20%'
-            },
-            {
-              label: 'VAT Paid',
-              value: 'NA',
-              price: false
-            },
-            {
-              label: 'Total paid with VAT',
-              value: totalAmount,
-              price: true
-            }
-          ]
+          total: [{
+            label: "Total",
+            value: totalAmount,
+            price: true
+          }]
         }
       }
     }
@@ -1056,9 +1126,6 @@ export const downloadReceipt = async ({ user, reference }) => {
     return `files/${receipt.reference}.pdf`;
   } else {
     let response = await myInvoice.generate(`files/${receipt.reference}.pdf`);
-    console.log('====================================');
-    console.log(response);
-    console.log('====================================');
     if (response) {
       return `files/${receipt.reference}.pdf`;
     }
@@ -1127,7 +1194,7 @@ export const inviteBeneficiary = async ({ beneficiary_ids = [], user }) => {
 export const slugPersonalization = async ({ slug }) => {
   const organization = await organizationModel.findOne({ slug }).select({ _id: 1 });
 
-  if (!organization) throw new BadRequestError('Organization not found');
+  if (!organization) throw new BadRequestError('Sponsor not found');
 
   const personalization = await personalizationModel
     .findOne({ sponsor_id: organization._id })

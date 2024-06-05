@@ -7,6 +7,7 @@ import {
   setOrganizationPreferences,
   onboardingPaymentInfo,
   inviteBeneficiary,
+  whatsappApiData,
   loginOrganization,
   onboardNewOrganization,
   sendSponsorEmail,
@@ -161,6 +162,15 @@ export const onboardingPaymentInfoHandler = async (req, res) => {
   const gateway = await onboardingPaymentInfo({user, params});
 
   res.send(appResponse('Updated payment successfully', gateway));
+};
+
+export const whatsappApiDataHandler = async (req, res) => {
+  const { user, query } = req;
+  const params = query;
+
+  const whatsappData = await whatsappApiData({user, params});
+
+  res.send(appResponse('WHatsapp Api data fetched successfully', whatsappData));
 };
 
 export const sendEmailHandler = async (req, res) => {

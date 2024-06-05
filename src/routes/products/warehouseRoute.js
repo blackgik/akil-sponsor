@@ -8,6 +8,7 @@ import {
 import {
   createNewWarehouseHandler,
   fetchWarehouseHandler,
+  getWarehouseStatHandler,
   getAllWarehousesHandler,
   getSingleWarehouseHandler,
   updateSingleWarehouseHandler
@@ -30,6 +31,7 @@ const warehouseRoot = () => {
 
   //------common Section of Warehouses------------\\
   warehouseRoutes.get('/get-all-warehouses', authentication, getAllWarehousesHandler);
+  warehouseRoutes.get('/get-warehouse-stat/:warehouse_id', Validate(viewSingleWarehouseSchema, 'params'), authentication, getWarehouseStatHandler);
   warehouseRoutes.get(
     '/view-single-warehouse/:warehouse_id',
     Validate(viewSingleWarehouseSchema, 'params'),
