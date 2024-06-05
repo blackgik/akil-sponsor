@@ -1,7 +1,9 @@
 import env from '../../config/env.js';
-import { DuplicateError, InternalServerError, NotFoundError } from '../../../lib/appErrors.js';
+import { BadRequestError, DuplicateError, InternalServerError, NotFoundError } from '../../../lib/appErrors.js';
 import WarehouseModel from '../../models/products/WarehouseModel.js';
+import warehouseProductModel from '../../models/products/warehouseProductModel.js';
 import usersModels from '../../models/settings/users.models.js';
+import mongoose from 'mongoose';
 
 export const createNewWarehouse = async ({ user, body }) => {
   const userx = await usersModels.findById(body.warehouse_overseer_id);
@@ -50,7 +52,7 @@ export const fetchWarehouse = async ({ user, params }) => {
   });
 
   const fetchData = await WarehouseModel
-    .find({ ...filterData})
+    .find({ ...filterData })
     .populate({
       path: 'warehouse_overseer_id',
       model: 'User'
@@ -95,14 +97,14 @@ export const fetchAllWarehouses = async ({ user, params }) => {
 
   const warehouseCount = await WarehouseModel.countDocuments({ ...filterData });
 
-  let warehouseData = await WarehouseModel.find({ ...filterData})
-  .populate({
-    path: 'warehouse_overseer_id',
-    model: 'User'
-  }).populate({
-    path: 'sponsor_id',
-    model: 'Organization'
-  });
+  let warehouseData = await WarehouseModel.find({ ...filterData })
+    .populate({
+      path: 'warehouse_overseer_id',
+      model: 'User'
+    }).populate({
+      path: 'sponsor_id',
+      model: 'Organization'
+    });
 
   const count = warehouseCount;
 
@@ -132,9 +134,45 @@ export const getSingleWarehouse = async ({ user, warehouse_id }) => {
       model: 'Organization'
     });
 
-  if (!warehouseInView) throw new NotFoundError('warehouse  does not exist');
+  if (!warehouseInView) throw new BadRequestError('warehouse  does not exist')
+  const totalInStock = await warehouseProductModel.aggregate([
+    //{$match : {warehouse_i: warehouse_id }},
+    { $match: { warehouse_id: mongoose.Types.ObjectId(warehouse_id) } },
+    { $group: { _id: null, totalQuantity: { $sum: "$quantity" } } }
+  ]);
 
-  return warehouseInView;
+  const itemCount = await warehouseProductModel.countDocuments({
+    warehouse_id: warehouse_id
+  });
+
+  const itemOnShortageCount = await warehouseProductModel.countDocuments({
+    warehouse_id: warehouse_id, quantity: 0
+  });
+  const totalProductQuantityInStock = totalInStock[0]?.totalQuantity || 0;
+  return { itemCount, totalProductQuantityInStock, itemOnShortageCount, warehouseInView };
+};
+
+export const getWarehouseStat = async ({ user, warehouse_id }) => {
+  let warehouseInView;
+
+  warehouseInView = await WarehouseModel.findById(warehouse_id);
+
+  if (!warehouseInView) throw new BadRequestError('warehouse  does not exist')
+  const totalInStock = await warehouseProductModel.aggregate([
+    //{$match : {warehouse_i: warehouse_id }},
+    { $match: { warehouse_id: mongoose.Types.ObjectId(warehouse_id) } },
+    { $group: { _id: null, totalQuantity: { $sum: "$quantity" } } }
+  ]);
+
+  const itemCount = await warehouseProductModel.countDocuments({
+    warehouse_id: warehouse_id
+  });
+
+  const itemOnShortageCount = await warehouseProductModel.countDocuments({
+    warehouse_id: warehouse_id, quantity: 0
+  });
+  const totalProductQuantityInStock = totalInStock[0]?.totalQuantity || 0;
+  return { itemCount, totalProductQuantityInStock, itemOnShortageCount, warehouseInView };
 };
 
 export const updateSingleWarehouse = async ({ warehouse_id, body, user }) => {

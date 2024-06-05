@@ -3,6 +3,7 @@ import {
   createNewWarehouse,
   fetchAllWarehouses,
   fetchWarehouse,
+  getWarehouseStat,
   getSingleWarehouse,
   updateSingleWarehouse
 } from '../../services/product/warehouseService.js';
@@ -43,6 +44,15 @@ export const getSingleWarehouseHandler = async (req, res) => {
   const warehouse = await getSingleWarehouse({ user, warehouse_id });
 
   res.send(appResponse('fetched warehouse successfully', warehouse));
+};
+
+export const getWarehouseStatHandler = async (req, res) => {
+  const { user, params } = req;
+  const { warehouse_id } = params;
+
+  const warehouse = await getWarehouseStat({ user, warehouse_id });
+
+  res.send(appResponse('fetched warehouse stat successfully', warehouse));
 };
 
 export const updateSingleWarehouseHandler = async (req, res) => {
