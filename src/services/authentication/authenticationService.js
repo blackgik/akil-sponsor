@@ -44,6 +44,7 @@ import personalizationModel from '../../models/settings/personalization.model.js
 
 import paymentModel from '../../models/paymentModel.js';
 import validator from 'validator';
+import usersModels from '../../models/settings/users.models.js';
 
 export const onboardNewOrganization = async ({ body, dbConnection }) => {
   if (!body.tosAgreement) throw new BadRequestError(`Terms and conditions not met`);
@@ -206,33 +207,47 @@ export const verifyEmail = async (body) => {
 
 export const loginOrganization = async (body) => {
   const { email, password } = body;
-  const checkOrg = await organizationModel.findOne({ email });
+  let checkOrg = await organizationModel.findOne({ email });
+  let user;
 
-  if (!checkOrg) throw new BadRequestError('Invalid Sponsor');
+  if (!checkOrg) {
+    user = await usersModels.findOne({ email }).populate('role_id');
 
-  if (!checkOrg.isApproved) throw new BadRequestError('Account not verified');
+    if (!user) throw new InvalidError('Invalid Sponsor');
+  }
 
-  const isMatch = await bcrypt.compare(password, checkOrg.password);
+  const acctstatus = checkOrg ? checkOrg.isApproved : user.acctstatus === 'active' ? true : false;
+
+  if (!acctstatus) throw new BadRequestError('Account not verified');
+
+  const passwordCrypt = checkOrg?.password || user?.password;
+
+  const isMatch = await bcrypt.compare(password, passwordCrypt);
 
   if (!isMatch) throw new BadRequestError('Invalid Sponsor');
 
-  const admin = checkOrg.toJSON();
+  const admin = checkOrg ? checkOrg : await organizationModel.findById(user.sponsor_id);
+
   admin.onboardingSetting = plans.sponsor_onboarding_settings;
-  const is_first_time = checkOrg.is_first_time;
+  const is_first_time = admin.is_first_time;
 
-  if (checkOrg.is_first_time === true) {
-    checkOrg.is_first_time = false;
+  if (admin.is_first_time === true) {
+    admin.is_first_time = false;
 
-    await checkOrg.save();
+    await admin.save();
   }
 
   const encrypedDataString = await encryptData({
-    data2encrypt: { ...admin, is_first_time },
+    data2encrypt: { ...admin.toJSON(), is_first_time, user_info: user ? user : {} },
     pubKey: env.public_key
   });
 
   const tokenEncryption = jwt.sign(
-    { _id: admin._id, email: admin.email, user: admin },
+    {
+      _id: checkOrg ? checkOrg._id : user._id,
+      email: checkOrg ? checkOrg.email : user.email,
+      adminType: checkOrg ? 'sponsor' : 'user'
+    },
     env.jwt_key
   );
 
@@ -396,6 +411,14 @@ export const findOrganizationById = async (id) => {
   if (admin) return admin;
 
   return false;
+};
+
+export const findUserById = async (id) => {
+  const user = await usersModels.findById(id).populate('role_id');
+
+  if (!user) return false;
+
+  return user;
 };
 
 export const onboardNewOrganizationBeneficiary = async ({ body, user }) => {
@@ -707,8 +730,9 @@ export const uploadOrganizationBeneficiariesInBulk = async ({ user, file, body }
     'November',
     'December'
   ];
-  const formattedDate = `${currentDate.getDate()} ${monthNames[currentDate.getMonth()]
-    } ${currentDate.getFullYear()}`;
+  const formattedDate = `${currentDate.getDate()} ${
+    monthNames[currentDate.getMonth()]
+  } ${currentDate.getFullYear()}`;
 
   // Create email profile here
   const bulkUpload = {
@@ -732,7 +756,6 @@ export const uploadOrganizationBeneficiariesInBulk = async ({ user, file, body }
 
   return { errorLogs, createBatchList };
 };
-
 
 export const fetchPreferencesData = async () => {
   const categories = await ProductCategoryModel.find({ is_active: true });
@@ -777,17 +800,15 @@ export const onboardingPayment = async ({ user, body }) => {
     try {
       initializePayment(data, (error, body) => {
         if (error) {
-          reject(new BadRequestError(error.message))
+          reject(new BadRequestError(error.message));
         }
         const response = JSON.parse(body);
         return resolve({ gateway: response.data.authorization_url });
-
       });
-
     } catch (error) {
       return reject(new BadRequestError(error.message));
     }
-  })
+  });
 };
 
 export const onboardingPaymentInfo = async ({ user, params }) => {
@@ -801,13 +822,12 @@ export const onboardingPaymentInfo = async ({ user, params }) => {
 
   return new Promise(async (resolve, reject) => {
     try {
-
       verifyPayment(reference, async (error, body) => {
         if (error) {
-          reject(new BadRequestError(error.message))
+          reject(new BadRequestError(error.message));
         }
         const response = JSON.parse(body);
-        const { status } = (response.data) ? response.data : response;
+        const { status } = response.data ? response.data : response;
         if (status == 'success' && response.data.metadata?.full_name) {
           const { email } = response.data.customer;
           const full_name = response.data.metadata.full_name;
@@ -820,7 +840,22 @@ export const onboardingPaymentInfo = async ({ user, params }) => {
           const metadata = response.data.metadata;
           const amount = parseInt(response.data.amount) / 100;
           const operation = 'onboarding';
-          let newPayment = { full_name, email, phone, amount, reference, trxid, trxref, trxfee, operation, metadata, channel, currency, paid_at, status };
+          let newPayment = {
+            full_name,
+            email,
+            phone,
+            amount,
+            reference,
+            trxid,
+            trxref,
+            trxfee,
+            operation,
+            metadata,
+            channel,
+            currency,
+            paid_at,
+            status
+          };
           const payment = paymentModel.create(newPayment);
 
           const checkIfOnboarded = await organizationModel.findOne({ email: email });
@@ -833,14 +868,13 @@ export const onboardingPaymentInfo = async ({ user, params }) => {
             checkIfOnboarded.paymentstatus = 'paid';
             await checkIfOnboarded.save();
           }
-          return resolve(payment)
+          return resolve(payment);
         }
-        return reject(new BadRequestError(response.message))
-      })
+        return reject(new BadRequestError(response.message));
+      });
     } catch (error) {
-      return reject(new BadRequestError(error.message))
+      return reject(new BadRequestError(error.message));
     }
-
   });
 };
 
@@ -873,68 +907,92 @@ export const downloadReceipt = async ({ user, reference }) => {
 
   let parts = Array();
   if (parseInt(receiptData.package.organization_reg_fee) > 0) {
-    parts.push([{
-      value: "Registration fee"
-    }, {
-      value: 1
-    }, {
-      value: receiptData.package.organization_reg_fee,
-      price: true
-    }]);
+    parts.push([
+      {
+        value: 'Registration fee'
+      },
+      {
+        value: 1
+      },
+      {
+        value: receiptData.package.organization_reg_fee,
+        price: true
+      }
+    ]);
   }
 
   if (parseInt(receiptData.package.beneficiaries.sup_beneficiary_fee) > 0) {
-    parts.push([{
-      value: "Additional Beneficiaries fee"
-    }, {
-      value: receiptData.package.beneficiaries.total_number_of_beneficiaries_chosen
-    }, {
-      value: receiptData.package.beneficiaries.sup_beneficiary_fee,
-      price: true
-    }]);
+    parts.push([
+      {
+        value: 'Additional Beneficiaries fee'
+      },
+      {
+        value: receiptData.package.beneficiaries.total_number_of_beneficiaries_chosen
+      },
+      {
+        value: receiptData.package.beneficiaries.sup_beneficiary_fee,
+        price: true
+      }
+    ]);
   }
 
   if (parseInt(receiptData.package.sms.sup_sms_fee) > 0) {
-    parts.push([{
-      value: "Additional SMS fee"
-    }, {
-      value: receiptData.package.sms.total_number_of_sms
-    }, {
-      value: receiptData.package.sms.sup_sms_fee,
-      price: true
-    }]);
+    parts.push([
+      {
+        value: 'Additional SMS fee'
+      },
+      {
+        value: receiptData.package.sms.total_number_of_sms
+      },
+      {
+        value: receiptData.package.sms.sup_sms_fee,
+        price: true
+      }
+    ]);
   }
 
   if (parseInt(receiptData.package.personalization.personalization_fee) > 0) {
-    parts.push([{
-      value: "Personalization fee"
-    }, {
-      value: 1
-    }, {
-      value: receiptData.package.personalization.personalization_fee,
-      price: true
-    }]);
+    parts.push([
+      {
+        value: 'Personalization fee'
+      },
+      {
+        value: 1
+      },
+      {
+        value: receiptData.package.personalization.personalization_fee,
+        price: true
+      }
+    ]);
   }
 
   if (parseInt(receiptData.package.data_collection.data_collection_fee) > 0) {
-    parts.push([{
-      value: "Data collection fee"
-    }, {
-      value: receiptData.package.data_collection.data_collection_quantity
-    }, {
-      value: receiptData.package.data_collection.data_collection_fee,
-      price: true
-    }]);
+    parts.push([
+      {
+        value: 'Data collection fee'
+      },
+      {
+        value: receiptData.package.data_collection.data_collection_quantity
+      },
+      {
+        value: receiptData.package.data_collection.data_collection_fee,
+        price: true
+      }
+    ]);
   }
 
-  parts.push([{
-    value: "Transaction fee"
-  }, {
-    value: 1
-  }, {
-    value: receipt.trxfee,
-    price: true
-  }]);
+  parts.push([
+    {
+      value: 'Transaction fee'
+    },
+    {
+      value: 1
+    },
+    {
+      value: receipt.trxfee,
+      price: true
+    }
+  ]);
   // Create the new invoice
   let myInvoice = new Microinvoice({
     style: {
@@ -948,7 +1006,7 @@ export const downloadReceipt = async ({ user, reference }) => {
     },
     data: {
       invoice: {
-        name: "Invoice",
+        name: 'Invoice',
 
         header: [{
           label: "Invoice Number",
@@ -989,24 +1047,67 @@ export const downloadReceipt = async ({ user, reference }) => {
           ]
         }],
 
-        legal: [{
-          value: "Thanks for your purchase!",
-          weight: "bold",
-          color: "primary"
-        }, {
-          value: "Once again, welcome to AKILAAH! We look forward to achieving great things together",
-          weight: "bold",
-          color: "secondary"
-        }],
+        customer: [
+          {
+            label: 'Bill To',
+            value: [
+              receipt.full_name,
+              'Akilaah Client',
+              receipt.email,
+              receipt.phone,
+              receipt.trxid,
+              'Nigeria'
+            ]
+          },
+          {
+            label: 'Tax Identifier',
+            value: ''
+          }
+        ],
+
+        seller: [
+          {
+            label: 'Bill From',
+            value: [
+              'Akilaah',
+              '2 Flowers Streets, Lagos',
+              'Nigeria',
+              '+234 809 535 5554',
+              'ask@akilaah.com'
+            ]
+          },
+          {
+            label: 'Tax Identifier',
+            value: ''
+          }
+        ],
+
+        legal: [
+          {
+            value: 'Thanks for your purchase!',
+            weight: 'bold',
+            color: 'primary'
+          },
+          {
+            value:
+              'Once again, welcome to AKILAAH! We look forward to achieving great things together',
+            weight: 'bold',
+            color: 'secondary'
+          }
+        ],
 
         details: {
-          header: [{
-            value: "Description"
-          }, {
-            value: "Quantity"
-          }, {
-            value: "Subtotal"
-          }],
+          header: [
+            {
+              value: 'Description'
+            },
+            {
+              value: 'Quantity'
+            },
+            {
+              value: 'Subtotal'
+            }
+          ],
 
           parts: parts,
 
