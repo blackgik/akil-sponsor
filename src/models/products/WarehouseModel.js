@@ -30,9 +30,9 @@ const WarehouseSchema = new Schema(
     wrhstatus: {
         type: String,
         trim: true,
-        default: 'draft',
+        default: 'available',
         index: true,
-        enum: ['draft', 'available', 'full', 'closed']
+        enum: ['available', 'full', 'closed']
       },
   },
   { timestamps: true }
