@@ -869,7 +869,7 @@ export const downloadReceipt = async ({ user, reference }) => {
   if (!receipt) throw new BadRequestError('Payment reference not found');
 
   let receiptData = receipt.metadata[0];
-  let totalAmount = receipt.amount / 100;
+  let totalAmount = receipt.amount;
 
   let parts = Array();
   if (parseInt(receiptData.package.organization_reg_fee) > 0) {
@@ -941,8 +941,8 @@ export const downloadReceipt = async ({ user, reference }) => {
       header: {
         image: {
           path: `./src/utils/akilaahlogo.png`,
-          width: 50,
-          height: 19
+          width: 100,
+          height: 36
         }
       }
     },
@@ -958,7 +958,9 @@ export const downloadReceipt = async ({ user, reference }) => {
           value: "Paid"
         }, {
           label: "Date",
-          value: receipt.paid_at
+          value: new Date(receipt.paid_at).toISOString().
+          replace(/T/, ' ').      // replace T with a space
+          replace(/\..+/, '')
         }],
 
         currency: "NGN",
@@ -970,12 +972,9 @@ export const downloadReceipt = async ({ user, reference }) => {
             "Akilaah Client",
             receipt.email,
             receipt.phone,
-            receipt.trxid,
+            "",
             "Nigeria"
           ]
-        }, {
-          label: "Tax Identifier",
-          value: ""
         }
         ],
 
@@ -983,14 +982,11 @@ export const downloadReceipt = async ({ user, reference }) => {
           label: "Bill From",
           value: [
             "Akilaah",
-            "2 Flowers Streets, Lagos",
-            "Nigeria",
-            "+234 809 535 5554",
-            "ask@akilaah.com"
+            "+234 0707 01163",
+"NICON Plaza (5th Floor) Left wing, Mohammadu Buhari Way", 
+"Central Business District Abuja, Nigeria",
+"support@majfintech.com"
           ]
-        }, {
-          label: "Tax Identifier",
-          value: ""
         }],
 
         legal: [{
@@ -1015,18 +1011,7 @@ export const downloadReceipt = async ({ user, reference }) => {
           parts: parts,
 
           total: [{
-            label: "Total without VAT",
-            value: totalAmount,
-            price: true
-          }, {
-            label: "VAT Rate",
-            value: "20%"
-          }, {
-            label: "VAT Paid",
-            value: "NA",
-            price: false
-          }, {
-            label: "Total paid with VAT",
+            label: "Total",
             value: totalAmount,
             price: true
           }]
@@ -1040,9 +1025,6 @@ export const downloadReceipt = async ({ user, reference }) => {
     return `files/${receipt.reference}.pdf`;
   } else {
     let response = await myInvoice.generate(`files/${receipt.reference}.pdf`);
-    console.log('====================================');
-    console.log(response);
-    console.log('====================================');
     if (response) {
       return `files/${receipt.reference}.pdf`;
     }
