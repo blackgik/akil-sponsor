@@ -209,6 +209,7 @@ export const verifyEmail = async (body) => {
 export const loginOrganization = async (body) => {
   const { email, password } = body;
   let checkOrg = await organizationModel.findOne({ email });
+
   let user;
 
   if (!checkOrg) {
@@ -238,21 +239,22 @@ export const loginOrganization = async (body) => {
     await admin.save();
   }
 
-  const encrypedDataString = await encryptData({
-    data2encrypt: { ...admin.toJSON(), is_first_time, user_info: user ? user : {} },
-    pubKey: env.public_key
-  });
+  // const encrypedDataString = await encryptData({
+  //   data2encrypt: { ...admin.toJSON(), is_first_time, user_info: user ? user : {} },
+  //   pubKey: env.public_key
+  // });
 
   const tokenEncryption = jwt.sign(
     {
       _id: checkOrg ? checkOrg._id : user._id,
       email: checkOrg ? checkOrg.email : user.email,
+      user: admin,
       adminType: checkOrg ? 'sponsor' : 'user'
     },
     env.jwt_key
   );
 
-  return { encrypedDataString, tokenEncryption };
+  return { tokenEncryption };
 };
 
 export const forgotPassword = async ({ body }) => {
