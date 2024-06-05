@@ -11,6 +11,7 @@ import {
 } from '../../controllers/settings/users.controllers.js';
 import validators from '../../validators/index.js';
 import { createNewUserSchema, editNewUserSchema } from '../../validators/users.schema.js';
+import { permissions } from '../../middlewares/permissions.js';
 
 const userRoute = express.Router();
 
@@ -18,18 +19,45 @@ userRoute.post(
   '/create-user',
   validators(createNewUserSchema),
   authentication,
+  permissions({ authorize: 'settings', functions: 'users', permission: 'create' }),
   createNewuserHandler
 );
-userRoute.get('/fetch-users', authentication, fetchUsersHandler);
-userRoute.get('/fetch-user/:user_id', authentication, fetchUserHandler);
+userRoute.get(
+  '/fetch-users',
+  authentication,
+  permissions({ authorize: 'settings', functions: 'users', permission: 'view' }),
+  fetchUsersHandler
+);
+userRoute.get(
+  '/fetch-user/:user_id',
+  authentication,
+  permissions({ authorize: 'settings', functions: 'users', permission: 'view' }),
+  fetchUserHandler
+);
 userRoute.patch(
   '/edit-users/:user_id',
   validators(editNewUserSchema),
   authentication,
+  permissions({ authorize: 'settings', functions: 'users', permission: 'edit' }),
   editUserHandler
 );
-userRoute.patch('/update-status/:user_id', authentication, updateStatusHandler);
-userRoute.get('/check-if-beneficiary', authentication, checkIfBenficiaryHandler);
-userRoute.delete('/delete-user/:user_id', authentication, deleteUserHandler);
+userRoute.patch(
+  '/update-status/:user_id',
+  authentication,
+  permissions({ authorize: 'settings', functions: 'users', permission: 'edit' }),
+  updateStatusHandler
+);
+userRoute.get(
+  '/check-if-beneficiary',
+  authentication,
+  permissions({ authorize: 'settings', functions: 'users', permission: 'view' }),
+  checkIfBenficiaryHandler
+);
+userRoute.delete(
+  '/delete-user/:user_id',
+  authentication,
+  permissions({ authorize: 'settings', functions: 'users', permission: 'delete' }),
+  deleteUserHandler
+);
 
 export default userRoute;
