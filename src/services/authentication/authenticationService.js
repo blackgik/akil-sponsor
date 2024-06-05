@@ -293,32 +293,68 @@ export const resetPassword = async ({ body, user }) => {
 };
 
 export const sendSponsorEmail = async ({ body, user }) => {
-  const onboardingData = {
-    name: user.firstname + ' ' + user.lastname,
-    data: body
-  };
 
-  const mailData = {
-    email: 'ask@akilaah.com',
-    subject: 'Payment Verification',
-    type: 'html',
-    html: paymentVerificationMail(onboardingData).html,
-    text: paymentVerificationMail(onboardingData).text
-  };
 
   const organizationExists = await organizationModel.findById(user._id);
   if (!organizationExists) {
     throw new BadRequestError("Sponsor doesn't exist!");
   }
 
-  if (organizationExists.hasPaid || organizationExists.paymentstatus =='paid') {
+  if (organizationExists.hasPaid || organizationExists.paymentstatus == 'paid') {
     throw new BadRequestError("Sponsor already paid!");
   }
 
+  let amountToPay = 0;
+  let supSmsFee = 0;
+  let supBeneficiaryFee = 0;
+  let personalizationFee = 0;
+  let dataCollectionFee = 0;
+
+  if (!organizationExists.hasPaid) {
+    amountToPay += plans.sponsor_onboarding_settings.organization_reg_fee;
+  }
+  if (organizationExists.psdAgreement && !organizationExists.hasPaid_personalization_fee) {
+    amountToPay += plans.sponsor_onboarding_settings.personalization_fee;
+    personalizationFee = plans.sponsor_onboarding_settings.personalization_fee;
+  }
+  if (organizationExists.total_number_of_beneficiaries_chosen > plans.sponsor_onboarding_settings.max_users) {
+    supBeneficiaryFee =
+      organizationExists.total_number_of_beneficiaries_chosen - plans.sponsor_onboarding_settings.max_users;
+    amountToPay += supBeneficiaryFee;
+  }
+  if (organizationExists.total_number_of_sms > plans.sponsor_onboarding_settings.max_sms) {
+    supSmsFee =
+      (organizationExists.total_number_of_sms - plans.sponsor_onboarding_settings.max_sms) *
+      plans.sponsor_onboarding_settings.sup_sms_fee;
+    amountToPay += supSmsFee;
+  }
+  if (organizationExists.data_collection_quantity > 0) {
+    dataCollectionFee =
+      organizationExists.data_collection_quantity * plans.sponsor_onboarding_settings.data_collection_fee;
+    amountToPay += dataCollectionFee;
+  }
   organizationExists.paymentstatus = 'pending'
   organizationExists.hasPaid = false;
   await organizationExists.save();
 
+
+  const onboardingData = {
+    amountToPay: amountToPay,
+    onboardingFee: organizationExists.organization_reg_fee,
+    supSmsFee: supSmsFee,
+    supBeneficiaryFee: supBeneficiaryFee,
+    personalizationFee: personalizationFee,
+    dataCollectionFee: dataCollectionFee,
+    note: body.description
+  };
+
+  const mailData = {
+    email: 'ask@akilaah.com',
+    subject: 'Onboarding Request',
+    type: 'html',
+    html: paymentVerificationMail(onboardingData).html,
+    text: paymentVerificationMail(onboardingData).text
+  };
   const msg = await formattMailInfo(mailData, env);
 
   const msgDelivered = await messageBird(msg);
@@ -814,7 +850,7 @@ export const whatsappApiData = async ({ user, params }) => {
     throw new BadRequestError("Sponsor doesn't exist!");
   }
 
-  if (organizationExists.hasPaid || organizationExists.paymentstatus =='paid') {
+  if (organizationExists.hasPaid || organizationExists.paymentstatus == 'paid') {
     throw new BadRequestError("Sponsor already paid!");
   }
 
@@ -822,7 +858,7 @@ export const whatsappApiData = async ({ user, params }) => {
   organizationExists.hasPaid = false;
   await organizationExists.save();
 
-  return {whatsapUrl: `https://wa.me/+2347070701163?text=Hello%2C%20please%20can%20I%20make%20enquiry%20about%20subscription%20payment%3F`};
+  return { whatsapUrl: `https://wa.me/+2347070701163?text=Hello%2C%20please%20can%20I%20make%20enquiry%20about%20subscription%20payment%3F` };
 };
 
 export const downloadReceipt = async ({ user, reference }) => {
