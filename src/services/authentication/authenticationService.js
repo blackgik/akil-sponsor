@@ -45,6 +45,7 @@ import personalizationModel from '../../models/settings/personalization.model.js
 import paymentModel from '../../models/paymentModel.js';
 import validator from 'validator';
 import usersModels from '../../models/settings/users.models.js';
+import { capitalizeWords } from '../../utils/general.js';
 
 export const onboardNewOrganization = async ({ body, dbConnection }) => {
   if (!body.tosAgreement) throw new BadRequestError(`Terms and conditions not met`);
@@ -308,15 +309,13 @@ export const resetPassword = async ({ body, user }) => {
 };
 
 export const sendSponsorEmail = async ({ body, user }) => {
-
-
   const organizationExists = await organizationModel.findById(user._id);
   if (!organizationExists) {
     throw new BadRequestError("Sponsor doesn't exist!");
   }
 
   if (organizationExists.hasPaid || organizationExists.paymentstatus == 'paid') {
-    throw new BadRequestError("Sponsor already paid!");
+    throw new BadRequestError('Sponsor already paid!');
   }
 
   let amountToPay = 0;
@@ -332,9 +331,13 @@ export const sendSponsorEmail = async ({ body, user }) => {
     amountToPay += plans.sponsor_onboarding_settings.personalization_fee;
     personalizationFee = plans.sponsor_onboarding_settings.personalization_fee;
   }
-  if (organizationExists.total_number_of_beneficiaries_chosen > plans.sponsor_onboarding_settings.max_users) {
+  if (
+    organizationExists.total_number_of_beneficiaries_chosen >
+    plans.sponsor_onboarding_settings.max_users
+  ) {
     supBeneficiaryFee =
-      organizationExists.total_number_of_beneficiaries_chosen - plans.sponsor_onboarding_settings.max_users;
+      organizationExists.total_number_of_beneficiaries_chosen -
+      plans.sponsor_onboarding_settings.max_users;
     amountToPay += supBeneficiaryFee;
   }
   if (organizationExists.total_number_of_sms > plans.sponsor_onboarding_settings.max_sms) {
@@ -345,13 +348,13 @@ export const sendSponsorEmail = async ({ body, user }) => {
   }
   if (organizationExists.data_collection_quantity > 0) {
     dataCollectionFee =
-      organizationExists.data_collection_quantity * plans.sponsor_onboarding_settings.data_collection_fee;
+      organizationExists.data_collection_quantity *
+      plans.sponsor_onboarding_settings.data_collection_fee;
     amountToPay += dataCollectionFee;
   }
-  organizationExists.paymentstatus = 'pending'
+  organizationExists.paymentstatus = 'pending';
   organizationExists.hasPaid = false;
   await organizationExists.save();
-
 
   const onboardingData = {
     amountToPay: amountToPay,
@@ -478,28 +481,28 @@ export const onboardNewOrganizationBeneficiary = async ({ body, user }) => {
 
   await user.save();
 
-  if (validator.isEmail(body.contact.email)) {
-    // send beneficiary login credentials
-    const onboardingData = {
-      email: createBeneficiary.contact.email,
-      name_of_cooperation: user.firstname,
-      name: createBeneficiary.personal.member_name,
-      password: generatePassword,
-      company_code: user.company_code
-    };
-    const mailData = {
-      email: createBeneficiary.contact.email,
-      subject: 'BENEFICIARY ONBOARDING',
-      type: 'html',
-      html: beneficaryOnboardinMail(onboardingData).html,
-      text: beneficaryOnboardinMail(onboardingData).text
-    };
-    const msg = await formattMailInfo(mailData, env);
+  // if (validator.isEmail(body.contact.email)) {
+  //   // send beneficiary login credentials
+  //   const onboardingData = {
+  //     email: createBeneficiary.contact.email,
+  //     name_of_cooperation: user.firstname,
+  //     name: createBeneficiary.personal.member_name,
+  //     password: generatePassword,
+  //     company_code: user.company_code
+  //   };
+  //   const mailData = {
+  //     email: createBeneficiary.contact.email,
+  //     subject: 'BENEFICIARY ONBOARDING',
+  //     type: 'html',
+  //     html: beneficaryOnboardinMail(onboardingData).html,
+  //     text: beneficaryOnboardinMail(onboardingData).text
+  //   };
+  //   const msg = await formattMailInfo(mailData, env);
 
-    const msgDelivered = await messageBird(msg);
-    if (!msgDelivered)
-      throw new InternalServerError('server slip. Beneficiary was created without mail being sent');
-  }
+  //   const msgDelivered = await messageBird(msg);
+  //   if (!msgDelivered)
+  //     throw new InternalServerError('server slip. Beneficiary was created without mail being sent');
+  // }
 
   // create notification for beneficiary
   await notificationsModel.create({
@@ -885,14 +888,16 @@ export const whatsappApiData = async ({ user, params }) => {
   }
 
   if (organizationExists.hasPaid || organizationExists.paymentstatus == 'paid') {
-    throw new BadRequestError("Sponsor already paid!");
+    throw new BadRequestError('Sponsor already paid!');
   }
 
-  organizationExists.paymentstatus = 'pending'
+  organizationExists.paymentstatus = 'pending';
   organizationExists.hasPaid = false;
   await organizationExists.save();
 
-  return { whatsapUrl: `https://wa.me/+2347070701163?text=Hello%2C%20please%20can%20I%20make%20enquiry%20about%20subscription%20payment%3F` };
+  return {
+    whatsapUrl: `https://wa.me/+2347070701163?text=Hello%2C%20please%20can%20I%20make%20enquiry%20about%20subscription%20payment%3F`
+  };
 };
 
 export const downloadReceipt = async ({ user, reference }) => {
@@ -1008,44 +1013,52 @@ export const downloadReceipt = async ({ user, reference }) => {
       invoice: {
         name: 'Invoice',
 
-        header: [{
-          label: "Invoice Number",
-          value: receipt.trxid
-        }, {
-          label: "Status",
-          value: "Paid"
-        }, {
-          label: "Date",
-          value: new Date(receipt.paid_at).toISOString().
-          replace(/T/, ' ').      // replace T with a space
-          replace(/\..+/, '')
-        }],
-
-        currency: "NGN",
-
-        customer: [{
-          label: "Bill To",
-          value: [
-            receipt.full_name,
-            "Akilaah Client",
-            receipt.email,
-            receipt.phone,
-            "",
-            "Nigeria"
-          ]
-        }
+        header: [
+          {
+            label: 'Invoice Number',
+            value: receipt.trxid
+          },
+          {
+            label: 'Status',
+            value: 'Paid'
+          },
+          {
+            label: 'Date',
+            value: new Date(receipt.paid_at)
+              .toISOString()
+              .replace(/T/, ' ') // replace T with a space
+              .replace(/\..+/, '')
+          }
         ],
 
-        seller: [{
-          label: "Bill From",
-          value: [
-            "Akilaah",
-            "+234 0707 01163",
-"NICON Plaza (5th Floor) Left wing, Mohammadu Buhari Way", 
-"Central Business District Abuja, Nigeria",
-"support@majfintech.com"
-          ]
-        }],
+        currency: 'NGN',
+
+        customer: [
+          {
+            label: 'Bill To',
+            value: [
+              receipt.full_name,
+              'Akilaah Client',
+              receipt.email,
+              receipt.phone,
+              '',
+              'Nigeria'
+            ]
+          }
+        ],
+
+        seller: [
+          {
+            label: 'Bill From',
+            value: [
+              'Akilaah',
+              '+234 0707 01163',
+              'NICON Plaza (5th Floor) Left wing, Mohammadu Buhari Way',
+              'Central Business District Abuja, Nigeria',
+              'support@majfintech.com'
+            ]
+          }
+        ],
 
         customer: [
           {
@@ -1111,11 +1124,13 @@ export const downloadReceipt = async ({ user, reference }) => {
 
           parts: parts,
 
-          total: [{
-            label: "Total",
-            value: totalAmount,
-            price: true
-          }]
+          total: [
+            {
+              label: 'Total',
+              value: totalAmount,
+              price: true
+            }
+          ]
         }
       }
     }
@@ -1138,17 +1153,33 @@ export const inviteBeneficiary = async ({ beneficiary_ids = [], user }) => {
     for (const beneficiary_id of beneficiary_ids) {
       const beneficiary = await organizationBeneficiaryModel.findById(beneficiary_id);
       if (!beneficiary) continue;
+      if (['invite', 'active', 'declined', 'suspended'].includes(beneficiary.acctstatus)) {
+        throw new DuplicateError('already invited');
+      }
+
+      // Generate a new password
+      const generatePassword = await codeGenerator(9, 'ABCDEFGHI&*$%#1234567890');
+
+      // Hash the new password
+      const hashedPassword = await bcrypt.hash(generatePassword, 12);
+
+      // Update the beneficiary's password in the database with the hashed password
+      const updatedUser = await organizationBeneficiaryModel.findByIdAndUpdate(beneficiary_id, {
+        password: hashedPassword
+      });
 
       const invitationData = {
-        member_name: beneficiary.personal.member_name,
+        name: capitalizeWords(beneficiary.personal.member_name),
         email: beneficiary.contact.email,
-        sponsor: `${user.firstname} ${user.lastname}`,
-        company_code: user.company_code
+        name_of_cooperation: capitalizeWords(`${user.firstname} ${user.lastname}`),
+        company_code: user.company_code,
+        password: generatePassword
       };
+
       if (beneficiary.contact.email) {
         const mailData = {
           email: beneficiary.contact.email,
-          subject: 'MAJFINTECH ONBOARDING',
+          subject: 'Welcome to AKILAAH - Your Login Details',
           type: 'html',
           html: invitationMail(invitationData).html,
           text: invitationMail(invitationData).text
@@ -1161,14 +1192,13 @@ export const inviteBeneficiary = async ({ beneficiary_ids = [], user }) => {
         if (!msgDelivered) {
           throw new InternalServerError('Server error. Invitation email not sent');
         }
+        // Update acctstatus to 'invite' after sending the invitation
       } else {
         const smsUrl = env.termii_api_url + '/api/sms/send';
         const smsData = {
           to: beneficiary.contact.phone,
           from: env.termii_sender_id,
-          sms: `Hi there, you have invited by ${invitationData.sponsor}\n use COMPANY CODE ${invitationData.company_code}
-    to  login into https://beneficiary.akilaah.com
-    `,
+          sms: `Hi there, you have invited by ${invitationData.name_of_cooperation}\n use COMPANY CODE ${invitationData.company_code} and PASSWORD ${generatePassword} to login into https://beneficiary.akilaah.com`,
           type: 'plain',
           api_key: env.termii_api_secret,
           channel: 'generic'
@@ -1182,6 +1212,11 @@ export const inviteBeneficiary = async ({ beneficiary_ids = [], user }) => {
 
         await axios.post(smsUrl, smsData, config);
       }
+
+      // Update acctstatus to 'invite' after sending the invitation
+      await organizationBeneficiaryModel.findByIdAndUpdate(beneficiary_id, {
+        acctstatus: 'invite'
+      });
     }
 
     return { success: true };

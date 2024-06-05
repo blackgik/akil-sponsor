@@ -11,6 +11,11 @@ export function removeFile(filePath) {
   });
 }
 
+export const capitalizeWords = (str) => {
+  return str.replace(/\b\w/g, char => char.toUpperCase())
+            .replace(/\B\w/g, char => char.toLowerCase());
+};
+
 export const downloadExcel = async (worksheetTitle, worksheetHearders, rows) => {
   let workbook = new excel.Workbook();
   let worksheet = workbook.addWorksheet(worksheetTitle);
