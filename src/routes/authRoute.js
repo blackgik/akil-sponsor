@@ -112,14 +112,24 @@ const organizationRoute = () => {
     upload.single('xls'),
     organizationBulkUploadBeneficiaryHandler
   );
-  organizationRoutes.patch('/make-onboarding-payments', authentication,Validate(BuildPackageSchema), onboardingPaymentHandler);
+  organizationRoutes.patch(
+    '/make-onboarding-payments',
+    authentication,
+    Validate(BuildPackageSchema),
+    onboardingPaymentHandler
+  );
   organizationRoutes.get('/onboarding-payment-info', authentication, onboardingPaymentInfoHandler);
   organizationRoutes.get(
     '/download-payment-receipt/:reference',
     authentication,
     downloadReceiptHandler
   );
-  organizationRoutes.post('/contact-sponsor-through-mail', authentication, Validate(sendContactMailSchema), sendEmailHandler);
+  organizationRoutes.post(
+    '/contact-sponsor-through-mail',
+    authentication,
+    Validate(sendContactMailSchema),
+    sendEmailHandler
+  );
 
   return organizationRoutes;
 };

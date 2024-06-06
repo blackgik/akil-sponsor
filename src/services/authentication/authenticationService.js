@@ -110,15 +110,20 @@ export const onboardNewOrganization = async ({ body, dbConnection }) => {
 
 export const resendOtp = async (body) => {
   //const hash = await argon.hash(dto.password);
-  const checkIfNotVerified = await organizationModel.findOne({ email: body.email });
-
-  if (!checkIfNotVerified) throw new BadRequestError('Account not found!');
+  let checkIfNotVerified = await organizationModel.findOne({ email: body.email });
+  let user;
+  if (!checkIfNotVerified) {
+    user = await usersModels.findOne({ email: body.email });
+    if (!user) throw new BadRequestError('Account not found!');
+  }
 
   // if (checkIfNotVerified.isApproved) throw new BadRequestError('Account already verified! Login!');
 
   const otp = await codeGenerator(6);
 
-  const otpHash = buildOtpHash(checkIfNotVerified.email, otp, env.otpKey, 15);
+  const emailTouse = checkIfNotVerified ? checkIfNotVerified.email : user.email;
+
+  const otpHash = buildOtpHash(emailTouse, otp, env.otpKey, 15);
 
   // checkIfNotVerified.otpHash = otpHash;
   // checkIfNotVerified.otp = otp;
@@ -126,12 +131,16 @@ export const resendOtp = async (body) => {
   // await checkIfNotVerified.save();
 
   //create email profile here
+  const nameToUse = checkIfNotVerified
+    ? checkIfNotVerified.firstname + ' ' + checkIfNotVerified.lastname
+    : user.user_name;
+
   const onboardingData = {
-    name: checkIfNotVerified.firstname + ' ' + checkIfNotVerified.lastname,
+    name: nameToUse,
     code: otp
   };
   const mailData = {
-    email: checkIfNotVerified.email,
+    email: emailTouse,
     subject: 'SPONSOR ONBOARDING',
     type: 'html',
     html: verifyOnbordingMail(onboardingData).html,
@@ -153,29 +162,48 @@ export const resendOtp = async (body) => {
 export const verifyEmail = async (body) => {
   const { code, hash, email } = body;
 
-  const checkAcct = await organizationModel.findOne({ email: email });
+  let checkAcct = await organizationModel.findOne({ email });
+  let user;
+  if (!checkAcct) {
+    user = await usersModels.findOne({ email });
+    if (!user) throw new BadRequestError('User not found');
+  }
 
-  if (!checkAcct) throw new BadRequestError('User not found');
+  const emailToUse = checkAcct ? checkAcct.email : user.email;
 
-  const verifyOtp = verifyOTP(checkAcct.email, code, hash, env.otpKey);
+  const verifyOtp = verifyOTP(emailToUse, code, hash, env.otpKey);
 
   if (!verifyOtp) throw new BadRequestError('Invalid Input');
 
-  checkAcct.isApproved = true;
-  checkAcct.acctstatus = 'active';
+  if (checkAcct) {
+    checkAcct.isApproved = true;
+    checkAcct.acctstatus = 'active';
 
-  await checkAcct.save();
+    await checkAcct.save();
+  }
+
+  const nameToUse = checkAcct
+    ? (checkAcct.firstname + ' ' + checkAcct.lastname).toUpperCase()
+    : user.user_name.toUpperCase();
+
+  if (user) {
+    user.acctstatus = 'active';
+
+    await user.save();
+
+    checkAcct = await organizationModel.findById(user.sponsor_id);
+  }
 
   //create email profile here
   const onboardingData = {
-    email: checkAcct.email,
-    name_of_cooperation: checkAcct.name_of_cooperation,
+    email: emailToUse,
+    name_of_cooperation: nameToUse,
     company_code: checkAcct.company_code,
-    name: (checkAcct.firstname + ' ' + checkAcct.lastname).toUpperCase()
+    name: nameToUse
   };
 
   const mailData = {
-    email: checkAcct.email,
+    email: emailToUse,
     subject: 'SPONSOR ONBOARDING',
     type: 'html',
     html: onboardinMail(onboardingData).html,
@@ -193,17 +221,23 @@ export const verifyEmail = async (body) => {
     );
   const admin = checkAcct.toJSON();
   admin.onboardingSetting = plans.sponsor_onboarding_settings;
-  const encrypedDataString = await encryptData({
-    data2encrypt: { ...admin },
-    pubKey: env.public_key
-  });
+
+  // const encrypedDataString = await encryptData({
+  //   data2encrypt: { ...admin },
+  //   pubKey: env.public_key
+  // });
 
   const tokenEncryption = jwt.sign(
-    { _id: admin._id, email: admin.email, user: admin },
+    {
+      _id: checkAcct ? admin._id : user._id,
+      email: emailToUse,
+      user: admin,
+      adminType: checkAcct ? 'sponsor' : 'user'
+    },
     env.jwt_key
   );
 
-  return { encrypedDataString, tokenEncryption };
+  return { tokenEncryption };
 };
 
 export const loginOrganization = async (body) => {
@@ -258,26 +292,29 @@ export const loginOrganization = async (body) => {
 };
 
 export const forgotPassword = async ({ body }) => {
-  const checkOrg = await organizationModel.findOne({ email: body.email });
+  let checkOrg = await organizationModel.findOne({ email: body.email });
+  let user;
+
   if (!checkOrg) {
-    return {};
+    user = await usersModels.findOne({ email: body.email });
+    if (!user) return {};
   }
 
   const newPassword = await codeGenerator(6);
 
   const hash = buildOtpHash(body.email, newPassword, env.otpKey, 15);
 
-  checkOrg.password = hash;
+  // checkOrg.password = hash;
 
-  checkOrg.save();
+  // checkOrg.save();
 
   const onboardingData = {
-    name: checkOrg.firstname + ' ' + checkOrg.lastname,
+    name: checkOrg ? checkOrg.firstname + ' ' + checkOrg.lastname : user.user_name,
     code: newPassword
   };
 
   const mailData = {
-    email: checkOrg.email,
+    email: body.email,
     subject: 'PASSWORD RESET REQUEST',
     type: 'html',
     html: forgotPasswordMail(onboardingData).html,
@@ -291,23 +328,30 @@ export const forgotPassword = async ({ body }) => {
   if (!msgDelivered) throw new InternalServerError('server slip. Reset Password code not sent');
 
   // return { email: checkBeneficiary.email };
-  return { hash: hash, email: checkOrg.email };
+  return { hash: hash, email: body.email };
 };
 
 export const resetPassword = async ({ body, user }) => {
   const { password } = body;
-  const email = user.email;
 
-  const checkOrg = await organizationModel.findOne({ email });
-  if (!checkOrg) throw new NotFoundError('Sponsor not found');
+  if (user.user_info) {
+    const userx = await usersModels.findOne({ email: user.user_info.email });
+
+    if (!userx) throw new NotFoundError(`User not found`);
+    userx.password = await bcrypt.hash(password, 12);
+
+    await userx.save();
+
+    return {};
+  }
 
   const hashPassword = await bcrypt.hash(password, 12);
 
-  checkOrg.password = hashPassword;
+  user.password = hashPassword;
 
-  await checkOrg.save();
+  await user.save();
 
-  return true;
+  return {};
 };
 
 export const sendSponsorEmail = async ({ body, user }) => {
