@@ -72,7 +72,7 @@ const organizationRoute = () => {
     '/onboard-organization-beneficiary',
     Validate(validateOrganizationBeneficiarySchema),
     authentication,
-    permissions({ authorize: 'settings', functions: 'users', permission: 'create' }),
+    permissions({ authorize: 'beneficiary', functions: 'add_beneficiary', permission: 'create' }),
     onboardNewOrganizationBeneficiaryHandler
   );
   organizationRoutes.post(
