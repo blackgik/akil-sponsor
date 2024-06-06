@@ -7,6 +7,7 @@ import { memberInvitehtmlFunction } from '../../htmls/memberOnboarding/memberInv
 import { formattMailInfo } from '../../utils/mailFormatter.js';
 import { messageBird } from '../../utils/msgBird.js';
 import rolepermissionModel from '../../models/settings/rolepermission.model.js';
+import organizationModel from '../../models/organizationModel.js';
 
 export const craeteNewUser = async ({ user, body }) => {
   const filter = {};
@@ -16,6 +17,12 @@ export const craeteNewUser = async ({ user, body }) => {
   const role = await rolepermissionModel.findById(body.role_id);
 
   if (!role) throw new BadRequestError('Our system does not know this role id');
+
+  // check email on admin
+  const sponsorAsUser = await organizationModel.findOne({ email: body.email });
+
+  if (sponsorAsUser)
+    throw new BadRequestError('This email can not be used. it exits as a sponsor already');
 
   let checkMember;
 
