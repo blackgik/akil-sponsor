@@ -38,6 +38,7 @@ import { upload } from '../../lib/multer.js';
 import validators from '../validators/index.js';
 import { sendContactMailSchema } from '../validators/sendContactMailSchema.js';
 import { BuildPackageSchema } from '../validators/packageSchema.js';
+import { permissions } from '../middlewares/permissions.js';
 
 const organizationRoutes = router.Router();
 
@@ -71,6 +72,7 @@ const organizationRoute = () => {
     '/onboard-organization-beneficiary',
     Validate(validateOrganizationBeneficiarySchema),
     authentication,
+    permissions({ authorize: 'settings', functions: 'users', permission: 'create' }),
     onboardNewOrganizationBeneficiaryHandler
   );
   organizationRoutes.post(
