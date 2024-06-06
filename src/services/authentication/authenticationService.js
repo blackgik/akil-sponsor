@@ -277,12 +277,16 @@ export const loginOrganization = async (body) => {
   //   data2encrypt: { ...admin.toJSON(), is_first_time, user_info: user ? user : {} },
   //   pubKey: env.public_key
   // });
+  let userData = admin.toJSON();
+  if (user) {
+    userData = { ...admin.toJSON(), user_info: user };
+  }
 
   const tokenEncryption = jwt.sign(
     {
       _id: checkOrg ? checkOrg._id : user._id,
       email: checkOrg ? checkOrg.email : user.email,
-      user: admin,
+      user: userData,
       adminType: checkOrg ? 'sponsor' : 'user'
     },
     env.jwt_key
@@ -432,8 +436,17 @@ export const sendSponsorEmail = async ({ body, user }) => {
 export const verifyForgotOtp = async ({ body }) => {
   const { code, hash, email } = body;
 
-  const checkOrg = await organizationModel.findOne({ email: email });
-  if (!checkOrg) throw new NotFoundError('Sponsor not found');
+  let checkOrg = await organizationModel.findOne({ email: email });
+
+  let user;
+
+  if (!checkOrg) {
+    user = await usersModels.findOne({ email });
+
+    if (!user) throw new NotFoundError('User not found');
+
+    checkOrg = await organizationModel.findById(user.sponsor_id);
+  }
 
   const verifyOtp = verifyOTP(email, code, hash, env.otpKey);
 
@@ -445,10 +458,15 @@ export const verifyForgotOtp = async ({ body }) => {
 
   checkOrg.password = hashPassword;
 
+  let userData = checkOrg.toJSON();
+  if (user) {
+    userData = { ...checkOrg.toJSON(), user_info: user };
+  }
+
   // await checkOrg.save();
 
   const tokenEncryption = jwt.sign(
-    { _id: checkOrg._id, email: checkOrg.email, user: checkOrg },
+    { _id: checkOrg._id, email: checkOrg.email, user: userData },
     env.jwt_key
   );
 
