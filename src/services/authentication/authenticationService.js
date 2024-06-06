@@ -4,7 +4,7 @@ import XLSX from 'xlsx';
 import axios from 'axios';
 import request from 'request';
 import path from 'path';
-import fs from 'fs';
+import fs, { exists } from 'fs';
 import Microinvoice from 'microinvoice';
 import env from '../../config/env.js';
 import organizationModel, { buildOrganizationSchema } from '../../models/organizationModel.js';
@@ -471,6 +471,8 @@ export const findUserById = async (id) => {
 };
 
 export const onboardNewOrganizationBeneficiary = async ({ body, user }) => {
+  // return {user}
+  // check if user info exists on the user if ot then a sponsor but when true it is a user
   // check organization count
   if (user.total_number_of_beneficiaries_created >= user.total_number_of_beneficiaries_chosen)
     throw new BadRequestError(
@@ -523,9 +525,18 @@ export const onboardNewOrganizationBeneficiary = async ({ body, user }) => {
 
   if (!createBeneficiary) throw new InternalServerError('server slip. Please try again in bit');
 
-  user.total_number_of_beneficiaries_created += 1;
-
-  await user.save();
+  if (user.user_info) {
+    const sponsorAcct = await organizationModel.findById(user.user_info.sponsor_id);
+    if (sponsorAcct) {
+      sponsorAcct.total_number_of_beneficiaries_created += 1;
+      await sponsorAcct.save();
+    } else {
+      throw new Error('Sponsor account not found');
+    }
+  } else {
+    user.total_number_of_beneficiaries_created += 1;
+    await user.save();
+  }
 
   // if (validator.isEmail(body.contact.email)) {
   //   // send beneficiary login credentials
@@ -947,172 +958,216 @@ export const whatsappApiData = async ({ user, params }) => {
 };
 
 export const downloadReceipt = async ({ user, reference }) => {
-    let receipt;
-  
-    receipt = await paymentModel.findOne({ reference: reference });
-  
-    if (fs.existsSync(`files/${receipt.reference}.pdf`)) {
-      fs.unlink(`files/${receipt.reference}.pdf`, (err) => {
-        if (err) console.log(err.message);
-      });
-    }
-  
-  
-    if (!receipt) throw new BadRequestError('Payment reference not found');
-  
-    let receiptData = receipt.metadata[0];
-    let totalAmount = receipt.amount;
-  
-    let parts = Array();
-    if (parseInt(receiptData.package.organization_reg_fee) > 0) {
-      parts.push([{
-        value: "Registration fee"
-      }, {
+  let receipt;
+
+  receipt = await paymentModel.findOne({ reference: reference });
+
+  if (fs.existsSync(`files/${receipt.reference}.pdf`)) {
+    fs.unlink(`files/${receipt.reference}.pdf`, (err) => {
+      if (err) console.log(err.message);
+    });
+  }
+
+  if (!receipt) throw new BadRequestError('Payment reference not found');
+
+  let receiptData = receipt.metadata[0];
+  let totalAmount = receipt.amount;
+
+  let parts = Array();
+  if (parseInt(receiptData.package.organization_reg_fee) > 0) {
+    parts.push([
+      {
+        value: 'Registration fee'
+      },
+      {
         value: 1
-      }, {
+      },
+      {
         value: receiptData.package.organization_reg_fee,
         price: true
-      }]);
-    }
-  
-    if (parseInt(receiptData.package.beneficiaries.sup_beneficiary_fee) > 0) {
-      parts.push([{
-        value: "Additional Beneficiaries fee"
-      }, {
-        value: receiptData.package.beneficiaries.total_number_of_beneficiaries_chosen - plans.sponsor_onboarding_settings.max_users
-      }, {
+      }
+    ]);
+  }
+
+  if (parseInt(receiptData.package.beneficiaries.sup_beneficiary_fee) > 0) {
+    parts.push([
+      {
+        value: 'Additional Beneficiaries fee'
+      },
+      {
+        value:
+          receiptData.package.beneficiaries.total_number_of_beneficiaries_chosen -
+          plans.sponsor_onboarding_settings.max_users
+      },
+      {
         value: receiptData.package.beneficiaries.sup_beneficiary_fee,
         price: true
-      }]);
-    }
-  
-    if (parseInt(receiptData.package.sms.sup_sms_fee) > 0) {
-      parts.push([{
-        value: "Additional SMS fee"
-      }, {
-        value: receiptData.package.sms.total_number_of_sms - plans.sponsor_onboarding_settings.max_sms
-      }, {
+      }
+    ]);
+  }
+
+  if (parseInt(receiptData.package.sms.sup_sms_fee) > 0) {
+    parts.push([
+      {
+        value: 'Additional SMS fee'
+      },
+      {
+        value:
+          receiptData.package.sms.total_number_of_sms - plans.sponsor_onboarding_settings.max_sms
+      },
+      {
         value: receiptData.package.sms.sup_sms_fee,
         price: true
-      }]);
-    }
-  
-    if (parseInt(receiptData.package.personalization.personalization_fee) > 0) {
-      parts.push([{
-        value: "Personalization fee"
-      }, {
+      }
+    ]);
+  }
+
+  if (parseInt(receiptData.package.personalization.personalization_fee) > 0) {
+    parts.push([
+      {
+        value: 'Personalization fee'
+      },
+      {
         value: 1
-      }, {
+      },
+      {
         value: receiptData.package.personalization.personalization_fee,
         price: true
-      }]);
-    }
-  
-    if (parseInt(receiptData.package.data_collection.data_collection_fee) > 0) {
-      parts.push([{
-        value: "Data collection fee"
-      }, {
+      }
+    ]);
+  }
+
+  if (parseInt(receiptData.package.data_collection.data_collection_fee) > 0) {
+    parts.push([
+      {
+        value: 'Data collection fee'
+      },
+      {
         value: receiptData.package.data_collection.data_collection_quantity
-      }, {
+      },
+      {
         value: receiptData.package.data_collection.data_collection_fee,
         price: true
-      }]);
-    }
-  
-    parts.push([{
-      value: "Transaction fee"
-    }, {
+      }
+    ]);
+  }
+
+  parts.push([
+    {
+      value: 'Transaction fee'
+    },
+    {
       value: 1
-    }, {
+    },
+    {
       value: receipt.trxfee,
       price: true
-    }]);
-    // Create the new invoice
-    let myInvoice = new Microinvoice({
-      style: {
-        header: {
-          image: {
-            path: `./src/utils/akilaahlogo.png`,
-            width: 100,
-            height: 36
-          }
-        }
-      },
-      data: {
-        invoice: {
-          name: "Invoice",
-  
-          header: [{
-            label: "Invoice Number",
-            value: receipt.trxid
-          }, {
-            label: "Status",
-            value: "Paid"
-          }, {
-            label: "Date",
-            value: new Date(receipt.paid_at).toISOString().
-              replace(/T/, ' ').      // replace T with a space
-              replace(/\..+/, '')
-          }],
-  
-          currency: "NGN",
-  
-          customer: [{
-            label: "Bill To",
-            value: [
-              receipt.full_name,
-              "Akilaah Client",
-              receipt.email,
-              receipt.phone,
-              "",
-              "Nigeria"
-            ]
-          }
-          ],
-  
-          seller: [{
-            label: "Bill From",
-            value: [
-              "Akilaah",
-              "+234 0707 01163",
-              "NICON Plaza (5th Floor) Left wing, Mohammadu Buhari Way",
-              "Central Business District Abuja, Nigeria",
-              "support@majfintech.com"
-            ]
-          }],
-  
-          legal: [{
-            value: "Thanks for your purchase!",
-            weight: "bold",
-            color: "primary"
-          }, {
-            value: "Once again, welcome to AKILAAH! We look forward to achieving great things together",
-            weight: "bold",
-            color: "secondary"
-          }],
-  
-          details: {
-            header: [{
-              value: "Description"
-            }, {
-              value: "Quantity"
-            }, {
-              value: "Subtotal"
-            }],
-  
-            parts: parts,
-  
-            total: [{
-              label: "Total",
-              value: totalAmount,
-              price: true
-            }]
-          }
+    }
+  ]);
+  // Create the new invoice
+  let myInvoice = new Microinvoice({
+    style: {
+      header: {
+        image: {
+          path: `./src/utils/akilaahlogo.png`,
+          width: 100,
+          height: 36
         }
       }
-    });
-  
-    // Render invoice as PDF
+    },
+    data: {
+      invoice: {
+        name: 'Invoice',
+
+        header: [
+          {
+            label: 'Invoice Number',
+            value: receipt.trxid
+          },
+          {
+            label: 'Status',
+            value: 'Paid'
+          },
+          {
+            label: 'Date',
+            value: new Date(receipt.paid_at)
+              .toISOString()
+              .replace(/T/, ' ') // replace T with a space
+              .replace(/\..+/, '')
+          }
+        ],
+
+        currency: 'NGN',
+
+        customer: [
+          {
+            label: 'Bill To',
+            value: [
+              receipt.full_name,
+              'Akilaah Client',
+              receipt.email,
+              receipt.phone,
+              '',
+              'Nigeria'
+            ]
+          }
+        ],
+
+        seller: [
+          {
+            label: 'Bill From',
+            value: [
+              'Akilaah',
+              '+234 0707 01163',
+              'NICON Plaza (5th Floor) Left wing, Mohammadu Buhari Way',
+              'Central Business District Abuja, Nigeria',
+              'support@majfintech.com'
+            ]
+          }
+        ],
+
+        legal: [
+          {
+            value: 'Thanks for your purchase!',
+            weight: 'bold',
+            color: 'primary'
+          },
+          {
+            value:
+              'Once again, welcome to AKILAAH! We look forward to achieving great things together',
+            weight: 'bold',
+            color: 'secondary'
+          }
+        ],
+
+        details: {
+          header: [
+            {
+              value: 'Description'
+            },
+            {
+              value: 'Quantity'
+            },
+            {
+              value: 'Subtotal'
+            }
+          ],
+
+          parts: parts,
+
+          total: [
+            {
+              label: 'Total',
+              value: totalAmount,
+              price: true
+            }
+          ]
+        }
+      }
+    }
+  });
+
+  // Render invoice as PDF
 
   // Render invoice as PDF
   if (fs.existsSync(`files/${receipt.reference}.pdf`)) {
