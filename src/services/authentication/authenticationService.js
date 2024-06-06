@@ -471,7 +471,7 @@ export const onboardNewOrganizationBeneficiary = async ({ body, user }) => {
   const data = {
     organization_id: user._id,
     password: await bcrypt.hash(generatePassword, 12),
-    beneficiary_unique_id: beneficiaryUniqueId,
+    member_unique_id: beneficiaryUniqueId,
     ...body
   };
 
