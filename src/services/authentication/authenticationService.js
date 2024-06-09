@@ -262,14 +262,13 @@ export const loginOrganization = async (body) => {
 
   if (!isMatch) throw new BadRequestError('Invalid Sponsor');
 
-  const userData = checkOrg ? checkOrg : await organizationModel.findById(user.sponsor_id);
-  const admin = userData.toJSON();
+  const loginData = checkOrg ? checkOrg : await organizationModel.findById(user.sponsor_id);
+  const admin = loginData.toJSON();
   admin.onboardingSetting = plans.sponsor_onboarding_settings;
   const is_first_time = admin.is_first_time;
 
   if (admin.is_first_time === true) {
     admin.is_first_time = false;
-
     await admin.save();
   }
 
