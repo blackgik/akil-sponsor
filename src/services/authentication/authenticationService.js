@@ -269,10 +269,10 @@ export const loginOrganization = async (body) => {
   if (user) {
     admin.user_info = user;
   }
-  
-  if (admin.is_first_time === true) {
-    admin.is_first_time = false;
-    await admin.save();
+
+  if (loginData.is_first_time === true) {
+    loginData.is_first_time = false;
+    await loginData.save();
   }
 
   // const encrypedDataString = await encryptData({
