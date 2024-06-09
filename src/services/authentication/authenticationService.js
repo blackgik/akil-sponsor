@@ -265,8 +265,11 @@ export const loginOrganization = async (body) => {
   const loginData = checkOrg ? checkOrg : await organizationModel.findById(user.sponsor_id);
   const admin = loginData.toJSON();
   admin.onboardingSetting = plans.sponsor_onboarding_settings;
-  const is_first_time = admin.is_first_time;
 
+  if (user) {
+    admin.user_info = user;
+  }
+  
   if (admin.is_first_time === true) {
     admin.is_first_time = false;
     await admin.save();
@@ -276,16 +279,13 @@ export const loginOrganization = async (body) => {
   //   data2encrypt: { ...admin.toJSON(), is_first_time, user_info: user ? user : {} },
   //   pubKey: env.public_key
   // });
-  let userData = admin.toJSON();
-  if (user) {
-    userData = { ...admin.toJSON(), user_info: user };
-  }
+
 
   const tokenEncryption = jwt.sign(
     {
       _id: checkOrg ? checkOrg._id : user._id,
       email: checkOrg ? checkOrg.email : user.email,
-      user: userData,
+      user: admin,
       adminType: checkOrg ? 'sponsor' : 'user'
     },
     env.jwt_key
