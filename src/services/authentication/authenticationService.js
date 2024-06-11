@@ -680,7 +680,8 @@ export const uploadOrganizationBeneficiariesInBulk = async ({ user, file, body }
   const workbook = XLSX.readFile(file.path);
   const worksheet = workbook.Sheets[workbook.SheetNames[0]];
   const header = [
-    'name',
+    'first_name',
+    'last_name',
     'gender',
     'marital_status',
     'nationality',
@@ -711,6 +712,7 @@ export const uploadOrganizationBeneficiariesInBulk = async ({ user, file, body }
   const errorLogs = [];
 
   for (let beneficiary of result) {
+    beneficiary.name = beneficiary.first_name + ' ' + beneficiary.last_name;
     let comment;
 
     const filter = { organization_id: user._id };
