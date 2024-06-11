@@ -17,7 +17,7 @@ const bulkBeneficiaryBatchUploadSchema = new Schema(
       country_of_residence: { type: String, required: true, trim: true, lowercase: true },
       state: { type: String, required: true, trim: true, lowercase: true },
       phone: { type: String, required: true, trim: true },
-      email: { type: String, required: true, trim: true, lowercase: true, index: true },
+      email: { type: String, required: false, trim: true, lowercase: true, index: true },
       city: { type: String, required: true, trim: true, lowercase: true },
       resident_address: { type: String, trim: true, lowercase: true }
     },
