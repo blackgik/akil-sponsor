@@ -625,15 +625,17 @@ export const setOrganizationPackageData = async ({ body, user }) => {
     organizationExists.psdAgreement = true;
     organizationExists.personalization_fee = plans.sponsor_onboarding_settings.personalization_fee;
   }
-  if (body.total_number_of_beneficiaries_chosen > plans.sponsor_onboarding_settings.max_users) {
-    organizationExists.total_number_of_beneficiaries_chosen =
+  organizationExists.total_number_of_beneficiaries_chosen =
       body.total_number_of_beneficiaries_chosen;
+  if (body.total_number_of_beneficiaries_chosen > plans.sponsor_onboarding_settings.max_users) {
+    
     supBeneficiaryFee =
       body.total_number_of_beneficiaries_chosen - plans.sponsor_onboarding_settings.max_users;
     amountToPay += supBeneficiaryFee;
   }
+  organizationExists.total_number_of_sms = body.total_number_of_sms;
   if (body.total_number_of_sms > plans.sponsor_onboarding_settings.max_sms) {
-    organizationExists.total_number_of_sms = body.total_number_of_sms;
+    
     supSmsFee =
       (body.total_number_of_sms - plans.sponsor_onboarding_settings.max_sms) *
       plans.sponsor_onboarding_settings.sup_sms_fee;

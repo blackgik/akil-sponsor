@@ -23,7 +23,7 @@ export const buildOrganizationSchema = new Schema(
     modules: Array,
     requested_modules: Array,
     moduleType: { type: String, trim: true, lowercase: true, default: 'sponsor' },
-    total_number_of_beneficiaries_chosen: { type: Number, default: 0 },
+    total_number_of_beneficiaries_created: { type: Number, default: 0 },
     total_number_of_beneficiaries_chosen: { type: Number, default: 0 },
     data_collection_quantity: { type: Number, default: 0 },
     total_number_of_sms: { type: Number, default: 0 },
