@@ -1394,8 +1394,8 @@ export const invitationMail = (data) => {
                                                                                   confidentiality as it is required for
                                                                                   every login of your beneficiaries)</li>
                                                                               <li>URL: <a
-                                                                                      href="https://beneficiary.akilaah.com/login"
-                                                                                      style="color: blue;">https://beneficiary.akilaah.com/login</a>
+                                                                                      href="https://akilaah-beneficiary.vercel.app/login?company_code=${data.company_code}"
+                                                                                      style="color: blue;">https://akilaah-beneficiary.vercel.app/login?company_code=${data.company_code}</a>
                                                                               </li>
                                                                           </ul>
                                                                       </span>
