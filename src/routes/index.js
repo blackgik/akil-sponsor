@@ -11,6 +11,7 @@ import notificationRoots from './settings/notificationRoute.js';
 import rolesRouteRoute from './settings/rolespermission.route.js';
 import userRoute from './settings/users.route.js';
 import personlizationRoute from './settings/personalization.route.js';
+import project_route from './projects/project.route.js';
 
 export default (router) => {
   router.use('/auth', organizationRoute());
@@ -26,6 +27,7 @@ export default (router) => {
   router.use('/roles', rolesRouteRoute);
   router.use('/users', userRoute);
   router.use('/personalization', personlizationRoute);
+  router.use('/project', project_route);
 
   return router;
 };

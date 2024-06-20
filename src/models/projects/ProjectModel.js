@@ -12,6 +12,11 @@ const projectSchema = new Schema(
     start_date: { type: Date },
     end_date: { type: Date },
     is_active: { type: Boolean, default: true },
+    project_state: {
+      type: String,
+      default: 'pending',
+      enum: ['pending', 'in-progress', 'completed', 'cancelled']
+    },
     project_status: {
       type: String,
       default: 'created',
@@ -19,6 +24,7 @@ const projectSchema = new Schema(
     },
     sponsor_id: { type: Schema.Types.ObjectId, ref: 'Organization', required: true }
   },
+
   { timestamps: true }
 );
 
