@@ -8,6 +8,8 @@ const projectSchema = new Schema(
     description: { type: String, default: '', trim: true },
     product_type: { type: Schema.Types.ObjectId, ref: 'ProductCategory', required: true },
     product_items: [{ type: Schema.Types.ObjectId, ref: 'Product', required: true }],
+    product_item_display: { type: Array },
+    is_beneficary_added: { type: Boolean, default: false },
     quantity_per_person: { type: Number, default: 0 },
     start_date: { type: Date },
     end_date: { type: Date },

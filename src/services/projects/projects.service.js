@@ -1,4 +1,5 @@
 import { BadRequestError, DuplicateError, InternalServerError } from '../../../lib/appErrors.js';
+import ProductModel from '../../models/products/ProductModel.js';
 import ProjectModel from '../../models/projects/ProjectModel.js';
 
 export const createProject = async ({ body, user }) => {
@@ -10,8 +11,19 @@ export const createProject = async ({ body, user }) => {
 
     if (checkProject) throw new DuplicateError('Project Created successfully');
 
+    const product_item_display = [];
+
+    for (let item of body.product_items) {
+      const item_name = await ProductModel.findById(item);
+
+      if (!item_name) continue;
+
+      product_item_display.push(item_name.product_name);
+    }
+
     const projectData = {
       ...body,
+      product_item_display,
       sponsor_id: user._id
     };
 
