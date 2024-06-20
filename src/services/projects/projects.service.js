@@ -9,6 +9,7 @@ import ProductModel from '../../models/products/ProductModel.js';
 import ProjectModel from '../../models/projects/ProjectModel.js';
 import organizationBeneficiaryModel from '../../models/beneficiaries/organizationBeneficiaryModel.js';
 import awardeesModel from '../../models/projects/awardeesModel.js';
+import RestockModel from '../../models/products/RestockModel.js';
 
 export const createProject = async ({ body, user }) => {
   try {
@@ -144,4 +145,79 @@ export const generateProjectList = async ({ user, param, project_id, body }) => 
   if (create_awardees.length === 0) throw new InternalServerError('Error inserting Data');
 
   return create_awardees;
+};
+
+export const saveGenerateList = async ({ user, param, project_id, body }) => {
+  const project = await ProjectModel.findById(project_id).populate('product_items');
+
+  if (!project) throw new NotFoundError('Project not found');
+
+  const { state, status, age, occupation } = param;
+
+  const { selection } = body;
+
+  const filter = { sponsor_id: user._id, project_id };
+
+  if (state) {
+    filter['state'] = param.state;
+  }
+
+  if (status) {
+    filter.beneficiary_status = status;
+  }
+
+  if (age) {
+    const splitAge = age.split('-');
+    const minAge = splitAge[0];
+    const maxAge = splitAge[1];
+
+    filter['age'] = { $gte: minAge, $lte: maxAge };
+  }
+
+  if (occupation) {
+    filter['employment_info.position'] = occupation;
+  }
+
+  const quantity_tray = [];
+
+  let shortage = 0;
+
+  if (selection.includes('*')) {
+    const awardeeCount = await awardeesModel.countDocuments(filter);
+    const update = await awardeesModel.updateMany(filter, {
+      $set: { status: 'awarded' }
+    });
+
+    if (!update) throw new InternalServerError('Could not update status');
+
+    for (let itemid of project.product_items) {
+      const item = await ProductModel.findById(itemid);
+      quantity_tray.push(item.product_quantity);
+    }
+
+    const minimun = Math.min(...quantity_tray);
+
+    shortage = awardeeCount - minimun;
+  } else {
+    filter._id = { $in: selection };
+
+    const update = await awardeesModel.updateMany(filter, {
+      $set: { status: 'awarded' }
+    });
+
+    if (!update) throw new InternalServerError('Could not update status');
+
+    for (let itemid of project.product_items) {
+      const item = await ProductModel.findById(itemid);
+      quantity_tray.push(item.product_quantity);
+    }
+
+    const awardeeCount = selection.length;
+
+    const minimun = Math.min(...quantity_tray);
+
+    shortage = awardeeCount - minimun;
+  }
+
+  return { shortage, saved: true };
 };
