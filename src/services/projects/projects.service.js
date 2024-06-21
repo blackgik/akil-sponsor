@@ -330,3 +330,9 @@ export const projectDashBoard = async ({ params, user }) => {
     cancelledProject
   };
 };
+
+export const viewProject = async ({ user, project_id }) => {
+  const project = await ProjectModel.findById(project_id);
+  if (!project) throw new NotFoundError('Project not found');
+  
+};
