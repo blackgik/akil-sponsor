@@ -3,6 +3,7 @@ import validators from '../../validators/index.js';
 import { createProjectSchema } from '../../validators/projectSchema.js';
 import {
   createProjectsHandler,
+  fetchGenerateListHandler,
   generateProjectListHandler,
   saveGenerateListHandler
 } from '../../controllers/projects/project.controller.js';
@@ -17,5 +18,6 @@ project_route.post(
   createProjectsHandler
 );
 project_route.post('/generate-list/:project_id', authentication, generateProjectListHandler);
+project_route.get('/fetch-generated-list/:project_id', authentication, fetchGenerateListHandler);
 project_route.patch('/save-generated_list/:project_id', authentication, saveGenerateListHandler);
 export default project_route;

@@ -1,6 +1,7 @@
 import appResponse from '../../../lib/appResponse.js';
 import {
   createProject,
+  fetchGenerateList,
   generateProjectList,
   saveGenerateList
 } from '../../services/projects/projects.service.js';
@@ -29,4 +30,14 @@ export const saveGenerateListHandler = async (req, res) => {
   const response = await saveGenerateList({ user, param: query, project_id, body });
 
   res.send(appResponse('Saved successfully', response));
+};
+
+export const fetchGenerateListHandler = async (req, res) => {
+  const { query, user, params } = req;
+
+  const { project_id } = params;
+
+  const response = await fetchGenerateList({ param: query, user, project_id });
+
+  res.send(appResponse('Fetched successfully', response));
 };

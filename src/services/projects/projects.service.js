@@ -197,7 +197,7 @@ export const saveGenerateList = async ({ user, param, project_id, body }) => {
 
     const minimun = Math.min(...quantity_tray);
 
-    shortage = awardeeCount - minimun;
+    shortage = minimun - awardeeCount;
   } else {
     filter._id = { $in: selection };
 
@@ -216,8 +216,84 @@ export const saveGenerateList = async ({ user, param, project_id, body }) => {
 
     const minimun = Math.min(...quantity_tray);
 
-    shortage = awardeeCount - minimun;
+    shortage = minimun - awardeeCount;
   }
 
   return { shortage, saved: true };
+};
+
+export const fetchGenerateList = async ({ param, user, project_id }) => {
+  const project = await ProjectModel.findById(project_id).populate('product_items');
+
+  if (!project) throw new NotFoundError('Project not found');
+
+  let {
+    page_no,
+    no_of_requests,
+    search,
+    gender,
+    state,
+    lga,
+    age,
+    occupation,
+    status,
+    is_shortaged
+  } = param;
+
+  page_no = Number(page_no) || 1;
+  no_of_requests = Number(no_of_requests) || Infinity;
+
+  const query = typeof search !== 'undefined' ? search : false;
+  const rgx = (pattern) => new RegExp(`.*${pattern}.*`, 'i');
+  const searchRgx = rgx(query);
+
+  const filter = { project_id, sponsor_id: user._id, batch_code: '' };
+
+  if (query) {
+    filter['$or'] = [{ name: searchRgx, phone: searchRgx }];
+  }
+
+  if (gender) {
+    filter.gender = gender;
+  }
+
+  if (state) {
+    filter.gender = state;
+  }
+
+  if (lga) {
+    filter.gender = lga;
+  }
+
+  if (age) {
+    filter.gender = age;
+  }
+
+  if (occupation) {
+    filter.gender = occupation;
+  }
+
+  if (status) {
+    filter.status = status;
+  }
+
+  if (is_shortaged) {
+    filter.is_shortaged = Boolean(is_shortaged);
+  }
+
+  const count = await awardeesModel.countDocuments(filter);
+  const fetched_data = await awardeesModel
+    .find(filter)
+    .sort({ created_at: -1 })
+    .skip((page_no - 1) * no_of_requests)
+    .limit(no_of_requests);
+
+  const available_pages = Math.ceil(count / no_of_requests);
+
+  return {
+    page_no,
+    available_pages,
+    count,
+    fetched_data
+  };
 };
