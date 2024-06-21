@@ -4,6 +4,7 @@ import { createProjectSchema } from '../../validators/projectSchema.js';
 import {
   createProjectsHandler,
   generateProjectListHandler,
+  projectDashboardHandler,
   saveGenerateListHandler
 } from '../../controllers/projects/project.controller.js';
 import { authentication } from '../../middlewares/authentication.js';
@@ -18,4 +19,6 @@ project_route.post(
 );
 project_route.post('/generate-list/:project_id', authentication, generateProjectListHandler);
 project_route.patch('/save-generated_list/:project_id', authentication, saveGenerateListHandler);
+project_route.get('/project-dashboard', authentication, projectDashboardHandler);
+
 export default project_route;
