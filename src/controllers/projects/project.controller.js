@@ -1,42 +1,32 @@
 import appResponse from '../../../lib/appResponse.js';
-import { createProject, projectDashBoard } from '../../services/projects/projects.service.js';
-import { codeGenerator } from '../../utils/codeGenerator.js';
-import { downloadExcel } from '../../utils/general.js';
+import {
+  createProject,
+  generateProjectList,
+  saveGenerateList
+} from '../../services/projects/projects.service.js';
 
 export const createProjectsHandler = async (req, res) => {
-  const { body, user, query } = req;
+  const { body, user } = req;
 
   const response = await createProject({ body, user });
 
   res.send(appResponse('Created successfully', response));
 };
 
-export const projectDashboardHandler = async (req, res) => {
-  const { query, user } = req;
-  const params = query;
+export const generateProjectListHandler = async (req, res) => {
+  const { user, query, params, body } = req;
+  const { project_id } = params;
 
-  const responses = await projectDashBoard({ user, params });
+  const response = await generateProjectList({ user, param: query, project_id, body });
 
-  if (params.download === 'on') {
-    const worksheet = new Date().getTime() + (await codeGenerator(5));
-    const worksheetHeaders = [
-      { header: 'ProductName', key: 'project_name', width: 50 },
-      { header: 'DateCreated', key: 'createdAt', width: 50 }
-    ];
+  res.send(appResponse('Generated successfully', response));
+};
 
-    let mainList = [];
+export const saveGenerateListHandler = async (req, res) => {
+  const { user, query, params, body } = req;
+  const { project_id } = params;
 
-    for (let response of responses) {
-      mainList.push({
-        project_name: response.project_name,
-        createdAt: response.createdAt
-      });
-    }
+  const response = await saveGenerateList({ user, param: query, project_id, body });
 
-    const file = await downloadExcel(worksheet, worksheetHeaders, mainList);
-
-    res.send(appResponse('File paths', file));
-  } else {
-    res.send(appResponse('Fetched project dashboard data successfully', responses));
-  }
+  res.send(appResponse('Saved successfully', response));
 };

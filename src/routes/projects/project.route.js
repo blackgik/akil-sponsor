@@ -1,9 +1,10 @@
 import { Router } from 'express';
 import validators from '../../validators/index.js';
-import { createProjectSchema, projectDashboardQuery } from '../../validators/projectSchema.js';
+import { createProjectSchema } from '../../validators/projectSchema.js';
 import {
   createProjectsHandler,
-  projectDashboardHandler
+  generateProjectListHandler,
+  saveGenerateListHandler
 } from '../../controllers/projects/project.controller.js';
 import { authentication } from '../../middlewares/authentication.js';
 
@@ -15,11 +16,6 @@ project_route.post(
   authentication,
   createProjectsHandler
 );
-
-project_route.get(
-  '/project-dashboard',
-  validators(projectDashboardQuery, 'query'),
-  authentication,
-  projectDashboardHandler
-);
+project_route.post('/generate-list/:project_id', authentication, generateProjectListHandler);
+project_route.patch('/save-generated_list/:project_id', authentication, saveGenerateListHandler);
 export default project_route;
