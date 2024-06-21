@@ -199,7 +199,7 @@ export const saveGenerateList = async ({ user, param, project_id, body }) => {
 
     const minimun = Math.min(...quantity_tray);
 
-    shortage = awardeeCount - minimun;
+    shortage = minimun - awardeeCount;
   } else {
     filter._id = { $in: selection };
 
@@ -218,121 +218,84 @@ export const saveGenerateList = async ({ user, param, project_id, body }) => {
 
     const minimun = Math.min(...quantity_tray);
 
-    shortage = awardeeCount - minimun;
+    shortage = minimun - awardeeCount;
   }
 
   return { shortage, saved: true };
 };
 
-export const projectDashBoard = async ({ params, user }) => {
+export const fetchGenerateList = async ({ param, user, project_id }) => {
+  const project = await ProjectModel.findById(project_id).populate('product_items');
+
+  if (!project) throw new NotFoundError('Project not found');
+
   let {
     page_no,
     no_of_requests,
     search,
-    product_type,
-    product_item,
-    dateCreated,
-    duration,
-    from,
-    to,
-    todayTime,
-    project_status,
-    project_state,
-    download
-  } = params;
+    gender,
+    state,
+    lga,
+    age,
+    occupation,
+    status,
+    is_shortaged
+  } = param;
 
   page_no = Number(page_no) || 1;
-  no_of_requests = Number(no_of_requests) || 20;
+  no_of_requests = Number(no_of_requests) || Infinity;
 
-  const { today, timeDiff } = dateFilters({ duration, from, to, todayTime });
-  const filter = {
-    sponsor_id: mongoose.Types.ObjectId(user._id),
-    createdAt: { $gte: timeDiff, $lte: today }
-  };
+  const query = typeof search !== 'undefined' ? search : false;
+  const rgx = (pattern) => new RegExp(`.*${pattern}.*`, 'i');
+  const searchRgx = rgx(query);
 
-  if (search) {
-    const searchRgx = new RegExp(`.*${search}.*`, 'i');
-    filter['$or'] = [{ project_name: searchRgx }, { description: searchRgx }];
+  const filter = { project_id, sponsor_id: user._id, batch_code: '' };
+
+  if (query) {
+    filter['$or'] = [{ name: searchRgx, phone: searchRgx }];
   }
 
-  if (product_type) {
-    filter.product_type = mongoose.Types.ObjectId(product_type);
+  if (gender) {
+    filter.gender = gender;
   }
 
-  if (product_item) {
-    filter.product_items = mongoose.Types.ObjectId(product_item);
+  if (state) {
+    filter.gender = state;
   }
 
-  if (dateCreated) {
-    filter.createdAt = { $gte: new Date(dateCreated) };
+  if (lga) {
+    filter.gender = lga;
   }
 
-  if (project_status) {
-    filter.project_status = project_status;
+  if (age) {
+    filter.gender = age;
   }
 
-  if (project_state) {
-    filter.project_state = project_state;
+  if (occupation) {
+    filter.gender = occupation;
   }
 
-  const skip = (page_no - 1) * no_of_requests;
-  const limit = no_of_requests;
-
-  // Find the total count of documents for pagination
-  const totalDocuments = await ProjectModel.countDocuments(filter);
-  const totalPages = Math.ceil(totalDocuments / no_of_requests);
-  // Fetch the filtered and paginated data
-  const awardees = await awardeesModel.find({ sponsor_id: user._id });
-  console.log(awardees);
-  const awardeesCount = awardees.length;
-  let fetchedData = await ProjectModel.find(filter)
-    .populate('product_type')
-    .sort({ createdAt: -1 })
-    .skip(skip)
-    .limit(limit)
-    .lean();
-  // Categorize projects based on project_state
-  const draftedProject = fetchedData.filter((project) => project.project_state === 'pending');
-  const projectInProgress = fetchedData.filter(
-    (project) => project.project_state === 'in-progress'
-  );
-  const completedProject = fetchedData.filter((project) => project.project_state === 'completed');
-  const cancelledProject = fetchedData.filter((project) => project.project_state === 'cancelled');
-  const projectInProgressCount = projectInProgress.length;
-  const completedProjectCount = completedProject.length;
-
-  if (download === 'on') {
-    const excelData = fetchedData.map((item) => ({
-      ProductName: item.project_name,
-      DateCreated: item.createdAt
-    }));
-    const file = await downloadExcel(
-      'Projects Report',
-      [
-        { header: 'ProductName', key: 'ProductName', width: 50 },
-        { header: 'DateCreated', key: 'DateCreated', width: 50 }
-      ],
-      excelData
-    );
-    return file; // Return the generated file
+  if (status) {
+    filter.status = status;
   }
+
+  if (is_shortaged) {
+    filter.is_shortaged = Boolean(is_shortaged);
+  }
+
+  const count = await awardeesModel.countDocuments(filter);
+  const fetched_data = await awardeesModel
+    .find(filter)
+    .sort({ created_at: -1 })
+    .skip((page_no - 1) * no_of_requests)
+    .limit(no_of_requests);
+
+  const available_pages = Math.ceil(count / no_of_requests);
 
   return {
     page_no,
-    available_pages: totalPages,
-    totalPages,
-    projectInProgressCount,
-    completedProjectCount,
-    totalBeneficaries: awardeesCount,
-    draftedProject,
-    projectInProgress,
-    completedProject,
-    cancelledProject
+    available_pages,
+    count,
+    fetched_data
   };
-};
-
-export const viewProject = async ({ user, project_id }) => {
-  const project = await ProjectModel.findById(project_id);
-  if (!project) throw new NotFoundError('Project not found');
-  
 };

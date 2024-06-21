@@ -14,9 +14,9 @@ const projectScheduleSchema = new Schema(
     phone: { type: String, default: '', trim: true },
     status: {
       type: String,
-      default: 'pending',
+      default: 'scheduled',
       trim: true,
-      enum: ['pending', 'scheduled', 'in-progress', 'completed']
+      enum: ['scheduled', 'in-progress', 'completed']
     },
     metadata: { type: Schema.Types.Mixed, default: {} },
     project: { type: Schema.Types.ObjectId, ref: 'Project', required: true },

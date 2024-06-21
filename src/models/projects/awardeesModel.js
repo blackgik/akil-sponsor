@@ -18,6 +18,7 @@ const AwardeesSchema = new Schema(
       default: 'selected',
       enum: ['selected', 'awarded', 'confirmed', 'scheduled', 'disbursed']
     },
+    is_shortaged: { type: Boolean, default: false },
     beneficiary_status: { type: String, required: true },
     project_id: { type: Schema.Types.ObjectId, ref: 'Project', required: true },
     batch_code: { type: String, default: '' },

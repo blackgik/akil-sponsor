@@ -1,6 +1,7 @@
 import appResponse from '../../../lib/appResponse.js';
 import {
   createProject,
+  fetchGenerateList,
   generateProjectList,
   projectDashBoard,
   saveGenerateList
@@ -33,32 +34,12 @@ export const saveGenerateListHandler = async (req, res) => {
   res.send(appResponse('Saved successfully', response));
 };
 
-export const projectDashboardHandler = async (req, res) => {
-  const { query, user } = req;
-  const params = query;
+export const fetchGenerateListHandler = async (req, res) => {
+  const { query, user, params } = req;
 
-  const responses = await projectDashBoard({ user, params });
+  const { project_id } = params;
 
-  if (params.download === 'on') {
-    const worksheet = new Date().getTime() + (await codeGenerator(5));
-    const worksheetHeaders = [
-      { header: 'ProductName', key: 'project_name', width: 50 },
-      { header: 'DateCreated', key: 'createdAt', width: 50 }
-    ];
+  const response = await fetchGenerateList({ param: query, user, project_id });
 
-    let mainList = [];
-
-    for (let response of responses) {
-      mainList.push({
-        project_name: response.project_name,
-        createdAt: response.createdAt
-      });
-    }
-
-    const file = await downloadExcel(worksheet, worksheetHeaders, mainList);
-
-    res.send(appResponse('File paths', file));
-  } else {
-    res.send(appResponse('Fetched project dashboard data successfully', responses));
-  }
+  res.send(appResponse('Fetched successfully', response));
 };
