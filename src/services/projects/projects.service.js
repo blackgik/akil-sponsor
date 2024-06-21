@@ -20,6 +20,17 @@ export const createProject = async ({ body, user }) => {
 
     if (checkProject) throw new DuplicateError('Project Created successfully');
 
+    // check if any project has the product type
+    const checkProductTypeProject = await ProjectModel.findOne({
+      product_type: body.product_type,
+      sponsor_id: user._id
+    });
+
+    if (checkProductTypeProject)
+      throw new BadRequestError(
+        `${checkProductTypeProject.project_name} project already uses this product type`
+      );
+
     const product_item_display = [];
 
     for (let item of body.product_items) {
