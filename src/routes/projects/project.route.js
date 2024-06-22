@@ -6,7 +6,8 @@ import {
   fetchGenerateListHandler,
   generateProjectListHandler,
   projectDashboardHandler,
-  saveGenerateListHandler
+  saveGenerateListHandler,
+  viewProjectHandler
 } from '../../controllers/projects/project.controller.js';
 import { authentication } from '../../middlewares/authentication.js';
 
@@ -22,5 +23,6 @@ project_route.post('/generate-list/:project_id', authentication, generateProject
 project_route.get('/fetch-generated-list/:project_id', authentication, fetchGenerateListHandler);
 project_route.patch('/save-generated_list/:project_id', authentication, saveGenerateListHandler);
 project_route.get('/project-dashboard', authentication, projectDashboardHandler);
+project_route.get('/view-project/:project_id', authentication, viewProjectHandler);
 
 export default project_route;

@@ -12,6 +12,7 @@ import awardeesModel from '../../models/projects/awardeesModel.js';
 import RestockModel from '../../models/products/RestockModel.js';
 import mongoose from 'mongoose';
 import { dateFilters } from '../../utils/timeFilters.js';
+import warehouseProductModel from '../../models/products/warehouseProductModel.js';
 
 export const createProject = async ({ body, user }) => {
   try {
@@ -418,8 +419,56 @@ export const projectDashBoard = async ({ params, user }) => {
   };
 };
 
-export const viewProject = async ({ user, project_id }) => {
-  const project = await ProjectModel.findById(project_id);
+export const viewProject = async ({ project_id, user }) => {
+  if (!project_id) throw new NotFoundError('project id not provided');
+  const project = await ProjectModel.findOne({ _id: project_id, sponsor_id: user._id });
+
   if (!project) throw new NotFoundError('Project not found');
-  
+
+  const warehouseProducts = await warehouseProductModel.aggregate([
+    {
+      $match: {
+        product_id: { $in: project.product_items.map((item) => item._id) }
+      }
+    },
+    {
+      $group: {
+        _id: '$product_id',
+        totalQuantity: { $sum: '$quantity' },
+        warehouseProducts: {
+          $push: {
+            warehouse_id: '$warehouse_id',
+            quantity: '$quantity'
+          }
+        }
+      }
+    }
+  ]);
+
+  // Format the result
+  const productQuantities = project.product_items.map((item) => {
+    const warehouseProduct = warehouseProducts.find((wp) => wp._id.equals(item._id));
+    return {
+      product_id: item._id,
+      product_name: item.name,
+      total_quantity: warehouseProduct ? warehouseProduct.totalQuantity : 0,
+      warehouse_details: warehouseProduct ? warehouseProduct.warehouseProducts : []
+    };
+  });
+
+  const totalQuantity = productQuantities.reduce((sum, item) => sum + item.total_quantity, 0);
+
+
+  const response = {
+    project_name: project.project_name,
+    product_quantities: productQuantities,
+    total_quantity: totalQuantity,
+    product_items: project.product_item_display,
+    createdAt: project.createdAt,
+    start_date: project.start_date,
+    end_date: project.end_date,
+    project_status: project.project_status
+  };
+
+  return response;
 };

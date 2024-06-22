@@ -4,7 +4,8 @@ import {
   fetchGenerateList,
   generateProjectList,
   projectDashBoard,
-  saveGenerateList
+  saveGenerateList,
+  viewProject
 } from '../../services/projects/projects.service.js';
 import { downloadExcel } from '../../utils/general.js';
 
@@ -72,4 +73,12 @@ export const projectDashboardHandler = async (req, res) => {
   } else {
     res.send(appResponse('Fetched project dashboard data successfully', responses));
   }
+};
+
+export const viewProjectHandler = async (req, res) => {
+  const { params, user } = req;
+  const { project_id } = params;
+
+  const response = await viewProject({ project_id, user });
+  res.send(appResponse('Fetched Project successfully', response));
 };
