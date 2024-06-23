@@ -13,6 +13,7 @@ import RestockModel from '../../models/products/RestockModel.js';
 import mongoose from 'mongoose';
 import { dateFilters } from '../../utils/timeFilters.js';
 import warehouseProductModel from '../../models/products/warehouseProductModel.js';
+import ProductCategoryModel from '../../models/products/ProductCategoryModel.js';
 
 export const createProject = async ({ body, user }) => {
   try {
@@ -419,56 +420,57 @@ export const projectDashBoard = async ({ params, user }) => {
   };
 };
 
-export const viewProject = async ({ project_id, user }) => {
-  if (!project_id) throw new NotFoundError('project id not provided');
-  const project = await ProjectModel.findOne({ _id: project_id, sponsor_id: user._id });
+export const viewProject = async ({ project_id }) => {
+  const project = await ProjectModel.findById(project_id).populate('product_items').exec();
 
   if (!project) throw new NotFoundError('Project not found');
 
-  const warehouseProducts = await warehouseProductModel.aggregate([
-    {
-      $match: {
-        product_id: { $in: project.product_items.map((item) => item._id) }
-      }
-    },
-    {
-      $group: {
-        _id: '$product_id',
-        totalQuantity: { $sum: '$quantity' },
-        warehouseProducts: {
-          $push: {
-            warehouse_id: '$warehouse_id',
-            quantity: '$quantity'
-          }
-        }
-      }
-    }
-  ]);
-
-  // Format the result
-  const productQuantities = project.product_items.map((item) => {
-    const warehouseProduct = warehouseProducts.find((wp) => wp._id.equals(item._id));
-    return {
-      product_id: item._id,
-      product_name: item.name,
-      total_quantity: warehouseProduct ? warehouseProduct.totalQuantity : 0,
-      warehouse_details: warehouseProduct ? warehouseProduct.warehouseProducts : []
-    };
+  const awardedBeneficiariesCount = await awardeesModel.countDocuments({
+    project_id,
+    status: 'awarded'
   });
 
-  const totalQuantity = productQuantities.reduce((sum, item) => sum + item.total_quantity, 0);
+  const disbursedBeneficiariesCount = await awardeesModel.countDocuments({
+    project_id,
+    status: 'disbursed'
+  });
 
+  const shortageBeneficiaries = await awardeesModel.find({
+    project_id,
+    is_shortaged: true
+  });
 
-  const response = {
+  const productQuantities = project.product_items.map((item) => ({
+    product_name: item.product_name,
+    product_quantity: item.product_quantity
+  }));
+
+  const productType = await ProductCategoryModel.findById(project.product_type);
+
+  // Calculate the total quantity
+  const totalQuantity = project.product_items.reduce((acc, item) => acc + item.product_quantity, 0);
+
+  // Construct the response object
+  const topResponse = {
     project_name: project.project_name,
     product_quantities: productQuantities,
-    total_quantity: totalQuantity,
+    total_item_in_stock: totalQuantity,
+    awarded_benefiacires: awardedBeneficiariesCount,
+    shortage: shortageBeneficiaries.length,
+    shortage_details: shortageBeneficiaries || [],
+    deliverd_item: disbursedBeneficiariesCount,
+    beneficary_feedback: 'not done'
+  };
+
+  const lowerResponse = {
+    product_type: productType.product_category_name,
     product_items: project.product_item_display,
-    createdAt: project.createdAt,
+    created: project.createdAt,
     start_date: project.start_date,
     end_date: project.end_date,
     project_status: project.project_status
   };
 
-  return response;
+  // Return the response object
+  return { topResponse, lowerResponse };
 };
