@@ -4,6 +4,7 @@ import validators from '../../validators/index.js';
 import { createProjectScheduleSchema } from '../../validators/projectSchema.js';
 import {
   createProductScheduleHandler,
+  fetchfetchScheduledListHandler,
   generateScheduleNumberHandler
 } from '../../controllers/projects/schedule.controller.js';
 
@@ -19,6 +20,11 @@ scheduling_route.get(
   '/generate-schedule-number/:project_id',
   authentication,
   generateScheduleNumberHandler
+);
+scheduling_route.get(
+  '/fetch-scheduled-list/:project_id',
+  authentication,
+  fetchfetchScheduledListHandler
 );
 
 export default scheduling_route;

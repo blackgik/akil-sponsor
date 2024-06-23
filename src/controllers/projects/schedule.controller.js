@@ -2,6 +2,7 @@ import { BadRequestError } from '../../../lib/appErrors.js';
 import appResponse from '../../../lib/appResponse.js';
 import {
   createProductSchedule,
+  fetchScheduledList,
   generateSchedule
 } from '../../services/projects/scheduling.service.js';
 
@@ -29,4 +30,14 @@ export const generateScheduleNumberHandler = async (req, res) => {
   const response = await generateSchedule({ user, project_id });
 
   res.send(appResponse('Generateds succcessfully', response));
+};
+
+export const fetchfetchScheduledListHandler = async (req, res) => {
+  const { query, user, params } = req;
+
+  const { project_id } = params;
+
+  const response = await fetchScheduledList({ param: query, user, project_id });
+
+  res.send(appResponse('Fetched Scheduled list successfully', response));
 };

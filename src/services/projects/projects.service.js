@@ -14,6 +14,7 @@ import mongoose from 'mongoose';
 import { dateFilters } from '../../utils/timeFilters.js';
 import warehouseProductModel from '../../models/products/warehouseProductModel.js';
 import ProductCategoryModel from '../../models/products/ProductCategoryModel.js';
+import scheduleModel from '../../models/projects/scheduleModel.js';
 
 export const createProject = async ({ body, user }) => {
   try {
@@ -474,3 +475,4 @@ export const viewProject = async ({ project_id }) => {
   // Return the response object
   return { topResponse, lowerResponse };
 };
+
