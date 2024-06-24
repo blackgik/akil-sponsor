@@ -4,9 +4,13 @@ import {
   deleteProject,
   fetchGenerateList,
   generateProjectList,
+  viewProject,
   saveGenerateList,
-  updateProject
+  updateProject,
+  projectDashBoardStats,
+  fetchAllProject
 } from '../../services/projects/projects.service.js';
+import { codeGenerator } from '../../utils/codeGenerator.js';
 import { downloadExcel } from '../../utils/general.js';
 
 export const createProjectsHandler = async (req, res) => {
@@ -63,29 +67,26 @@ export const deleteProjectHandler = async () => {
   res.send(appResponse('Deleted successfully', response));
 };
 
-export const updateProjectHandler = async (req, res) => {
-  const { user, body, params } = req;
+export const projectDashboardStatsHandler = async (req, res) => {
+  const { params, user } = req;
 
-  const { project_id } = params;
-
-  const response = await updateProject({ user, body, project_id });
-
-  res.send(appResponse('Updated successfully', response));
+  const response = await projectDashBoardStats({ params, user });
+  res.send(appResponse('Fetched Project Dashboard Stats Successfully', response));
 };
 
-export const deleteProjectHandler = async () => {
+export const viewProjectHandler = async (req, res) => {
+  const { params, user } = req;
   const { project_id } = params;
 
-  const response = await deleteProject({ project_id });
-
-  res.send(appResponse('Deleted successfully', response));
+  const response = await viewProject({ project_id, user });
+  res.send(appResponse('Fetched Project successfully', response));
 };
 
-export const projectDashboardHandler = async (req, res) => {
+export const fetchProjectHandler = async (req, res) => {
   const { query, user } = req;
   const params = query;
 
-  const responses = await projectDashBoard({ user, params });
+  const responses = await fetchAllProject({ user, params });
 
   if (params.download === 'on') {
     const worksheet = new Date().getTime() + (await codeGenerator(5));
@@ -109,12 +110,4 @@ export const projectDashboardHandler = async (req, res) => {
   } else {
     res.send(appResponse('Fetched project dashboard data successfully', responses));
   }
-};
-
-export const viewProjectHandler = async (req, res) => {
-  const { params, user } = req;
-  const { project_id } = params;
-
-  const response = await viewProject({ project_id, user });
-  res.send(appResponse('Fetched Project successfully', response));
 };
