@@ -9,7 +9,7 @@ import ProductModel from '../../models/products/ProductModel.js';
 import ProjectModel from '../../models/projects/ProjectModel.js';
 import organizationBeneficiaryModel from '../../models/beneficiaries/organizationBeneficiaryModel.js';
 import awardeesModel from '../../models/projects/awardeesModel.js';
-import RestockModel from '../../models/products/RestockModel.js';
+import scheduleModel from '../../models/projects/scheduleModel.js';
 import mongoose from 'mongoose';
 import { dateFilters } from '../../utils/timeFilters.js';
 import warehouseProductModel from '../../models/products/warehouseProductModel.js';
@@ -122,7 +122,7 @@ export const generateProjectList = async ({ user, param, project_id, body }) => 
         ward: beneficiary.personal.lga,
         beneficiary_status: beneficiary.acctstatus,
         project_id: project_id,
-        status: 'selected',
+        status: 'awarded',
         sponsor_id: user._id
       };
 
@@ -148,13 +148,17 @@ export const generateProjectList = async ({ user, param, project_id, body }) => 
         ward: beneficiary.personal.lga,
         beneficiary_status: beneficiary.acctstatus,
         project_id: project_id,
-        status: 'selected',
+        status: 'awarded',
         sponsor_id: user._id
       };
 
       batch.push(data);
     }
   }
+
+  project.project_status = 'awarded';
+
+  await project.save();
 
   const create_awardees = await awardeesModel.insertMany(batch);
 
@@ -201,7 +205,7 @@ export const saveGenerateList = async ({ user, param, project_id, body }) => {
   if (selection.includes('*')) {
     const awardeeCount = await awardeesModel.countDocuments(filter);
     const update = await awardeesModel.updateMany(filter, {
-      $set: { status: 'awarded' }
+      $set: { status: 'allocated' }
     });
 
     if (!update) throw new InternalServerError('Could not update status');
@@ -218,7 +222,7 @@ export const saveGenerateList = async ({ user, param, project_id, body }) => {
     filter._id = { $in: selection };
 
     const update = await awardeesModel.updateMany(filter, {
-      $set: { status: 'awarded' }
+      $set: { status: 'allocated' }
     });
 
     if (!update) throw new InternalServerError('Could not update status');
@@ -300,7 +304,7 @@ export const fetchGenerateList = async ({ param, user, project_id }) => {
   const count = await awardeesModel.countDocuments(filter);
   const fetched_data = await awardeesModel
     .find(filter)
-    .sort({ created_at: -1 })
+    .sort({ createdAt: -1 })
     .skip((page_no - 1) * no_of_requests)
     .limit(no_of_requests);
 
@@ -314,165 +318,42 @@ export const fetchGenerateList = async ({ param, user, project_id }) => {
   };
 };
 
-export const projectDashBoard = async ({ params, user }) => {
-  let {
-    page_no,
-    no_of_requests,
-    search,
-    product_type,
-    product_item,
-    dateCreated,
-    duration,
-    from,
-    to,
-    todayTime,
-    project_status,
-    project_state,
-    download
-  } = params;
-
-  page_no = Number(page_no) || 1;
-  no_of_requests = Number(no_of_requests) || 20;
-
-  const { today, timeDiff } = dateFilters({ duration, from, to, todayTime });
-  const filter = {
-    sponsor_id: mongoose.Types.ObjectId(user._id),
-    createdAt: { $gte: timeDiff, $lte: today }
-  };
-
-  if (search) {
-    const searchRgx = new RegExp(`.*${search}.*`, 'i');
-    filter['$or'] = [{ project_name: searchRgx }, { description: searchRgx }];
-  }
-
-  if (product_type) {
-    filter.product_type = mongoose.Types.ObjectId(product_type);
-  }
-
-  if (product_item) {
-    filter.product_items = mongoose.Types.ObjectId(product_item);
-  }
-
-  if (dateCreated) {
-    filter.createdAt = { $gte: new Date(dateCreated) };
-  }
-
-  if (project_status) {
-    filter.project_status = project_status;
-  }
-
-  if (project_state) {
-    filter.project_state = project_state;
-  }
-
-  const skip = (page_no - 1) * no_of_requests;
-  const limit = no_of_requests;
-
-  // Find the total count of documents for pagination
-  const totalDocuments = await ProjectModel.countDocuments(filter);
-  const totalPages = Math.ceil(totalDocuments / no_of_requests);
-  // Fetch the filtered and paginated data
-  const awardees = await awardeesModel.find({ sponsor_id: user._id });
-  console.log(awardees);
-  const awardeesCount = awardees.length;
-  let fetchedData = await ProjectModel.find(filter)
-    .populate('product_type')
-    .sort({ createdAt: -1 })
-    .skip(skip)
-    .limit(limit)
-    .lean();
-  // Categorize projects based on project_state
-  const draftedProject = fetchedData.filter((project) => project.project_state === 'pending');
-  const projectInProgress = fetchedData.filter(
-    (project) => project.project_state === 'in-progress'
-  );
-  const completedProject = fetchedData.filter((project) => project.project_state === 'completed');
-  const cancelledProject = fetchedData.filter((project) => project.project_state === 'cancelled');
-  const projectInProgressCount = projectInProgress.length;
-  const completedProjectCount = completedProject.length;
-
-  if (download === 'on') {
-    const excelData = fetchedData.map((item) => ({
-      ProductName: item.project_name,
-      DateCreated: item.createdAt
-    }));
-    const file = await downloadExcel(
-      'Projects Report',
-      [
-        { header: 'ProductName', key: 'ProductName', width: 50 },
-        { header: 'DateCreated', key: 'DateCreated', width: 50 }
-      ],
-      excelData
-    );
-    return file; // Return the generated file
-  }
-
-  return {
-    page_no,
-    available_pages: totalPages,
-    totalPages,
-    projectInProgressCount,
-    completedProjectCount,
-    totalBeneficaries: awardeesCount,
-    draftedProject,
-    projectInProgress,
-    completedProject,
-    cancelledProject
-  };
-};
-
-export const viewProject = async ({ project_id }) => {
-  const project = await ProjectModel.findById(project_id).populate('product_items').exec();
+export const updateProject = async ({ user, body, project_id }) => {
+  const project = await ProjectModel.findById(project_id).populate('product_items');
 
   if (!project) throw new NotFoundError('Project not found');
 
-  const awardedBeneficiariesCount = await awardeesModel.countDocuments({
-    project_id,
-    status: 'awarded'
-  });
+  const updates = Object.keys(body);
 
-  const disbursedBeneficiariesCount = await awardeesModel.countDocuments({
-    project_id,
-    status: 'disbursed'
-  });
+  updates.forEach((update) => (project[update] = body[update]));
 
-  const shortageBeneficiaries = await awardeesModel.find({
-    project_id,
-    is_shortaged: true
-  });
+  await project.save();
 
-  const productQuantities = project.product_items.map((item) => ({
-    product_name: item.product_name,
-    product_quantity: item.product_quantity
-  }));
-
-  const productType = await ProductCategoryModel.findById(project.product_type);
-
-  // Calculate the total quantity
-  const totalQuantity = project.product_items.reduce((acc, item) => acc + item.product_quantity, 0);
-
-  // Construct the response object
-  const topResponse = {
-    project_name: project.project_name,
-    product_quantities: productQuantities,
-    total_item_in_stock: totalQuantity,
-    awarded_benefiacires: awardedBeneficiariesCount,
-    shortage: shortageBeneficiaries.length,
-    shortage_details: shortageBeneficiaries || [],
-    deliverd_item: disbursedBeneficiariesCount,
-    beneficary_feedback: 'not done'
-  };
-
-  const lowerResponse = {
-    product_type: productType.product_category_name,
-    product_items: project.product_item_display,
-    created: project.createdAt,
-    start_date: project.start_date,
-    end_date: project.end_date,
-    project_status: project.project_status
-  };
-
-  // Return the response object
-  return { topResponse, lowerResponse };
+  if (body.is_active === false && project.project_state === 'in-progress') {
+    // delete everything with project id
+    await awardeesModel.deleteMany({ project_id, sponsor_id: user._id });
+    await scheduleModel.deleteMany({ project: project_id, sponsor_id: user._id });
+  }
 };
 
+export const deleteProject = async ({ project_id }) => {
+  const project = await ProjectModel.findById(project_id).populate('product_items');
+
+  if (!project) throw new NotFoundError('Project not found');
+
+  const deleteable = ['scheduled', 'disbursed', 'completed', 'ended'];
+
+  if (deleteable.includes(project.project_status))
+    throw new BadRequestError(
+      'Project has started, you can no longer delete it. Please cancel the project'
+    );
+  const deleteProject = await ProjectModel.findByIdAndDelete(project_id);
+
+  if (!deleteProject)
+    throw new InternalServerError('Deleting project cannot work. contant our customer support');
+
+  await awardeesModel.deleteMany({ project_id });
+  await scheduleModel.deleteMany({ project: project_id });
+
+  return {};
+};

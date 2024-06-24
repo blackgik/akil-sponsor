@@ -15,8 +15,8 @@ const AwardeesSchema = new Schema(
     ward: { type: String, required: true },
     status: {
       type: String,
-      default: 'selected',
-      enum: ['selected', 'awarded', 'confirmed', 'scheduled', 'disbursed']
+      default: 'awarded',
+      enum: ['awarded', 'allocated', 'confirmed', 'scheduled', 'disbursed']
     },
     is_shortaged: { type: Boolean, default: false },
     beneficiary_status: { type: String, required: true },

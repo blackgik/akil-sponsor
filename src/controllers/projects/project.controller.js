@@ -1,11 +1,11 @@
 import appResponse from '../../../lib/appResponse.js';
 import {
   createProject,
+  deleteProject,
   fetchGenerateList,
   generateProjectList,
-  projectDashBoard,
   saveGenerateList,
-  viewProject
+  updateProject
 } from '../../services/projects/projects.service.js';
 import { downloadExcel } from '../../utils/general.js';
 
@@ -43,6 +43,42 @@ export const fetchGenerateListHandler = async (req, res) => {
   const response = await fetchGenerateList({ param: query, user, project_id });
 
   res.send(appResponse('Fetched successfully', response));
+};
+
+export const updateProjectHandler = async (req, res) => {
+  const { user, body, params } = req;
+
+  const { project_id } = params;
+
+  const response = await updateProject({ user, body, project_id });
+
+  res.send(appResponse('Updated successfully', response));
+};
+
+export const deleteProjectHandler = async () => {
+  const { project_id } = params;
+
+  const response = await deleteProject({ project_id });
+
+  res.send(appResponse('Deleted successfully', response));
+};
+
+export const updateProjectHandler = async (req, res) => {
+  const { user, body, params } = req;
+
+  const { project_id } = params;
+
+  const response = await updateProject({ user, body, project_id });
+
+  res.send(appResponse('Updated successfully', response));
+};
+
+export const deleteProjectHandler = async () => {
+  const { project_id } = params;
+
+  const response = await deleteProject({ project_id });
+
+  res.send(appResponse('Deleted successfully', response));
 };
 
 export const projectDashboardHandler = async (req, res) => {
