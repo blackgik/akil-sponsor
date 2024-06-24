@@ -226,3 +226,99 @@ export const listschedules = async ({ user, param }) => {
 
   return { page_no, available_pages, count, fetched_data };
 };
+
+export const startSchedule = async ({ body, user, project_id }) => {
+  const project = await ProjectModel.findById(project_id).populate('product_items');
+
+  if (!project) throw new NotFoundError('Project not found');
+
+  if (body.selection.includes('*')) {
+    await scheduleModel.updateMany(
+      { project: project_id, status: 'scheduled' },
+      { $set: { status: 'in-progress', start_date: new Date() } }
+    );
+  } else {
+    await scheduleModel.updateMany(
+      { _id: { $in: body.selection }, status: 'scheduled' },
+      { $set: { status: 'in-progress' } }
+    );
+  }
+
+  project.project_state =
+    project.project_state === 'scheduled ' || project.project_state === 'pending'
+      ? 'in-progress'
+      : project.project_state;
+
+  await project.save();
+
+  return {};
+};
+
+export const viewSchedule = async ({ schedule_id, user }) => {
+  const schedule = await scheduleModel.findById(schedule_id);
+
+  if (!schedule) throw new NotFoundError('Schedule not found for');
+
+  return schedule;
+};
+
+export const fetchAwardeesinSchedule = async ({ schedule_id, user, param }) => {
+  let { page_no, no_of_requests, search, gender, state, lga, age, occupation, status } = param;
+
+  page_no = Number(page_no) || 1;
+  no_of_requests = Number(no_of_requests) || Infinity;
+
+  const query = typeof search !== 'undefined' ? search : false;
+  const rgx = (pattern) => new RegExp(`.*${pattern}.*`, 'i');
+  const searchRgx = rgx(query);
+
+  const filter = { sponsor_id: user._id, batch_id: schedule_id };
+
+  if (query) {
+    filter['$or'] = [{ name: searchRgx, phone: searchRgx }];
+  }
+
+  if (gender) {
+    filter.gender = gender;
+  }
+
+  if (state) {
+    filter.state = state;
+  }
+
+  if (lga) {
+    filter.lga = lga;
+  }
+
+  if (age) {
+    const ageSplit = age.split('-');
+    const min = ageSplit[0].trim();
+    const max = ageSplit[1].trim();
+
+    filter.age = { $gte: Number(min), $lte: Number(max) };
+  }
+
+  if (occupation) {
+    filter.occupation = occupation;
+  }
+
+  if (status) {
+    filter.status = status;
+  }
+
+  const count = await awardeesModel.countDocuments(filter);
+  const fetched_data = await awardeesModel
+    .find(filter)
+    .sort({ createdAt: -1 })
+    .skip((page_no - 1) * no_of_requests)
+    .limit(no_of_requests);
+
+  const available_pages = Math.ceil(count / no_of_requests);
+
+  return {
+    page_no,
+    available_pages,
+    count,
+    fetched_data
+  };
+};

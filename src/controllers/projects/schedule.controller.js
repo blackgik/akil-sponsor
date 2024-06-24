@@ -2,8 +2,11 @@ import { BadRequestError } from '../../../lib/appErrors.js';
 import appResponse from '../../../lib/appResponse.js';
 import {
   createProductSchedule,
+  fetchAwardeesinSchedule,
   generateSchedule,
-  listschedules
+  listschedules,
+  startSchedule,
+  viewSchedule
 } from '../../services/projects/scheduling.service.js';
 
 export const createProductScheduleHandler = async (req, res) => {
@@ -39,7 +42,31 @@ export const listScheduleHandler = async (req, res) => {
 };
 
 export const startScheduleHandler = async (req, res) => {
-  const { body, user } = req;
+  const { body, user, params } = req;
 
-  const response = await startSchedule({});
+  const { project_id } = params;
+
+  const response = await startSchedule({ body, user, project_id });
+
+  res.send(appResponse('Started succcessfully', response));
+};
+
+export const viewScheduleHandler = async (req, res) => {
+  const { user, params } = req;
+
+  const { schedule_id } = params;
+
+  const response = await viewSchedule({ schedule_id, user });
+
+  res.send(appResponse('Fetched succcessfully', response));
+};
+
+export const fetchAwardeesinScheduleHandler = async (req, res) => {
+  const { user, params, query } = req;
+
+  const { schedule_id } = params;
+
+  const response = await fetchAwardeesinSchedule({ schedule_id, param: query, user });
+
+  res.send(appResponse('Fetched succcessfully', response));
 };
