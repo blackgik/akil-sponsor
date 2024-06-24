@@ -249,6 +249,11 @@ export const startSchedule = async ({ body, user, project_id }) => {
       ? 'in-progress'
       : project.project_state;
 
+  project.start_date =
+    (await scheduleModel.countDocuments({ $nin: ['pending', 'scheduled'] })) > 1
+      ? project.start_date
+      : new Date();
+
   await project.save();
 
   return {};
@@ -321,4 +326,40 @@ export const fetchAwardeesinSchedule = async ({ schedule_id, user, param }) => {
     count,
     fetched_data
   };
+};
+
+export const editSchedule = async ({ schedule_id, user, body }) => {
+  const schedule = await scheduleModel.findById(schedule_id);
+
+  if (!schedule) throw new NotFoundError('Schedule not found');
+
+  if (schedule.status === 'completed') throw new BadRequestError('Schedule already completed');
+
+  const updates = Object.keys(body);
+
+  updates.forEach((update) => (schedule[update] = body[update]));
+
+  if (schedule.status === 'in-progress' && updates.includes('start_date'))
+    throw new BadRequestError('Schedule already started, start date cannot be updated');
+
+  await schedule.save();
+
+  return {};
+};
+
+export const deleteSchedule = async ({ schedule_id, user }) => {
+  const scheduleCheck = await scheduleModel.findById(schedule_id);
+
+  if (!scheduleCheck) throw new NotFoundError('Schedule not found for');
+
+  if (scheduleCheck.status === 'completed') throw new BadRequestError('Schedule already completed');
+
+  await scheduleCheck.remove();
+
+  await awardeesModel.updateMany(
+    { batch_id: schedule_id, is_shortaged: false, status: { $nin: ['disbursed'] } },
+    { $set: { status: 'allocated' } }
+  );
+
+  return {};
 };
