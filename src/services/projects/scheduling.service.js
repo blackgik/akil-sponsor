@@ -194,3 +194,35 @@ export const generateSchedule = async ({ user, project_id }) => {
 
   return batch_number;
 };
+
+export const listschedules = async ({ user, param }) => {
+  let { page_no, no_of_requests, search, status } = param;
+
+  page_no = Number(page_no) || 1;
+  no_of_requests = Number(no_of_requests) || Infinity;
+
+  const query = typeof search !== 'undefined' ? search : false;
+  const rgx = (pattern) => new RegExp(`.*${pattern}.*`, 'i');
+  const searchRgx = rgx(query);
+
+  const filter = { sponsor_id: user._id };
+
+  if (status) {
+    filter.status = status;
+  }
+
+  if (query) {
+    filter.batch_number = searchRgx;
+  }
+
+  const count = await scheduleModel.countDocuments(filter);
+  const fetched_data = await scheduleModel
+    .find(filter)
+    .sort({ creatdAt: -1 })
+    .skip((page_no - 1) * no_of_requests)
+    .limit(no_of_requests);
+
+  const available_pages = Math.ceil(count / no_of_requests);
+
+  return { page_no, available_pages, count, fetched_data };
+};

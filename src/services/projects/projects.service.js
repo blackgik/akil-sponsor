@@ -9,7 +9,7 @@ import ProductModel from '../../models/products/ProductModel.js';
 import ProjectModel from '../../models/projects/ProjectModel.js';
 import organizationBeneficiaryModel from '../../models/beneficiaries/organizationBeneficiaryModel.js';
 import awardeesModel from '../../models/projects/awardeesModel.js';
-import RestockModel from '../../models/products/RestockModel.js';
+import scheduleModel from '../../models/projects/scheduleModel.js';
 
 export const createProject = async ({ body, user }) => {
   try {
@@ -117,7 +117,7 @@ export const generateProjectList = async ({ user, param, project_id, body }) => 
         ward: beneficiary.personal.lga,
         beneficiary_status: beneficiary.acctstatus,
         project_id: project_id,
-        status: 'selected',
+        status: 'awarded',
         sponsor_id: user._id
       };
 
@@ -143,13 +143,17 @@ export const generateProjectList = async ({ user, param, project_id, body }) => 
         ward: beneficiary.personal.lga,
         beneficiary_status: beneficiary.acctstatus,
         project_id: project_id,
-        status: 'selected',
+        status: 'awarded',
         sponsor_id: user._id
       };
 
       batch.push(data);
     }
   }
+
+  project.project_status = 'awarded';
+
+  await project.save();
 
   const create_awardees = await awardeesModel.insertMany(batch);
 
@@ -196,7 +200,7 @@ export const saveGenerateList = async ({ user, param, project_id, body }) => {
   if (selection.includes('*')) {
     const awardeeCount = await awardeesModel.countDocuments(filter);
     const update = await awardeesModel.updateMany(filter, {
-      $set: { status: 'awarded' }
+      $set: { status: 'allocated' }
     });
 
     if (!update) throw new InternalServerError('Could not update status');
@@ -213,7 +217,7 @@ export const saveGenerateList = async ({ user, param, project_id, body }) => {
     filter._id = { $in: selection };
 
     const update = await awardeesModel.updateMany(filter, {
-      $set: { status: 'awarded' }
+      $set: { status: 'allocated' }
     });
 
     if (!update) throw new InternalServerError('Could not update status');
@@ -295,7 +299,7 @@ export const fetchGenerateList = async ({ param, user, project_id }) => {
   const count = await awardeesModel.countDocuments(filter);
   const fetched_data = await awardeesModel
     .find(filter)
-    .sort({ created_at: -1 })
+    .sort({ createdAt: -1 })
     .skip((page_no - 1) * no_of_requests)
     .limit(no_of_requests);
 
@@ -307,4 +311,44 @@ export const fetchGenerateList = async ({ param, user, project_id }) => {
     count,
     fetched_data
   };
+};
+
+export const updateProject = async ({ user, body, project_id }) => {
+  const project = await ProjectModel.findById(project_id).populate('product_items');
+
+  if (!project) throw new NotFoundError('Project not found');
+
+  const updates = Object.keys(body);
+
+  updates.forEach((update) => (project[update] = body[update]));
+
+  await project.save();
+
+  if (body.is_active === false && project.project_state === 'in-progress') {
+    // delete everything with project id
+    await awardeesModel.deleteMany({ project_id, sponsor_id: user._id });
+    await scheduleModel.deleteMany({ project: project_id, sponsor_id: user._id });
+  }
+};
+
+export const deleteProject = async ({ project_id }) => {
+  const project = await ProjectModel.findById(project_id).populate('product_items');
+
+  if (!project) throw new NotFoundError('Project not found');
+
+  const deleteable = ['scheduled', 'disbursed', 'completed', 'ended'];
+
+  if (deleteable.includes(project.project_status))
+    throw new BadRequestError(
+      'Project has started, you can no longer delete it. Please cancel the project'
+    );
+  const deleteProject = await ProjectModel.findByIdAndDelete(project_id);
+
+  if (!deleteProject)
+    throw new InternalServerError('Deleting project cannot work. contant our customer support');
+
+  await awardeesModel.deleteMany({ project_id });
+  await scheduleModel.deleteMany({ project: project_id });
+
+  return {};
 };

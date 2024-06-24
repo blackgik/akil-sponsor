@@ -2,15 +2,14 @@ import { BadRequestError } from '../../../lib/appErrors.js';
 import appResponse from '../../../lib/appResponse.js';
 import {
   createProductSchedule,
-  generateSchedule
+  generateSchedule,
+  listschedules
 } from '../../services/projects/scheduling.service.js';
 
 export const createProductScheduleHandler = async (req, res) => {
   const { body, user, params, query } = req;
 
   const { project_id } = params;
-
-  console.log({ project_id });
 
   if (!project_id) throw new BadRequestError('Please provide a project id');
 
@@ -28,5 +27,19 @@ export const generateScheduleNumberHandler = async (req, res) => {
 
   const response = await generateSchedule({ user, project_id });
 
-  res.send(appResponse('Generateds succcessfully', response));
+  res.send(appResponse('Generated succcessfully', response));
+};
+
+export const listScheduleHandler = async (req, res) => {
+  const { user, query } = req;
+
+  const response = await listschedules({ user, param: query });
+
+  res.send(appResponse('Fetched succcessfully', response));
+};
+
+export const startScheduleHandler = async (req, res) => {
+  const { body, user } = req;
+
+  const response = await startSchedule({});
 };
