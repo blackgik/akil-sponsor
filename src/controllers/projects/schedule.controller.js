@@ -2,8 +2,13 @@ import { BadRequestError } from '../../../lib/appErrors.js';
 import appResponse from '../../../lib/appResponse.js';
 import {
   createProductSchedule,
+  deleteSchedule,
+  editSchedule,
+  fetchAwardeesinSchedule,
   generateSchedule,
-  listschedules
+  listschedules,
+  startSchedule,
+  viewSchedule
 } from '../../services/projects/scheduling.service.js';
 
 export const createProductScheduleHandler = async (req, res) => {
@@ -39,7 +44,51 @@ export const listScheduleHandler = async (req, res) => {
 };
 
 export const startScheduleHandler = async (req, res) => {
-  const { body, user } = req;
+  const { body, user, params } = req;
 
-  const response = await startSchedule({});
+  const { project_id } = params;
+
+  const response = await startSchedule({ body, user, project_id });
+
+  res.send(appResponse('Started succcessfully', response));
+};
+
+export const viewScheduleHandler = async (req, res) => {
+  const { user, params } = req;
+
+  const { schedule_id } = params;
+
+  const response = await viewSchedule({ schedule_id, user });
+
+  res.send(appResponse('Fetched succcessfully', response));
+};
+
+export const fetchAwardeesinScheduleHandler = async (req, res) => {
+  const { user, params, query } = req;
+
+  const { schedule_id } = params;
+
+  const response = await fetchAwardeesinSchedule({ schedule_id, param: query, user });
+
+  res.send(appResponse('Fetched succcessfully', response));
+};
+
+export const editScheduleHandler = async (req, res) => {
+  const { user, params, body } = req;
+
+  const { schedule_id } = params;
+
+  const response = await editSchedule({ schedule_id, user, body });
+
+  res.send(appResponse('Edited succcessfully', response));
+};
+
+export const deleteScheduleHandler = async (req, res) => {
+  const { user, params } = req;
+
+  const { schedule_id } = params;
+
+  const response = await deleteSchedule({ schedule_id, user });
+
+  res.send(appResponse('Delete succcessfully', response));
 };

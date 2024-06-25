@@ -277,19 +277,23 @@ export const fetchGenerateList = async ({ param, user, project_id }) => {
   }
 
   if (state) {
-    filter.gender = state;
+    filter.state = state;
   }
 
   if (lga) {
-    filter.gender = lga;
+    filter.lga = lga;
   }
 
   if (age) {
-    filter.gender = age;
+    const ageSplit = age.split('-');
+    const min = ageSplit[0];
+    const max = ageSplit[1];
+
+    filter.age = { $gte: Number(min), $lte: Number(max) };
   }
 
   if (occupation) {
-    filter.gender = occupation;
+    filter.occupation = occupation;
   }
 
   if (status) {

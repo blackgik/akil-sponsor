@@ -31,17 +31,9 @@ export const updateProjectSchema = Joi.object({
   is_active: Joi.boolean().optional().allow('', null)
 });
 
-export const projectDashboardQuery = Joi.object({
-  page_no: Joi.string().optional().allow('', null),
-  no_of_requests: Joi.string().optional().allow('', null),
-  search: Joi.string().optional(),
-  productName: Joi.string().optional(),
-  productItem: Joi.string().optional(),
-  dateCreated: Joi.string().optional(),
-  project_status: Joi.string().optional(),
-  project_state: Joi.string().optional(),
-  duration: Joi.string().optional(),
-  from: Joi.string().optional(),
-  to: Joi.string().optional(),
-  download: Joi.string().optional()
-})
+export const verifyCodeSchema = Joi.object({
+  otp: Joi.string().required(),
+  hash: Joi.string().required(),
+  awardee: Joi.string().required(),
+  contact: Joi.string().required()
+});
