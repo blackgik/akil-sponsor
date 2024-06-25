@@ -8254,7 +8254,7 @@ export const newProductMail = (data) => {
                                                                                       style="line-height: 21px;">Dear
                                                                                   </span></strong></span><strong><span
                                                                                   style="line-height: 21px;"><span
-                                                                                      style="color: #CB6015; line-height: 21px;">${data.name_of_cooperation.toUpperCase()}</span></span></strong></span>
+                                                                                      style="color: #CB6015; line-height: 21px;">${data.name_of_cooperation?.toUpperCase()}</span></span></strong></span>
   
                                                                   </p>
                                                               </div>
