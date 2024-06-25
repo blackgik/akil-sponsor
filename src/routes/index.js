@@ -13,6 +13,7 @@ import userRoute from './settings/users.route.js';
 import personlizationRoute from './settings/personalization.route.js';
 import project_route from './projects/project.route.js';
 import scheduling_route from './projects/scheduling.route.js';
+import disbursement_router from './projects/disbursement.route.js';
 
 export default (router) => {
   router.use('/auth', organizationRoute());
@@ -30,6 +31,7 @@ export default (router) => {
   router.use('/personalization', personlizationRoute);
   router.use('/project', project_route);
   router.use('/project/schedule', scheduling_route);
+  router.use('/project/disbursement', disbursement_router);
 
   return router;
 };

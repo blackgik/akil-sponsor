@@ -30,3 +30,10 @@ export const updateProjectSchema = Joi.object({
   end_date: Joi.date().optional().allow('', null),
   is_active: Joi.boolean().optional().allow('', null)
 });
+
+export const verifyCodeSchema = Joi.object({
+  otp: Joi.string().required(),
+  hash: Joi.string().required(),
+  awardee: Joi.string().required(),
+  contact: Joi.string().required()
+});

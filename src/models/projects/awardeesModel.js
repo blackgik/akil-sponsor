@@ -22,6 +22,7 @@ const AwardeesSchema = new Schema(
     beneficiary_status: { type: String, required: true },
     project_id: { type: Schema.Types.ObjectId, ref: 'Project', required: true },
     batch_code: { type: String, default: '' },
+    hash: { type: String, default: '' },
     batch_id: { type: Schema.Types.ObjectId, ref: 'Project_schedule' },
     sponsor_id: { type: Schema.Types.ObjectId, required: true, ref: 'Organization' }
   },
