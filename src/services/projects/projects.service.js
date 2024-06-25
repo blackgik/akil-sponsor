@@ -10,6 +10,10 @@ import ProjectModel from '../../models/projects/ProjectModel.js';
 import organizationBeneficiaryModel from '../../models/beneficiaries/organizationBeneficiaryModel.js';
 import awardeesModel from '../../models/projects/awardeesModel.js';
 import scheduleModel from '../../models/projects/scheduleModel.js';
+import mongoose from 'mongoose';
+import { dateFilters } from '../../utils/timeFilters.js';
+import ProductCategoryModel from '../../models/products/ProductCategoryModel.js';
+import { downloadExcel } from '../../utils/general.js';
 
 export const createProject = async ({ body, user }) => {
   try {
@@ -317,6 +321,85 @@ export const fetchGenerateList = async ({ param, user, project_id }) => {
   };
 };
 
+export const projectDashBoardStats = async ({ params, user }) => {
+  const activeProjectCount = await ProjectModel.countDocuments({
+    sponsor_id: user._id,
+    project_state: 'in-progress'
+  });
+  const completedProjectCount = await ProjectModel.countDocuments({
+    sponsor_id: user._id,
+    project_state: 'completed'
+  });
+  const awardeesCount = await awardeesModel.countDocuments({ sponsor_id: user._id });
+
+  return {
+    activeProjectCount,
+    completedProjectCount,
+    awardeesCount
+  };
+};
+
+export const viewProject = async ({ project_id }) => {
+  const project = await ProjectModel.findById(project_id).populate('product_items').exec();
+
+  if (!project) throw new NotFoundError('Project not found');
+
+  const quantityPerPerson = project.quantity_per_person === 0 ? 1 : project.quantity_per_person;
+
+  const awardedBeneficiariesCount = await awardeesModel.countDocuments({
+    project_id,
+    status: 'awarded'
+  });
+
+  const productQuantities = project.product_items.map((item) => ({
+    product_name: item.product_name,
+    product_quantity: item.product_quantity
+  }));
+
+  const quantityNeeded = quantityPerPerson * awardedBeneficiariesCount;
+
+  const shortages = productQuantities.map((item) => {
+    const shortage = quantityNeeded - item.product_quantity;
+    return {
+      product_name: item.product_name,
+      product_shortage_quantity: shortage > 0 ? shortage : 0
+    };
+  });
+
+  const totalShortage = shortages.reduce(
+    (total, item) => total + item.product_shortage_quantity,
+    0
+  );
+
+  const disbursedBeneficiariesCount = await awardeesModel.countDocuments({
+    project_id,
+    status: 'disbursed'
+  });
+
+  const productType = await ProductCategoryModel.findById(project.product_type);
+
+  const totalQuantity = project.product_items.reduce((acc, item) => acc + item.product_quantity, 0);
+
+  const data = {
+    project_name: project.project_name,
+    total_item_in_stock: totalQuantity,
+    product_item_quantities: productQuantities,
+    awarded_benefiacires: awardedBeneficiariesCount,
+    total_shortage: totalShortage,
+    shortage_items: shortages,
+    deliverd_item: disbursedBeneficiariesCount,
+    beneficary_feedback: 'not done',
+    product_type: productType.product_category_name,
+    product_items: project.product_item_display,
+    created: project.createdAt,
+    start_date: project.start_date,
+    end_date: project.end_date,
+    project_status: project.project_status
+  };
+
+  return data;
+};
+
 export const updateProject = async ({ user, body, project_id }) => {
   const project = await ProjectModel.findById(project_id).populate('product_items');
 
@@ -355,4 +438,78 @@ export const deleteProject = async ({ project_id }) => {
   await scheduleModel.deleteMany({ project: project_id });
 
   return {};
+};
+
+export const fetchAllProject = async ({ params, user }) => {
+  let {
+    page_no,
+    no_of_requests,
+    search,
+    product_type,
+    product_item,
+    dateCreated,
+    duration,
+    from,
+    to,
+    todayTime,
+    project_status,
+    project_state,
+    download
+  } = params;
+
+  page_no = Number(page_no) || 1;
+  no_of_requests = Number(no_of_requests) || 20;
+
+  const { today, timeDiff } = dateFilters({ duration, from, to, todayTime });
+  const filter = {
+    sponsor_id: mongoose.Types.ObjectId(user._id),
+    createdAt: { $gte: timeDiff, $lte: today }
+  };
+
+  if (search) {
+    const searchRgx = new RegExp(`.*${search}.*`, 'i');
+    filter['$or'] = [{ project_name: searchRgx }, { description: searchRgx }];
+  }
+
+  if (product_type) {
+    filter.product_type = mongoose.Types.ObjectId(product_type);
+  }
+
+  if (product_item) {
+    filter.product_items = mongoose.Types.ObjectId(product_item);
+  }
+
+  if (dateCreated) {
+    filter.createdAt = { $gte: new Date(dateCreated) };
+  }
+
+  if (project_status) {
+    filter.project_status = project_status;
+  }
+
+  if (project_state) {
+    filter.project_state = project_state;
+  }
+
+  const skip = (page_no - 1) * no_of_requests;
+  const limit = no_of_requests;
+
+  const totalDocuments = await ProjectModel.countDocuments(filter);
+  const totalPages = Math.ceil(totalDocuments / no_of_requests);
+
+  let fetchedData = await ProjectModel.find(filter)
+    .populate('product_type')
+    .sort({ createdAt: -1 })
+    .skip(skip)
+    .limit(limit)
+    .lean();
+
+  return download === 'on'
+    ? fetchedData
+    : {
+        page_no,
+        available_pages: totalPages,
+        totalPages,
+        fetchedData
+      };
 };

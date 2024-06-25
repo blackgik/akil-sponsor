@@ -4,9 +4,14 @@ import {
   deleteProject,
   fetchGenerateList,
   generateProjectList,
+  viewProject,
   saveGenerateList,
-  updateProject
+  updateProject,
+  projectDashBoardStats,
+  fetchAllProject
 } from '../../services/projects/projects.service.js';
+import { codeGenerator } from '../../utils/codeGenerator.js';
+import { downloadExcel } from '../../utils/general.js';
 
 export const createProjectsHandler = async (req, res) => {
   const { body, user } = req;
@@ -60,4 +65,49 @@ export const deleteProjectHandler = async () => {
   const response = await deleteProject({ project_id });
 
   res.send(appResponse('Deleted successfully', response));
+};
+
+export const projectDashboardStatsHandler = async (req, res) => {
+  const { params, user } = req;
+
+  const response = await projectDashBoardStats({ params, user });
+  res.send(appResponse('Fetched Project Dashboard Stats Successfully', response));
+};
+
+export const viewProjectHandler = async (req, res) => {
+  const { params, user } = req;
+  const { project_id } = params;
+
+  const response = await viewProject({ project_id, user });
+  res.send(appResponse('Fetched Project successfully', response));
+};
+
+export const fetchProjectHandler = async (req, res) => {
+  const { query, user } = req;
+  const params = query;
+
+  const responses = await fetchAllProject({ user, params });
+
+  if (params.download === 'on') {
+    const worksheet = new Date().getTime() + (await codeGenerator(5));
+    const worksheetHeaders = [
+      { header: 'ProductName', key: 'project_name', width: 50 },
+      { header: 'DateCreated', key: 'createdAt', width: 50 }
+    ];
+
+    let mainList = [];
+
+    for (let response of responses) {
+      mainList.push({
+        project_name: response.project_name,
+        createdAt: response.createdAt
+      });
+    }
+
+    const file = await downloadExcel(worksheet, worksheetHeaders, mainList);
+
+    res.send(appResponse('File paths', file));
+  } else {
+    res.send(appResponse('Fetched project dashboard data successfully', responses));
+  }
 };
