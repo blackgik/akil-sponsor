@@ -416,6 +416,7 @@ export const viewProject = async ({ project_id }) => {
     quantity_per_person: project.quantity_per_person,
     product_type: productType.product_category_name,
     product_type_id: project.product_type,
+    project_discription: project.description,
     product_items: project.product_items,
     is_active: project.is_active,
     created: project.createdAt,
