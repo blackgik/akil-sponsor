@@ -14,7 +14,11 @@ import mongoose from 'mongoose';
 import { dateFilters } from '../../utils/timeFilters.js';
 import ProductCategoryModel from '../../models/products/ProductCategoryModel.js';
 import { capitalizeWords, downloadExcel } from '../../utils/general.js';
-import { beneficiarySuccefullyAllocatedEmail, newProjectCreationEmail, succefulProjectAwardedEmail } from '../../config/mail.js';
+import {
+  beneficiarySuccefullyAllocatedEmail,
+  newProjectCreationEmail,
+  succefulProjectAwardedEmail
+} from '../../config/mail.js';
 import { formattMailInfo } from '../../utils/mailFormatter.js';
 import { messageBird } from '../../utils/msgBird.js';
 import env from '../../config/env.js';
@@ -293,7 +297,7 @@ export const saveGenerateList = async ({ user, param, project_id, body }) => {
 
   const mailData = {
     email: user.email,
-    subject: `Successful Project Beneficiary Award Notification`,
+    subject: `Beneficiary Successfully Allocated to ${emailData.project_name}`,
     type: 'html',
     html: beneficiarySuccefullyAllocatedEmail(emailData).html,
     text: beneficiarySuccefullyAllocatedEmail(emailData).text
