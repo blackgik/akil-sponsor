@@ -516,3 +516,13 @@ export const fetchAllProject = async ({ params, user }) => {
         fetchedData
       };
 };
+
+export const getProjectItem = async ({ user, product_id }) => {
+  const product = await ProductCategoryModel.findById(product_id);
+
+  if (!product) throw new NotFoundError('Product does not exist');
+
+  const items = await ProductModel.find({ product_category_id: product_id });
+
+  return items;
+};
