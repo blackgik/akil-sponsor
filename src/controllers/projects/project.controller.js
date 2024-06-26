@@ -8,7 +8,8 @@ import {
   saveGenerateList,
   updateProject,
   projectDashBoardStats,
-  fetchAllProject
+  fetchAllProject,
+  getProjectItem
 } from '../../services/projects/projects.service.js';
 import { codeGenerator } from '../../utils/codeGenerator.js';
 import { downloadExcel } from '../../utils/general.js';
@@ -110,4 +111,14 @@ export const fetchProjectHandler = async (req, res) => {
   } else {
     res.send(appResponse('Fetched project dashboard data successfully', responses));
   }
+};
+
+export const getProjectItemHandler = async (req, res) => {
+  const { product_id } = req.params;
+
+  const { user } = req;
+
+  const response = await getProjectItem({ user, product_id });
+
+  res.send(appResponse('Fetched project item successfully', response));
 };

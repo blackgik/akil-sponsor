@@ -7,6 +7,7 @@ import {
   fetchGenerateListHandler,
   fetchProjectHandler,
   generateProjectListHandler,
+  getProjectItemHandler,
   projectDashboardStatsHandler,
   saveGenerateListHandler,
   updateProjectHandler,
@@ -32,9 +33,9 @@ project_route.patch(
   updateProjectHandler
 );
 project_route.delete('/delete-project/:project_id', authentication, deleteProjectHandler);
-
 project_route.get('/project-dashboard-stats', authentication, projectDashboardStatsHandler);
 project_route.get('/fetch-project', authentication, fetchProjectHandler);
 project_route.get('/view-project/:project_id', authentication, viewProjectHandler);
+project_route.get('/get-project-item/:product_id', authentication, getProjectItemHandler);
 
 export default project_route;
