@@ -13,7 +13,11 @@ import scheduleModel from '../../models/projects/scheduleModel.js';
 import mongoose from 'mongoose';
 import { dateFilters } from '../../utils/timeFilters.js';
 import ProductCategoryModel from '../../models/products/ProductCategoryModel.js';
-import { downloadExcel } from '../../utils/general.js';
+import { capitalizeWords, downloadExcel } from '../../utils/general.js';
+import { newProjectCreationEmail } from '../../config/mail.js';
+import { formattMailInfo } from '../../utils/mailFormatter.js';
+import { messageBird } from '../../utils/msgBird.js';
+import env from '../../config/env.js';
 
 export const createProject = async ({ body, user }) => {
   try {
@@ -22,7 +26,7 @@ export const createProject = async ({ body, user }) => {
       sponsor_id: user._id
     });
 
-    if (checkProject) throw new DuplicateError('Project Created successfully');
+    if (checkProject) throw new DuplicateError('Project already exisiting');
 
     // check if any project has the product type
     const checkProductTypeProject = await ProjectModel.findOne({
@@ -54,6 +58,26 @@ export const createProject = async ({ body, user }) => {
     const project = await ProjectModel.create(projectData);
 
     if (!project) throw new InternalServerError('Project not created. Server is down');
+
+    //create email profile here
+    const emailData = {
+      sponsor_name: capitalizeWords(`${user.firstname} ${user.lastname}`),
+      project_name: capitalizeWords(body.project_name)
+    };
+
+    const mailData = {
+      email: user.email,
+      subject: `New Project Created - ${emailData.project_name}`,
+      type: 'html',
+      html: newProjectCreationEmail(emailData).html,
+      text: newProjectCreationEmail(emailData).text
+    };
+
+    const msg = await formattMailInfo(mailData, env);
+
+    const msgDelivered = await messageBird(msg);
+    if (!msgDelivered)
+      throw new InternalServerError('server slip. project was created without mail being sent');
 
     return project;
   } catch (err) {
@@ -321,7 +345,7 @@ export const fetchGenerateList = async ({ param, user, project_id }) => {
   };
 };
 
-export const projectDashBoardStats = async ({ params, user }) => {
+export const projectDashBoardStats = async ({ user }) => {
   const activeProjectCount = await ProjectModel.countDocuments({
     sponsor_id: user._id,
     project_state: 'in-progress'
