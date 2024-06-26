@@ -300,8 +300,12 @@ export const fetchGenerateList = async ({ param, user, project_id }) => {
     filter.status = status;
   }
 
-  if (is_shortaged) {
-    filter.is_shortaged = is_shortaged;
+  if (is_shortaged === 'true' || is_shortaged === true) {
+    filter.is_shortaged = true;
+  }
+
+  if (is_shortaged === 'false' || is_shortaged === false) {
+    filter.is_shortaged = false;
   }
 
   const count = await awardeesModel.countDocuments(filter);
