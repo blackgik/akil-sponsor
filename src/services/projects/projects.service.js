@@ -388,7 +388,7 @@ export const viewProject = async ({ project_id }) => {
     total_shortage: totalShortage,
     shortage_items: shortages,
     delivered_item: disbursedBeneficiariesCount,
-    beneficary_feedback: 'not done',
+    beneficiary_feedback: 'not done',
     quantity_per_person: project.quantity_per_person,
     product_type: productType.product_category_name,
     product_type_id: project.product_type,
@@ -397,7 +397,8 @@ export const viewProject = async ({ project_id }) => {
     created: project.createdAt,
     start_date: project.start_date,
     end_date: project.end_date,
-    project_status: project.project_status
+    project_status: project.project_status,
+    project_state: project.project_state
   };
 
   return data;
