@@ -157,6 +157,8 @@ export const generateProjectList = async ({ user, param, project_id, body }) => 
 
       if (!beneficiary) continue;
 
+      console.log(beneficiary);
+
       const today = Date.now() / (1000 * 60 * 24 * 60 * 365);
       const dob = beneficiary.personal.dob.getTime() / (1000 * 60 * 24 * 60 * 365);
       const data = {
@@ -165,7 +167,7 @@ export const generateProjectList = async ({ user, param, project_id, body }) => 
         gender: beneficiary.personal.gender,
         age: Math.floor(today - dob),
         phone: beneficiary.contact.phone,
-        occupation: beneficiary.employment_info.employment_status,
+        occupation: beneficiary.employment_info?.employment_status || 'unemployed',
         state: beneficiary.personal.state_of_origin,
         lga: beneficiary.personal.lga,
         ward: beneficiary.personal.lga,
@@ -174,6 +176,8 @@ export const generateProjectList = async ({ user, param, project_id, body }) => 
         status: 'awarded',
         sponsor_id: user._id
       };
+
+      console.log(data);
 
       batch.push(data);
     }
@@ -363,8 +367,12 @@ export const fetchGenerateList = async ({ param, user, project_id }) => {
     filter.status = status;
   }
 
-  if (is_shortaged) {
-    filter.is_shortaged = Boolean(is_shortaged);
+  if (is_shortaged === 'true' || is_shortaged === true) {
+    filter.is_shortaged = true;
+  }
+
+  if (is_shortaged === 'false' || is_shortaged === false) {
+    filter.is_shortaged = false;
   }
 
   const count = await awardeesModel.countDocuments(filter);
