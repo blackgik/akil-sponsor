@@ -384,13 +384,16 @@ export const viewProject = async ({ project_id }) => {
     project_name: project.project_name,
     total_item_in_stock: totalQuantity,
     product_item_quantities: productQuantities,
-    awarded_benefiacires: awardedBeneficiariesCount,
+    awarded_beneficiaries: awardedBeneficiariesCount,
     total_shortage: totalShortage,
     shortage_items: shortages,
-    deliverd_item: disbursedBeneficiariesCount,
+    delivered_item: disbursedBeneficiariesCount,
     beneficary_feedback: 'not done',
+    quantity_per_person: project.quantity_per_person,
     product_type: productType.product_category_name,
-    product_items: project.product_item_display,
+    product_type_id: project.product_type,
+    product_items: project.product_items,
+    is_active: project.is_active,
     created: project.createdAt,
     start_date: project.start_date,
     end_date: project.end_date,
@@ -512,4 +515,14 @@ export const fetchAllProject = async ({ params, user }) => {
         totalPages,
         fetchedData
       };
+};
+
+export const getProjectItem = async ({ user, product_id }) => {
+  const product = await ProductCategoryModel.findById(product_id);
+
+  if (!product) throw new NotFoundError('Product does not exist');
+
+  const items = await ProductModel.find({ product_category_id: product_id });
+
+  return items;
 };
