@@ -14,7 +14,11 @@ import mongoose from 'mongoose';
 import { dateFilters } from '../../utils/timeFilters.js';
 import ProductCategoryModel from '../../models/products/ProductCategoryModel.js';
 import { capitalizeWords, downloadExcel } from '../../utils/general.js';
-import { newProjectCreationEmail } from '../../config/mail.js';
+import {
+  beneficiarySuccefullyAllocatedEmail,
+  newProjectCreationEmail,
+  succefulProjectAwardedEmail
+} from '../../config/mail.js';
 import { formattMailInfo } from '../../utils/mailFormatter.js';
 import { messageBird } from '../../utils/msgBird.js';
 import env from '../../config/env.js';
@@ -196,7 +200,25 @@ export const generateProjectList = async ({ user, param, project_id, body }) => 
   );
 
   // send email
+  //create email profile here
+  const emailData = {
+    sponsor_name: capitalizeWords(`${user.firstname} ${user.lastname}`),
+    project_name: capitalizeWords(project.project_name)
+  };
 
+  const mailData = {
+    email: user.email,
+    subject: `Successful Project Beneficiary Award Notification`,
+    type: 'html',
+    html: succefulProjectAwardedEmail(emailData).html,
+    text: succefulProjectAwardedEmail(emailData).text
+  };
+
+  const msg = await formattMailInfo(mailData, env);
+
+  const msgDelivered = await messageBird(msg);
+  if (!msgDelivered)
+    throw new InternalServerError('server slip. project was created without mail being sent');
   return create_awardees;
 };
 
@@ -271,6 +293,26 @@ export const saveGenerateList = async ({ user, param, project_id, body }) => {
 
     shortage = minimun - awardeeCount;
   }
+
+  //create email profile here
+  const emailData = {
+    sponsor_name: capitalizeWords(`${user.firstname} ${user.lastname}`),
+    project_name: capitalizeWords(project.project_name)
+  };
+
+  const mailData = {
+    email: user.email,
+    subject: `Beneficiary Successfully Allocated to ${emailData.project_name}`,
+    type: 'html',
+    html: beneficiarySuccefullyAllocatedEmail(emailData).html,
+    text: beneficiarySuccefullyAllocatedEmail(emailData).text
+  };
+
+  const msg = await formattMailInfo(mailData, env);
+
+  const msgDelivered = await messageBird(msg);
+  if (!msgDelivered)
+    throw new InternalServerError('server slip. project was created without mail being sent');
 
   return { shortage, saved: true };
 };
