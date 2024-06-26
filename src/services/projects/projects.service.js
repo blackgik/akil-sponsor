@@ -95,7 +95,7 @@ export const generateProjectList = async ({ user, param, project_id, body }) => 
 
   const { selection } = body;
 
-  const filter = { organization_id: user._id };
+  const filter = { organization_id: user._id, project_ids: { $nin: [project_id] } };
 
   if (state) {
     filter['contact.state'] = param.state;
@@ -149,6 +149,7 @@ export const generateProjectList = async ({ user, param, project_id, body }) => 
         sponsor_id: user._id
       };
 
+      body.selection.push(beneficiary._id);
       batch.push(data);
     }
   } else {
@@ -157,7 +158,7 @@ export const generateProjectList = async ({ user, param, project_id, body }) => 
 
       if (!beneficiary) continue;
 
-      console.log(beneficiary);
+      if (beneficiary.project_ids.includes(project_id)) continue;
 
       const today = Date.now() / (1000 * 60 * 24 * 60 * 365);
       const dob = beneficiary.personal.dob.getTime() / (1000 * 60 * 24 * 60 * 365);
@@ -177,8 +178,6 @@ export const generateProjectList = async ({ user, param, project_id, body }) => 
         sponsor_id: user._id
       };
 
-      console.log(data);
-
       batch.push(data);
     }
   }
@@ -190,6 +189,11 @@ export const generateProjectList = async ({ user, param, project_id, body }) => 
   const create_awardees = await awardeesModel.insertMany(batch);
 
   if (create_awardees.length === 0) throw new InternalServerError('Error inserting Data');
+
+  await organizationBeneficiaryModel.updateMany(
+    { _id: { $nin: body.selection } },
+    { $push: { project_ids: project_id } }
+  );
 
   // send email
 

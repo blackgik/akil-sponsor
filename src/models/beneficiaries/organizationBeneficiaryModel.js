@@ -92,6 +92,7 @@ const organizationBeneficiarySchema = new Schema(
     metadata: { type: Schema.Types.Mixed },
     otpCode: { type: String, default: '' },
     isVerified: { type: Boolean, default: false },
+    project_ids: Array,
     note: { type: String, default: '', trim: true },
     has_paid_reg: { type: Boolean, default: false },
     password: { type: String, required: false },
