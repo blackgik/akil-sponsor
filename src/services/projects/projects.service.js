@@ -38,10 +38,18 @@ export const createProject = async ({ body, user }) => {
       sponsor_id: user._id
     });
 
-    if (checkProductTypeProject)
-      throw new BadRequestError(
-        `${checkProductTypeProject.project_name} project already uses this product type`
-      );
+    if (checkProductTypeProject) {
+      body.product_items.forEach(async (item) => {
+        const item_name = await ProductModel.findById(item);
+
+        if (!item_name) throw new NotFoundError('Product Item not found');
+
+        if (checkProductTypeProject.product_items.includes(item))
+          throw BadRequestError(
+            `This Item ${item_name.product_name} Can not added because ${checkProductTypeProject.project_name} has it already`
+          );
+      });
+    }
 
     const product_item_display = [];
 
@@ -613,7 +621,10 @@ export const getProjectItem = async ({ user, product_id }) => {
 
   if (!product) throw new NotFoundError('Product does not exist');
 
-  const items = await ProductModel.find({ product_category_id: product_id });
+  const items = await ProductModel.find({
+    product_category_id: product_id,
+    organization_id: user._id
+  });
 
   return items;
 };
