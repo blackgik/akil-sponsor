@@ -281,7 +281,10 @@ export const startSchedule = async ({ body, user, project_id }) => {
       : project.project_state;
 
   project.start_date =
-    (await scheduleModel.countDocuments({ $nin: ['pending', 'scheduled'] })) > 1
+    (await scheduleModel.countDocuments({
+      sponsor_id: user._id,
+      status: { $nin: ['scheduled', 'completed'] }
+    })) > 1
       ? project.start_date
       : new Date();
 
@@ -312,7 +315,7 @@ export const startSchedule = async ({ body, user, project_id }) => {
 };
 
 export const viewSchedule = async ({ schedule_id, user }) => {
-  const schedule = await scheduleModel.findById(schedule_id);
+  const schedule = await scheduleModel.findById(schedule_id).populate('project').populate();
 
   if (!schedule) throw new NotFoundError('Schedule not found for');
 

@@ -38,10 +38,18 @@ export const createProject = async ({ body, user }) => {
       sponsor_id: user._id
     });
 
-    if (checkProductTypeProject)
-      throw new BadRequestError(
-        `${checkProductTypeProject.project_name} project already uses this product type`
-      );
+    if (checkProductTypeProject) {
+      body.product_items.forEach(async (item) => {
+        const item_name = await ProductModel.findById(item);
+
+        if (!item_name) throw new NotFoundError('Product Item not found');
+
+        if (checkProductTypeProject.product_items.includes(item))
+          throw BadRequestError(
+            `This Item ${item_name.product_name} Can not added because ${checkProductTypeProject.project_name} has it already`
+          );
+      });
+    }
 
     const product_item_display = [];
 
@@ -272,7 +280,7 @@ export const saveGenerateList = async ({ user, param, project_id, body }) => {
 
     const minimun = Math.min(...quantity_tray);
 
-    shortage = minimun - awardeeCount;
+    shortage = minimun - awardeeCount * project.quantity_per_person;
   } else {
     filter._id = { $in: selection };
 
@@ -291,7 +299,7 @@ export const saveGenerateList = async ({ user, param, project_id, body }) => {
 
     const minimun = Math.min(...quantity_tray);
 
-    shortage = minimun - awardeeCount;
+    shortage = minimun - awardeeCount * project.quantity_per_person;
   }
 
   //create email profile here
@@ -492,6 +500,15 @@ export const updateProject = async ({ user, body, project_id }) => {
 
   const updates = Object.keys(body);
 
+  if (project.project_state !== 'pending' || project.project_state !== 'completed') {
+    const allowableUpdates = ['description', 'end_date', 'is_active'];
+
+    const iseditable = updates.every((item) => allowableUpdates.includes(item));
+
+    if (!iseditable)
+      throw new BadRequestError('Allowable updates at this time are description and end_date');
+  }
+
   updates.forEach((update) => (project[update] = body[update]));
 
   await project.save();
@@ -604,7 +621,10 @@ export const getProjectItem = async ({ user, product_id }) => {
 
   if (!product) throw new NotFoundError('Product does not exist');
 
-  const items = await ProductModel.find({ product_category_id: product_id });
+  const items = await ProductModel.find({
+    product_category_id: product_id,
+    organization_id: user._id
+  });
 
   return items;
 };
