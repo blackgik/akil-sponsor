@@ -315,7 +315,7 @@ export const startSchedule = async ({ body, user, project_id }) => {
 };
 
 export const viewSchedule = async ({ schedule_id, user }) => {
-  const schedule = await scheduleModel.findById(schedule_id).populate('project').populate();
+  const schedule = await scheduleModel.findById(schedule_id).populate('project').populate('userid');
 
   if (!schedule) throw new NotFoundError('Schedule not found for');
 

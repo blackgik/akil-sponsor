@@ -10,7 +10,7 @@ const projectScheduleSchema = new Schema(
     end_date: { type: Date },
     delivery_address: { type: String, default: '', trim: true },
     landmark: { type: String, default: '', trim: true },
-    userid: { type: Schema.Types.ObjectId, ref: 'Organization_Member', required: true },
+    userid: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     phone: { type: String, default: '', trim: true },
     status: {
       type: String,

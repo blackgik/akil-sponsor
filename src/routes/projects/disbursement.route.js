@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { authentication } from '../../middlewares/authentication.js';
 import {
+  confirmDisbursementHandler,
   disbursementCodeHandler,
   verifyCodeHandler
 } from '../../controllers/projects/disbursement.controller.js';
@@ -15,6 +16,11 @@ disbursement_router.patch(
   validators(verifyCodeSchema),
   authentication,
   verifyCodeHandler
+);
+disbursement_router.patch(
+  '/confirm-disbursement/:awardee_id',
+  authentication,
+  confirmDisbursementHandler
 );
 
 export default disbursement_router;
