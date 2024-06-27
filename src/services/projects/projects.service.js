@@ -498,10 +498,21 @@ export const updateProject = async ({ user, body, project_id }) => {
 
   if (!project) throw new NotFoundError('Project not found');
 
-  const updates = Object.keys(body);
+  let updates = Object.keys(body);
 
-  if (project.project_state !== 'pending' || project.project_state !== 'completed') {
+  const fullUpdateState = ['pending'];
+
+  if (!fullUpdateState.includes(project.project_state)) {
     const allowableUpdates = ['description', 'end_date', 'is_active'];
+
+    updates.forEach((item) => {
+      if (!allowableUpdates.includes(item)) {
+        console.log({ item });
+        delete body[item];
+      }
+    });
+
+    updates = Object.keys(body);
 
     const iseditable = updates.every((item) => allowableUpdates.includes(item));
 
@@ -518,6 +529,8 @@ export const updateProject = async ({ user, body, project_id }) => {
     await awardeesModel.deleteMany({ project_id, sponsor_id: user._id });
     await scheduleModel.deleteMany({ project: project_id, sponsor_id: user._id });
   }
+
+  return {};
 };
 
 export const deleteProject = async ({ project_id }) => {
