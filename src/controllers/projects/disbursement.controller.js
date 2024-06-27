@@ -18,3 +18,12 @@ export const verifyCodeHandler = async (req, res) => {
 
   res.send(appResponse('Verified successfully', response));
 };
+
+export const confirmDisbursementHandler = async (req, res) => {
+  const { user } = req;
+  const { awardee_id } = req.params;
+
+  const response = await confirmDisbursement({ user, awardee_id });
+
+  res.send(appResponse('Confirmed successfully', response));
+};

@@ -14,7 +14,11 @@ import mongoose from 'mongoose';
 import { dateFilters } from '../../utils/timeFilters.js';
 import ProductCategoryModel from '../../models/products/ProductCategoryModel.js';
 import { capitalizeWords, downloadExcel } from '../../utils/general.js';
-import { newProjectCreationEmail } from '../../config/mail.js';
+import {
+  beneficiarySuccefullyAllocatedEmail,
+  newProjectCreationEmail,
+  succefulProjectAwardedEmail
+} from '../../config/mail.js';
 import { formattMailInfo } from '../../utils/mailFormatter.js';
 import { messageBird } from '../../utils/msgBird.js';
 import env from '../../config/env.js';
@@ -34,10 +38,18 @@ export const createProject = async ({ body, user }) => {
       sponsor_id: user._id
     });
 
-    if (checkProductTypeProject)
-      throw new BadRequestError(
-        `${checkProductTypeProject.project_name} project already uses this product type`
-      );
+    if (checkProductTypeProject) {
+      body.product_items.forEach(async (item) => {
+        const item_name = await ProductModel.findById(item);
+
+        if (!item_name) throw new NotFoundError('Product Item not found');
+
+        if (checkProductTypeProject.product_items.includes(item))
+          throw BadRequestError(
+            `This Item ${item_name.product_name} Can not added because ${checkProductTypeProject.project_name} has it already`
+          );
+      });
+    }
 
     const product_item_display = [];
 
@@ -95,7 +107,7 @@ export const generateProjectList = async ({ user, param, project_id, body }) => 
 
   const { selection } = body;
 
-  const filter = { organization_id: user._id };
+  const filter = { organization_id: user._id, project_ids: { $nin: [project_id] } };
 
   if (state) {
     filter['contact.state'] = param.state;
@@ -149,6 +161,7 @@ export const generateProjectList = async ({ user, param, project_id, body }) => 
         sponsor_id: user._id
       };
 
+      body.selection.push(beneficiary._id);
       batch.push(data);
     }
   } else {
@@ -157,7 +170,7 @@ export const generateProjectList = async ({ user, param, project_id, body }) => 
 
       if (!beneficiary) continue;
 
-      console.log(beneficiary);
+      if (beneficiary.project_ids.includes(project_id)) continue;
 
       const today = Date.now() / (1000 * 60 * 24 * 60 * 365);
       const dob = beneficiary.personal.dob.getTime() / (1000 * 60 * 24 * 60 * 365);
@@ -177,8 +190,6 @@ export const generateProjectList = async ({ user, param, project_id, body }) => 
         sponsor_id: user._id
       };
 
-      console.log(data);
-
       batch.push(data);
     }
   }
@@ -191,8 +202,31 @@ export const generateProjectList = async ({ user, param, project_id, body }) => 
 
   if (create_awardees.length === 0) throw new InternalServerError('Error inserting Data');
 
-  // send email
+  await organizationBeneficiaryModel.updateMany(
+    { _id: { $nin: body.selection } },
+    { $push: { project_ids: project_id } }
+  );
 
+  // send email
+  //create email profile here
+  const emailData = {
+    sponsor_name: capitalizeWords(`${user.firstname} ${user.lastname}`),
+    project_name: capitalizeWords(project.project_name)
+  };
+
+  const mailData = {
+    email: user.email,
+    subject: `Successful Project Beneficiary Award Notification`,
+    type: 'html',
+    html: succefulProjectAwardedEmail(emailData).html,
+    text: succefulProjectAwardedEmail(emailData).text
+  };
+
+  const msg = await formattMailInfo(mailData, env);
+
+  const msgDelivered = await messageBird(msg);
+  if (!msgDelivered)
+    throw new InternalServerError('server slip. project was created without mail being sent');
   return create_awardees;
 };
 
@@ -246,7 +280,7 @@ export const saveGenerateList = async ({ user, param, project_id, body }) => {
 
     const minimun = Math.min(...quantity_tray);
 
-    shortage = minimun - awardeeCount;
+    shortage = minimun - awardeeCount * project.quantity_per_person;
   } else {
     filter._id = { $in: selection };
 
@@ -265,8 +299,28 @@ export const saveGenerateList = async ({ user, param, project_id, body }) => {
 
     const minimun = Math.min(...quantity_tray);
 
-    shortage = minimun - awardeeCount;
+    shortage = minimun - awardeeCount * project.quantity_per_person;
   }
+
+  //create email profile here
+  const emailData = {
+    sponsor_name: capitalizeWords(`${user.firstname} ${user.lastname}`),
+    project_name: capitalizeWords(project.project_name)
+  };
+
+  const mailData = {
+    email: user.email,
+    subject: `Beneficiary Successfully Allocated to ${emailData.project_name}`,
+    type: 'html',
+    html: beneficiarySuccefullyAllocatedEmail(emailData).html,
+    text: beneficiarySuccefullyAllocatedEmail(emailData).text
+  };
+
+  const msg = await formattMailInfo(mailData, env);
+
+  const msgDelivered = await messageBird(msg);
+  if (!msgDelivered)
+    throw new InternalServerError('server slip. project was created without mail being sent');
 
   return { shortage, saved: true };
 };
@@ -446,6 +500,15 @@ export const updateProject = async ({ user, body, project_id }) => {
 
   const updates = Object.keys(body);
 
+  if (project.project_state !== 'pending' || project.project_state !== 'completed') {
+    const allowableUpdates = ['description', 'end_date', 'is_active'];
+
+    const iseditable = updates.every((item) => allowableUpdates.includes(item));
+
+    if (!iseditable)
+      throw new BadRequestError('Allowable updates at this time are description and end_date');
+  }
+
   updates.forEach((update) => (project[update] = body[update]));
 
   await project.save();
@@ -558,7 +621,10 @@ export const getProjectItem = async ({ user, product_id }) => {
 
   if (!product) throw new NotFoundError('Product does not exist');
 
-  const items = await ProductModel.find({ product_category_id: product_id });
+  const items = await ProductModel.find({
+    product_category_id: product_id,
+    organization_id: user._id
+  });
 
   return items;
 };

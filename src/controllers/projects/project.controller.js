@@ -60,8 +60,8 @@ export const updateProjectHandler = async (req, res) => {
   res.send(appResponse('Updated successfully', response));
 };
 
-export const deleteProjectHandler = async () => {
-  const { project_id } = params;
+export const deleteProjectHandler = async (req, res) => {
+  const { project_id } = req.params;
 
   const response = await deleteProject({ project_id });
 
