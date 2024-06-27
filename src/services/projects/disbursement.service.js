@@ -40,3 +40,18 @@ export const verifyCode = async ({ body, user }) => {
 
   return awardee;
 };
+
+export const confirmDisbursement = async ({ user, awardee_id }) => {
+  const awardee = await awardeesModel.findById(awardee_id);
+
+  if (!awardee) throw new NotFoundError('No allocated beneficiaries found');
+
+  awardee.status = 'disbursed';
+
+  await awardee.save();
+
+  const count = await awardee.countDocuments({
+    status: { $nin: ['disbursed', 'feedback'] },
+    sponsor_id: user._id
+  });
+};
