@@ -140,7 +140,13 @@ export const createProductSchedule = async ({ user, body, project_id, param }) =
     metadata.total_awardees = totalawardees;
 
     for (const benefic_id of body.selection.slice(0, 5)) {
-      const benefic = await organizationBeneficiaryModel.findById(benefic_id).select({ avatar: 1 });
+      const awardee = await awardeesModel.findById(benefic_id);
+
+      if (!awardee) throw new NotFoundError('Some Awardees are not beneficiaries on your portal');
+
+      const benefic = await organizationBeneficiaryModel
+        .findById(awardee.beneficiary_id)
+        .select({ avatar: 1 });
 
       metadata.images.push(benefic.avatar.key);
     }
@@ -218,7 +224,7 @@ export const listschedules = async ({ user, param }) => {
   const count = await scheduleModel.countDocuments(filter);
   const fetched_data = await scheduleModel
     .find(filter)
-    .sort({ creatdAt: -1 })
+    .sort({ createdAt: -1 })
     .skip((page_no - 1) * no_of_requests)
     .limit(no_of_requests);
 
