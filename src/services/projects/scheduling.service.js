@@ -1,7 +1,7 @@
 import { schedule } from 'node-cron';
 import { BadRequestError, InternalServerError, NotFoundError } from '../../../lib/appErrors.js';
 import env from '../../config/env.js';
-import { batchDeliveryCreatedEmail } from '../../config/mail.js';
+import { batchDeliveryCreatedEmail, batchDeliveryStartedEmail } from '../../config/mail.js';
 import organizationBeneficiaryModel from '../../models/beneficiaries/organizationBeneficiaryModel.js';
 import awardeesModel from '../../models/projects/awardeesModel.js';
 import ProjectModel from '../../models/projects/ProjectModel.js';
@@ -299,10 +299,10 @@ export const startSchedule = async ({ body, user, project_id }) => {
 
   const mailData = {
     email: user.email,
-    subject: `Batch Delivery Created for - ${emailData.project_name}`,
+    subject: `Batch Delivery Started for - ${emailData.project_name}`,
     type: 'html',
-    html: batchDeliveryCreatedEmail(emailData).html,
-    text: batchDeliveryCreatedEmail(emailData).text
+    html: batchDeliveryStartedEmail(emailData).html,
+    text: batchDeliveryStartedEmail(emailData).text
   };
 
   const msg = await formattMailInfo(mailData, env);
