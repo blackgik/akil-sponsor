@@ -416,5 +416,28 @@ export const deleteSchedule = async ({ schedule_id, user }) => {
     { $set: { status: 'allocated' } }
   );
 
+  const projectInfo = await ProjectModel.findById(scheduleCheck.project);
+
+  //create email profile here
+  const emailData = {
+    sponsor_name: capitalizeWords(`${user.firstname} ${user.lastname}`),
+    project_name: capitalizeWords(projectInfo.project_name),
+    batch_delivery_number: scheduleCheck.batch_number,
+    start_date: scheduleCheck.start_date
+  };
+  const mailData = {
+    email: user.email,
+    subject: `Batch Delivery Deleted for - ${emailData.project_name}`,
+    type: 'html',
+    html: batchDeliveryStartedEmail(emailData).html,
+    text: batchDeliveryStartedEmail(emailData).text
+  };
+
+  const msg = await formattMailInfo(mailData, env);
+
+  const msgDelivered = await messageBird(msg);
+  if (!msgDelivered)
+    throw new InternalServerError('server slip. project delivery created without mail being sent');
+
   return {};
 };
