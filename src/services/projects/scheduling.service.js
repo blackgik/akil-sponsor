@@ -1,11 +1,16 @@
+import { schedule } from 'node-cron';
 import { BadRequestError, InternalServerError, NotFoundError } from '../../../lib/appErrors.js';
+import env from '../../config/env.js';
+import { batchDeliveryCreatedEmail } from '../../config/mail.js';
 import organizationBeneficiaryModel from '../../models/beneficiaries/organizationBeneficiaryModel.js';
 import awardeesModel from '../../models/projects/awardeesModel.js';
 import ProjectModel from '../../models/projects/ProjectModel.js';
 import scheduleModel from '../../models/projects/scheduleModel.js';
 import rolepermissionModel from '../../models/settings/rolepermission.model.js';
 import usersModels from '../../models/settings/users.models.js';
-import { generateId } from '../../utils/general.js';
+import { capitalizeWords, generateId } from '../../utils/general.js';
+import { formattMailInfo } from '../../utils/mailFormatter.js';
+import { messageBird } from '../../utils/msgBird.js';
 
 export const createProductSchedule = async ({ user, body, project_id, param }) => {
   const project = await ProjectModel.findById(project_id).populate('product_items');
@@ -178,6 +183,27 @@ export const createProductSchedule = async ({ user, body, project_id, param }) =
 
   await schedule.save();
 
+  //create email profile here
+  const emailData = {
+    sponsor_name: capitalizeWords(`${user.firstname} ${user.lastname}`),
+    project_name: capitalizeWords(project.project_name),
+    batch_delivery_number: body.batch_number
+  };
+
+  const mailData = {
+    email: user.email,
+    subject: `Batch Delivery Created for - ${emailData.project_name}`,
+    type: 'html',
+    html: batchDeliveryCreatedEmail(emailData).html,
+    text: batchDeliveryCreatedEmail(emailData).text
+  };
+
+  const msg = await formattMailInfo(mailData, env);
+
+  const msgDelivered = await messageBird(msg);
+  if (!msgDelivered)
+    throw new InternalServerError('server slip. project delivery created without mail being sent');
+
   return {};
 };
 
@@ -232,6 +258,11 @@ export const startSchedule = async ({ body, user, project_id }) => {
 
   if (!project) throw new NotFoundError('Project not found');
 
+  const scheduleItem = await scheduleModel.find({
+    sponsor_id: user._id,
+    project: project_id
+  });
+
   if (body.selection.includes('*')) {
     await scheduleModel.updateMany(
       { project: project_id, status: 'scheduled' },
@@ -255,6 +286,27 @@ export const startSchedule = async ({ body, user, project_id }) => {
       : new Date();
 
   await project.save();
+
+  //create email profile here
+  const emailData = {
+    sponsor_name: capitalizeWords(`${user.firstname} ${user.lastname}`),
+    project_name: capitalizeWords(project.project_name),
+    batch_delivery_number: scheduleItem.batch_number
+  };
+
+  const mailData = {
+    email: user.email,
+    subject: `Batch Delivery Created for - ${emailData.project_name}`,
+    type: 'html',
+    html: batchDeliveryCreatedEmail(emailData).html,
+    text: batchDeliveryCreatedEmail(emailData).text
+  };
+
+  const msg = await formattMailInfo(mailData, env);
+
+  const msgDelivered = await messageBird(msg);
+  if (!msgDelivered)
+    throw new InternalServerError('server slip. project delivery created without mail being sent');
 
   return {};
 };
