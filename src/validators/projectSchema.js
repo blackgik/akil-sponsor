@@ -24,7 +24,10 @@ export const createProjectScheduleSchema = Joi.object({
 });
 
 export const updateProjectSchema = Joi.object({
+  project_name: Joi.string().optional().allow('', null),
   description: Joi.string().min(20).max(300).optional().allow('', null),
+  product_type: Joi.string().optional().allow('', null),
+  product_items: Joi.array().items(Joi.string()).optional().allow('', null),
   quantity_per_person: Joi.number().optional().allow('', null),
   start_date: Joi.date().optional().allow('', null),
   end_date: Joi.date().optional().allow('', null),

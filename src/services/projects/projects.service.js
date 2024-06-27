@@ -272,7 +272,7 @@ export const saveGenerateList = async ({ user, param, project_id, body }) => {
 
     const minimun = Math.min(...quantity_tray);
 
-    shortage = minimun - awardeeCount;
+    shortage = minimun - awardeeCount * project.quantity_per_person;
   } else {
     filter._id = { $in: selection };
 
@@ -291,7 +291,7 @@ export const saveGenerateList = async ({ user, param, project_id, body }) => {
 
     const minimun = Math.min(...quantity_tray);
 
-    shortage = minimun - awardeeCount;
+    shortage = minimun - awardeeCount * project.quantity_per_person;
   }
 
   //create email profile here
@@ -491,6 +491,15 @@ export const updateProject = async ({ user, body, project_id }) => {
   if (!project) throw new NotFoundError('Project not found');
 
   const updates = Object.keys(body);
+
+  if (project.project_state !== 'pending' || project.project_state !== 'completed') {
+    const allowableUpdates = ['description', 'end_date', 'is_active'];
+
+    const iseditable = updates.every((item) => allowableUpdates.includes(item));
+
+    if (!iseditable)
+      throw new BadRequestError('Allowable updates at this time are description and end_date');
+  }
 
   updates.forEach((update) => (project[update] = body[update]));
 
