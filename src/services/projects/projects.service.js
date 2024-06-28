@@ -428,7 +428,9 @@ export const projectDashBoardStats = async ({ user }) => {
 };
 
 export const viewProject = async ({ project_id }) => {
-  const project = await ProjectModel.findById(project_id).populate('product_items').exec();
+  const project = await ProjectModel.findById(project_id)
+    .populate({ path: 'product_items', populate: { path: 'product_type' } })
+    .exec();
 
   if (!project) throw new NotFoundError('Project not found');
 
@@ -640,4 +642,20 @@ export const getProjectItem = async ({ user, product_id }) => {
   });
 
   return items;
+};
+
+export const closeProject = async ({ user, project_id }) => {
+  const project = await ProjectModel.findById(project_id);
+
+  if (!project) throw new NotFoundError('Project not found');
+
+  if (project.project_state === 'pending') {
+    project.project_state = 'cancelled';
+
+    await project.save();
+  } else {
+    throw new BadRequestError('Project is already a moving state.');
+  }
+
+  return {};
 };

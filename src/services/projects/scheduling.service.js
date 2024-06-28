@@ -419,7 +419,7 @@ export const deleteSchedule = async ({ schedule_id, user }) => {
 
   await awardeesModel.updateMany(
     { batch_id: schedule_id, is_shortaged: false, status: { $nin: ['disbursed'] } },
-    { $set: { status: 'allocated' } }
+    { $set: { status: 'allocated', batch_code: '', batch_id: '' } }
   );
 
   const projectInfo = await ProjectModel.findById(scheduleCheck.project);

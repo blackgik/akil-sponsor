@@ -2,6 +2,7 @@ import { Router } from 'express';
 import validators from '../../validators/index.js';
 import { createProjectSchema, updateProjectSchema } from '../../validators/projectSchema.js';
 import {
+  closeProjectHandler,
   createProjectsHandler,
   deleteProjectHandler,
   fetchGenerateListHandler,
@@ -37,5 +38,6 @@ project_route.get('/project-dashboard-stats', authentication, projectDashboardSt
 project_route.get('/fetch-project', authentication, fetchProjectHandler);
 project_route.get('/view-project/:project_id', authentication, viewProjectHandler);
 project_route.get('/get-project-item/:product_id', authentication, getProjectItemHandler);
+project_route.patch('/close-project/:project_id', authentication, closeProjectHandler);
 
 export default project_route;
