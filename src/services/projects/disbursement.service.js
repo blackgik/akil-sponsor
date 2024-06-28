@@ -1,6 +1,7 @@
-import { NotFoundError } from '../../../lib/appErrors.js';
+import { BadRequestError, NotFoundError } from '../../../lib/appErrors.js';
 import env from '../../config/env.js';
 import awardeesModel from '../../models/projects/awardeesModel.js';
+import scheduleModel from '../../models/projects/scheduleModel.js';
 import { buildOtpHash, codeGenerator, verifyOTP } from '../../utils/codeGenerator.js';
 
 export const disbursementCode = async ({ awardee_id, user }) => {
@@ -24,7 +25,13 @@ export const disbursementCode = async ({ awardee_id, user }) => {
 };
 
 export const verifyCode = async ({ body, user }) => {
-  const awardee = await awardeesModel.findById(body.awardee).populate('beneficiary_id');
+  const awardee = await awardeesModel
+    .findById(body.awardee)
+    .populate('beneficiary_id')
+    .populate({
+      path: 'batch_id',
+      populate: { path: 'project', populate: { path: 'product_type' } }
+    });
 
   if (!awardee) throw new NotFoundError('Awardee Not found');
 
@@ -50,8 +57,5 @@ export const confirmDisbursement = async ({ user, awardee_id }) => {
 
   await awardee.save();
 
-  const count = await awardee.countDocuments({
-    status: { $nin: ['disbursed', 'feedback'] },
-    sponsor_id: user._id
-  });
+  return {};
 };

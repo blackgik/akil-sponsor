@@ -428,7 +428,10 @@ export const projectDashBoardStats = async ({ user }) => {
 };
 
 export const viewProject = async ({ project_id }) => {
-  const project = await ProjectModel.findById(project_id).populate('product_items').exec();
+  const project = await ProjectModel.findById(project_id)
+    .populate({ path: 'product_items' })
+    .populate({ path: 'product_type' })
+    .exec();
 
   if (!project) throw new NotFoundError('Project not found');
 
@@ -498,10 +501,21 @@ export const updateProject = async ({ user, body, project_id }) => {
 
   if (!project) throw new NotFoundError('Project not found');
 
-  const updates = Object.keys(body);
+  let updates = Object.keys(body);
 
-  if (project.project_state !== 'pending' || project.project_state !== 'completed') {
+  const fullUpdateState = ['pending'];
+
+  if (!fullUpdateState.includes(project.project_state)) {
     const allowableUpdates = ['description', 'end_date', 'is_active'];
+
+    updates.forEach((item) => {
+      if (!allowableUpdates.includes(item)) {
+        console.log({ item });
+        delete body[item];
+      }
+    });
+
+    updates = Object.keys(body);
 
     const iseditable = updates.every((item) => allowableUpdates.includes(item));
 
@@ -518,6 +532,8 @@ export const updateProject = async ({ user, body, project_id }) => {
     await awardeesModel.deleteMany({ project_id, sponsor_id: user._id });
     await scheduleModel.deleteMany({ project: project_id, sponsor_id: user._id });
   }
+
+  return {};
 };
 
 export const deleteProject = async ({ project_id }) => {
@@ -627,4 +643,20 @@ export const getProjectItem = async ({ user, product_id }) => {
   });
 
   return items;
+};
+
+export const closeProject = async ({ user, project_id }) => {
+  const project = await ProjectModel.findById(project_id);
+
+  if (!project) throw new NotFoundError('Project not found');
+
+  if (project.project_state === 'pending') {
+    project.project_state = 'cancelled';
+
+    await project.save();
+  } else {
+    throw new BadRequestError('Project is already a moving state.');
+  }
+
+  return {};
 };

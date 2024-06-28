@@ -1,5 +1,9 @@
 import appResponse from '../../../lib/appResponse.js';
-import { disbursementCode, verifyCode } from '../../services/projects/disbursement.service.js';
+import {
+  confirmDisbursement,
+  disbursementCode,
+  verifyCode
+} from '../../services/projects/disbursement.service.js';
 
 export const disbursementCodeHandler = async (req, res) => {
   const { params, user } = req;

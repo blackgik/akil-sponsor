@@ -9,7 +9,8 @@ import {
   updateProject,
   projectDashBoardStats,
   fetchAllProject,
-  getProjectItem
+  getProjectItem,
+  closeProject
 } from '../../services/projects/projects.service.js';
 import { codeGenerator } from '../../utils/codeGenerator.js';
 import { downloadExcel } from '../../utils/general.js';
@@ -121,4 +122,14 @@ export const getProjectItemHandler = async (req, res) => {
   const response = await getProjectItem({ user, product_id });
 
   res.send(appResponse('Fetched project item successfully', response));
+};
+
+export const closeProjectHandler = async (req, res) => {
+  const { project_id } = req.params;
+
+  const { user } = req;
+
+  const response = await closeProject({ user, project_id });
+
+  res.send(appResponse('Closed project successfully', response));
 };
