@@ -429,7 +429,8 @@ export const projectDashBoardStats = async ({ user }) => {
 
 export const viewProject = async ({ project_id }) => {
   const project = await ProjectModel.findById(project_id)
-    .populate({ path: 'product_items', populate: { path: 'product_type' } })
+    .populate({ path: 'product_items' })
+    .populate({ path: 'product_type' })
     .exec();
 
   if (!project) throw new NotFoundError('Project not found');
