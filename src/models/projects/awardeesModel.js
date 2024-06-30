@@ -16,7 +16,15 @@ const AwardeesSchema = new Schema(
     status: {
       type: String,
       default: 'awarded',
-      enum: ['awarded', 'allocated', 'confirmed', 'scheduled', 'disbursed', 'feedback']
+      enum: [
+        'awarded',
+        'allocated',
+        'confirmed',
+        'scheduled',
+        'in-progress',
+        'disbursed',
+        'feedback'
+      ]
     },
     is_shortaged: { type: Boolean, default: false },
     beneficiary_status: { type: String, required: true },

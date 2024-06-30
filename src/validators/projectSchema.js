@@ -1,8 +1,8 @@
 import Joi from 'joi';
 
 export const createProjectSchema = Joi.object({
-  project_name: Joi.string().required(),
-  description: Joi.string().min(20).max(300).optional().allow('', null),
+  project_name: Joi.string().required().max(20),
+  description: Joi.string().max(300).optional().allow('', null),
   product_type: Joi.string().required(),
   product_items: Joi.array().items(Joi.string().required().min(1)).required(),
   quantity_per_person: Joi.number().required(),

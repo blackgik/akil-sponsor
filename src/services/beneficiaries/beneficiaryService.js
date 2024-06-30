@@ -104,7 +104,7 @@ export const fetchBeneficiariesByStatus = async ({ user, params }) => {
   const searchRgx = rgx(query);
 
   if (query) {
-    filterData['$or'] = [{ firstname: searchRgx }, { lastname: searchRgx }];
+    filterData['$or'] = [{ 'personal.member_name': searchRgx }, { 'contact.email': searchRgx }];
   }
 
   if (status) {
@@ -129,7 +129,11 @@ export const fetchBeneficiariesByStatus = async ({ user, params }) => {
     .select({
       avatar: 1,
       'personal.member_name': 1,
+      'personal.lga': 1,
+      'personal.state_of_origin': 1,
+      'personal.dob': 1,
       'contact.email': 1,
+      'employment_info.employment_status': 1,
       'contact.country_of_residence': 1,
       'personal.gender': 1,
       has_paid_reg: 1,
@@ -493,7 +497,7 @@ export const updateBeneficiaryBatchListStatus = async ({ beneficiary_batch_id, b
     } else {
       const beneficiaries = await beneficiaryBatchUploadModel.findOne({
         _id: beneficiary_batch_id,
-        status: "pending"
+        status: 'pending'
       });
       // beneficiaries = await beneficiaryBatchUploadModel.findById(beneficiary_batch_id);
       if (!beneficiaries) throw new NotFoundError('Beneficiary not found');

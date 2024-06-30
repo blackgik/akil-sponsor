@@ -4,6 +4,7 @@ import { createProjectSchema, updateProjectSchema } from '../../validators/proje
 import {
   closeProjectHandler,
   createProjectsHandler,
+  deleteAwardeeHandler,
   deleteProjectHandler,
   fetchGenerateListHandler,
   fetchProjectHandler,
@@ -39,5 +40,6 @@ project_route.get('/fetch-project', authentication, fetchProjectHandler);
 project_route.get('/view-project/:project_id', authentication, viewProjectHandler);
 project_route.get('/get-project-item/:product_id', authentication, getProjectItemHandler);
 project_route.patch('/close-project/:project_id', authentication, closeProjectHandler);
+project_route.post('/delete-awardees/', authentication, deleteAwardeeHandler);
 
 export default project_route;

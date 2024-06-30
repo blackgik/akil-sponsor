@@ -36,9 +36,11 @@ export const generateScheduleNumberHandler = async (req, res) => {
 };
 
 export const listScheduleHandler = async (req, res) => {
-  const { user, query } = req;
+  const { user, query, params } = req;
 
-  const response = await listschedules({ user, param: query });
+  const { project_id } = params;
+
+  const response = await listschedules({ user, param: query, project_id });
 
   res.send(appResponse('Fetched succcessfully', response));
 };

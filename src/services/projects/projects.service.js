@@ -99,141 +99,160 @@ export const createProject = async ({ body, user }) => {
 };
 
 export const generateProjectList = async ({ user, param, project_id, body }) => {
-  const project = await ProjectModel.findById(project_id);
+  try {
+    const project = await ProjectModel.findById(project_id);
 
-  if (!project) throw new NotFoundError('Project not found');
+    if (!project) throw new NotFoundError('Project not found');
 
-  const { state, status, age, occupation } = param;
+    if (!project.is_active)
+      throw new BadRequestError(
+        'Project is not active. Please activate it before generation of list'
+      );
 
-  const { selection } = body;
+    const { state, status, age, occupation } = param;
 
-  const filter = { organization_id: user._id, project_ids: { $nin: [project_id] } };
+    const { selection } = body;
 
-  if (state) {
-    filter['contact.state'] = param.state;
-  }
+    const filter = { organization_id: user._id, project_ids: { $nin: [project_id] } };
 
-  if (status) {
-    filter.acctstatus = status;
-  }
-
-  if (age) {
-    const currentDate = moment();
-
-    const splitAge = age.split('-');
-    const minAge = splitAge[0];
-    const maxAge = splitAge[1];
-    const startDate = currentDate.subtract(maxAge, 'years').startOf('day').toDate();
-    const endDate = currentDate
-      .add(maxAge - minAge, 'years')
-      .subtract(minAge, 'years')
-      .endOf('day')
-      .toDate();
-
-    filter['persona.dob'] = { $gte: startDate, $lte: endDate };
-  }
-
-  if (occupation) {
-    filter['employment_info.position'] = occupation;
-  }
-
-  const batch = [];
-
-  if (selection.includes('*')) {
-    const beneficiaries = await organizationBeneficiaryModel.find(filter);
-
-    for (const beneficiary of beneficiaries) {
-      const today = Date.now() / (1000 * 60 * 24 * 60 * 365);
-      const dob = beneficiary.personal.dob.getTime() / (1000 * 60 * 24 * 60 * 365);
-      const data = {
-        beneficiary_id: beneficiary._id,
-        name: beneficiary.personal.member_name,
-        gender: beneficiary.personal.gender,
-        age: Math.floor(today - dob),
-        phone: beneficiary.contact.phone,
-        occupation: beneficiary.employment_info.employment_status,
-        state: beneficiary.personal.state_of_origin,
-        lga: beneficiary.personal.lga,
-        ward: beneficiary.personal.lga,
-        beneficiary_status: beneficiary.acctstatus,
-        project_id: project_id,
-        status: 'awarded',
-        sponsor_id: user._id
-      };
-
-      body.selection.push(beneficiary._id);
-      batch.push(data);
+    if (state) {
+      filter['contact.state'] = param.state;
     }
-  } else {
-    for (const benefic_id of body.selection) {
-      const beneficiary = await organizationBeneficiaryModel.findById(benefic_id);
 
-      if (!beneficiary) continue;
-
-      if (beneficiary.project_ids.includes(project_id)) continue;
-
-      const today = Date.now() / (1000 * 60 * 24 * 60 * 365);
-      const dob = beneficiary.personal.dob.getTime() / (1000 * 60 * 24 * 60 * 365);
-      const data = {
-        beneficiary_id: beneficiary._id,
-        name: beneficiary.personal.member_name,
-        gender: beneficiary.personal.gender,
-        age: Math.floor(today - dob),
-        phone: beneficiary.contact.phone,
-        occupation: beneficiary.employment_info?.employment_status || 'unemployed',
-        state: beneficiary.personal.state_of_origin,
-        lga: beneficiary.personal.lga,
-        ward: beneficiary.personal.lga,
-        beneficiary_status: beneficiary.acctstatus,
-        project_id: project_id,
-        status: 'awarded',
-        sponsor_id: user._id
-      };
-
-      batch.push(data);
+    if (status) {
+      filter.acctstatus = status;
     }
+
+    if (age) {
+      const currentDate = moment();
+
+      const splitAge = age.split('-');
+      const minAge = splitAge[0];
+      const maxAge = splitAge[1];
+      const startDate = currentDate.subtract(maxAge, 'years').startOf('day').toDate();
+      const endDate = currentDate
+        .add(maxAge - minAge, 'years')
+        .subtract(minAge, 'years')
+        .endOf('day')
+        .toDate();
+
+      filter['persona.dob'] = { $gte: startDate, $lte: endDate };
+    }
+
+    if (occupation) {
+      filter['employment_info.position'] = occupation;
+    }
+
+    const batch = [];
+
+    if (selection.includes('*')) {
+      const beneficiaries = await organizationBeneficiaryModel.find(filter);
+
+      for (const beneficiary of beneficiaries) {
+        const today = Date.now() / (1000 * 60 * 24 * 60 * 365);
+        const dob = beneficiary.personal.dob.getTime() / (1000 * 60 * 24 * 60 * 365);
+        const data = {
+          beneficiary_id: beneficiary._id,
+          name: beneficiary.personal.member_name,
+          gender: beneficiary.personal.gender,
+          age: Math.floor(today - dob),
+          phone: beneficiary.contact.phone,
+          occupation: beneficiary.employment_info.employment_status,
+          state: beneficiary.personal.state_of_origin,
+          lga: beneficiary.personal.lga,
+          ward: beneficiary.personal.lga,
+          beneficiary_status: beneficiary.acctstatus,
+          project_id: project_id,
+          status: 'awarded',
+          sponsor_id: user._id
+        };
+
+        body.selection.push(beneficiary._id);
+        batch.push(data);
+      }
+    } else {
+      for (const benefic_id of body.selection) {
+        const beneficiary = await organizationBeneficiaryModel.findById(benefic_id);
+
+        if (!beneficiary) continue;
+
+        if (beneficiary.project_ids.includes(project_id)) continue;
+
+        const today = Date.now() / (1000 * 60 * 24 * 60 * 365);
+        const dob = beneficiary.personal.dob.getTime() / (1000 * 60 * 24 * 60 * 365);
+        const data = {
+          beneficiary_id: beneficiary._id,
+          name: beneficiary.personal.member_name,
+          gender: beneficiary.personal.gender,
+          age: Math.floor(today - dob),
+          phone: beneficiary.contact.phone,
+          occupation: beneficiary.employment_info?.employment_status || 'unemployed',
+          state: beneficiary.personal.state_of_origin,
+          lga: beneficiary.personal.lga,
+          ward: beneficiary.personal.lga,
+          beneficiary_status: beneficiary.acctstatus,
+          project_id: project_id,
+          status: 'awarded',
+          sponsor_id: user._id
+        };
+
+        batch.push(data);
+      }
+    }
+
+    const create_awardees = await awardeesModel.insertMany(batch);
+
+    if (create_awardees.length === 0)
+      throw new InternalServerError('List is empty. Users are already allocated to this project');
+
+    project.project_status = 'awarded';
+    project.is_beneficary_added = true;
+
+    await project.save();
+
+    const addProject_id = await organizationBeneficiaryModel.updateMany(
+      { _id: { $in: body.selection } },
+      { $push: { project_ids: project_id } }
+    );
+
+    console.log({ addProject_id });
+
+    // send email
+    //create email profile here
+    const emailData = {
+      sponsor_name: capitalizeWords(`${user.firstname} ${user.lastname}`),
+      project_name: capitalizeWords(project.project_name)
+    };
+
+    const mailData = {
+      email: user.email,
+      subject: `Successful Project Beneficiary Award Notification`,
+      type: 'html',
+      html: succefulProjectAwardedEmail(emailData).html,
+      text: succefulProjectAwardedEmail(emailData).text
+    };
+
+    const msg = await formattMailInfo(mailData, env);
+
+    const msgDelivered = await messageBird(msg);
+    if (!msgDelivered)
+      throw new InternalServerError('server slip. project was created without mail being sent');
+
+    return create_awardees;
+  } catch (err) {
+    console.log(err);
+
+    throw new BadRequestError(err.message || 'server slip');
   }
-
-  project.project_status = 'awarded';
-
-  await project.save();
-
-  const create_awardees = await awardeesModel.insertMany(batch);
-
-  if (create_awardees.length === 0) throw new InternalServerError('Error inserting Data');
-
-  await organizationBeneficiaryModel.updateMany(
-    { _id: { $nin: body.selection } },
-    { $push: { project_ids: project_id } }
-  );
-
-  // send email
-  //create email profile here
-  const emailData = {
-    sponsor_name: capitalizeWords(`${user.firstname} ${user.lastname}`),
-    project_name: capitalizeWords(project.project_name)
-  };
-
-  const mailData = {
-    email: user.email,
-    subject: `Successful Project Beneficiary Award Notification`,
-    type: 'html',
-    html: succefulProjectAwardedEmail(emailData).html,
-    text: succefulProjectAwardedEmail(emailData).text
-  };
-
-  const msg = await formattMailInfo(mailData, env);
-
-  const msgDelivered = await messageBird(msg);
-  if (!msgDelivered)
-    throw new InternalServerError('server slip. project was created without mail being sent');
-  return create_awardees;
 };
 
 export const saveGenerateList = async ({ user, param, project_id, body }) => {
   const project = await ProjectModel.findById(project_id).populate('product_items');
 
   if (!project) throw new NotFoundError('Project not found');
+
+  if (!project.is_active)
+    throw new BadRequestError('Project ID is not active. Please activate it before saving list');
 
   const { state, status, age, occupation } = param;
 
@@ -656,6 +675,24 @@ export const closeProject = async ({ user, project_id }) => {
     await project.save();
   } else {
     throw new BadRequestError('Project is already a moving state.');
+  }
+
+  return {};
+};
+
+export const deleteAwardee = async ({ body, user }) => {
+  for (const awardee_id of body.selection) {
+    const awardee = await awardeesModel.findById(awardee_id);
+
+    if (!awardee) throw new NotFoundError('Awardee not found');
+
+    const deletableStatus = ['awarded', 'allocated'];
+
+    if (deletableStatus.includes(awardee.status)) {
+      await awardee.remove();
+    } else {
+      throw new BadRequestError('Awardee is already in  a moving state. You can not delete');
+    }
   }
 
   return {};

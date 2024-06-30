@@ -9,6 +9,8 @@ export const disbursementCode = async ({ awardee_id, user }) => {
 
   if (!awardee) throw new NotFoundError('Awardee Not found');
 
+  awardee.status = 'in-progress';
+
   const code = await codeGenerator(6);
 
   const contact = awardee.beneficiary_id.contact.email
