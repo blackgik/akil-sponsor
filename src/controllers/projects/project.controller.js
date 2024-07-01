@@ -11,7 +11,8 @@ import {
   fetchAllProject,
   getProjectItem,
   closeProject,
-  deleteAwardee
+  deleteAwardee,
+  fetchBeneficiariesForProjects
 } from '../../services/projects/projects.service.js';
 import { codeGenerator } from '../../utils/codeGenerator.js';
 import { downloadExcel } from '../../utils/general.js';
@@ -140,5 +141,16 @@ export const deleteAwardeeHandler = async (req, res) => {
 
   const response = await deleteAwardee({ body, user });
 
-  res.send(appResponse('Closed project successfully', response));
+  res.send(appResponse('Deleted successfully', response));
+};
+
+export const fetchBeneficiariesHandler = async (req, res) => {
+  const { user, params } = req;
+  const param = req.query;
+
+  const { project_id } = params;
+
+  const beneficiaries = await fetchBeneficiariesForProjects({ user, param, project_id });
+
+  res.send(appResponse('Fetched successfully', beneficiaries));
 };
