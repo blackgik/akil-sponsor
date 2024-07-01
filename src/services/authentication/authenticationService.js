@@ -713,28 +713,35 @@ export const uploadOrganizationBeneficiariesInBulk = async ({ user, file, body }
     beneficiary.name = beneficiary.first_name + ' ' + beneficiary.last_name;
     let comment;
 
-    const filter = { organization_id: user._id };
+    const filter = { organization_id: user._id, $or: [] };
+
+
 
     if (beneficiary.email) {
-      filter['contact.email'] = beneficiary.email;
+      filter['$or'].push({ 'contact.email': beneficiary.email });
     }
 
     if (beneficiary.phone) {
-      filter['contact.phone'] = beneficiary.phone;
+      filter['$or'].push({ 'contact.phone': beneficiary.phone });
     }
 
-    // Check if beneficiary already exists
-    const beneficiaryExists = await organizationBeneficiaryModel.findOne(filter);
+    // Check if beneficiary already exists with either email or phone number
+    const beneficiaryExists = await organizationBeneficiaryModel.findOne({
+      ...filter
+    });
     if (beneficiaryExists) {
       errorLogs.push({
         comment: `${beneficiary.name} is already part of this organization`,
         code: 422,
         batch_no: body.batch_no
       });
-      continue; // Skip to the next beneficiary
+      continue;
     }
 
-    const batchExist = await beneficiaryBatchUploadModel.findOne(filter);
+    // Check if batch already exists with either email or phone number
+    const batchExist = await beneficiaryBatchUploadModel.findOne({
+      ...filter
+    });
     if (batchExist) {
       errorLogs.push({
         comment: `${beneficiary.name} was already uploaded with batch ${batchExist.batch_no}`,
@@ -742,7 +749,7 @@ export const uploadOrganizationBeneficiariesInBulk = async ({ user, file, body }
         batch_no: batchExist.batch_no,
         id: batchExist._id
       });
-      continue; // Skip to the next beneficiary
+      continue;
     }
 
     const batchListData = {

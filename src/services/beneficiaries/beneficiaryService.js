@@ -374,7 +374,7 @@ export const viewBeneficiariesUploadedList = async ({ user, params }) => {
   page_no = Number(page_no) || 1;
   no_of_requests = Number(no_of_requests) || 20;
 
-  const filterObj = { organization_id: user._id };
+  const filterObj = { organization_id: user._id, status: 'pending' };
 
   const query = typeof search !== 'undefined' ? search : false;
   const rgx = (pattern) => new RegExp(`.*${pattern}.*`, 'i');
@@ -405,30 +405,45 @@ export const updateBeneficiaryBatchListStatus = async ({ beneficiary_batch_id, b
     let beneficiaries;
 
     if (body.approval_type === 'all') {
-      if (!body.batch_no) throw new BadRequestError('Batch number must be provided');
+      // if (!body.batch_no) throw new BadRequestError('Batch number must be provided');
 
       beneficiaries = await beneficiaryBatchUploadModel.find({
         organization_id: user._id,
-        batch_no: body.batch_no,
+        // batch_no: body.batch_no,
         status: 'pending'
       });
 
-      // Check for existing beneficiaries by email or phone
-      const existingBeneficiaries = await organizationBeneficiaryModel.find({
-        organization_id: user._id,
-        $or: [
-          { 'contact.email': { $in: beneficiaries.map((b) => b.contact.email) } },
-          { 'contact.phone': { $in: beneficiaries.map((b) => b.contact.phone) } }
-        ]
-      });
+      // // Check for existing beneficiaries by email or phone
+      // const existingBeneficiaries = await organizationBeneficiaryModel.find({
+      //   organization_id: user._id,
+      //   $or: [
+      //     { 'contact.email': { $in: beneficiaries.map((b) => b.contact.email) } },
+      //     { 'contact.phone': { $in: beneficiaries.map((b) => b.contact.phone) } }
+      //   ]
+      // });
 
-      if (existingBeneficiaries.length > 0) {
-        throw new BadRequestError(
-          'One or more beneficiaries already exist with the provided email or phone number.'
-        );
-      }
+
+      // if (existingBeneficiaries.length > 0) {
+      //   throw new BadRequestError(
+      //     'One or more beneficiaries already exist with the provided email or phone number.'
+      //   );
+      // }
 
       for (let beneficiary of beneficiaries) {
+        const filter = { organization_id: user._id, $or: [] };
+
+        if (beneficiary.contact.email) {
+          filter['$or'].push({ 'contact.email': beneficiary.contact.email});
+        }
+    
+        if (beneficiary.contact.phone) {
+          filter['$or'].push({ 'contact.phone':beneficiary.contact.phone });
+        }
+
+        const memberCheck = await organizationBeneficiaryModel.findOne(filter)
+
+        if(memberCheck) continue
+
         if (body.status === 'declined') {
           await beneficiary.remove();
         } else if (body.status === 'approved') {
