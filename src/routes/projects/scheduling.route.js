@@ -26,7 +26,7 @@ scheduling_route.get(
   authentication,
   generateScheduleNumberHandler
 );
-scheduling_route.get('/list-schedule', authentication, listScheduleHandler);
+scheduling_route.get('/list-schedule/:project_id', authentication, listScheduleHandler);
 scheduling_route.patch('/start-schedules/:project_id', authentication, startScheduleHandler);
 scheduling_route.get('/view-schedule/:schedule_id', authentication, viewScheduleHandler);
 scheduling_route.get(

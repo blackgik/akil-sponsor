@@ -17,6 +17,9 @@ export const createProductSchedule = async ({ user, body, project_id, param }) =
 
   if (!project) throw new NotFoundError('Project not found');
 
+  if (!project.is_active)
+    throw new BadRequestError('Project is not active. Please activate it before scheduling');
+
   const checkBatch = await scheduleModel.findOne({
     sponsor_id: user._id,
     project: project_id,
@@ -185,6 +188,10 @@ export const createProductSchedule = async ({ user, body, project_id, param }) =
     }
   }
 
+  project.project_status = 'scheduled';
+
+  await project.save();
+
   schedule.metadata = metadata;
 
   await schedule.save();
@@ -218,6 +225,9 @@ export const generateSchedule = async ({ user, project_id }) => {
 
   if (!project) throw new NotFoundError('Project not found');
 
+  if (!project.is_active)
+    throw new BadRequestError('Project is not active. Please activate it before scheduling');
+
   const count = await scheduleModel.countDocuments({ project: project_id, sponsor_id: user._id });
 
   const code = generateId(count);
@@ -227,7 +237,7 @@ export const generateSchedule = async ({ user, project_id }) => {
   return batch_number;
 };
 
-export const listschedules = async ({ user, param }) => {
+export const listschedules = async ({ user, param, project_id }) => {
   let { page_no, no_of_requests, search, status } = param;
 
   page_no = Number(page_no) || 1;
@@ -237,7 +247,7 @@ export const listschedules = async ({ user, param }) => {
   const rgx = (pattern) => new RegExp(`.*${pattern}.*`, 'i');
   const searchRgx = rgx(query);
 
-  const filter = { sponsor_id: user._id };
+  const filter = { sponsor_id: user._id, project: project_id };
 
   if (status) {
     filter.status = status;
@@ -264,6 +274,9 @@ export const startSchedule = async ({ body, user, project_id }) => {
 
   if (!project) throw new NotFoundError('Project not found');
 
+  if (!project.is_active)
+    throw new BadRequestError('Project is not active. Please activate it before starting schedule');
+
   const scheduleItem = await scheduleModel.find({
     sponsor_id: user._id,
     project: project_id
@@ -274,11 +287,24 @@ export const startSchedule = async ({ body, user, project_id }) => {
       { project: project_id, status: 'scheduled' },
       { $set: { status: 'in-progress', start_date: new Date() } }
     );
+
+    const schedules = await scheduleModel.find({ project: project_id, sponsor_id: user._id });
+
+    for (let schedule of schedules) {
+      await awardeesModel.updateMany(
+        { batch_id: schedule._id },
+        { $set: { status: 'in-progress' } }
+      );
+    }
   } else {
     await scheduleModel.updateMany(
       { _id: { $in: body.selection }, status: 'scheduled' },
       { $set: { status: 'in-progress' } }
     );
+
+    for (const eachbatch of body.selection) {
+      await awardeesModel.updateMany({ batch_id: eachbatch }, { $set: { status: 'in-progress' } });
+    }
   }
 
   project.project_state =
@@ -419,10 +445,21 @@ export const deleteSchedule = async ({ schedule_id, user }) => {
 
   await awardeesModel.updateMany(
     { batch_id: schedule_id, is_shortaged: false, status: { $nin: ['disbursed'] } },
-    { $set: { status: 'allocated', batch_code: '', batch_id: '' } }
+    { $set: { status: 'allocated', batch_code: '' } }
   );
 
   const projectInfo = await ProjectModel.findById(scheduleCheck.project);
+
+  const count = await scheduleModel.countDocuments({
+    project: projectInfo._id,
+    sponsor_id: schedule_id
+  });
+
+  if (count === 0) {
+    projectInfo.project_status = 'awarded';
+
+    await projectInfo.save();
+  }
 
   //create email profile here
   const emailData = {

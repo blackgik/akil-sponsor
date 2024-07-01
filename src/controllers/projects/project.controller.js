@@ -10,7 +10,8 @@ import {
   projectDashBoardStats,
   fetchAllProject,
   getProjectItem,
-  closeProject
+  closeProject,
+  deleteAwardee
 } from '../../services/projects/projects.service.js';
 import { codeGenerator } from '../../utils/codeGenerator.js';
 import { downloadExcel } from '../../utils/general.js';
@@ -130,6 +131,14 @@ export const closeProjectHandler = async (req, res) => {
   const { user } = req;
 
   const response = await closeProject({ user, project_id });
+
+  res.send(appResponse('Closed project successfully', response));
+};
+
+export const deleteAwardeeHandler = async (req, res) => {
+  const { body, user } = req;
+
+  const response = await deleteAwardee({ body, user });
 
   res.send(appResponse('Closed project successfully', response));
 };
