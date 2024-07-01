@@ -458,7 +458,7 @@ export const viewProject = async ({ project_id }) => {
 
   const awardedBeneficiariesCount = await awardeesModel.countDocuments({
     project_id,
-    status: 'awarded'
+    status: { $ne: 'awarded' }
   });
 
   const productQuantities = project.product_items.map((item) => ({
