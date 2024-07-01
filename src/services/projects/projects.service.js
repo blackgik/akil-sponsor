@@ -369,7 +369,7 @@ export const fetchGenerateList = async ({ param, user, project_id }) => {
   const rgx = (pattern) => new RegExp(`.*${pattern}.*`, 'i');
   const searchRgx = rgx(query);
 
-  const filter = { project_id, sponsor_id: user._id, batch_code: '' };
+  const filter = { project_id, sponsor_id: user._id };
 
   if (query) {
     filter['$or'] = [{ name: searchRgx, phone: searchRgx }];
@@ -414,6 +414,7 @@ export const fetchGenerateList = async ({ param, user, project_id }) => {
   const count = await awardeesModel.countDocuments(filter);
   const fetched_data = await awardeesModel
     .find(filter)
+    .populate({ path: 'project_id', populate: { path: 'product_items' } })
     .sort({ createdAt: -1 })
     .skip((page_no - 1) * no_of_requests)
     .limit(no_of_requests);

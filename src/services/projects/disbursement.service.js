@@ -55,6 +55,8 @@ export const confirmDisbursement = async ({ user, awardee_id }) => {
 
   if (!awardee) throw new NotFoundError('No allocated beneficiaries found');
 
+  if(awardee)
+
   awardee.status = 'disbursed';
 
   await awardee.save();

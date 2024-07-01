@@ -458,7 +458,7 @@ export const updateBeneficiaryBatchListStatus = async ({ beneficiary_batch_id, b
           const beneficiaryObject = {
             ...beneficiary.toJSON(),
             organization_id: user._id,
-            acctstatus: beneficiary.has_paid ? 'active' : 'pending',
+            acctstatus: beneficiary.has_paid ? 'invite' : 'pending',
             password: await bcrypt.hash(password, 12),
             beneficiary_unique_id: beneficiaryUniqueId,
             has_paid_reg: beneficiary.has_paid,
