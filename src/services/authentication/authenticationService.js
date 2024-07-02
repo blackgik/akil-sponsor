@@ -105,6 +105,15 @@ export const onboardNewOrganization = async ({ body, dbConnection }) => {
   if (!msgDelivered)
     throw new InternalServerError('server slip. Sponsor was created without mail being sent');
 
+  // create notification
+  await notificationsModel.create({
+    note: `You have successfully created a sponsors account`,
+    type: 'creation',
+    who_is_reading: 'sponsor',
+    compliment_obj: { status: 'pending' },
+    organization_id: user._id,
+  });
+
   return { code: otp, hash: otpHash, email: createOrganizationProfile.email };
 };
 
@@ -577,13 +586,13 @@ export const onboardNewOrganizationBeneficiary = async ({ body, user }) => {
   //     throw new InternalServerError('server slip. Beneficiary was created without mail being sent');
   // }
 
-  // create notification for beneficiary
+  // create notification
   await notificationsModel.create({
-    note: `You have been successfully onboarded to  ${user.firstname}`,
-    who_is_reading: 'beneficiary',
+    note: `You have successfully onboarded ${body.personal.member_name} as a new beneficary`,
+    type: 'creation',
+    who_is_reading: 'sponsor',
     compliment_obj: { status: 'pending' },
     organization_id: user._id,
-    beneficiary_id: createBeneficiary._id
   });
 
   return true;
@@ -715,8 +724,6 @@ export const uploadOrganizationBeneficiariesInBulk = async ({ user, file, body }
 
     const filter = { organization_id: user._id, $or: [] };
 
-
-
     if (beneficiary.email) {
       filter['$or'].push({ 'contact.email': beneficiary.email });
     }
@@ -838,6 +845,15 @@ export const uploadOrganizationBeneficiariesInBulk = async ({ user, file, body }
   const msgDelivered = await messageBird(msg);
   if (!msgDelivered)
     throw new InternalServerError('Server slip. Bulk Upload was made without mail being sent');
+
+  // create notification
+  await notificationsModel.create({
+    note: `You have successfully bulk uploaded ${batchList.length} beneficiaries`,
+    type: 'bulk_upload',
+    who_is_reading: 'sponsor',
+    compliment_obj: { status: 'pending' },
+    organization_id: user._id,
+  });
 
   return { errorLogs, createBatchList };
 };

@@ -183,6 +183,7 @@ export const updateBeneficiaryStatus = async ({ user, status, beneficiary_id, no
     // create notification for beneficiary
     await notificationsModel.create({
       note: `You are ${status} on ${user.firstname}`,
+      type: 'update',
       who_is_reading: 'beneficiary',
       compliment_obj: { status: `${status}` },
       organization_id: user._id,
@@ -203,8 +204,9 @@ export const updateBeneficiaryStatus = async ({ user, status, beneficiary_id, no
 
   // create notification for beneficiary
   await notificationsModel.create({
-    note: `You are ${status} on ${user.firstname}`,
-    who_is_reading: 'beneficiary',
+    note: `You changed ${beneficiary.personal.member_name} status to ${status}`,
+    type: 'update',
+    who_is_reading: 'sponsor',
     compliment_obj: { status: `${status}` },
     organization_id: user._id,
     beneficiary_id: beneficiary._id
@@ -300,7 +302,16 @@ export const editBeneficiaryProfile = async ({ user, beneficiary_id, body }) => 
   // create notification for beneficiary
   await notificationsModel.create({
     note: `Your profile was updated on  ${user.name_of_cooperation}`,
+    type: 'update',
     who_is_reading: 'beneficiary',
+    organization_id: user._id,
+    beneficiary_id: beneficiary._id
+  });
+
+  await notificationsModel.create({
+    note: `You updated ${beneficiary.personal.member_name} profile`,
+    type: 'update',
+    who_is_reading: 'sponsor',
     organization_id: user._id,
     beneficiary_id: beneficiary._id
   });
@@ -422,7 +433,6 @@ export const updateBeneficiaryBatchListStatus = async ({ beneficiary_batch_id, b
       //   ]
       // });
 
-
       // if (existingBeneficiaries.length > 0) {
       //   throw new BadRequestError(
       //     'One or more beneficiaries already exist with the provided email or phone number.'
@@ -433,16 +443,16 @@ export const updateBeneficiaryBatchListStatus = async ({ beneficiary_batch_id, b
         const filter = { organization_id: user._id, $or: [] };
 
         if (beneficiary.contact.email) {
-          filter['$or'].push({ 'contact.email': beneficiary.contact.email});
+          filter['$or'].push({ 'contact.email': beneficiary.contact.email });
         }
-    
+
         if (beneficiary.contact.phone) {
-          filter['$or'].push({ 'contact.phone':beneficiary.contact.phone });
+          filter['$or'].push({ 'contact.phone': beneficiary.contact.phone });
         }
 
-        const memberCheck = await organizationBeneficiaryModel.findOne(filter)
+        const memberCheck = await organizationBeneficiaryModel.findOne(filter);
 
-        if(memberCheck) continue
+        if (memberCheck) continue;
 
         if (body.status === 'declined') {
           await beneficiary.remove();
