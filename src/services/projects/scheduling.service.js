@@ -383,6 +383,14 @@ export const startSchedule = async ({ body, user, project_id }) => {
   if (!msgDelivered)
     throw new InternalServerError('server slip. project delivery created without mail being sent');
 
+  // create notification
+  await notificationsModel.create({
+    note: `You have successfully started batch delivery for ${project.project_name} project`,
+    type: 'update',
+    who_is_reading: 'sponsor',
+    compliment_obj: { status: 'pending' },
+    organization_id: user._id
+  });
   return {};
 };
 
@@ -521,6 +529,15 @@ export const deleteSchedule = async ({ schedule_id, user }) => {
   const msgDelivered = await messageBird(msg);
   if (!msgDelivered)
     throw new InternalServerError('server slip. project delivery created without mail being sent');
+
+  // create notification
+  await notificationsModel.create({
+    note: `You have successfully deleted batch delivery for ${project.project_name} project`,
+    type: 'update',
+    who_is_reading: 'sponsor',
+    compliment_obj: { status: 'pending' },
+    organization_id: user._id
+  });
 
   return {};
 };

@@ -17,11 +17,13 @@ import { capitalizeWords, downloadExcel } from '../../utils/general.js';
 import {
   beneficiarySuccefullyAllocatedEmail,
   newProjectCreationEmail,
+  projectClosureEmail,
   succefulProjectAwardedEmail
 } from '../../config/mail.js';
 import { formattMailInfo } from '../../utils/mailFormatter.js';
 import { messageBird } from '../../utils/msgBird.js';
 import env from '../../config/env.js';
+import notificationsModel from '../../models/settings/notificationsModel.js';
 
 export const createProject = async ({ body, user }) => {
   try {
@@ -91,6 +93,13 @@ export const createProject = async ({ body, user }) => {
     if (!msgDelivered)
       throw new InternalServerError('server slip. project was created without mail being sent');
 
+    // create notification
+    await notificationsModel.create({
+      note: `You have successfully created a new project ${body.project_name} `,
+      type: 'creation',
+      who_is_reading: 'sponsor',
+      organization_id: user._id
+    });
     return project;
   } catch (err) {
     console.log(err);
@@ -575,6 +584,14 @@ export const deleteProject = async ({ project_id }) => {
   await awardeesModel.deleteMany({ project_id });
   await scheduleModel.deleteMany({ project: project_id });
 
+  // create notification
+  await notificationsModel.create({
+    note: `You have successfully deleted ${project.project_name} project`,
+    type: 'update',
+    who_is_reading: 'sponsor',
+    organization_id: user._id
+  });
+
   return {};
 };
 
@@ -678,6 +695,34 @@ export const closeProject = async ({ user, project_id }) => {
     throw new BadRequestError('Project is already a moving state.');
   }
 
+  //create email profile here
+  const emailData = {
+    sponsor_name: capitalizeWords(`${user.firstname} ${user.lastname}`),
+    project_name: capitalizeWords(project.project_name),
+    closure_date: project.end_date
+  };
+
+  const mailData = {
+    email: user.email,
+    subject: `Project Closure Notification of -${emailData.project_name}`,
+    type: 'html',
+    html: projectClosureEmail(emailData).html,
+    text: projectClosureEmail(emailData).text
+  };
+
+  const msg = await formattMailInfo(mailData, env);
+
+  const msgDelivered = await messageBird(msg);
+  if (!msgDelivered)
+    throw new InternalServerError('server slip. project was closed without mail being sent');
+
+  // create notification
+  await notificationsModel.create({
+    note: `You have successfully closed ${project.project_name} project`,
+    type: 'update',
+    who_is_reading: 'sponsor',
+    organization_id: user._id
+  });
   return {};
 };
 

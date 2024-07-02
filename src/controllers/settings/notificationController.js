@@ -6,9 +6,9 @@ import {
 } from '../../services/settings/notificationService.js';
 
 export const fetchNotifcationHandler = async (req, res) => {
-  const { user } = req;
+  const { user, query } = req;
 
-  const response = await fetchNotifications({ user });
+  const response = await fetchNotifications({ user, param: query });
 
   res.send(appResponse('fetched notifications successfully', response));
 };

@@ -6,6 +6,7 @@ import {
   fetchNotifcationHandler,
   markasunreadHandler
 } from '../../controllers/settings/notificationController.js';
+import { permissions } from '../../middlewares/permissions.js';
 
 const notificationRoutes = router.Router();
 
