@@ -479,32 +479,32 @@ export const updateBeneficiaryBatchListStatus = async ({ beneficiary_batch_id, b
 
           if (activeBeneficiary) {
             // Email constructor
-            // const onboardingData = {
-            //   email: beneficiary.contact.email,
-            //   name: beneficiary.personal.member_name,
-            //   name_of_cooperation: user.firstname,
-            //   password: password,
-            //   company_code: user.company_code
-            // };
+            const onboardingData = {
+              email: beneficiary.contact.email,
+              name: beneficiary.personal.member_name,
+              name_of_cooperation: user.firstname,
+              password: password,
+              company_code: user.company_code
+            };
 
-            // const mailData = {
-            //   email: onboardingData.email,
-            //   subject: 'MAJFINTECH ONBOARDING',
-            //   type: 'html',
-            //   html: beneficaryOnboardinMail(onboardingData).html,
-            //   text: beneficaryOnboardinMail(onboardingData).text
-            // };
+            const mailData = {
+              email: onboardingData.email,
+              subject: 'MAJFINTECH ONBOARDING',
+              type: 'html',
+              html: beneficaryOnboardinMail(onboardingData).html,
+              text: beneficaryOnboardinMail(onboardingData).text
+            };
 
-            // const msg = await formattMailInfo(mailData, env);
-            // const msgDelivered = await messageBird(msg);
+            const msg = await formattMailInfo(mailData, env);
+            const msgDelivered = await messageBird(msg);
 
-            // if (!msgDelivered) {
-            //   throw new InternalServerError(
-            //     'Server slip. Beneficiary was created without mail being sent'
-            //   );
-            // }
+            if (!msgDelivered) {
+              throw new InternalServerError(
+                'Server slip. Beneficiary was created without mail being sent'
+              );
+            }
 
-            user.total_number_of_beneficiaries_created += 1;
+            // user.total_number_of_beneficiaries_created += 1;
           } else {
             throw new BadRequestError('Beneficiary already exists');
           }
