@@ -40,6 +40,10 @@ export const fetchAllFeedback = async ({ user, param }) => {
     .find({
       ...filter
     })
+    .populate({
+      path: 'beneficiary_id',
+      model: 'Organization_Member'
+    })
     .sort({ createdAt: -1 })
     .skip((page_no - 1) * no_of_requests)
     .limit(no_of_requests);
