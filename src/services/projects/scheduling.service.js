@@ -11,6 +11,7 @@ import usersModels from '../../models/settings/users.models.js';
 import { capitalizeWords, generateId } from '../../utils/general.js';
 import { formattMailInfo } from '../../utils/mailFormatter.js';
 import { messageBird } from '../../utils/msgBird.js';
+import ProductModel from '../../models/products/ProductModel.js';
 
 export const createProductSchedule = async ({ user, body, project_id, param }) => {
   const project = await ProjectModel.findById(project_id).populate('product_items');
@@ -20,11 +21,35 @@ export const createProductSchedule = async ({ user, body, project_id, param }) =
   if (!project.is_active)
     throw new BadRequestError('Project is not active. Please activate it before scheduling');
 
-  const checkBatch = await scheduleModel.findOne({
+  // confirm that the allocation project is enough for this allocation
+
+  const quantity_tray_check = [];
+
+  for (let itemid of project.product_items) {
+    const item = await ProductModel.findById(itemid);
+    quantity_tray_check.push(item.product_quantity);
+  }
+
+  const minimun = Math.min(...quantity_tray_check);
+  const quantity_per_person = project.quantity_per_person;
+  const total_allocated = await awardeesModel.countDocuments({
+    project_id,
     sponsor_id: user._id,
-    project: project_id,
-    batch_number: body.batch_number
+    status: 'allocated'
   });
+
+  const division = minimun / quantity_per_person;
+
+  console.log({ minimun, quantity_per_person });
+  console.log({ division });
+
+  const shortage_persons = division - total_allocated;
+
+  console.log({ shortage_persons });
+
+  const total_persons_to_get = total_allocated - Math.abs(shortage_persons);
+
+  console.log({ total_allocated });
 
   const { gender, state, lga, age, occupation, status } = param;
 
@@ -80,6 +105,20 @@ export const createProductSchedule = async ({ user, body, project_id, param }) =
   if (!userfunction.permissions.includes('create') || !userfunction.permissions.includes('edit'))
     throw new BadRequestError('Permission not allowed on this role');
 
+  const total_scheduled = await awardeesModel.countDocuments({
+    project_id,
+    sponsor_id: user._id,
+    status: 'scheduled'
+  });
+
+  const total_left = total_persons_to_get - total_scheduled;
+
+  console.log({ total_scheduled });
+  console.log({ total_left });
+  console.log({ total_persons_to_get });
+
+  if (total_left <= 0) throw new BadRequestError('Total number of participants has be exhauted');
+
   //   create object
   const schedule_data = {
     ...body,
@@ -100,7 +139,8 @@ export const createProductSchedule = async ({ user, body, project_id, param }) =
 
   const update_data = {
     batch_code: body.batch_number,
-    batch_id: schedule._id
+    batch_id: schedule._id,
+    status: 'scheduled'
   };
 
   if (selection.includes('*')) {
@@ -343,6 +383,14 @@ export const startSchedule = async ({ body, user, project_id }) => {
   if (!msgDelivered)
     throw new InternalServerError('server slip. project delivery created without mail being sent');
 
+  // create notification
+  await notificationsModel.create({
+    note: `You have successfully started batch delivery for ${project.project_name} project`,
+    type: 'update',
+    who_is_reading: 'sponsor',
+    compliment_obj: { status: 'pending' },
+    organization_id: user._id
+  });
   return {};
 };
 
@@ -444,8 +492,8 @@ export const deleteSchedule = async ({ schedule_id, user }) => {
   await scheduleCheck.remove();
 
   await awardeesModel.updateMany(
-    { batch_id: schedule_id, is_shortaged: false, status: { $nin: ['disbursed'] } },
-    { $set: { status: 'allocated', batch_code: '' } }
+    { batch_id: schedule_id, status: { $nin: ['disbursed'] } },
+    { $set: { status: 'allocated', batch_code: '', is_shortaged: false } }
   );
 
   const projectInfo = await ProjectModel.findById(scheduleCheck.project);
@@ -481,6 +529,15 @@ export const deleteSchedule = async ({ schedule_id, user }) => {
   const msgDelivered = await messageBird(msg);
   if (!msgDelivered)
     throw new InternalServerError('server slip. project delivery created without mail being sent');
+
+  // create notification
+  await notificationsModel.create({
+    note: `You have successfully deleted batch delivery for ${project.project_name} project`,
+    type: 'update',
+    who_is_reading: 'sponsor',
+    compliment_obj: { status: 'pending' },
+    organization_id: user._id
+  });
 
   return {};
 };

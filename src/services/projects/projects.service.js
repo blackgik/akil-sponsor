@@ -17,11 +17,13 @@ import { capitalizeWords, downloadExcel } from '../../utils/general.js';
 import {
   beneficiarySuccefullyAllocatedEmail,
   newProjectCreationEmail,
+  projectClosureEmail,
   succefulProjectAwardedEmail
 } from '../../config/mail.js';
 import { formattMailInfo } from '../../utils/mailFormatter.js';
 import { messageBird } from '../../utils/msgBird.js';
 import env from '../../config/env.js';
+import notificationsModel from '../../models/settings/notificationsModel.js';
 
 export const createProject = async ({ body, user }) => {
   try {
@@ -91,6 +93,13 @@ export const createProject = async ({ body, user }) => {
     if (!msgDelivered)
       throw new InternalServerError('server slip. project was created without mail being sent');
 
+    // create notification
+    await notificationsModel.create({
+      note: `You have successfully created a new project ${body.project_name} `,
+      type: 'creation',
+      who_is_reading: 'sponsor',
+      organization_id: user._id
+    });
     return project;
   } catch (err) {
     console.log(err);
@@ -369,7 +378,7 @@ export const fetchGenerateList = async ({ param, user, project_id }) => {
   const rgx = (pattern) => new RegExp(`.*${pattern}.*`, 'i');
   const searchRgx = rgx(query);
 
-  const filter = { project_id, sponsor_id: user._id, batch_code: '' };
+  const filter = { project_id, sponsor_id: user._id };
 
   if (query) {
     filter['$or'] = [{ name: searchRgx, phone: searchRgx }];
@@ -414,6 +423,7 @@ export const fetchGenerateList = async ({ param, user, project_id }) => {
   const count = await awardeesModel.countDocuments(filter);
   const fetched_data = await awardeesModel
     .find(filter)
+    .populate({ path: 'project_id', populate: { path: 'product_items' } })
     .sort({ createdAt: -1 })
     .skip((page_no - 1) * no_of_requests)
     .limit(no_of_requests);
@@ -458,7 +468,7 @@ export const viewProject = async ({ project_id }) => {
 
   const awardedBeneficiariesCount = await awardeesModel.countDocuments({
     project_id,
-    status: 'awarded'
+    status: { $ne: 'awarded' }
   });
 
   const productQuantities = project.product_items.map((item) => ({
@@ -574,6 +584,14 @@ export const deleteProject = async ({ project_id }) => {
   await awardeesModel.deleteMany({ project_id });
   await scheduleModel.deleteMany({ project: project_id });
 
+  // create notification
+  await notificationsModel.create({
+    note: `You have successfully deleted ${project.project_name} project`,
+    type: 'update',
+    who_is_reading: 'sponsor',
+    organization_id: user._id
+  });
+
   return {};
 };
 
@@ -677,6 +695,34 @@ export const closeProject = async ({ user, project_id }) => {
     throw new BadRequestError('Project is already a moving state.');
   }
 
+  //create email profile here
+  const emailData = {
+    sponsor_name: capitalizeWords(`${user.firstname} ${user.lastname}`),
+    project_name: capitalizeWords(project.project_name),
+    closure_date: project.end_date
+  };
+
+  const mailData = {
+    email: user.email,
+    subject: `Project Closure Notification of -${emailData.project_name}`,
+    type: 'html',
+    html: projectClosureEmail(emailData).html,
+    text: projectClosureEmail(emailData).text
+  };
+
+  const msg = await formattMailInfo(mailData, env);
+
+  const msgDelivered = await messageBird(msg);
+  if (!msgDelivered)
+    throw new InternalServerError('server slip. project was closed without mail being sent');
+
+  // create notification
+  await notificationsModel.create({
+    note: `You have successfully closed ${project.project_name} project`,
+    type: 'update',
+    who_is_reading: 'sponsor',
+    organization_id: user._id
+  });
   return {};
 };
 
@@ -690,10 +736,79 @@ export const deleteAwardee = async ({ body, user }) => {
 
     if (deletableStatus.includes(awardee.status)) {
       await awardee.remove();
+
+      const beneficiary = await organizationBeneficiaryModel.findById(awardee.beneficiary_id);
+
+      if (!beneficiary) continue;
+
+      const filtered = beneficiary.project_ids.filter(
+        (item) => String(item) !== String(awardee.project_id)
+      );
+
+      beneficiary.project_ids = filtered;
+
+      await beneficiary.save();
     } else {
       throw new BadRequestError('Awardee is already in  a moving state. You can not delete');
     }
   }
 
   return {};
+};
+
+export const fetchBeneficiariesForProjects = async ({ user, param, project_id }) => {
+  const project = await ProjectModel.findById(project_id);
+
+  if (!project) throw new NotFoundError('Project not found');
+
+  let { page_no, no_of_requests, search, status } = param;
+
+  page_no = Number(page_no) || 1;
+  no_of_requests = Number(no_of_requests) || 20;
+
+  const filterData = { organization_id: user._id, project_ids: { $nin: [project_id] } };
+
+  const query = typeof search !== 'undefined' ? search.trim() : false;
+
+  const rgx = (pattern) => new RegExp(`.*${pattern}.*`, 'i');
+  const searchRgx = rgx(query);
+
+  if (query) {
+    filterData['$or'] = [{ 'personal.member_name': searchRgx }, { 'contact.email': searchRgx }];
+  }
+
+  if (status) {
+    filterData.acctstatus = status;
+  }
+
+  const beneficiaryCount = await organizationBeneficiaryModel.countDocuments({ ...filterData });
+  const fetchedResults = await organizationBeneficiaryModel
+    .find({ ...filterData })
+    .select({
+      avatar: 1,
+      'personal.member_name': 1,
+      'personal.lga': 1,
+      'personal.state_of_origin': 1,
+      'personal.dob': 1,
+      'contact.email': 1,
+      'employment_info.employment_status': 1,
+      'contact.country_of_residence': 1,
+      'personal.gender': 1,
+      has_paid_reg: 1,
+      'contact.phone': 1,
+      createdAt: 1,
+      acctstatus: 1
+    })
+    .populate({
+      path: 'organization_id',
+      model: 'Organization',
+      select: { name_of_cooperation: 1, company_code: 1 }
+    })
+    .sort({ createdAt: -1 })
+    .skip((page_no - 1) * no_of_requests)
+    .limit(no_of_requests);
+
+  const available_pages = Math.ceil(beneficiaryCount / no_of_requests);
+
+  return { page_no, available_pages, fetchedResults };
 };

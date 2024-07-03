@@ -2,24 +2,32 @@ import appResponse from '../../../lib/appResponse.js';
 import {
   enableChat,
   fetchNotifications,
-  marksAsUnread
+  marksAsRread,
+  removeNotification
 } from '../../services/settings/notificationService.js';
 
 export const fetchNotifcationHandler = async (req, res) => {
-  const { user } = req;
+  const { user, query } = req;
 
-  const response = await fetchNotifications({ user });
+  const response = await fetchNotifications({ user, param: query });
 
   res.send(appResponse('fetched notifications successfully', response));
 };
 
-export const markasunreadHandler = async (req, res) => {
-  const { user } = req;
+export const markAsReadHandler = async (req, res) => {
   const { notification_id } = req.params;
 
-  const response = await marksAsUnread({ user, notification_id });
+  const response = await marksAsRread({ notification_id });
 
   res.send(appResponse('marked notification as read', response));
+};
+
+export const removeNotificationHandler = async (req, res) => {
+  const { notification_id } = req.params;
+
+  const response = await removeNotification({ notification_id });
+
+  res.send(appResponse('notification removed', response));
 };
 
 export const enableChatHandler = async (req, res) => {

@@ -105,6 +105,15 @@ export const onboardNewOrganization = async ({ body, dbConnection }) => {
   if (!msgDelivered)
     throw new InternalServerError('server slip. Sponsor was created without mail being sent');
 
+  // create notification
+  await notificationsModel.create({
+    note: `You have successfully created a sponsors account`,
+    type: 'creation',
+    who_is_reading: 'sponsor',
+    compliment_obj: { status: 'pending' },
+    organization_id: user._id,
+  });
+
   return { code: otp, hash: otpHash, email: createOrganizationProfile.email };
 };
 
@@ -279,7 +288,6 @@ export const loginOrganization = async (body) => {
   //   data2encrypt: { ...admin.toJSON(), is_first_time, user_info: user ? user : {} },
   //   pubKey: env.public_key
   // });
-
 
   const tokenEncryption = jwt.sign(
     {
@@ -578,13 +586,13 @@ export const onboardNewOrganizationBeneficiary = async ({ body, user }) => {
   //     throw new InternalServerError('server slip. Beneficiary was created without mail being sent');
   // }
 
-  // create notification for beneficiary
+  // create notification
   await notificationsModel.create({
-    note: `You have been successfully onboarded to  ${user.firstname}`,
-    who_is_reading: 'beneficiary',
+    note: `You have successfully onboarded ${body.personal.member_name} as a new beneficary`,
+    type: 'creation',
+    who_is_reading: 'sponsor',
     compliment_obj: { status: 'pending' },
     organization_id: user._id,
-    beneficiary_id: createBeneficiary._id
   });
 
   return true;
@@ -626,16 +634,14 @@ export const setOrganizationPackageData = async ({ body, user }) => {
     organizationExists.personalization_fee = plans.sponsor_onboarding_settings.personalization_fee;
   }
   organizationExists.total_number_of_beneficiaries_chosen =
-      body.total_number_of_beneficiaries_chosen;
+    body.total_number_of_beneficiaries_chosen;
   if (body.total_number_of_beneficiaries_chosen > plans.sponsor_onboarding_settings.max_users) {
-    
     supBeneficiaryFee =
       body.total_number_of_beneficiaries_chosen - plans.sponsor_onboarding_settings.max_users;
     amountToPay += supBeneficiaryFee;
   }
   organizationExists.total_number_of_sms = body.total_number_of_sms;
   if (body.total_number_of_sms > plans.sponsor_onboarding_settings.max_sms) {
-    
     supSmsFee =
       (body.total_number_of_sms - plans.sponsor_onboarding_settings.max_sms) *
       plans.sponsor_onboarding_settings.sup_sms_fee;
@@ -716,28 +722,33 @@ export const uploadOrganizationBeneficiariesInBulk = async ({ user, file, body }
     beneficiary.name = beneficiary.first_name + ' ' + beneficiary.last_name;
     let comment;
 
-    const filter = { organization_id: user._id };
+    const filter = { organization_id: user._id, $or: [] };
 
     if (beneficiary.email) {
-      filter['contact.email'] = beneficiary.email;
+      filter['$or'].push({ 'contact.email': beneficiary.email });
     }
 
     if (beneficiary.phone) {
-      filter['contact.phone'] = beneficiary.phone;
+      filter['$or'].push({ 'contact.phone': beneficiary.phone });
     }
 
-    // Check if beneficiary already exists
-    const beneficiaryExists = await organizationBeneficiaryModel.findOne(filter);
+    // Check if beneficiary already exists with either email or phone number
+    const beneficiaryExists = await organizationBeneficiaryModel.findOne({
+      ...filter
+    });
     if (beneficiaryExists) {
       errorLogs.push({
         comment: `${beneficiary.name} is already part of this organization`,
         code: 422,
         batch_no: body.batch_no
       });
-      continue; // Skip to the next beneficiary
+      continue;
     }
 
-    const batchExist = await beneficiaryBatchUploadModel.findOne(filter);
+    // Check if batch already exists with either email or phone number
+    const batchExist = await beneficiaryBatchUploadModel.findOne({
+      ...filter
+    });
     if (batchExist) {
       errorLogs.push({
         comment: `${beneficiary.name} was already uploaded with batch ${batchExist.batch_no}`,
@@ -745,7 +756,7 @@ export const uploadOrganizationBeneficiariesInBulk = async ({ user, file, body }
         batch_no: batchExist.batch_no,
         id: batchExist._id
       });
-      continue; // Skip to the next beneficiary
+      continue;
     }
 
     const batchListData = {
@@ -834,6 +845,15 @@ export const uploadOrganizationBeneficiariesInBulk = async ({ user, file, body }
   const msgDelivered = await messageBird(msg);
   if (!msgDelivered)
     throw new InternalServerError('Server slip. Bulk Upload was made without mail being sent');
+
+  // create notification
+  await notificationsModel.create({
+    note: `You have successfully bulk uploaded ${batchList.length} beneficiaries`,
+    type: 'bulk_upload',
+    who_is_reading: 'sponsor',
+    compliment_obj: { status: 'pending' },
+    organization_id: user._id,
+  });
 
   return { errorLogs, createBatchList };
 };

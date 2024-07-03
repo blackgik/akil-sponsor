@@ -8,13 +8,26 @@ const notificationSchema = new Schema(
     type: {
       type: String,
       default: 'organization',
-      enum: ['organization', 'sponsor','single', 'KYC', 'bulk-upload']
+      enum: [
+        'organization',
+        'sponsor',
+        'single',
+        'KYC',
+        'creation',
+        'payment',
+        'bulk_upload',
+        'update',
+        'feedback'
+      ]
     },
     note: { type: String, default: '' },
     is_read: { type: Boolean, default: false },
     link: { type: String, default: '' },
     compliment_obj: { type: Schema.Types.Mixed, default: {} },
-    who_is_reading: { type: String, enum: ['member', 'organization','beneficiary', 'agent', 'sponsor'] },
+    who_is_reading: {
+      type: String,
+      enum: ['member', 'organization', 'beneficiary', 'agent', 'sponsor']
+    },
     organization_id: { type: Schema.Types.ObjectId, ref: 'Organization' },
     member_id: { type: Schema.Types.ObjectId, ref: 'Organization_Member' },
     agent_id: { type: Schema.Types.ObjectId, ref: 'Agent_Registry' }

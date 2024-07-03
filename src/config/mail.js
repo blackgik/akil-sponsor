@@ -5203,7 +5203,7 @@ export const batchDeliveryCompletedEmail = (data) => {
                                                                             <span><strong>${data.batch_delivery_number}</strong></span>
                                                                             for the
                                                                             <span><strong>${data.project_name}</strong></span>
-                                                                            project has been successfully disbursed in full.
+                                                                            project has been successfully disbursed to you.
                                                                         </div>
                                                                     </td>
                                                                 </tr>
@@ -5221,8 +5221,7 @@ export const batchDeliveryCompletedEmail = (data) => {
                                                                             style="font-size: 18px; line-height: 150%; text-align: left; word-wrap: break-word;color:#002366;">
                                                                             <p style="font-size: 18px; line-height: 150%;">
                                                                                 This marks a key milestone in the project's
-                                                                                progress. Detailed information regarding the
-                                                                                disbursement can be accessed through your account.
+                                                                                progress.
                                                                             </p> <br>
                                                                             Thanks for choosing us,
                                                                             <p>Akilaah Team</p>

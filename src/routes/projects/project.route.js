@@ -6,6 +6,7 @@ import {
   createProjectsHandler,
   deleteAwardeeHandler,
   deleteProjectHandler,
+  fetchBeneficiariesHandler,
   fetchGenerateListHandler,
   fetchProjectHandler,
   generateProjectListHandler,
@@ -41,5 +42,6 @@ project_route.get('/view-project/:project_id', authentication, viewProjectHandle
 project_route.get('/get-project-item/:product_id', authentication, getProjectItemHandler);
 project_route.patch('/close-project/:project_id', authentication, closeProjectHandler);
 project_route.post('/delete-awardees/', authentication, deleteAwardeeHandler);
+project_route.get('/fetch-beneficiaries/:project_id', authentication, fetchBeneficiariesHandler);
 
 export default project_route;
