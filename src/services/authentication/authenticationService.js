@@ -111,7 +111,7 @@ export const onboardNewOrganization = async ({ body, dbConnection }) => {
     type: 'creation',
     who_is_reading: 'sponsor',
     compliment_obj: { status: 'pending' },
-    organization_id: user._id,
+    organization_id: createOrganizationProfile._id,
   });
 
   return { code: otp, hash: otpHash, email: createOrganizationProfile.email };

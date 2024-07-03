@@ -589,7 +589,7 @@ export const deleteProject = async ({ project_id }) => {
     note: `You have successfully deleted ${project.project_name} project`,
     type: 'update',
     who_is_reading: 'sponsor',
-    organization_id: user._id
+    organization_id: project.sponsor_id
   });
 
   return {};
