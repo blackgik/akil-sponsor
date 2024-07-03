@@ -1,8 +1,11 @@
 import { NotFoundError } from '../../../lib/appErrors.js';
 import feedbackModel from '../../models/messages/feedbackModel.js';
+import awardeesModel from '../../models/projects/awardeesModel.js';
 
 export const createBeneficiaryFeedback = async ({ body, user, beneficiary_id }) => {
   const { title, content } = body;
+  const awardee = await awardeesModel.findOne({ beneficiary_id, status: 'disbursed' });
+  if (!awardee) throw new NotFoundError('Awardee not found');
   const feedbackData = {
     title,
     content,
@@ -10,6 +13,8 @@ export const createBeneficiaryFeedback = async ({ body, user, beneficiary_id }) 
     beneficiary_id
   };
   const feedbackCreated = await feedbackModel.create(feedbackData);
+  awardee.status = 'feedback';
+  await awardee.save();
   return feedbackCreated;
 };
 
@@ -58,10 +63,21 @@ export const getSingleFeedback = async ({ feedback_id }) => {
     model: 'Organization_Member'
   });
 
-  if (!feedback) throw new NotFoundError('product  does not exist');
+  if (!feedback) throw new NotFoundError('feedback does not exist');
 
   return feedback;
 };
+
+// export const getSingleFeedback_ = async ({ feedback_id }) => {
+//     const feedback = await feedbackModel.findById(feedback_id).populate({
+//       path: 'beneficiary_id',
+//       model: 'Organization_Member'
+//     });
+
+//     if (!feedback) throw new NotFoundError('product  does not exist');
+
+//     return feedback;
+//   };
 
 export const markAsRead = async ({ feedback_id }) => {
   const feedback = await feedbackModel.findById(feedback_id);

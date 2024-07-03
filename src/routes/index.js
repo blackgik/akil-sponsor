@@ -15,6 +15,7 @@ import project_route from './projects/project.route.js';
 import scheduling_route from './projects/scheduling.route.js';
 import disbursement_router from './projects/disbursement.route.js';
 import feedbackRoots from './settings/feedbackRoute.js';
+import mediaFileRoots from './media/mediaRoute.js';
 
 export default (router) => {
   router.use('/auth', organizationRoute());
@@ -28,6 +29,7 @@ export default (router) => {
   router.use('/profile', profileRoot());
   router.use('/notifications', notificationRoots());
   router.use('/feedback', feedbackRoots());
+  router.use('/media', mediaFileRoots());
   router.use('/roles', rolesRouteRoute);
   router.use('/users', userRoute);
   router.use('/personalization', personlizationRoute);
