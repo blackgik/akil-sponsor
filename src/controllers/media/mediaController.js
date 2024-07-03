@@ -9,9 +9,8 @@ import {
 
 export const uploadMediaHanlder = async (req, res) => {
   const { body, user } = req;
-  const { project_id } = req.params;
 
-  const response = await uploadMedia({ body, user, project_id });
+  const response = await uploadMedia({ body, user });
 
   res.send(appResponse('uploaded media file successfully', response));
 };

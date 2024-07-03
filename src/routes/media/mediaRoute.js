@@ -11,7 +11,7 @@ import {
 const mediaFileRoutes = router.Router();
 
 const mediaFileRoots = () => {
-  mediaFileRoutes.post('/upload-mediafile/:project_id', authentication, uploadMediaHanlder);
+  mediaFileRoutes.post('/upload-mediafile', authentication, uploadMediaHanlder);
   mediaFileRoutes.get('/fetch-mediafiles', authentication, fetchMediaHandler);
   mediaFileRoutes.patch('/update-status/:media_id', authentication, changeMediaStatusHandler);
   mediaFileRoutes.patch('/edit-mediafile/:media_id', authentication, editMediaFileHandler);
