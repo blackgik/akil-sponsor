@@ -1,8 +1,8 @@
 import { NotFoundError } from '../../../lib/appErrors.js';
 import mediaModel from '../../models/media/mediaModel.js';
 
-export const uploadMedia = async ({ body, user, project_id }) => {
-  const { fileKey, title, description, start_date, end_date } = body;
+export const uploadMedia = async ({ body, user }) => {
+  const { fileKey, title, description, start_date, end_date, project_id } = body;
   const mediaData = {
     file: {
       key: fileKey
@@ -37,8 +37,8 @@ export const fetchMedia = async ({ user, param }) => {
       ...filter
     })
     .populate({
-      path: 'sponsor_id',
-      model: 'Organization'
+      path: 'project_id',
+      model: 'Project'
     })
     .sort({ createdAt: -1 })
     .skip((page_no - 1) * no_of_requests)
