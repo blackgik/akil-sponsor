@@ -2,8 +2,7 @@ import { NotFoundError } from '../../../lib/appErrors.js';
 import notificationsModel from '../../models/settings/notificationsModel.js';
 
 export const fetchNotifications = async ({ user, param }) => {
-  let { page_no, no_of_requests, type } = param;
-  console.log(type)
+  let { page_no, no_of_requests, type, is_read } = param;
   page_no = Number(page_no) || 1;
   no_of_requests = Number(no_of_requests) || 20;
 
@@ -12,7 +11,10 @@ export const fetchNotifications = async ({ user, param }) => {
     filter.type = type;
   }
 
-  console.log(filter.type)
+  if (is_read) {
+    filter.is_read = is_read;
+  }
+
   const unread_count = await notificationsModel.countDocuments({
     ...filter,
     is_read: false
@@ -35,12 +37,23 @@ export const fetchNotifications = async ({ user, param }) => {
   return { page_no, available_pages, unread_count, notifications };
 };
 
-export const marksAsUnread = async ({ user, notification_id }) => {
+export const removeNotification = async ({ notification_id }) => {
   const notification = await notificationsModel.findById(notification_id);
 
   if (!notification) throw new NotFoundError('Notification not found');
 
   await notification.remove();
+
+  return {};
+};
+
+export const marksAsRread = async ({ notification_id }) => {
+  const notification = await notificationsModel.findById(notification_id);
+
+  if (!notification) throw new NotFoundError('Notification not found');
+
+  notification.is_read = true;
+  await notification.save();
 
   return {};
 };
