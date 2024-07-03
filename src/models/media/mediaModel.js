@@ -7,6 +7,11 @@ const mediaSchema = new Schema(
     file: {
       key: { type: String }
     },
+    video_url: {
+      type: String,
+      default: '',
+      trim: true
+    },
     title: {
       type: String,
       trim: true
@@ -22,7 +27,7 @@ const mediaSchema = new Schema(
     },
     start_date: { type: Date },
     end_date: { type: Date },
-    project_id: { type: Schema.Types.ObjectId, ref: 'Project', required: true },
+    project_id: { type: Schema.Types.ObjectId, ref: 'Project', default: '' },
     sponsor_id: { type: Schema.Types.ObjectId, required: true, ref: 'Organization' }
   },
 

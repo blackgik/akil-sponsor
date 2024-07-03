@@ -7,11 +7,7 @@ export const uploadMedia = async ({ body, user }) => {
     file: {
       key: fileKey
     },
-    title,
-    description,
-    start_date,
-    end_date,
-    project_id,
+    ...body,
     sponsor_id: user._id
   };
   const mediaCreated = await mediaModel.create(mediaData);
@@ -23,18 +19,24 @@ export const fetchMedia = async ({ user, param }) => {
   let { page_no, no_of_requests, status, project_id } = param;
   page_no = Number(page_no) || 1;
   no_of_requests = Number(no_of_requests) || 20;
-  const filter = { sponsor_id: user._id, project_id };
+  const filter = { sponsor_id: user._id,  };
   if (status) {
     filter.status = status;
   }
 
+  if(project_id) {
+    filter.project_id = project_id
+  }
+
   const media_count = await mediaModel.countDocuments({
-    ...filter
+    ...filter,
+
   });
 
   const mediaFiles = await mediaModel
     .find({
-      ...filter
+      ...filter,
+
     })
     .populate({
       path: 'project_id',
@@ -49,7 +51,7 @@ export const fetchMedia = async ({ user, param }) => {
 };
 
 export const changeMediaStatus = async ({ status, media_id }) => {
-    console.log(status)
+  console.log(status);
   const mediaFile = await mediaModel.findById(media_id);
 
   if (!mediaFile) throw new NotFoundError('mediaFile does not exist');
