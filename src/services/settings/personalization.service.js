@@ -42,6 +42,7 @@ export const buildPersonlaization = async ({ user, param, body }) => {
         : `${env.prod_base_url_beneficiary}/${user.slug}/dashboard`,
     metadata: {
       amount: 840000,
+      userId: user._id,
       personalization_id: check_personalization._id,
       type: 'personalization_payment'
     }
