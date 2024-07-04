@@ -3,14 +3,14 @@ import conversationModel from '../../models/messages/conversationModel.js';
 import messageModel from '../../models/messages/messageModel.js';
 import organizationModel from '../../models/organizationModel.js';
 
-export const createConversation = async ({ user, beneficiary_id }) => {
-  const checkExistingConvo = await existingConverstion({ user, beneficiary_id });
+export const createConversation = async ({ user, member_id }) => {
+  const checkExistingConvo = await existingConverstion({ user, member_id });
 
   if (checkExistingConvo) {
     return checkExistingConvo;
   }
   const data = {
-    beneficiaries: [beneficiary_id],
+    members: [member_id],
     organization_id: user._id
   };
 
@@ -19,10 +19,10 @@ export const createConversation = async ({ user, beneficiary_id }) => {
   return convo;
 };
 
-const existingConverstion = async ({ user, beneficiary_id }) => {
+const existingConverstion = async ({ user, member_id }) => {
   const findConvo = await conversationModel.findOne({
     organization_id: user._id,
-    beneficiaries: { $all: [beneficiary_id] }
+    members: { $all: [member_id] }
   });
 
   if (!findConvo) return false;
@@ -36,7 +36,7 @@ export const fetchAllConversations = async ({ user }) => {
       organization_id: user._id
     })
     .populate({
-      path: 'beneficiaries',
+      path: 'members',
       model: 'Organization_Member',
       select: { personal: 1, avatar: 1 }
     });
