@@ -44,7 +44,7 @@ export const createProductSchedule = async ({ user, body, project_id, param }) =
   console.log({ minimun, quantity_per_person });
   console.log({ division });
 
-  const shortage_persons = division - total_allocated;
+  let shortage_persons = division - total_allocated;
 
   console.log({ shortage_persons });
 
@@ -118,7 +118,7 @@ export const createProductSchedule = async ({ user, body, project_id, param }) =
   console.log({ total_left });
   console.log({ total_persons_to_get });
 
-  if (total_left <= 0) throw new BadRequestError('Total number of participants has be exhauted');
+  // if (total_left <= 0) throw new BadRequestError('Total number of participants has be exhauted');
 
   //   create object
   const schedule_data = {

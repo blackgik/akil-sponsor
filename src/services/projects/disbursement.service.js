@@ -58,6 +58,7 @@ export const verifyCode = async ({ body, user }) => {
 };
 
 export const confirmDisbursement = async ({ user, awardee_id }) => {
+  console.log({ awardee_id });
   const awardee = await awardeesModel.findOne({ _id: awardee_id, status: 'allocated' });
   if (!awardee) throw new NotFoundError('No allocated beneficiaries found');
   const beneficiary = await organizationBeneficiaryModel.findById(awardee.beneficiary_id);
@@ -65,6 +66,7 @@ export const confirmDisbursement = async ({ user, awardee_id }) => {
   const schedule = await scheduleModel.findOne({ project: awardee.project_id });
 
   if (awardee) awardee.status = 'disbursed';
+
   await awardee.save();
 
   //create email profile here
@@ -96,5 +98,5 @@ export const confirmDisbursement = async ({ user, awardee_id }) => {
     who_is_reading: 'sponsor',
     organization_id: user._id
   });
-  return {};
+  return { awardee };
 };
