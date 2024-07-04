@@ -1,5 +1,6 @@
 import { NotFoundError } from '../../../lib/appErrors.js';
 import mediaModel from '../../models/media/mediaModel.js';
+import notificationsModel from '../../models/settings/notificationsModel.js';
 
 export const uploadMedia = async ({ body, user }) => {
   const { fileKey, title, description, start_date, end_date, project_id } = body;
@@ -11,6 +12,14 @@ export const uploadMedia = async ({ body, user }) => {
     sponsor_id: user._id
   };
   const mediaCreated = await mediaModel.create(mediaData);
+
+  // create notification
+  await notificationsModel.create({
+    note: `You have successfully Uploaded a new media file`,
+    type: 'creation',
+    who_is_reading: 'sponsor',
+    organization_id: user._id
+  });
 
   return mediaCreated;
 };
@@ -61,7 +70,7 @@ export const fetchSingleMedia = async ({ user, media_id }) => {
   return mediaFiles;
 };
 
-export const changeMediaStatus = async ({ status, media_id }) => {
+export const changeMediaStatus = async ({ user, status, media_id }) => {
   const mediaFile = await mediaModel.findByIdAndUpdate(
     media_id,
     { $set: { status } },
@@ -70,15 +79,30 @@ export const changeMediaStatus = async ({ status, media_id }) => {
 
   if (!mediaFile) throw new NotFoundError('mediaFile does not exist');
 
+  // create notification
+  await notificationsModel.create({
+    note: `You have successfully updated the status of this media file to ${status}`,
+    type: 'update',
+    who_is_reading: 'sponsor',
+    organization_id: user._id
+  });
+
   return mediaFile;
 };
 
-export const removeMediaFile = async ({ media_id }) => {
+export const removeMediaFile = async ({ user, media_id }) => {
   const mediaFile = await mediaModel.findById(media_id);
 
   if (!mediaFile) throw new NotFoundError('mediaFile not found');
 
   await mediaFile.remove();
+  // create notification
+  await notificationsModel.create({
+    note: `You have successfully removed a media file`,
+    type: 'update',
+    who_is_reading: 'sponsor',
+    organization_id: user._id
+  });
 
   return {};
 };
