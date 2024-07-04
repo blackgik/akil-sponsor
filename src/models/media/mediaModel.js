@@ -7,6 +7,21 @@ const mediaSchema = new Schema(
     file: {
       key: { type: String }
     },
+    file_name: {
+      type: String,
+      default: '',
+      trim: true
+    },
+    file_size: {
+      type: String,
+      default: '',
+      trim: true
+    },
+    file_ext: {
+      type: String,
+      default: '',
+      trim: true
+    },
     video_url: {
       type: String,
       default: '',

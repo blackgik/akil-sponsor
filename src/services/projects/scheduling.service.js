@@ -449,6 +449,10 @@ export const fetchAwardeesinSchedule = async ({ schedule_id, user, param }) => {
   const count = await awardeesModel.countDocuments(filter);
   const fetched_data = await awardeesModel
     .find(filter)
+    .populate({
+      path: 'beneficiary_id',
+      model: 'Organization_Member'
+    })
     .sort({ createdAt: -1 })
     .skip((page_no - 1) * no_of_requests)
     .limit(no_of_requests);
