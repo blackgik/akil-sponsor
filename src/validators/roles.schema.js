@@ -52,7 +52,7 @@ export const rolesCretionSchema = Joi.object({
     projects: Joi.object({
       is_active: Joi.boolean().required(),
       functions: Joi.object({
-        create_product: Joi.object({
+        project: Joi.object({
           is_active: Joi.boolean().required(),
           permissions: Joi.array().items(Joi.string().valid('create', 'delete', 'edit', 'view'))
         })
