@@ -254,7 +254,7 @@ export const generateProjectList = async ({ user, param, project_id, body }) => 
       who_is_reading: 'sponsor',
       organization_id: user._id
     });
-    
+
     return create_awardees;
   } catch (err) {
     console.log(err);
@@ -357,6 +357,14 @@ export const saveGenerateList = async ({ user, param, project_id, body }) => {
   const msgDelivered = await messageBird(msg);
   if (!msgDelivered)
     throw new InternalServerError('server slip. project was created without mail being sent');
+
+  // create notification
+  await notificationsModel.create({
+    note: `You have successfully allocated beneficiaires to this project ${project.project_name} `,
+    type: 'creation',
+    who_is_reading: 'sponsor',
+    organization_id: user._id
+  });
 
   return { shortage, saved: true };
 };
