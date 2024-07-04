@@ -3,6 +3,7 @@ import {
   changeMediaStatus,
   editMediaFile,
   fetchMedia,
+  fetchSingleMedia,
   removeMediaFile,
   uploadMedia
 } from '../../services/media/mediaService.js';
@@ -21,6 +22,15 @@ export const fetchMediaHandler = async (req, res) => {
   const response = await fetchMedia({ user, param: query });
 
   res.send(appResponse('fetched all media files successfully', response));
+};
+
+export const fetchSingleMediaHandler = async (req, res) => {
+  const { user } = req;
+  const { media_id } = req.params;
+
+  const response = await fetchSingleMedia({ user, media_id });
+
+  res.send(appResponse('fetched single media file successfully', response));
 };
 
 export const changeMediaStatusHandler = async (req, res) => {
