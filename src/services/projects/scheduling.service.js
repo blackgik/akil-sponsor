@@ -256,7 +256,13 @@ export const createProductSchedule = async ({ user, body, project_id, param }) =
   const msgDelivered = await messageBird(msg);
   if (!msgDelivered)
     throw new InternalServerError('server slip. project delivery created without mail being sent');
-
+  // create notification
+  await notificationsModel.create({
+    note: `You have successfully scheduled a new batch for the ${project.project_name} project with the batch number ${body.batch_number} `,
+    type: 'creation',
+    who_is_reading: 'sponsor',
+    organization_id: user._id
+  });
   return {};
 };
 
