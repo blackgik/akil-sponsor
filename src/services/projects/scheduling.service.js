@@ -12,6 +12,7 @@ import { capitalizeWords, generateId } from '../../utils/general.js';
 import { formattMailInfo } from '../../utils/mailFormatter.js';
 import { messageBird } from '../../utils/msgBird.js';
 import ProductModel from '../../models/products/ProductModel.js';
+import notificationsModel from '../../models/settings/notificationsModel.js';
 
 export const createProductSchedule = async ({ user, body, project_id, param }) => {
   const project = await ProjectModel.findById(project_id).populate('product_items');

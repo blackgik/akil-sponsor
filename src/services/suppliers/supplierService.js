@@ -1,6 +1,7 @@
 import env from '../../config/env.js';
 import { DuplicateError, InternalServerError, NotFoundError } from '../../../lib/appErrors.js';
 import SupplierModel from '../../models/suppliers/supplierModel.js';
+import notificationsModel from '../../models/settings/notificationsModel.js';
 
 export const createNewSupplier = async ({ user, body }) => {
   const supplierData = {
