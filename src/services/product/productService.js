@@ -8,12 +8,12 @@ import {
 import ProductModel from '../../models/products/ProductModel.js';
 import WarehouseModel from '../../models/products/WarehouseModel.js';
 import { formattMailInfo } from '../../utils/mailFormatter.js';
-import {
-  newProductMail,
-} from '../../config/mail.js';
+import { newProductMail } from '../../config/mail.js';
 import { messageBird } from '../../utils/msgBird.js';
 import warehouseProductModel from '../../models/products/warehouseProductModel.js';
 import RestockModel from '../../models/products/RestockModel.js';
+import notificationsModel from '../../models/settings/notificationsModel.js';
+import { capitalizeWords } from '../../utils/general.js';
 
 export const createNewProduct = async ({ user, body }) => {
   const productData = {
@@ -31,18 +31,22 @@ export const createNewProduct = async ({ user, body }) => {
   if (!created)
     throw new InternalServerError('server slip error. Please Check your Input properly');
 
-  body.warehouses.forEach(async element => {
+  body.warehouses.forEach(async (element) => {
     let warehouse = await WarehouseModel.findById(element);
     if (warehouse) {
-      await warehouseProductModel.create({product_id: created._id, warehouse_id: warehouse._id, quantity: created.product_quantity});
+      await warehouseProductModel.create({
+        product_id: created._id,
+        warehouse_id: warehouse._id,
+        quantity: created.product_quantity
+      });
     }
   });
   //create email profile here
   const creationData = {
     email: user.email,
-    name_of_cooperation: user.name_of_cooperation,
-    product_name: body.product_name,
-    product_id: created.product_id,
+    sponsors_name: capitalizeWords(`${user.firstname} ${user.lastname}`),
+    product_name: capitalizeWords(body.product_name),
+    product_slug: body.product_slug,
     date: created.updatedAt.toUTCString(),
     status: 'published'
   };
@@ -59,6 +63,15 @@ export const createNewProduct = async ({ user, body }) => {
   if (!msgDelivered)
     throw new InternalServerError('server slip. Bulk Upload was made without mail being sent');
 
+  // create notification for beneficiary
+  const notifica = await notificationsModel.create({
+    note: `You just created a new ${body.product_name} product`,
+    type: 'creation',
+    who_is_reading: 'sponsor',
+    organization_id: user._id
+  });
+
+  console.log(notifica);
   return true;
 };
 
@@ -105,18 +118,20 @@ export const createNewProductDraft = async ({ user, body }) => {
 };
 
 export const restockProductData = async ({ user, body }) => {
-  
   const created = await RestockModel.create(body);
   if (!created)
     throw new InternalServerError('server slip error. Please Check your Input properly');
 
   if (body.rtkstatus == 'complete') {
-    body.warehouses.forEach(async element => {
-      let restock = await warehouseProductModel.findOne({product_id: body.product_id, warehouse_id: element});
+    body.warehouses.forEach(async (element) => {
+      let restock = await warehouseProductModel.findOne({
+        product_id: body.product_id,
+        warehouse_id: element
+      });
       let product = await ProductModel.findById(body.product_id);
       if (restock) {
         restock.quantity += body.quantity_per_warehouse;
-        if(product){
+        if (product) {
           product.product_quantity += body.quantity_per_warehouse;
           await product.save();
         }
@@ -129,19 +144,21 @@ export const restockProductData = async ({ user, body }) => {
 };
 
 export const completeRestock = async ({ restock_id, body, user }) => {
-  
   let restock = await RestockModel.findById(restock_id);
   if (!restock) throw new BadRequestError('Restock  does not exist');
 
-  if (restock.rtkstatus =='complete') throw new BadRequestError('Restock  already completed!');
+  if (restock.rtkstatus == 'complete') throw new BadRequestError('Restock  already completed!');
 
   if (body.rtkstatus == 'complete') {
-    restock.warehouses.forEach(async element => {
-      let warehaouseProduct = await warehouseProductModel.findOne({product_id: restock.product_id, warehouse_id: element});
+    restock.warehouses.forEach(async (element) => {
+      let warehaouseProduct = await warehouseProductModel.findOne({
+        product_id: restock.product_id,
+        warehouse_id: element
+      });
       let product = await ProductModel.findById(restock.product_id);
       if (warehaouseProduct) {
         warehaouseProduct.quantity += restock.quantity_per_warehouse;
-        if(product){
+        if (product) {
           product.product_quantity += restock.quantity_per_warehouse;
           await product.save();
         }
@@ -150,8 +167,8 @@ export const completeRestock = async ({ restock_id, body, user }) => {
     });
   }
 
-   restock.rtkstatus = body.rtkstatus;
-   await restock.save();
+  restock.rtkstatus = body.rtkstatus;
+  await restock.save();
   return true;
 };
 
@@ -189,8 +206,7 @@ export const fetchProduct = async ({ user, params }) => {
     is_active: true
   });
 
-  const fetchData = await ProductModel
-    .find({ ...filterData, is_active: true })
+  const fetchData = await ProductModel.find({ ...filterData, is_active: true })
     .populate({
       path: 'product_category_id',
       model: 'ProductCategory'
@@ -207,7 +223,7 @@ export const fetchProduct = async ({ user, params }) => {
 };
 
 export const fetchProductRestockHistory = async ({ user, params }) => {
-  let { page_no, no_of_requests, search, status,  product_id } = params;
+  let { page_no, no_of_requests, search, status, product_id } = params;
 
   page_no = Number(page_no) || 1;
   no_of_requests = Number(no_of_requests) || Infinity;
@@ -233,8 +249,7 @@ export const fetchProductRestockHistory = async ({ user, params }) => {
     is_active: true
   });
 
-  const fetchData = await RestockModel
-    .find({ ...filterData, is_active: true })
+  const fetchData = await RestockModel.find({ ...filterData, is_active: true })
     .populate({
       path: 'product_id',
       model: 'Product'
@@ -253,7 +268,6 @@ export const fetchProductRestockHistory = async ({ user, params }) => {
 
   return { page_no, available_pages, fetchData };
 };
-
 
 //------ common product handlers --------------------\\
 
@@ -356,7 +370,6 @@ export const updateProductImage = async ({ product_id, body, user }) => {
 };
 
 export const cancelProduct = async ({ user, product_id }) => {
-
   let productInView;
 
   productInView = await ProductModel.findById(product_id);
@@ -371,7 +384,6 @@ export const cancelProduct = async ({ user, product_id }) => {
 };
 
 export const publishProduct = async ({ user, product_id }) => {
-
   let productInView;
 
   productInView = await ProductModel.findById(product_id);
@@ -386,7 +398,6 @@ export const publishProduct = async ({ user, product_id }) => {
 };
 
 export const unPublishProduct = async ({ user, product_id }) => {
-
   let productInView;
 
   productInView = await ProductModel.findById(product_id);

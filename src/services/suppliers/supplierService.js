@@ -1,10 +1,7 @@
 import env from '../../config/env.js';
-import {
-  DuplicateError,
-  InternalServerError,
-  NotFoundError
-} from '../../../lib/appErrors.js';
+import { DuplicateError, InternalServerError, NotFoundError } from '../../../lib/appErrors.js';
 import SupplierModel from '../../models/suppliers/supplierModel.js';
+import notificationsModel from '../../models/settings/notificationsModel.js';
 
 export const createNewSupplier = async ({ user, body }) => {
   const supplierData = {
@@ -22,34 +19,41 @@ export const createNewSupplier = async ({ user, body }) => {
     throw new InternalServerError('server slip error. Please Check your Input properly');
 
   //create email profile here
-//   const creationData = {
-//     email: user.email,
-//     name_of_cooperation: user.name_of_cooperation,
-//     supplier_name: body.supplier_name,
-//     supplier_id: created.supplier_id,
-//     date: created.updatedAt.toUTCString(),
-//     status: 'processing'
-//   };
-//   const mailData = {
-//     email: user.email,
-//     subject: 'Successful Creation of Supplier on Akilaah',
-//     type: 'html',
-//     html: newSupplierMail(creationData).html,
-//     text: newSupplierMail(creationData).text
-//   };
-//   const msg = await formattMailInfo(mailData, env);
+  //   const creationData = {
+  //     email: user.email,
+  //     name_of_cooperation: user.name_of_cooperation,
+  //     supplier_name: body.supplier_name,
+  //     supplier_id: created.supplier_id,
+  //     date: created.updatedAt.toUTCString(),
+  //     status: 'processing'
+  //   };
+  //   const mailData = {
+  //     email: user.email,
+  //     subject: 'Successful Creation of Supplier on Akilaah',
+  //     type: 'html',
+  //     html: newSupplierMail(creationData).html,
+  //     text: newSupplierMail(creationData).text
+  //   };
+  //   const msg = await formattMailInfo(mailData, env);
 
-//   const msgDelivered = await messageBird(msg);
-//   if (!msgDelivered)
-//     throw new InternalServerError('server slip. Bulk Upload was made without mail being sent');
+  //   const msgDelivered = await messageBird(msg);
+  //   if (!msgDelivered)
+  //     throw new InternalServerError('server slip. Bulk Upload was made without mail being sent');
 
+  // create notification
+  await notificationsModel.create({
+    note: `You have successfully created a new Supplier ${body.supplier_name} `,
+    type: 'creation',
+    who_is_reading: 'sponsor',
+    organization_id: user._id
+  });
   return true;
 };
 
 export const createNewDraftSupplier = async ({ user, body }) => {
   const supplierData = {
-    ...body,    
-    acctstatus: 'draft',
+    ...body,
+    acctstatus: 'draft'
   };
   const supplier = await SupplierModel.findOne({
     supplier_name: body.supplier_name
@@ -62,26 +66,26 @@ export const createNewDraftSupplier = async ({ user, body }) => {
     throw new InternalServerError('server slip error. Please Check your Input properly');
 
   //create email profile here
-//   const creationData = {
-//     email: user.email,
-//     name_of_cooperation: user.name_of_cooperation,
-//     supplier_name: body.supplier_name,
-//     supplier_id: created.supplier_id,
-//     date: created.updatedAt.toUTCString(),
-//     status: 'processing'
-//   };
-//   const mailData = {
-//     email: user.email,
-//     subject: 'Successful Creation of Supplier on Akilaah',
-//     type: 'html',
-//     html: newSupplierMail(creationData).html,
-//     text: newSupplierMail(creationData).text
-//   };
-//   const msg = await formattMailInfo(mailData, env);
+  //   const creationData = {
+  //     email: user.email,
+  //     name_of_cooperation: user.name_of_cooperation,
+  //     supplier_name: body.supplier_name,
+  //     supplier_id: created.supplier_id,
+  //     date: created.updatedAt.toUTCString(),
+  //     status: 'processing'
+  //   };
+  //   const mailData = {
+  //     email: user.email,
+  //     subject: 'Successful Creation of Supplier on Akilaah',
+  //     type: 'html',
+  //     html: newSupplierMail(creationData).html,
+  //     text: newSupplierMail(creationData).text
+  //   };
+  //   const msg = await formattMailInfo(mailData, env);
 
-//   const msgDelivered = await messageBird(msg);
-//   if (!msgDelivered)
-//     throw new InternalServerError('server slip. Bulk Upload was made without mail being sent');
+  //   const msgDelivered = await messageBird(msg);
+  //   if (!msgDelivered)
+  //     throw new InternalServerError('server slip. Bulk Upload was made without mail being sent');
 
   return true;
 };
@@ -111,8 +115,7 @@ export const fetchSupplier = async ({ user, params }) => {
     is_active: true
   });
 
-  const fetchData = await SupplierModel
-    .find({ ...filterData, is_active: true })
+  const fetchData = await SupplierModel.find({ ...filterData, is_active: true })
     .populate({
       path: 'supplier_product_category_id',
       model: 'ProductCategory'
@@ -127,7 +130,6 @@ export const fetchSupplier = async ({ user, params }) => {
 
   return { page_no, available_pages, fetchData };
 };
-
 
 //------ common supplier handlers --------------------\\
 

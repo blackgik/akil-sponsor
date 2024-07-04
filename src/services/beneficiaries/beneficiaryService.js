@@ -614,7 +614,13 @@ export const updateBeneficiaryBatchListStatus = async ({ beneficiary_batch_id, b
     }
 
     await user.save();
-
+    // create notification
+    await notificationsModel.create({
+      note: `You have successfully updated  beneficiary status who where bulk uploaded `,
+      type: 'update',
+      who_is_reading: 'sponsor',
+      organization_id: user._id
+    });
     return true;
   } catch (err) {
     console.error(err);

@@ -12,6 +12,7 @@ import { capitalizeWords, generateId } from '../../utils/general.js';
 import { formattMailInfo } from '../../utils/mailFormatter.js';
 import { messageBird } from '../../utils/msgBird.js';
 import ProductModel from '../../models/products/ProductModel.js';
+import notificationsModel from '../../models/settings/notificationsModel.js';
 
 export const createProductSchedule = async ({ user, body, project_id, param }) => {
   const project = await ProjectModel.findById(project_id).populate('product_items');
@@ -256,7 +257,13 @@ export const createProductSchedule = async ({ user, body, project_id, param }) =
   const msgDelivered = await messageBird(msg);
   if (!msgDelivered)
     throw new InternalServerError('server slip. project delivery created without mail being sent');
-
+  // create notification
+  await notificationsModel.create({
+    note: `You have successfully scheduled a new batch for the ${project.project_name} project with the batch number ${body.batch_number} `,
+    type: 'creation',
+    who_is_reading: 'sponsor',
+    organization_id: user._id
+  });
   return {};
 };
 

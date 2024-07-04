@@ -48,6 +48,19 @@ export const fetchMedia = async ({ user, param }) => {
   return { page_no, available_pages, media_count, mediaFiles };
 };
 
+export const fetchSingleMedia = async ({ user, media_id }) => {
+  const mediaFiles = await mediaModel
+    .findById(media_id)
+    .populate({
+      path: 'project_id',
+      model: 'Project'
+    })
+    .sort({ createdAt: -1 });
+
+  if (!mediaFiles) throw new NotFoundError("media file doesn't exist");
+  return mediaFiles;
+};
+
 export const changeMediaStatus = async ({ status, media_id }) => {
   const mediaFile = await mediaModel.findByIdAndUpdate(
     media_id,
