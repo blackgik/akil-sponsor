@@ -1,9 +1,15 @@
 import env from '../../config/env.js';
-import { BadRequestError, DuplicateError, InternalServerError, NotFoundError } from '../../../lib/appErrors.js';
+import {
+  BadRequestError,
+  DuplicateError,
+  InternalServerError,
+  NotFoundError
+} from '../../../lib/appErrors.js';
 import WarehouseModel from '../../models/products/WarehouseModel.js';
 import warehouseProductModel from '../../models/products/warehouseProductModel.js';
 import usersModels from '../../models/settings/users.models.js';
 import mongoose from 'mongoose';
+import notificationsModel from '../../models/settings/notificationsModel.js';
 
 export const createNewWarehouse = async ({ user, body }) => {
   const userx = await usersModels.findById(body.warehouse_overseer_id);
@@ -23,6 +29,14 @@ export const createNewWarehouse = async ({ user, body }) => {
   const created = await WarehouseModel.create(warehouseData);
   if (!created)
     throw new InternalServerError('server slip error. Please Check your Input properly');
+
+  // create notification
+  await notificationsModel.create({
+    note: `You have successfully created a new Warehouse ${body.warehouse_name} `,
+    type: 'creation',
+    who_is_reading: 'sponsor',
+    organization_id: user._id
+  });
 
   return true;
 };
@@ -51,8 +65,7 @@ export const fetchWarehouse = async ({ user, params }) => {
     ...filterData
   });
 
-  const fetchData = await WarehouseModel
-    .find({ ...filterData })
+  const fetchData = await WarehouseModel.find({ ...filterData })
     .populate({
       path: 'warehouse_overseer_id',
       model: 'User'
@@ -97,11 +110,10 @@ export const fetchAllWarehouses = async ({ user, params }) => {
 
   const warehouseCount = await WarehouseModel.countDocuments({ ...filterData });
 
-  let warehouseData = await WarehouseModel.find({ ...filterData })
-    .populate({
-      path: 'warehouse_overseer_id',
-      model: 'User'
-    });
+  let warehouseData = await WarehouseModel.find({ ...filterData }).populate({
+    path: 'warehouse_overseer_id',
+    model: 'User'
+  });
 
   const count = warehouseCount;
 
@@ -121,17 +133,16 @@ export const fetchAllWarehouses = async ({ user, params }) => {
 export const getSingleWarehouse = async ({ user, warehouse_id }) => {
   let warehouseInView;
 
-  warehouseInView = await WarehouseModel.findById(warehouse_id)
-    .populate({
-      path: 'warehouse_overseer_id',
-      model: 'User'
-    });
+  warehouseInView = await WarehouseModel.findById(warehouse_id).populate({
+    path: 'warehouse_overseer_id',
+    model: 'User'
+  });
 
-  if (!warehouseInView) throw new BadRequestError('warehouse  does not exist')
+  if (!warehouseInView) throw new BadRequestError('warehouse  does not exist');
   const totalInStock = await warehouseProductModel.aggregate([
     //{$match : {warehouse_i: warehouse_id }},
     { $match: { warehouse_id: mongoose.Types.ObjectId(warehouse_id) } },
-    { $group: { _id: null, totalQuantity: { $sum: "$quantity" } } }
+    { $group: { _id: null, totalQuantity: { $sum: '$quantity' } } }
   ]);
 
   const itemCount = await warehouseProductModel.countDocuments({
@@ -139,7 +150,8 @@ export const getSingleWarehouse = async ({ user, warehouse_id }) => {
   });
 
   const itemOnShortageCount = await warehouseProductModel.countDocuments({
-    warehouse_id: warehouse_id, quantity: 0
+    warehouse_id: warehouse_id,
+    quantity: 0
   });
   const totalProductQuantityInStock = totalInStock[0]?.totalQuantity || 0;
   return { itemCount, totalProductQuantityInStock, itemOnShortageCount, warehouseInView };
@@ -150,11 +162,11 @@ export const getWarehouseStat = async ({ user, warehouse_id }) => {
 
   warehouseInView = await WarehouseModel.findById(warehouse_id);
 
-  if (!warehouseInView) throw new BadRequestError('warehouse  does not exist')
+  if (!warehouseInView) throw new BadRequestError('warehouse  does not exist');
   const totalInStock = await warehouseProductModel.aggregate([
     //{$match : {warehouse_i: warehouse_id }},
     { $match: { warehouse_id: mongoose.Types.ObjectId(warehouse_id) } },
-    { $group: { _id: null, totalQuantity: { $sum: "$quantity" } } }
+    { $group: { _id: null, totalQuantity: { $sum: '$quantity' } } }
   ]);
 
   const itemCount = await warehouseProductModel.countDocuments({
@@ -162,7 +174,8 @@ export const getWarehouseStat = async ({ user, warehouse_id }) => {
   });
 
   const itemOnShortageCount = await warehouseProductModel.countDocuments({
-    warehouse_id: warehouse_id, quantity: 0
+    warehouse_id: warehouse_id,
+    quantity: 0
   });
   const totalProductQuantityInStock = totalInStock[0]?.totalQuantity || 0;
   return { itemCount, totalProductQuantityInStock, itemOnShortageCount, warehouseInView };
