@@ -13,6 +13,12 @@ const personalizationSchema = new Schema(
       url_name: { type: String, trim: true, lowercase: true, default: '' },
       language: { type: String, trim: true, lowercase: true, default: '' }
     },
+    goals_and_objectives: [
+      {
+        title: { type: String, trim: true, default: '' },
+        content: { type: String, trim: true, default: '' }
+      }
+    ],
     brand_info: {
       logo: { type: String, trim: true, default: '' },
       personal_image: { type: String, trim: true, default: '' },
