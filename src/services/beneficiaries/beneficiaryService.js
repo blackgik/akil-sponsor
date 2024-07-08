@@ -285,7 +285,7 @@ export const viewBeneficiaryProfile = async ({ beneficiary_id }) => {
   if (!beneficiary) throw new NotFoundError('Beneficiary not found in Organization Directory');
 
   const beneficiaryProject = await awardeesModel
-    .findOne({ beneficiary_id })
+    .find({ beneficiary_id })
     .populate({
       path: 'project_id',
       model: 'Project'
@@ -294,7 +294,7 @@ export const viewBeneficiaryProfile = async ({ beneficiary_id }) => {
 
   const result = {
     beneficiary: beneficiary.toJSON(),
-    beneficiaryProject: beneficiaryProject ? beneficiaryProject.toJSON() : null
+    beneficiaryProject: beneficiaryProject ? beneficiaryProject : null
   };
 
   return result;
