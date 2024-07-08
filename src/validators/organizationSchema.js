@@ -156,6 +156,18 @@ export const personalizationSchema = Joi.object({
     url_name: Joi.string().optional().allow('', null),
     language: Joi.string().optional().allow('', null)
   }),
+  goals_and_objective: Joi.object({
+    goals: Joi.array()
+      .items(
+        Joi.object({
+          title: Joi.string().trim().required(),
+          content: Joi.string().trim().required()
+        })
+      )
+      .required()
+      .default([]),
+    objective: Joi.string().trim().required()
+  }).required(),
   brand_info: Joi.object({
     logo: Joi.string().optional().allow('', null),
     personal_image: Joi.string().optional().allow('', null),

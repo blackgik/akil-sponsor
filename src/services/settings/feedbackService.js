@@ -1,6 +1,7 @@
 import { NotFoundError } from '../../../lib/appErrors.js';
 import feedbackModel from '../../models/messages/feedbackModel.js';
 import awardeesModel from '../../models/projects/awardeesModel.js';
+import notificationsModel from '../../models/settings/notificationsModel.js';
 
 export const createBeneficiaryFeedback = async ({ body, user, beneficiary_id }) => {
   const { title, content } = body;
@@ -15,6 +16,15 @@ export const createBeneficiaryFeedback = async ({ body, user, beneficiary_id }) 
   const feedbackCreated = await feedbackModel.create(feedbackData);
   awardee.status = 'feedback';
   await awardee.save();
+
+  // create notification
+  await notificationsModel.create({
+    note: `You have successfully created feedback for ${awardee.name}`,
+    type: 'creation',
+    who_is_reading: 'sponsor',
+    organization_id: user._id
+  });
+
   return feedbackCreated;
 };
 
