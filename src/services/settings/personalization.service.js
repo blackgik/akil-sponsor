@@ -1,6 +1,7 @@
 import axios from 'axios';
 import env from '../../config/env.js';
 import personalizationModel from '../../models/settings/personalization.model.js';
+import { NotFoundError } from '../../../lib/appErrors.js';
 
 export const buildPersonlaization = async ({ user, param, body }) => {
   if (user.hasPaid_personalization_fee) {
@@ -58,4 +59,13 @@ export const buildPersonlaization = async ({ user, param, body }) => {
   });
 
   return { gateway: gateway.data.data.authorization_url };
+};
+
+export const fetchInformation = async ({ param }) => {
+  const { url } = param;
+  const info = await personalizationModel.findOne({ url });
+
+  if (!info) throw new NotFoundError('No information containing this URL');
+
+  return info;
 };

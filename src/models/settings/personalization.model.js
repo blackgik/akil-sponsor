@@ -10,7 +10,7 @@ const personalizationSchema = new Schema(
       about_you: { type: String, trim: true, required: true },
       about_organization: { type: String, trim: true, default: '' },
       goals: { type: String, default: '' },
-      url_name: { type: String, trim: true, lowercase: true, default: '' },
+      url_name: { type: String, trim: true, lowercase: true, default: '', unique: true },
       language: { type: String, trim: true, lowercase: true, default: '' }
     },
     goals_and_objectives: [
