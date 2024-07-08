@@ -58,8 +58,7 @@ export const verifyCode = async ({ body, user }) => {
 };
 
 export const confirmDisbursement = async ({ user, awardee_id }) => {
-  console.log({ awardee_id });
-  const awardee = await awardeesModel.findOne({ _id: awardee_id, status: 'allocated' });
+  const awardee = await awardeesModel.findById(awardee_id);
   if (!awardee) throw new NotFoundError('No allocated beneficiaries found');
   const beneficiary = await organizationBeneficiaryModel.findById(awardee.beneficiary_id);
   const project = await ProjectModel.findById(awardee.project_id);

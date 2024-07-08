@@ -1,4 +1,3 @@
-import { schedule } from 'node-cron';
 import { BadRequestError, InternalServerError, NotFoundError } from '../../../lib/appErrors.js';
 import env from '../../config/env.js';
 import { batchDeliveryCreatedEmail, batchDeliveryStartedEmail } from '../../config/mail.js';
