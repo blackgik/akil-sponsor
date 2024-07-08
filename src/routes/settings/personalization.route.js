@@ -17,5 +17,5 @@ personlizationRoute.post(
   permissions({ authorize: 'settings', functions: 'personalisation', permission: 'create' }),
   buildpersonalizationHandler
 );
-personlizationRoute.get('/', fetchInformationHandler);
+personlizationRoute.get('/:url', fetchInformationHandler);
 export default personlizationRoute;

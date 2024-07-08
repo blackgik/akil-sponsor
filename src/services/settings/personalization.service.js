@@ -61,10 +61,11 @@ export const buildPersonlaization = async ({ user, param, body }) => {
   return { gateway: gateway.data.data.authorization_url };
 };
 
-export const fetchInformation = async ({ param }) => {
-  const { url } = param;
-  const info = await personalizationModel.findOne({ url });
+export const fetchInformation = async ({ params }) => {
+  const { url } = params;
+  const info = await personalizationModel.findOne({ 'general_info.url_name': url });
 
+  console.log(url);
   if (!info) throw new NotFoundError('No information containing this URL');
 
   return info;

@@ -10,9 +10,9 @@ export const buildpersonalizationHandler = async (req, res) => {
 };
 
 export const fetchInformationHandler = async (req, res) => {
-  const { query } = req;
+  const { params } = req;
 
-  const response = await fetchInformation({ param: query });
+  const response = await fetchInformation({ params });
 
   res.send(appResponse('Personalized screen details', response));
 };
