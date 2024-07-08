@@ -13,12 +13,15 @@ const personalizationSchema = new Schema(
       url_name: { type: String, trim: true, lowercase: true, default: '', unique: true },
       language: { type: String, trim: true, lowercase: true, default: '' }
     },
-    goals_and_objectives: [
-      {
-        title: { type: String, trim: true, default: '' },
-        content: { type: String, trim: true, default: '' }
-      }
-    ],
+    goals_and_objective: {
+      goals: [
+        {
+          title: { type: String, trim: true, default: '' },
+          content: { type: String, trim: true, default: '' }
+        }
+      ],
+      objective: { type: String, trim: true, default: '' }
+    },
     brand_info: {
       logo: { type: String, trim: true, default: '' },
       personal_image: { type: String, trim: true, default: '' },
