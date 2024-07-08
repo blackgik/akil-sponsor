@@ -466,7 +466,7 @@ export const projectDashBoardStats = async ({ user }) => {
     project_state: 'completed'
   });
   const awardeesCount = await awardeesModel.countDocuments({ sponsor_id: user._id });
-
+  console.log(user);
   return {
     activeProjectCount,
     completedProjectCount,

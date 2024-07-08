@@ -24,6 +24,7 @@ import {
 import { formattMailInfo } from '../../utils/mailFormatter.js';
 import { messageBird } from '../../utils/msgBird.js';
 import notificationsModel from '../../models/settings/notificationsModel.js';
+import awardeesModel from '../../models/projects/awardeesModel.js';
 
 const { Base64Encode } = base64String;
 
@@ -282,9 +283,21 @@ export const viewBeneficiaryProfile = async ({ beneficiary_id }) => {
     model: 'Organization'
   });
   if (!beneficiary) throw new NotFoundError('Beneficiary not found in Organization Directory');
-  const data = beneficiary.toJSON();
 
-  return data;
+  const beneficiaryProject = await awardeesModel
+    .find({ beneficiary_id })
+    .populate({
+      path: 'project_id',
+      model: 'Project'
+    })
+    .select('project_id');
+
+  const result = {
+    beneficiary: beneficiary.toJSON(),
+    beneficiaryProject: beneficiaryProject ? beneficiaryProject : null
+  };
+
+  return result;
 };
 
 export const editBeneficiaryProfile = async ({ user, beneficiary_id, body }) => {

@@ -237,6 +237,11 @@ export const createProductSchedule = async ({ user, body, project_id, param }) =
 
   await schedule.save();
 
+  // for (eachAwardee of body.selection) {
+  //   const awardee = await awardeesModel.findById(eachAwardee)
+  //   .populate;
+  // }
+
   //create email profile here
   const emailData = {
     sponsor_name: capitalizeWords(`${user.firstname} ${user.lastname}`),

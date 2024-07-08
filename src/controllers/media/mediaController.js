@@ -34,10 +34,11 @@ export const fetchSingleMediaHandler = async (req, res) => {
 };
 
 export const changeMediaStatusHandler = async (req, res) => {
+  const { user } = req;
   const { status } = req.body;
   const { media_id } = req.params;
 
-  const response = await changeMediaStatus({ status, media_id });
+  const response = await changeMediaStatus({ user, status, media_id });
 
   res.send(appResponse('updated media file successfully', response));
 };
@@ -52,9 +53,10 @@ export const editMediaFileHandler = async (req, res) => {
 };
 
 export const removeMediaFileHandler = async (req, res) => {
+  const { user } = req;
   const { media_id } = req.params;
 
-  const response = await removeMediaFile({ media_id });
+  const response = await removeMediaFile({ user, media_id });
 
   res.send(appResponse('removed mediafile', response));
 };
