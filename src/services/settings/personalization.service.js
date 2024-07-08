@@ -1,6 +1,7 @@
 import axios from 'axios';
 import env from '../../config/env.js';
 import personalizationModel from '../../models/settings/personalization.model.js';
+import { NotFoundError } from '../../../lib/appErrors.js';
 
 export const buildPersonlaization = async ({ user, param, body }) => {
   if (user.hasPaid_personalization_fee) {
@@ -42,6 +43,7 @@ export const buildPersonlaization = async ({ user, param, body }) => {
         : `${env.prod_base_url_beneficiary}/${user.slug}/dashboard`,
     metadata: {
       amount: 840000,
+      userId: user._id,
       personalization_id: check_personalization._id,
       type: 'personalization_payment'
     }
@@ -57,4 +59,14 @@ export const buildPersonlaization = async ({ user, param, body }) => {
   });
 
   return { gateway: gateway.data.data.authorization_url };
+};
+
+export const fetchInformation = async ({ params }) => {
+  const { url } = params;
+  const info = await personalizationModel.findOne({ 'general_info.url_name': url });
+
+  console.log(url);
+  if (!info) throw new NotFoundError('No information containing this URL');
+
+  return info;
 };

@@ -1,6 +1,7 @@
+import axios from 'axios';
 import { BadRequestError, InternalServerError, NotFoundError } from '../../../lib/appErrors.js';
 import env from '../../config/env.js';
-import { batchDeliveryCompletedEmail } from '../../config/mail.js';
+import { batchDeliveryCompletedEmail, disbursementBeneficiariesEmail } from '../../config/mail.js';
 import organizationBeneficiaryModel from '../../models/beneficiaries/organizationBeneficiaryModel.js';
 import ProjectModel from '../../models/projects/ProjectModel.js';
 import awardeesModel from '../../models/projects/awardeesModel.js';
@@ -12,7 +13,11 @@ import { formattMailInfo } from '../../utils/mailFormatter.js';
 import { messageBird } from '../../utils/msgBird.js';
 
 export const disbursementCode = async ({ awardee_id, user }) => {
-  const awardee = await awardeesModel.findById(awardee_id).populate('beneficiary_id');
+  const awardee = await awardeesModel
+    .findById(awardee_id)
+    .populate('beneficiary_id')
+    .populate('project_id')
+    .populate('batch_id');
 
   if (!awardee) throw new NotFoundError('Awardee Not found');
 
@@ -28,7 +33,62 @@ export const disbursementCode = async ({ awardee_id, user }) => {
 
   awardee.hash = hash;
 
+  const contactEmail = awardee.beneficiary_id.contact.email;
+  const contactPhone = awardee.beneficiary_id.contact.phone;
+  console.log(contactEmail);
+  console.log(contactPhone);
   await awardee.save();
+
+  if (contactEmail) {
+    //create email profile here
+    const emailData = {
+      beneficiary_name: capitalizeWords(awardee.name),
+      project_name: capitalizeWords(awardee.project_id.project_name),
+      start_date: awardee.batch_id.start_date,
+      end_date: awardee.batch_id.end_date,
+      location: awardee.batch_id.delivery_address,
+      code: code
+    };
+    const mailData = {
+      email: contactEmail,
+      subject: `Your ${emailData.project_name} Package is Ready for Collection`,
+      type: 'html',
+      html: disbursementBeneficiariesEmail(emailData).html,
+      text: disbursementBeneficiariesEmail(emailData).text
+    };
+
+    const msg = await formattMailInfo(mailData, env);
+
+    const msgDelivered = await messageBird(msg);
+    if (!msgDelivered)
+      throw new InternalServerError(
+        'server slip. project delivery created without mail being sent'
+      );
+  } else {
+    //create sms profile here
+    const smsUrl = env.termii_api_url + '/api/sms/send';
+    const smsData = {
+      to: contactPhone,
+      from: env.termii_sender_id,
+      sms: `Hi there, you should to ${batch_id.delivery_address} from ${
+        awardee.batch_id.start_date
+      } to ${awardee.batch_id.end_date} to collect your ${capitalizeWords(
+        awardee.project_id.project_name
+      )}.\n 
+      Come with a means of identification and also your disbursement code ${code}`,
+      type: 'plain',
+      api_key: env.termii_api_secret,
+      channel: 'generic'
+    };
+
+    const config = {
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    };
+
+    await axios.post(smsUrl, smsData, config);
+  }
 
   return { code, contact, hash, awardee: awardee_id };
 };
