@@ -12,7 +12,8 @@ import {
   unPublishProduct,
   restockProductData,
   completeRestock,
-  fetchProductRestockHistory
+  fetchProductRestockHistory,
+  itemStatistics
 } from '../../services/product/productService.js';
 
 export const createNewProductHandler = async (req, res) => {
@@ -48,7 +49,6 @@ export const fetchProductHandler = async (req, res) => {
   res.send(appResponse('fetched  products successfully', fetchedData));
 };
 
-
 //================================================================================================
 
 //------ commeon product handlers --------------------\\
@@ -75,7 +75,7 @@ export const getProductRestockHistoryHandler = async (req, res) => {
   const { user, query } = req;
   const params = query;
 
-  const product = await fetchProductRestockHistory({ user, params});
+  const product = await fetchProductRestockHistory({ user, params });
 
   res.send(appResponse('fetched product restock history successfully', product));
 };
@@ -109,7 +109,7 @@ export const unpublishProductHandler = async (req, res) => {
 
 export const updateSingleProductHandler = async (req, res) => {
   const { user, params, body } = req;
-  const { product_id} = params;
+  const { product_id } = params;
 
   const updated = await updateSingleProduct({ product_id, body, user });
 
@@ -118,7 +118,7 @@ export const updateSingleProductHandler = async (req, res) => {
 
 export const completeRestockHandler = async (req, res) => {
   const { user, params, body } = req;
-  const { restock_id} = params;
+  const { restock_id } = params;
 
   const updated = await completeRestock({ restock_id, body, user });
 
@@ -127,9 +127,19 @@ export const completeRestockHandler = async (req, res) => {
 
 export const updateProductImageHandler = async (req, res) => {
   const { user, params, body } = req;
-  const { product_id} = params;
+  const { product_id } = params;
 
   const updated = await updateProductImage({ product_id, body, user });
 
   res.send(appResponse('updated product image successfully', updated));
+};
+
+export const itemStatistictHandler = async (req, res) => {
+  const { user, params } = req;
+
+  const { product_id } = params;
+
+  const response = await itemStatistics({ product_id, user });
+
+  res.send(appResponse('Fetched Succesfuly', response));
 };
