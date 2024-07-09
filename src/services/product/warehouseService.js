@@ -196,3 +196,40 @@ export const updateSingleWarehouse = async ({ warehouse_id, body, user }) => {
 
   return true;
 };
+
+export const removeWarehouse = async ({ user, warehouse_id }) => {
+  const warehouse = await WarehouseModel.findById(warehouse_id);
+  if (!warehouse) throw new NotFoundError('warehouse not found');
+
+  await warehouse.remove();
+
+  // create notification
+  await notificationsModel.create({
+    note: `You have successfully removed a warehouse`,
+    type: 'update',
+    who_is_reading: 'sponsor',
+    organization_id: user._id
+  });
+
+  return {};
+};
+
+export const changeWarehouseStatus = async ({ user, wrhstatus, warehouse_id }) => {
+  const warehouse = await WarehouseModel.findByIdAndUpdate(
+    warehouse_id,
+    { $set: { wrhstatus } },
+    { new: true, runValidators: true }
+  );
+
+  if (!warehouse) throw new NotFoundError('warehouse does not exist');
+
+  // create notification
+  await notificationsModel.create({
+    note: `You have successfully updated the status of this warehouse to ${wrhstatus}`,
+    type: 'update',
+    who_is_reading: 'sponsor',
+    organization_id: user._id
+  });
+
+  return warehouse;
+};

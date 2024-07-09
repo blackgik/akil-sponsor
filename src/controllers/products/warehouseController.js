@@ -5,7 +5,9 @@ import {
   fetchWarehouse,
   getWarehouseStat,
   getSingleWarehouse,
-  updateSingleWarehouse
+  updateSingleWarehouse,
+  removeWarehouse,
+  changeWarehouseStatus
 } from '../../services/product/warehouseService.js';
 
 export const createNewWarehouseHandler = async (req, res) => {
@@ -57,9 +59,28 @@ export const getWarehouseStatHandler = async (req, res) => {
 
 export const updateSingleWarehouseHandler = async (req, res) => {
   const { user, params, body } = req;
-  const { warehouse_id} = params;
+  const { warehouse_id } = params;
 
   const updated = await updateSingleWarehouse({ warehouse_id, body, user });
 
   res.send(appResponse('updated warehouse successfully', updated));
+};
+
+export const removeWarehouseHandler = async (req, res) => {
+  const { user, params } = req;
+  const { warehouse_id } = params;
+
+  const response = await removeWarehouse({ warehouse_id, user });
+
+  res.send(appResponse('warehouse removed successfully', response));
+};
+
+export const changeWarehouseStatusHandler = async (req, res) => {
+  const { user } = req;
+  const { wrhstatus } = req.body;
+  const { warehouse_id } = req.params;
+
+  const response = await changeWarehouseStatus({ user, wrhstatus, warehouse_id });
+
+  res.send(appResponse('updated warehouse status successfully updated', response));
 };
