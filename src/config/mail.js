@@ -1393,7 +1393,7 @@ export const invitationMail = (data) => {
                                                                                   every login of your beneficiaries)</li>
                                                                               <li>URL: <a
                                                                                       href="https://akilaah-beneficiary.vercel.app/login?company_code=${data.company_code}"
-                                                                                      style="color: blue;">https://akilaah-beneficiary.vercel.app/login?company_code=${data.company_code}</a>
+                                                                                      style="color: blue;">https://akilaah-beneficiary.vercel.app/</a>
                                                                               </li>
                                                                           </ul>
                                                                       </span>
