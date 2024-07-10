@@ -12,6 +12,7 @@ import {
   fetchSupplierHandler,
   getAllSuppliersHandler,
   getSingleSupplierHandler,
+  getSponosrSupplierHanlder,
   updateSingleSupplierHandler,
   updateSupplierStatusHandler
 } from '../../controllers/suppliers/supplierController.js';
@@ -35,6 +36,11 @@ const supplierRoot = () => {
     '/fetch-suppliers',
     authentication,
     fetchSupplierHandler
+  );
+  supplierRoutes.get(
+    '/fetch-sponsors-suppliers',
+    authentication,
+    getSponosrSupplierHanlder
   );
 
   //------common Section of Suppliers------------\\

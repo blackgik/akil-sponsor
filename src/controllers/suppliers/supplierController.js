@@ -6,7 +6,8 @@ import {
   fetchSupplier,
   updateSupplierStatus,
   getSingleSupplier,
-  updateSingleSupplier
+  updateSingleSupplier,
+  getSponosrSupplier
 } from '../../services/suppliers/supplierService.js';
 
 export const createNewSupplierHandler = async (req, res) => {
@@ -32,6 +33,14 @@ export const fetchSupplierHandler = async (req, res) => {
   const fetchedData = await fetchSupplier({ user, params });
 
   res.send(appResponse('fetched suppliers successfully', fetchedData));
+};
+
+export const getSponosrSupplierHanlder = async (req, res) => {
+  const { user } = req;
+
+  const fetchedData = await getSponosrSupplier({ user });
+
+  res.send(appResponse('fetched sponsors suppliers successfully', fetchedData));
 };
 //================================================================================================
 

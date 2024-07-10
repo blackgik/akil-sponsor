@@ -4,7 +4,8 @@ import { personalizationSchema } from '../../validators/organizationSchema.js';
 import { authentication } from '../../middlewares/authentication.js';
 import {
   buildpersonalizationHandler,
-  fetchInformationHandler
+  fetchInformationHandler,
+  fetchUserInformationHandler
 } from '../../controllers/settings/peronalization/personalization.service.js';
 import { permissions } from '../../middlewares/permissions.js';
 
@@ -17,5 +18,6 @@ personlizationRoute.post(
   permissions({ authorize: 'settings', functions: 'personalisation', permission: 'create' }),
   buildpersonalizationHandler
 );
-personlizationRoute.get('/:url', fetchInformationHandler);
+personlizationRoute.get('/info', fetchInformationHandler);
+personlizationRoute.get('/', authentication, fetchUserInformationHandler);
 export default personlizationRoute;
