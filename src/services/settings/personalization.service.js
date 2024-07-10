@@ -70,3 +70,11 @@ export const fetchInformation = async ({ params }) => {
 
   return info;
 };
+
+export const fetchUserInformation = async ({ user }) => {
+  const userId = user._id;
+  const info = await personalizationModel.findOne({ sponsor_id: userId });
+  if (!info) throw new NotFoundError('this user doesnt have personalization turn on');
+
+  return info;
+};
