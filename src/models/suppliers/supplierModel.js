@@ -1,11 +1,10 @@
 import mongoose from 'mongoose';
 
 const { Schema, model } = mongoose;
-
 const SupplierSchema = new Schema(
   {
-    supplier_name: {type: String, required: false, trim: true, lowercase: true},
-    supplier_surname: {type: String, required: false, trim: true, lowercase: true},
+    supplier_name: { type: String, required: false, trim: true, lowercase: true },
+    supplier_surname: { type: String, required: false, trim: true, lowercase: true },
     supplier_phone: { type: String, required: false, trim: true, lowercase: true },
     supplier_country: { type: String, required: false, trim: true, lowercase: true },
     supplier_lga: { type: String, required: false, trim: true, lowercase: true },
@@ -28,6 +27,12 @@ const SupplierSchema = new Schema(
     is_active: {
       type: Boolean,
       default: true
+    },
+    sponsor_id: {
+      type: Schema.Types.ObjectId,
+      required: true,
+      ref: 'Organization',
+      default: ""
     }
   },
   { timestamps: true }

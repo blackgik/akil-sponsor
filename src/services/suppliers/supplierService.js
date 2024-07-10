@@ -6,6 +6,7 @@ import notificationsModel from '../../models/settings/notificationsModel.js';
 export const createNewSupplier = async ({ user, body }) => {
   const supplierData = {
     ...body,
+    sponsor_id: user._id,
     acctstatus: 'active'
   };
   const supplier = await SupplierModel.findOne({
@@ -192,6 +193,17 @@ export const getSingleSupplier = async ({ user, supplier_id }) => {
   if (!supplierInView) throw new NotFoundError('supplier  does not exist');
 
   return supplierInView;
+};
+
+export const getSponosrSupplier = async ({ user }) => {
+  const suppliers = await SupplierModel.find({ sponsor_id: user._id }).populate({
+    path: 'supplier_product_category_id',
+    model: 'ProductCategory'
+  });
+
+  if (!suppliers) throw new NotFoundError('no suppliers  does not exist for you');
+
+  return suppliers;
 };
 
 export const updateSingleSupplier = async ({ supplier_id, body, user }) => {

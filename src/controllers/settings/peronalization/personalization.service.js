@@ -1,5 +1,9 @@
 import appResponse from '../../../../lib/appResponse.js';
-import { buildPersonlaization, fetchInformation, fetchUserInformation } from '../../../services/settings/personalization.service.js';
+import {
+  buildPersonlaization,
+  fetchInformation,
+  fetchUserInformation
+} from '../../../services/settings/personalization.service.js';
 
 export const buildpersonalizationHandler = async (req, res) => {
   const { body, user, query } = req;
@@ -10,9 +14,9 @@ export const buildpersonalizationHandler = async (req, res) => {
 };
 
 export const fetchInformationHandler = async (req, res) => {
-  const { params } = req;
+  const { query } = req;
 
-  const response = await fetchInformation({ params });
+  const response = await fetchInformation({ param: query });
 
   res.send(appResponse('Personalized screen details', response));
 };
