@@ -37,6 +37,8 @@ export const buildOrganizationSchema = new Schema(
     reg_fee: { type: Number, default: 0 },
     personalization_fee: { type: Number, default: 0 },
     hasPaid_personalization_fee: { type: Boolean, default: false },
+    psdStart:Date,
+    psdEnd:Date,
     otpHash: { type: String, default: '' },
     slug: { type: String, default: '', lowercase: true },
     date_of_incooperation: { type: Date, deafault: '2000-10-01' },

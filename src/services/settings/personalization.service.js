@@ -34,7 +34,7 @@ export const buildPersonlaization = async ({ user, param, body }) => {
   }
 
   const pay_data = {
-    amount: 840000 * 100,
+    amount: user.personalization_fee * 100,
     email: user.email,
     channels: ['bank', 'ussd', 'bank_transfer'],
     callback_url:
@@ -42,7 +42,7 @@ export const buildPersonlaization = async ({ user, param, body }) => {
         ? `${env.dev_base_url_beneficiary}/${user.slug}/dashboard`
         : `${env.prod_base_url_beneficiary}/${user.slug}/dashboard`,
     metadata: {
-      amount: 840000,
+      amount: user.personalization_fee,
       userId: user._id,
       personalization_id: check_personalization._id,
       type: 'personalization_payment'
@@ -76,5 +76,10 @@ export const fetchUserInformation = async ({ user }) => {
   const info = await personalizationModel.findOne({ sponsor_id: userId });
   if (!info) throw new NotFoundError('this user doesnt have personalization turn on');
 
-  return info;
+  return {
+    ...info.toJSON(),
+    hasPaid_personalization_fee: user.hasPaid_personalization_fee,
+    psd_start: user.psdStart,
+    psd_end: user.psdEnd
+  };
 };
