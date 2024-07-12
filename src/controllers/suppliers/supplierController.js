@@ -37,8 +37,9 @@ export const fetchSupplierHandler = async (req, res) => {
 
 export const getSponosrSupplierHanlder = async (req, res) => {
   const { user } = req;
+  const params = req.query;
 
-  const fetchedData = await getSponosrSupplier({ user });
+  const fetchedData = await getSponosrSupplier({ user, params });
 
   res.send(appResponse('fetched sponsors suppliers successfully', fetchedData));
 };
@@ -66,17 +67,16 @@ export const getSingleSupplierHandler = async (req, res) => {
 
 export const updateSingleSupplierHandler = async (req, res) => {
   const { user, params, body } = req;
-  const { supplier_id} = params;
+  const { supplier_id } = params;
 
   const updated = await updateSingleSupplier({ supplier_id, body, user });
 
   res.send(appResponse('updated supplier successfully', updated));
 };
 
-
 export const updateSupplierStatusHandler = async (req, res) => {
   const { user, params, body } = req;
-  const { supplier_id} = params;
+  const { supplier_id } = params;
 
   const updated = await updateSupplierStatus({ supplier_id, body, user });
 
