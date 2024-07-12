@@ -97,7 +97,7 @@ export const fetchSupplier = async ({ user, params }) => {
   page_no = Number(page_no) || 1;
   no_of_requests = Number(no_of_requests) || Infinity;
 
-  const filterData = { is_active: true };
+  const filterData = { is_active: true, sponsor_id: user._id };
 
   const query = typeof search !== 'undefined' ? search : false;
   const acctstatus = typeof status !== 'undefined' ? status : false;
