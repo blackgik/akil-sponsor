@@ -66,7 +66,7 @@ export const fetchInformation = async ({ param }) => {
   const regex = new RegExp(url, 'i');
   const info = await personalizationModel.findOne({ 'general_info.url_name': { $regex: regex } });
 
-  if (!info) throw new NotFoundError('No information containing this URL');
+  // if (!info) throw new NotFoundError('No information containing this URL');
 
   return info;
 };
@@ -74,7 +74,7 @@ export const fetchInformation = async ({ param }) => {
 export const fetchUserInformation = async ({ user }) => {
   const userId = user._id;
   const info = await personalizationModel.findOne({ sponsor_id: userId });
-  if (!info) throw new NotFoundError('this user doesnt have personalization turn on');
+  // if (!info) throw new NotFoundError('this user doesnt have personalization turn on');
 
   return {
     ...info.toJSON(),
