@@ -21,7 +21,8 @@ import {
   unpublishProductHandler,
   restockProductHandler,
   completeRestockHandler,
-  getProductRestockHistoryHandler
+  getProductRestockHistoryHandler,
+  itemStatistictHandler
 } from '../../controllers/products/productController.js';
 
 const productRoutes = router.Router();
@@ -104,6 +105,7 @@ const productRoot = () => {
     updateProductImageHandler
   );
 
+  productRoutes.get('/item-statistict/:product_id', authentication, itemStatistictHandler)
   return productRoutes;
 };
 

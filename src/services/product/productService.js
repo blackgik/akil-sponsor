@@ -14,6 +14,8 @@ import warehouseProductModel from '../../models/products/warehouseProductModel.j
 import RestockModel from '../../models/products/RestockModel.js';
 import notificationsModel from '../../models/settings/notificationsModel.js';
 import { capitalizeWords } from '../../utils/general.js';
+import ProjectModel from '../../models/projects/ProjectModel.js';
+import awardeesModel from '../../models/projects/awardeesModel.js';
 
 export const createNewProduct = async ({ user, body }) => {
   const productData = {
@@ -409,4 +411,43 @@ export const unPublishProduct = async ({ user, product_id }) => {
   await productInView.save();
 
   return true;
+};
+
+export const itemStatistics = async ({ product_id, user }) => {
+  const item = await ProductModel.findById(product_id);
+
+  if (!item) throw new NotFoundError('product does not exist');
+
+  const total_in_stock = item.product_quantity;
+
+  const projects = await ProjectModel.find({ product_items: { $in: [product_id] } });
+
+  let total_needed_quantity = 0;
+
+  let total_disbursed = 0;
+
+  for (const project of projects) {
+    const quantity_person = project.quantity_per_person;
+    const allocated_persons = await awardeesModel.countDocuments({ project_id: project._id });
+
+    const disbursed_persons = await awardeesModel.countDocuments({
+      project_id: project._id,
+      status: 'disbursed'
+    });
+
+    total_needed_quantity += quantity_person * allocated_persons;
+
+    total_disbursed += disbursed_persons * quantity_person;
+  }
+
+  const amount_scale = total_in_stock - (total_needed_quantity - total_disbursed);
+
+  const shortaged = amount_scale > 0 ? 0 : amount_scale;
+
+  return {
+    total_in_stock,
+    shortaged,
+    total_disbursed,
+    status: item.prdstatus
+  };
 };

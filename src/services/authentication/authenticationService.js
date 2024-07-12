@@ -111,7 +111,7 @@ export const onboardNewOrganization = async ({ body, dbConnection }) => {
     type: 'creation',
     who_is_reading: 'sponsor',
     compliment_obj: { status: 'pending' },
-    organization_id: createOrganizationProfile._id,
+    organization_id: createOrganizationProfile._id
   });
 
   return { code: otp, hash: otpHash, email: createOrganizationProfile.email };
@@ -249,7 +249,7 @@ export const verifyEmail = async (body) => {
   return { tokenEncryption };
 };
 
-export const loginOrganization = async (body) => {
+export const loginOrganization = async (body, clienturl) => {
   const { email, password } = body;
   let checkOrg = await organizationModel.findOne({ email });
 
@@ -284,10 +284,21 @@ export const loginOrganization = async (body) => {
     await loginData.save();
   }
 
-  // const encrypedDataString = await encryptData({
-  //   data2encrypt: { ...admin.toJSON(), is_first_time, user_info: user ? user : {} },
-  //   pubKey: env.public_key
-  // });
+  const allowdOrigin = ['akilaah-sponsor.vercel.app', 'sponsor.akilaah.com'];
+
+  if (!allowdOrigin.includes(clienturl)) {
+    const rgx = (pattern) => new RegExp(`.*${pattern}.*`, 'i');
+    const searchRgx = rgx(clienturl);
+
+    const findPersonalization = await personalizationModel.findOne({
+      'general_info.url_name': searchRgx
+    });
+
+    if (
+      String(findPersonalization.sponsor_id) === String(checkOrg ? checkOrg._id : user?.sponsor_id)
+    )
+      throw new BadRequestError('Invalid account user');
+  }
 
   const tokenEncryption = jwt.sign(
     {
@@ -592,7 +603,7 @@ export const onboardNewOrganizationBeneficiary = async ({ body, user }) => {
     type: 'creation',
     who_is_reading: 'sponsor',
     compliment_obj: { status: 'pending' },
-    organization_id: user._id,
+    organization_id: user._id
   });
 
   return true;
@@ -852,7 +863,7 @@ export const uploadOrganizationBeneficiariesInBulk = async ({ user, file, body }
     type: 'bulk_upload',
     who_is_reading: 'sponsor',
     compliment_obj: { status: 'pending' },
-    organization_id: user._id,
+    organization_id: user._id
   });
 
   return { errorLogs, createBatchList };

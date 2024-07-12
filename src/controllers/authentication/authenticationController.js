@@ -40,7 +40,11 @@ export const onboardNewOrganizationHandler = async (req, res) => {
 export const organizationLoginHandler = async (req, res) => {
   const { body } = req;
 
-  const loggedIn = await loginOrganization(body);
+  let clienturl = String(req.get('origin'));
+
+  clienturl = clienturl.replace(/https:\/\//g, '');
+
+  const loggedIn = await loginOrganization(body, clienturl);
 
   res.send(appResponse('Logged in successfully', loggedIn));
 };
@@ -159,7 +163,7 @@ export const onboardingPaymentInfoHandler = async (req, res) => {
   const { user, query } = req;
   const params = query;
 
-  const gateway = await onboardingPaymentInfo({user, params});
+  const gateway = await onboardingPaymentInfo({ user, params });
 
   res.send(appResponse('Updated payment successfully', gateway));
 };
@@ -168,7 +172,7 @@ export const whatsappApiDataHandler = async (req, res) => {
   const { user, query } = req;
   const params = query;
 
-  const whatsappData = await whatsappApiData({user, params});
+  const whatsappData = await whatsappApiData({ user, params });
 
   res.send(appResponse('WHatsapp Api data fetched successfully', whatsappData));
 };
@@ -180,7 +184,6 @@ export const sendEmailHandler = async (req, res) => {
 
   res.send(appResponse('Mail sent successfully', data));
 };
-
 
 export const slugPersonalizationHandler = async (req, res) => {
   const { query } = req;
