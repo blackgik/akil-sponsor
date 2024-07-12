@@ -785,7 +785,7 @@ export const beneficaryOnboardinMail = (data) => {
                                                           cellpadding="0" cellspacing="0" width="100%" border="0">
                                                           <tbody>
                                                               <tr>
-                                                                  <td style="overflow-wrap:break-word;word-break:break-word;padding:25px;font-family:arial,helvetica,sans-serif;"
+                                                                  <td style="overflow-wrap:break-word;word-break:break-word;padding:0px 25px 5px;font-family:arial,helvetica,sans-serif;"
                                                                       align="left">
     
                                                                       <div class="v-line-height"
@@ -795,7 +795,7 @@ export const beneficaryOnboardinMail = (data) => {
                                                                               <span
                                                                                   style="font-size: 24px; line-height: 36px;"><span
                                                                                       style="color:#002366; line-height: 21px;"><strong><span
-                                                                                              style="line-height: 21px;">Dear
+                                                                                              style="line-height: 21px;">Dear,
                                                                                           </span></strong></span><strong><span
                                                                                           style="line-height: 21px;"><span
                                                                                               style="color: #CB6015; line-height: 21px;">${data.name}</span></span></strong></span>
@@ -812,7 +812,7 @@ export const beneficaryOnboardinMail = (data) => {
                                                           cellpadding="0" cellspacing="0" width="100%" border="0">
                                                           <tbody>
                                                               <tr>
-                                                                  <td style="overflow-wrap:break-word;word-break:break-word;padding:10px 25px 15px;font-family:arial,helvetica,sans-serif;"
+                                                                  <td style="overflow-wrap:break-word;word-break:break-word;padding:0px 25px 5px;font-family:arial,helvetica,sans-serif;"
                                                                       align="left">
     
                                                                       <div class="v-line-height"
@@ -846,7 +846,7 @@ export const beneficaryOnboardinMail = (data) => {
                                                           cellpadding="0" cellspacing="0" width="100%" border="0">
                                                           <tbody>
                                                               <tr>
-                                                                  <td style="overflow-wrap:break-word;word-break:break-word;padding:10px 25px 15px;font-family:arial,helvetica,sans-serif;"
+                                                                  <td style="overflow-wrap:break-word;word-break:break-word;padding:0px 25px 5px;font-family:arial,helvetica,sans-serif;"
                                                                       align="left">
     
                                                                       <div class="v-line-height"
@@ -865,7 +865,6 @@ export const beneficaryOnboardinMail = (data) => {
                                                                                           every login of your beneficiaries)</li>
                                                                                      
                                                                                   </ul>
-                                                                                  <br>
                                                                               </span>
                                                                           </p>
                                                                       </div>
@@ -879,7 +878,7 @@ export const beneficaryOnboardinMail = (data) => {
                                                           cellpadding="0" cellspacing="0" width="100%" border="0">
                                                           <tbody>
                                                               <tr>
-                                                                  <td style="overflow-wrap:break-word;word-break:break-word;padding:10px 25px 15px;font-family:arial,helvetica,sans-serif;"
+                                                                  <td style="overflow-wrap:break-word;word-break:break-word;padding:0px 25px 5px;font-family:arial,helvetica,sans-serif;"
                                                                       align="left">
     
                                                                       <div class="v-line-height"
@@ -907,7 +906,7 @@ export const beneficaryOnboardinMail = (data) => {
                                                           cellpadding="0" cellspacing="0" width="100%" border="0">
                                                           <tbody>
                                                               <tr>
-                                                                  <td style="overflow-wrap:break-word;word-break:break-word;padding:20px;font-family:arial,helvetica,sans-serif;"
+                                                                  <td style="overflow-wrap:break-word;word-break:break-word;padding:5px;font-family:arial,helvetica,sans-serif;"
                                                                       align="left">
     
                                                                       <!--[if mso]><style>.v-button {background: transparent !important;}</style><![endif]-->

@@ -25,6 +25,7 @@ import { formattMailInfo } from '../../utils/mailFormatter.js';
 import { messageBird } from '../../utils/msgBird.js';
 import notificationsModel from '../../models/settings/notificationsModel.js';
 import awardeesModel from '../../models/projects/awardeesModel.js';
+import { capitalizeWords } from '../../utils/general.js';
 
 const { Base64Encode } = base64String;
 
@@ -494,8 +495,8 @@ export const updateBeneficiaryBatchListStatus = async ({ beneficiary_batch_id, b
             // Email constructor
             const onboardingData = {
               email: beneficiary.contact.email,
-              name: beneficiary.personal.member_name,
-              name_of_cooperation: user.firstname,
+              name: capitalizeWords(beneficiary.personal.member_name),
+              name_of_cooperation: capitalizeWords(user.firstname),
               password: password,
               company_code: user.company_code
             };
