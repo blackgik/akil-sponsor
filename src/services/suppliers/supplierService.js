@@ -97,7 +97,7 @@ export const fetchSupplier = async ({ user, params }) => {
   page_no = Number(page_no) || 1;
   no_of_requests = Number(no_of_requests) || Infinity;
 
-  const filterData = { is_active: true };
+  const filterData = { is_active: true, sponsor_id: user._id };
 
   const query = typeof search !== 'undefined' ? search : false;
   const acctstatus = typeof status !== 'undefined' ? status : false;
@@ -195,8 +195,19 @@ export const getSingleSupplier = async ({ user, supplier_id }) => {
   return supplierInView;
 };
 
-export const getSponosrSupplier = async ({ user }) => {
-  const suppliers = await SupplierModel.find({ sponsor_id: user._id }).populate({
+export const getSponosrSupplier = async ({ params, user }) => {
+  let { page_no, no_of_requests, status } = params;
+  page_no = Number(page_no) || 1;
+  no_of_requests = Number(no_of_requests) || 10;
+
+  const filter = {
+    sponsor_id: user._id
+  };
+
+  if (status) {
+    filter.acctstatus = status;
+  }
+  const suppliers = await SupplierModel.find(filter).populate({
     path: 'supplier_product_category_id',
     model: 'ProductCategory'
   });

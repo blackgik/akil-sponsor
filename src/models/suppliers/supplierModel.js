@@ -22,7 +22,7 @@ const SupplierSchema = new Schema(
       trim: true,
       default: 'active',
       index: true,
-      enum: ['draft', 'active', 'suspended']
+      enum: ['active', 'suspended']
     },
     is_active: {
       type: Boolean,
@@ -32,7 +32,7 @@ const SupplierSchema = new Schema(
       type: Schema.Types.ObjectId,
       required: true,
       ref: 'Organization',
-      default: ""
+      default: ''
     }
   },
   { timestamps: true }
