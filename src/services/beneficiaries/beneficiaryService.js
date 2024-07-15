@@ -110,7 +110,11 @@ export const fetchBeneficiariesByStatus = async ({ user, params }) => {
   }
 
   if (status) {
-    filterData.acctstatus = status;
+    if (status === 'pending') {
+      filterData.acctstatus = { $in: ['pending', 'invite'] };
+    } else {
+      filterData.acctstatus = status;
+    }
   }
 
   if (has_paid === true) {
