@@ -5,9 +5,9 @@ const { Schema, model } = mongoose;
 const personalizationSchema = new Schema(
   {
     general_info: {
-      organization_name: { type: String, trim: true, required: true },
+      organization_name: { type: String, trim: true, default:""  },
       title: { type: String, trim: true, lowercase: true },
-      about_you: { type: String, trim: true, required: true },
+      about_you: { type: String, trim: true, default:"" },
       about_organization: { type: String, trim: true, default: '' },
       goals: { type: String, default: '' },
       url_name: { type: String, trim: true, lowercase: true, default: '', unique: true },
