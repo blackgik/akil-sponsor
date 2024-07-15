@@ -284,7 +284,14 @@ export const loginOrganization = async (body, clienturl) => {
     await loginData.save();
   }
 
-  const allowdOrigin = ['akilaah-sponsor.vercel.app', 'sponsor.akilaah.com'];
+  const allowdOrigin = [
+    'akilaah-sponsor.vercel.app',
+    'sponsor.akilaah.com',
+    'http://localhost:4000',
+    'http://localhost:4005',
+    'http://localhost:3000',
+    'http://localhost:3005'
+  ];
 
   if (!allowdOrigin.includes(clienturl)) {
     const rgx = (pattern) => new RegExp(`.*${pattern}.*`, 'i');
