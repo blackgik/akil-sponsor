@@ -34,7 +34,7 @@ export const buildPersonlaization = async ({ user, param, body }) => {
   }
 
   const pay_data = {
-    amount: user.personalization_fee * 100,
+    amount: user?.personalization_fee || 2500000 * 100,
     email: user.email,
     channels: ['bank', 'ussd', 'bank_transfer'],
     callback_url:
@@ -42,7 +42,7 @@ export const buildPersonlaization = async ({ user, param, body }) => {
         ? `${env.dev_base_url_beneficiary}/${user.slug}/dashboard`
         : `${env.prod_base_url_beneficiary}/${user.slug}/dashboard`,
     metadata: {
-      amount: user.personalization_fee,
+      amount: user?.personalization_fee || 2500000,
       userId: user._id,
       personalization_id: check_personalization._id,
       type: 'personalization_payment'
