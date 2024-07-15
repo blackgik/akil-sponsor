@@ -4,6 +4,7 @@ import { personalizationSchema } from '../../validators/organizationSchema.js';
 import { authentication } from '../../middlewares/authentication.js';
 import {
   buildpersonalizationHandler,
+  editPersonalizationHandler,
   fetchInformationHandler,
   fetchUserInformationHandler
 } from '../../controllers/settings/peronalization/personalization.service.js';
@@ -20,4 +21,5 @@ personlizationRoute.post(
 );
 personlizationRoute.get('/info', fetchInformationHandler);
 personlizationRoute.get('/', authentication, fetchUserInformationHandler);
+personlizationRoute.patch('/edit/:personalization_id', authentication, editPersonalizationHandler);
 export default personlizationRoute;
