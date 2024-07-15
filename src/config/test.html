@@ -5,13 +5,13 @@
 
 <head>
     <!--[if gte mso 9]>
-<xml>
-<o:OfficeDocumentSettings>
-<o:AllowPNG/>
-<o:PixelsPerInch>96</o:PixelsPerInch>
-</o:OfficeDocumentSettings>
-</xml>
-<![endif]-->
+        <xml>
+          <o:OfficeDocumentSettings>
+            <o:AllowPNG/>
+            <o:PixelsPerInch>96</o:PixelsPerInch>
+          </o:OfficeDocumentSettings>
+        </xml>
+        <![endif]-->
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="x-apple-disable-message-reformatting">
@@ -239,10 +239,12 @@
                                                                     <span
                                                                         style="font-size: 24px; line-height: 36px;"><span
                                                                             style="color:#002366; line-height: 21px;"><strong><span
-                                                                                    style="line-height: 21px;">Dear,
+                                                                                    style="line-height: 21px;">Dear
                                                                                 </span></strong></span><strong><span
                                                                                 style="line-height: 21px;"><span
-                                                                                    style="color: #CB6015; line-height: 21px;">${data.beneficiary_name}</span></span></strong></span>
+                                                                                    style="color: #CB6015; line-height: 21px;">
+                                                                                    Akilaah
+                                                                                    Team,</span></span></strong></span>
 
                                                                 </p>
                                                             </div>
@@ -256,49 +258,64 @@
                                                 cellpadding="0" cellspacing="0" width="100%" border="0">
                                                 <tbody>
                                                     <tr>
-                                                        <td style="overflow-wrap:break-word;word-break:break-word;padding:5px 25px 0px;font-family:arial,helvetica,sans-serif;"
+                                                        <td style="overflow-wrap:break-word;word-break:break-word;padding:0px 25px 5px;font-family:arial,helvetica,sans-serif;"
                                                             align="left">
 
                                                             <div class="v-line-height"
                                                                 style="font-size: 18px; line-height: 150%; text-align: left; word-wrap: break-word;color:#002366;">
-                                                                <p style="font-size: 18px; line-height: 150%;"></p>We
-                                                                are pleased to inform you that your palliative package
-                                                                will be ready for collection. To ensure a smooth and
-                                                                secure process, please present the One-Time Password
-                                                                (OTP) provided below and present a valid means of
-                                                                identification at the collection point. Also,
+                                                                <p style="font-size: 18px; line-height: 150%;"></p>
+                                                                I am writing to confirm my decision to proceed with the
+                                                                sponsor subscription package.
+                                                                I have reviewed the details and believe this package
+                                                                best suits my needs,
+                                                                </p>
+
                                                             </div>
-                                                            
                                                             <br>
                                                             <div class="v-line-height"
                                                                 style="font-size: 18px; line-height: 150%; text-align: left; word-wrap: break-word;color:#002366;">
                                                                 <p
                                                                     style="font-size: 18px; line-height: 150%; text-align: justify;">
-                                                                    Collection Details:
+                                                                    My selection is as follows:
                                                                 </p>
                                                             </div>
+
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+
+                                            <table id="u_content_text_deprecated_1"
+                                                style="font-family:arial,helvetica,sans-serif;" role="presentation"
+                                                cellpadding="0" cellspacing="0" width="100%" border="0">
+                                                <tbody>
+                                                    <tr>
+                                                        <td style="overflow-wrap:break-word;word-break:break-word;padding:0px 25px 5px;font-family:arial,helvetica,sans-serif;"
+                                                            align="left">
+
                                                             <div class="v-line-height"
-                                                            style="font-size: 14px; text-align: left; word-wrap: break-word;">
-                                                            <p style="font-size: 14px; text-align: justify;">
-                                                                <span>
-                                                                    <ul
-                                                                        style="font-size: 18px; line-height: 23.8px; color: #002366;">
-                                                                        <li>Your One-Time Password (OTP):
-                                                                            ${
-                                                                            data.code
-                                                                            }
-                                                                        </li>
-                                                                        <li>Location : ${
-                                                                            data.location
-                                                                            }</li>
-                                                                        <li> Date and Time: ${
-                                                                            data.date
-                                                                            }</li>
-                                                                    </ul>
-                                                                    <br>
-                                                                </span>
-                                                            </p>
-                                                        </div>
+                                                                style="font-size: 14px; line-height: 170%; text-align: left; word-wrap: break-word;">
+                                                                <p
+                                                                    style="font-size: 14px; line-height: 170%; text-align: justify;">
+                                                                    <span>
+                                                                        <ul
+                                                                            style="font-size: 14px; line-height: 23.8px; color: #002366;">
+
+                                                                            <li>Name : ${data.name}</li>
+                                                                            <li>Email : ${data.email}</li>
+                                                                            <li>Phone : ${data.phone}</li>
+                                                                            <li>Extra Member: ${data.supBeneficiaryFee}
+                                                                            </li>
+                                                                            <li>Data collection:
+                                                                                ${data.dataCollectionFee} </li>
+                                                                            <li>SMS: ${data.supSmsFee} </li>
+                                                                            <li>Personalization Fee:
+                                                                                ${data.personalizationFee} </li>
+                                                                            <li>Total: NGN ${data.amountToPay} </li>
+                                                                        </ul>
+                                                                    </span>
+                                                                </p>
+                                                            </div>
 
                                                         </td>
                                                     </tr>
@@ -309,23 +326,21 @@
                                                 cellpadding="0" cellspacing="0" width="100%" border="0">
                                                 <tbody>
                                                     <tr>
-                                                        <td style="overflow-wrap:break-word;word-break:break-word;padding:0px 25px 0px;font-family:arial,helvetica,sans-serif;"
+                                                        <td style="overflow-wrap:break-word;word-break:break-word;padding:0px 25px 5px;font-family:arial,helvetica,sans-serif;"
                                                             align="left">
 
                                                             <div class="v-line-height"
                                                                 style="font-size: 18px; line-height: 150%; text-align: left; word-wrap: break-word;color:#002366;">
                                                                 <p style="font-size: 18px; line-height: 150%;">
-                                                                    Please keep this OTP confidential and bring it with
-                                                                    you to the collection point. If you have any
-                                                                    questions or need further assistance, feel free to
-                                                                    contact us at <a
-                                                                        href="mailto: ask@akilaah.com">ask@akilaah.com</a>
-                                                                </p> <br>
-                                                                <p>
-                                                                    Thank you for your cooperation.
-                                                                    <br>
-                                                                    Best regards,
+                                                                    ${data.note}
                                                                 </p>
+                                                                <p style="font-size: 18px; line-height: 150%;">
+                                                                    Could you please provide me with the necessary
+                                                                    payment details and instructions?
+                                                                </p> <br>
+                                                                Thank you for your assistance. I look forward to your
+                                                                prompt response.
+
                                                             </div>
                                                         </td>
                                                     </tr>
@@ -335,6 +350,28 @@
                                             <table id="u_content_button_2"
                                                 style="font-family:arial,helvetica,sans-serif;" role="presentation"
                                                 cellpadding="0" cellspacing="0" width="100%" border="0">
+                                                <tbody>
+                                                    <tr>
+                                                        <td style="overflow-wrap:break-word;word-break:break-word;padding:20px;font-family:arial,helvetica,sans-serif;"
+                                                            align="left">
+
+                                                            <!--[if mso]><style>.v-button {background: transparent !important;}</style><![endif]-->
+                                                            <div align="center">
+                                                                <!--[if mso]><v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="https://sponsor.akilaah.com" style="height:37px; v-text-anchor:middle; width:122px;" arcsize="11%"  stroke="f" fillcolor="#e67e23"><w:anchorlock/><center style="color:#FFFFFF;"><![endif]-->
+                                                                <a href="https://sponsor.akilaah.com/login"
+                                                                    target="_blank" class="v-button v-button-colors"
+                                                                    style="box-sizing: border-box;display: inline-block;text-decoration: none;-webkit-text-size-adjust: none;text-align: center;color: #FFFFFF; background-color: #002366; border-radius: 4px;-webkit-border-radius: 4px; -moz-border-radius: 4px; width:auto; max-width:100%; overflow-wrap: break-word; word-break: break-word; word-wrap:break-word; mso-border-alt: none;font-size: 14px;">
+                                                                    <span class="v-line-height"
+                                                                        style="display:block;padding:10px 20px;line-height:120%;"><strong><span
+                                                                                style="line-height: 16.8px;">LOGIN
+                                                                                NOW</span></strong></span>
+                                                                </a>
+                                                                <!--[if mso]></center></v:roundrect><![endif]-->
+                                                            </div>
+
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
                                                 <tr style="border-collapse:collapse">
                                                     <td align="center" style="padding:5px;Margin:0;font-size:0">
                                                         <table border="0" width="100%" height="100%" cellpadding="0"
