@@ -302,7 +302,7 @@ export const loginOrganization = async (body, clienturl) => {
     });
 
     if (
-      String(findPersonalization.sponsor_id) === String(checkOrg ? checkOrg._id : user?.sponsor_id)
+      String(findPersonalization.sponsor_id) !== String(checkOrg ? checkOrg._id : user?.sponsor_id)
     )
       throw new BadRequestError('Invalid account user');
   }
