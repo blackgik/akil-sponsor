@@ -1,6 +1,7 @@
 import appResponse from '../../../../lib/appResponse.js';
 import {
   buildPersonlaization,
+  editPersonalization,
   fetchInformation,
   fetchUserInformation
 } from '../../../services/settings/personalization.service.js';
@@ -27,4 +28,12 @@ export const fetchUserInformationHandler = async (req, res) => {
   const response = await fetchUserInformation({ user });
 
   res.send(appResponse('Personalized screen details', response));
+};
+
+export const editPersonalizationHandler = async (req, res) => {
+  const { body } = req;
+  const { personalization_id } = req.params;
+  const response = await editPersonalization({ body, personalization_id });
+
+  res.send(appResponse('edited personalization data', response));
 };
