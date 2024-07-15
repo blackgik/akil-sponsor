@@ -62,8 +62,11 @@ export const buildPersonlaization = async ({ user, param, body }) => {
 };
 
 export const fetchInformation = async ({ param }) => {
-  const { url } = param;
+  let { url } = param;
+  url = url.replace('beneficiary.', '');
+
   const regex = new RegExp(url, 'i');
+
   const info = await personalizationModel.findOne({ 'general_info.url_name': { $regex: regex } });
 
   // if (!info) throw new NotFoundError('No information containing this URL');
