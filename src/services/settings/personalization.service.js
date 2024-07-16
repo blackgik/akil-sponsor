@@ -92,18 +92,11 @@ export const editPersonalization = async ({ personalization_id, body }) => {
   let personalisationData = await personalizationModel.findById(personalization_id);
   if (!personalisationData) throw new NotFoundError('personalisation data not found');
 
-  // return personalisationData
-  // Deeply merge the updates with the existing document
-  _.merge(personalisationData, body);
+  const updates = Object.keys(body);
 
-  // Save the updated document
-  const updatedPersonalisationData = await personalisationData.save();
+  updates.forEach((update) => (personalisationData[update] = body[update]));
 
-  // const personalisationData = await personalizationModel.findByIdAndUpdate(
-  //   personalization_id,
-  //   body,
-  //   { new: true } // This option returns the updated document
-  // );
+  await personalisationData.save();
 
-  return updatedPersonalisationData;
+  return personalisationData;
 };
