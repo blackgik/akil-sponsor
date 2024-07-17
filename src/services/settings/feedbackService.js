@@ -7,12 +7,15 @@ export const createBeneficiaryFeedback = async ({ body, user, beneficiary_id }) 
   const { title, content } = body;
   const awardee = await awardeesModel.findOne({ beneficiary_id, status: 'disbursed' });
   if (!awardee) throw new NotFoundError('Awardee not found');
+
   const feedbackData = {
     title,
     content,
+    project_id: awardee.project_id,
     sponsor_id: user._id,
     beneficiary_id
   };
+
   const feedbackCreated = await feedbackModel.create(feedbackData);
   awardee.status = 'feedback';
   await awardee.save();

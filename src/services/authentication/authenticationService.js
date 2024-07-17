@@ -284,6 +284,8 @@ export const loginOrganization = async (body, clienturl) => {
     await loginData.save();
   }
 
+  console.log({ clienturl });
+
   const allowdOrigin = [
     'akilaah-sponsor.vercel.app',
     'sponsor.akilaah.com',

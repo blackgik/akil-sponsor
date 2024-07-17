@@ -3,6 +3,7 @@ import env from '../../config/env.js';
 import _ from 'lodash';
 import personalizationModel from '../../models/settings/personalization.model.js';
 import { NotFoundError } from '../../../lib/appErrors.js';
+import organizationModel from '../../models/organizationModel.js';
 
 export const buildPersonlaization = async ({ user, param, body }) => {
   if (user.hasPaid_personalization_fee) {
@@ -70,7 +71,13 @@ export const fetchInformation = async ({ param }) => {
 
   const info = await personalizationModel.findOne({ 'general_info.url_name': { $regex: regex } });
 
-  // if (!info) throw new NotFoundError('No information containing this URL');
+  if (!info) return null;
+
+  const sponsor = await organizationModel.findById(info.sponsor_id);
+
+  if (!sponsor) return null;
+
+  if (!sponsor.hasPaid_personalization_fee) return null;
 
   return info;
 };
@@ -78,13 +85,13 @@ export const fetchInformation = async ({ param }) => {
 export const fetchUserInformation = async ({ user }) => {
   const userId = user._id;
   const info = await personalizationModel.findOne({ sponsor_id: userId });
-  // if (!info) throw new NotFoundError('this user doesnt have personalization turn on');
+  if (!info) throw new NotFoundError('this user doesnt have personalization turned on');
 
   return {
     ...info.toJSON(),
     hasPaid_personalization_fee: user.hasPaid_personalization_fee,
-    psd_start: user.psdStart,
-    psd_end: user.psdEnd
+    psd_start: user?.psdStart || null,
+    psd_end: user?.psdEnd || null
   };
 };
 

@@ -17,7 +17,8 @@ const notificationSchema = new Schema(
         'payment',
         'bulk_upload',
         'update',
-        'feedback'
+        'feedback',
+        'project'
       ]
     },
     note: { type: String, default: '' },
