@@ -547,7 +547,7 @@ export const deleteSchedule = async ({ schedule_id, user }) => {
 
   // create notification
   await notificationsModel.create({
-    note: `You have successfully deleted batch delivery for ${project.project_name} project`,
+    note: `You have successfully deleted batch delivery for ${projectInfo.project_name} project`,
     type: 'update',
     who_is_reading: 'sponsor',
     compliment_obj: { status: 'pending' },
