@@ -1,6 +1,10 @@
 import { BadRequestError, InternalServerError, NotFoundError } from '../../../lib/appErrors.js';
 import env from '../../config/env.js';
-import { batchDeliveryCreatedEmail, batchDeliveryStartedEmail } from '../../config/mail.js';
+import {
+  batchDeliveryCreatedEmail,
+  batchDeliveryStartedEmail,
+  beneSuccefulProjectScheduledEmail
+} from '../../config/mail.js';
 import organizationBeneficiaryModel from '../../models/beneficiaries/organizationBeneficiaryModel.js';
 import awardeesModel from '../../models/projects/awardeesModel.js';
 import ProjectModel from '../../models/projects/ProjectModel.js';
@@ -113,9 +117,9 @@ export const createProductSchedule = async ({ user, body, project_id, param }) =
 
   const total_left = total_persons_to_get - total_scheduled;
 
-  console.log({ total_scheduled });
-  console.log({ total_left });
-  console.log({ total_persons_to_get });
+  // console.log({ total_scheduled });
+  // console.log({ total_left });
+  // console.log({ total_persons_to_get });
 
   // if (total_left <= 0) throw new BadRequestError('Total number of participants has be exhauted');
 
@@ -268,6 +272,46 @@ export const createProductSchedule = async ({ user, body, project_id, param }) =
     who_is_reading: 'sponsor',
     organization_id: user._id
   });
+
+  for (const benefic_id of body.selection) {
+    console.log('i am here');
+    const beneficiary = await organizationBeneficiaryModel.findById(benefic_id);
+    if (beneficiary) {
+      // Create notification for beneficiary
+      await notificationsModel.create({
+        note: `you have been successfully scheduled for the ${project.project_name} project with the batch number ${body.batch_number}`,
+        type: 'update',
+        who_is_reading: 'beneficiary',
+        member_id: benefic_id,
+        organization_id: user._id
+      });
+
+      // Send email to beneficiary
+      const beneficiaryEmailData = {
+        beneficiary_name: capitalizeWords(`${beneficiary.personal.member_name}`),
+        project_name: capitalizeWords(project.project_name),
+        batch_delivery_number: body.batch_number
+      };
+
+      const beneficiaryMailData = {
+        email: beneficiary.contact.email,
+        subject: `you have been successfully scheduled for the ${project.project_name} project with the batch number ${body.batch_number}`,
+        type: 'html',
+        html: beneSuccefulProjectScheduledEmail(beneficiaryEmailData).html,
+        text: beneSuccefulProjectScheduledEmail(beneficiaryEmailData).text
+      };
+
+      const beneficiaryMsg = await formattMailInfo(beneficiaryMailData, env);
+
+      const beneficiaryMsgDelivered = await messageBird(beneficiaryMsg);
+      if (!beneficiaryMsgDelivered) {
+        throw new InternalServerError(
+          'server slip.project allocated without email sent to awardees'
+        );
+      }
+    }
+  }
+
   return {};
 };
 
