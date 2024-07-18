@@ -35,6 +35,10 @@ const mediaSchema = new Schema(
       type: String,
       trim: true
     },
+    is_viewed: {
+      type: Boolean,
+      default: false
+    },
     status: {
       type: String,
       default: 'unpublished',
@@ -42,7 +46,7 @@ const mediaSchema = new Schema(
     },
     start_date: { type: Date },
     end_date: { type: Date },
-    project_id: { type: Schema.Types.ObjectId, ref: 'Project', default: '' },
+    project_id: { type: Schema.Types.ObjectId, ref: 'Project' },
     sponsor_id: { type: Schema.Types.ObjectId, required: true, ref: 'Organization' }
   },
 
