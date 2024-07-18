@@ -16,6 +16,7 @@ import ProductCategoryModel from '../../models/products/ProductCategoryModel.js'
 import { capitalizeWords, downloadExcel } from '../../utils/general.js';
 import {
   beneficiarySuccefullyAllocatedEmail,
+  beneSuccefulProjectAwardedEmail,
   newProjectCreationEmail,
   projectClosureEmail,
   succefulProjectAwardedEmail
@@ -119,7 +120,6 @@ export const generateProjectList = async ({ user, param, project_id, body }) => 
       );
 
     const { state, status, age, occupation } = param;
-
     const { selection } = body;
 
     const filter = { organization_id: user._id, project_ids: { $nin: [project_id] } };
@@ -134,7 +134,6 @@ export const generateProjectList = async ({ user, param, project_id, body }) => 
 
     if (age) {
       const currentDate = moment();
-
       const splitAge = age.split('-');
       const minAge = splitAge[0];
       const maxAge = splitAge[1];
@@ -224,36 +223,75 @@ export const generateProjectList = async ({ user, param, project_id, body }) => 
       { $push: { project_ids: project_id } }
     );
 
-    console.log({ addProject_id });
+    // console.log({ addProject_id });
 
-    // send email
-    //create email profile here
-    const emailData = {
+    // send email to sponsor
+    const sponsorEmailData = {
       sponsor_name: capitalizeWords(`${user.firstname} ${user.lastname}`),
       project_name: capitalizeWords(project.project_name)
     };
 
-    const mailData = {
+    const sponsorMailData = {
       email: user.email,
       subject: `Successful Project Beneficiary Award Notification`,
       type: 'html',
-      html: succefulProjectAwardedEmail(emailData).html,
-      text: succefulProjectAwardedEmail(emailData).text
+      html: succefulProjectAwardedEmail(sponsorEmailData).html,
+      text: succefulProjectAwardedEmail(sponsorEmailData).text
     };
 
-    const msg = await formattMailInfo(mailData, env);
+    const sponsorMsg = await formattMailInfo(sponsorMailData, env);
 
-    const msgDelivered = await messageBird(msg);
-    if (!msgDelivered)
+    const sponsorMsgDelivered = await messageBird(sponsorMsg);
+    if (!sponsorMsgDelivered)
       throw new InternalServerError('server slip. project was created without mail being sent');
 
-    // create notification
+    // create notification for sponsor
     await notificationsModel.create({
-      note: `You have successfully awarded beneficiaries to this project  ${project.project_name} `,
+      note: `You have successfully awarded beneficiaries to this project ${project.project_name}`,
       type: 'creation',
       who_is_reading: 'sponsor',
       organization_id: user._id
     });
+
+    // create notifications and send emails for all beneficiaries
+    for (const benefic_id of body.selection) {
+      const beneficiary = await organizationBeneficiaryModel.findById(benefic_id);
+      if (beneficiary) {
+        // create notification for beneficiary
+        try {
+          await notificationsModel.create({
+            note: `You have been awarded to the project ${project.project_name}`,
+            type: 'creation',
+            who_is_reading: 'beneficiary',
+            beneficiary_id: benefic_id,
+            organization_id: user._id
+          });
+        } catch (error) {
+          throw new Error(error);
+        }
+
+        // send email to beneficiary
+        const beneficiaryEmailData = {
+          beneficiary_name: capitalizeWords(`${beneficiary.personal.member_name}`),
+          project_name: capitalizeWords(project.project_name)
+        };
+
+        const beneficiaryMailData = {
+          email: beneficiary.contact.email,
+          subject: `You have been awarded to project ${project.project_name}`,
+          type: 'html',
+          html: beneSuccefulProjectAwardedEmail(beneficiaryEmailData).html,
+          text: beneSuccefulProjectAwardedEmail(beneficiaryEmailData).text
+        };
+
+        const beneficiaryMsg = await formattMailInfo(beneficiaryMailData, env);
+
+        const beneficiaryMsgDelivered = await messageBird(beneficiaryMsg);
+        if (!beneficiaryMsgDelivered) {
+          throw new InternalServerError(`Failed to send email to beneficiary`);
+        }
+      }
+    }
 
     return create_awardees;
   } catch (err) {
