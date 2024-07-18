@@ -604,7 +604,7 @@ export const viewProject = async ({ project_id }) => {
     delivered_item: disbursedBeneficiariesCount,
     beneficiary_feedback: 'not done',
     quantity_per_person: project.quantity_per_person,
-    product_type: productType.product_category_name,
+    product_type: productType?.product_category_name || 'N/A',
     product_type_id: project.product_type,
     project_discription: project.description,
     product_items: project.product_items,
