@@ -375,44 +375,6 @@ export const saveGenerateList = async ({ user, param, project_id, body }) => {
     const minimun = Math.min(...quantity_tray);
 
     shortage = minimun - awardeeCount * project.quantity_per_person;
-
-    for (const benefic_id of selection) {
-      console.log("am here")
-      const beneficiary = await organizationBeneficiaryModel.findById(benefic_id);
-      if (beneficiary) {
-        // Create notification for beneficiary
-        await notificationsModel.create({
-          note: `You have been successfully allocated to the project ${project.project_name}`,
-          type: 'update',
-          who_is_reading: 'beneficiary',
-          member_id: beneficiary._id,
-          organization_id: user._id
-        });
-
-        // Send email to beneficiary
-        const beneficiaryEmailData = {
-          beneficiary_name: capitalizeWords(`${beneficiary.personal.member_name}`),
-          project_name: capitalizeWords(project.project_name)
-        };
-
-        const beneficiaryMailData = {
-          email: beneficiary.contact.email,
-          subject: `You have been allocated to project ${project.project_name}`,
-          type: 'html',
-          html: beneSuccefulProjectAllocatedEmail(beneficiaryEmailData).html,
-          text: beneSuccefulProjectAllocatedEmail(beneficiaryEmailData).text
-        };
-
-        const beneficiaryMsg = await formattMailInfo(beneficiaryMailData, env);
-
-        const beneficiaryMsgDelivered = await messageBird(beneficiaryMsg);
-        if (!beneficiaryMsgDelivered) {
-          throw new InternalServerError(
-            'server slip.project allocated without email sent to awardees'
-          );
-        }
-      }
-    }
   }
 
   //create email profile here
@@ -442,6 +404,43 @@ export const saveGenerateList = async ({ user, param, project_id, body }) => {
     who_is_reading: 'sponsor',
     organization_id: user._id
   });
+
+  for (const benefic_id of selection) {
+    const beneficiary = await organizationBeneficiaryModel.findById(benefic_id);
+    if (beneficiary) {
+      // Create notification for beneficiary
+      await notificationsModel.create({
+        note: `You have been successfully allocated to the project ${project.project_name}`,
+        type: 'update',
+        who_is_reading: 'beneficiary',
+        member_id: beneficiary._id,
+        organization_id: user._id
+      });
+
+      // Send email to beneficiary
+      const beneficiaryEmailData = {
+        beneficiary_name: capitalizeWords(`${beneficiary.personal.member_name}`),
+        project_name: capitalizeWords(project.project_name)
+      };
+
+      const beneficiaryMailData = {
+        email: beneficiary.contact.email,
+        subject: `You have been allocated to project ${project.project_name}`,
+        type: 'html',
+        html: beneSuccefulProjectAllocatedEmail(beneficiaryEmailData).html,
+        text: beneSuccefulProjectAllocatedEmail(beneficiaryEmailData).text
+      };
+
+      const beneficiaryMsg = await formattMailInfo(beneficiaryMailData, env);
+
+      const beneficiaryMsgDelivered = await messageBird(beneficiaryMsg);
+      if (!beneficiaryMsgDelivered) {
+        throw new InternalServerError(
+          'server slip.project allocated without email sent to awardees'
+        );
+      }
+    }
+  }
 
   return { shortage, saved: true };
 };
