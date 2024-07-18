@@ -10,8 +10,8 @@ import {
 } from './mailerHtml.js';
 
 export const onboardinMail = (data) => {
-    return {
-      html: `
+  return {
+    html: `
       <!DOCTYPE HTML
       PUBLIC "-//W3C//DTD XHTML 1.0 Transitional //EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
       <html xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml"
@@ -539,7 +539,7 @@ export const onboardinMail = (data) => {
   
       </html>
        `,
-      text: `welcome to MAJFINTECH Onboarding\n
+    text: `welcome to MAJFINTECH Onboarding\n
     Your login Credentials can be seen below\n
     \n
     Name of Coopoeration</strong>: ${data.name_of_cooperation}\n
@@ -548,12 +548,12 @@ export const onboardinMail = (data) => {
     company Unique Code:${data.company_code}\n
     Login url: https://sponsor.akilaah.com \n\n
     NB: You Company Unique code should be share to beneficiaries `
-    };
+  };
 };
-  
+
 export const beneficaryOnboardinMail = (data) => {
-      return {
-        html: `
+  return {
+    html: `
         <!DOCTYPE HTML
         PUBLIC "-//W3C//DTD XHTML 1.0 Transitional //EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
         <html xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml"
@@ -1080,7 +1080,7 @@ export const beneficaryOnboardinMail = (data) => {
     
         </html>
          `,
-        text: `welcome to MAJFINTECH Onboarding\n
+    text: `welcome to MAJFINTECH Onboarding\n
       Your login Credentials can be seen below\n
       \n
       Name of Coopoeration</strong>: ${data.name_of_cooperation}\n
@@ -1089,12 +1089,12 @@ export const beneficaryOnboardinMail = (data) => {
       company Unique Code:${data.company_code}\n
       Login url: https://sponsor.akilaah.com \n\n
       NB: You Company Unique code should be share to beneficiaries `
-      };
+  };
 };
 
 export const invitationMail = (data) => {
-    return {
-      html: `
+  return {
+    html: `
       <!DOCTYPE HTML
       PUBLIC "-//W3C//DTD XHTML 1.0 Transitional //EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
   <html xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml"
@@ -1606,7 +1606,7 @@ export const invitationMail = (data) => {
   
   </html>
          `,
-      text: `welcome to MAJFINTECH Onboarding\n
+    text: `welcome to MAJFINTECH Onboarding\n
       Your login Credentials can be seen below\n
       \n
       Name of Coopoeration</strong>: ${data.name_of_cooperation}\n
@@ -1615,7 +1615,7 @@ export const invitationMail = (data) => {
       company Unique Code:${data.company_code}\n
       Login url: https://sponsor.akilaah.com \n\n
       NB: You Company Unique code should be share to beneficiaries `
-    };
+  };
 };
 
 export const beneficiaryBulkUpload = (data) => {
@@ -2656,8 +2656,8 @@ export const verifyOnbordingMail = (data) => {
 };
 
 export const newProjectCreationEmail = (data) => {
-    return {
-      html: `
+  return {
+    html: `
             <!DOCTYPE HTML
             PUBLIC "-//W3C//DTD XHTML 1.0 Transitional //EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
             <html xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml"
@@ -3096,7 +3096,7 @@ export const newProjectCreationEmail = (data) => {
 
         </html>
         `,
-        text: `Dear ${data.sponsor_name}\n
+    text: `Dear ${data.sponsor_name}\n
         We are excited to inform you that a new project, ${data.project_name}, has been created.\n
         
         We are looking forward to a successful project and significant achievements. You can access the project details and timeline in your account.\n
@@ -3104,13 +3104,12 @@ export const newProjectCreationEmail = (data) => {
         Thanks for choosing us\n
         Akilaah Team
         `
-    };
+  };
 };
 
 export const succefulProjectAwardedEmail = (data) => {
-    return {
-      html: 
-        `
+  return {
+    html: `
             <!DOCTYPE HTML
             PUBLIC "-//W3C//DTD XHTML 1.0 Transitional //EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
             <html xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml"
@@ -3550,7 +3549,7 @@ export const succefulProjectAwardedEmail = (data) => {
 
             </html>   
         `,
-      text: `Dear ${data.sponsor_name}\n
+    text: `Dear ${data.sponsor_name}\n
         We are pleased to inform you that beneficiaries has been successfully awarded the 
         ${data.project_name} project\n.
         
@@ -3559,13 +3558,12 @@ export const succefulProjectAwardedEmail = (data) => {
         Thanks for choosing us\n
         Akilaah Team
         `
-    };
+  };
 };
 
 export const beneSuccefulProjectAwardedEmail = (data) => {
-    return {
-      html: 
-        `
+  return {
+    html: `
             <!DOCTYPE HTML
                 PUBLIC "-//W3C//DTD XHTML 1.0 Transitional //EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
             <html xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml"
@@ -4003,19 +4001,18 @@ export const beneSuccefulProjectAwardedEmail = (data) => {
 
             </html>
         `,
-      text: `Dear
+    text: `Dear
         We are pleased to inform you that beneficiaries has been successfully awarded the 
         ${data.project_name} project\n.
         
         This award marks an important milestone, and we are excited about the positive impact this project will have on you.
         `
-    };
+  };
 };
 
 export const beneSuccefulProjectAllocatedEmail = (data) => {
-    return {
-      html: 
-        `
+  return {
+    html: `
             <!DOCTYPE HTML
                 PUBLIC "-//W3C//DTD XHTML 1.0 Transitional //EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
             <html xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml"
@@ -4453,19 +4450,467 @@ export const beneSuccefulProjectAllocatedEmail = (data) => {
 
             </html>
         `,
-      text: `Dear
+    text: `Dear
         We are pleased to inform you that beneficiaries has been successfully allocated the 
         ${data.project_name} project\n.
         
         This award marks an important milestone, and we are excited about the positive impact this project will have on you.
         `
-    };
+  };
+};
+
+export const beneSuccefulProjectScheduledEmail = (data) => {
+  return {
+    html: `
+            <!DOCTYPE HTML
+                PUBLIC "-//W3C//DTD XHTML 1.0 Transitional //EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+            <html xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml"
+                xmlns:o="urn:schemas-microsoft-com:office:office">
+
+            <head>
+                <!--[if gte mso 9]>
+                            <xml>
+                                <o:OfficeDocumentSettings>
+                                <o:AllowPNG/>
+                                <o:PixelsPerInch>96</o:PixelsPerInch>
+                                </o:OfficeDocumentSettings>
+                            </xml>
+                            <![endif]-->
+                <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <meta name="x-apple-disable-message-reformatting">
+                <!--[if !mso]><!-->
+                <meta http-equiv="X-UA-Compatible" content="IE=edge"><!--<![endif]-->
+                <title></title>
+
+                <style type="text/css">
+                    @media only screen and (min-width: 660px) {
+                        .u-row {
+                            width: 640px !important;
+                        }
+
+                        .u-row .u-col {
+                            vertical-align: top;
+                        }
+
+                        .u-row .u-col-100 {
+                            width: 640px !important;
+                        }
+
+                    }
+
+                    @media (max-width: 660px) {
+                        .u-row-container {
+                            max-width: 100% !important;
+                            padding-left: 0px !important;
+                            padding-right: 0px !important;
+                        }
+
+                        .u-row .u-col {
+                            min-width: 320px !important;
+                            max-width: 100% !important;
+                            display: block !important;
+                        }
+
+                        .u-row {
+                            width: 100% !important;
+                        }
+
+                        .u-col {
+                            width: 100% !important;
+                        }
+
+                        .u-col>div {
+                            margin: 0 auto;
+                        }
+                    }
+
+                    body {
+                        margin: 0;
+                        padding: 0;
+                    }
+
+                    table,
+                    tr,
+                    td {
+                        vertical-align: top;
+                        border-collapse: collapse;
+                    }
+
+                    p {
+                        margin: 0;
+                    }
+
+                    .ie-container table,
+                    .mso-container table {
+                        table-layout: fixed;
+                    }
+
+                    * {
+                        line-height: inherit;
+                    }
+
+                    a[x-apple-data-detectors='true'] {
+                        color: inherit !important;
+                        text-decoration: none !important;
+                    }
+
+                    table,
+                    td {
+                        color: #000000;
+                    }
+
+                    #u_body a {
+                        color: #0000ee;
+                        text-decoration: underline;
+                    }
+
+                    @media (max-width: 480px) {
+                        #u_content_text_deprecated_1 .v-line-height {
+                            line-height: 170% !important;
+                        }
+
+                        #u_content_button_2 .v-button-colors {
+                            color: #FFFFFF !important;
+                            background-color: white !important;
+                        }
+
+                        #u_content_button_2 .v-button-colors:hover {
+                            color: #FFFFFF !important;
+                            background-color: #3AAEE0 !important;
+                        }
+                    }
+                </style>
+
+
+
+            </head>
+
+            <body class="clean-body u_body"
+                style="margin: 0;padding: 0;-webkit-text-size-adjust: 100%;background-color: #e7e7e7;color: #000000">
+                <!--[if IE]><div class="ie-container"><![endif]-->
+                <!--[if mso]><div class="mso-container"><![endif]-->
+                <table id="u_body"
+                    style="border-collapse: collapse;table-layout: fixed;border-spacing: 0;mso-table-lspace: 0pt;mso-table-rspace: 0pt;vertical-align: top;min-width: 320px;Margin: 0 auto;background-color: #e7e7e7;width:100%"
+                    cellpadding="0" cellspacing="0">
+                    <tbody>
+                        <tr style="vertical-align: top">
+                            <td style="word-break: break-word;border-collapse: collapse !important;vertical-align: top">
+                                <!--[if (mso)|(IE)]><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td align="center" style="background-color: #e7e7e7;"><![endif]-->
+
+
+
+                                <div class="u-row-container" style="padding: 0px;background-color: transparent">
+                                    <div class="u-row"
+                                        style="margin: 0 auto;min-width: 320px;max-width: 640px;overflow-wrap: break-word;word-wrap: break-word;word-break: break-word;background-color: #FFFFFF;">
+                                        <div
+                                            style="border-collapse: collapse;display: table;width: 100%;height: 100%;background-color: transparent;">
+                                            <!--[if (mso)|(IE)]><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding: 0px;background-color: transparent;" align="center"><table cellpadding="0" cellspacing="0" border="0" style="width:640px;"><tr style="background-color: #e67e23;"><![endif]-->
+
+                                            <!--[if (mso)|(IE)]><td align="center" width="640" style="width: 640px;padding: 0px;border-top: 0px solid transparent;border-left: 0px solid transparent;border-right: 0px solid transparent;border-bottom: 0px solid transparent;" valign="top"><![endif]-->
+                                            <div class="u-col u-col-100"
+                                                style="max-width: 320px;min-width: 640px;display: table-cell;vertical-align: top;">
+                                                <div style="height: 100%;width: 100% !important;">
+                                                    <!--[if (!mso)&(!IE)]><!-->
+                                                    <div
+                                                        style="box-sizing: border-box; height: 100%; padding: 0px;border-top: 0px solid transparent;border-left: 0px solid transparent;border-right: 0px solid transparent;border-bottom: 0px solid transparent;">
+                                                        <!--<![endif]-->
+
+                                                        <table style="font-family:arial,helvetica,sans-serif;" role="presentation"
+                                                            cellpadding="0" cellspacing="0" width="100%" border="0">
+                                                            <tbody>
+                                                                <tr>
+                                                                    <td style="overflow-wrap:break-word;word-break:break-word;padding:30px 10px 20px;font-family:arial,helvetica,sans-serif;"
+                                                                        align="left">
+
+                                                                        <table width="100%" cellpadding="0" cellspacing="0"
+                                                                            border="0">
+                                                                            <tr>
+                                                                                <td style="padding-right: 0px;padding-left: 0px;"
+                                                                                    align="center">
+
+                                                                                    <img align="center" border="0"
+                                                                                        src="https://i.stack.imgur.com/FwiZi.jpg"
+                                                                                        alt="Image" title="Image"
+                                                                                        style="outline: none;text-decoration: none;-ms-interpolation-mode: bicubic;clear: both;display: inline-block !important;border: none;height: auto;float: none;width: 35%;max-width: 217px;"
+                                                                                        width="217" />
+
+                                                                                </td>
+                                                                            </tr>
+                                                                            <tr style="border-collapse:collapse">
+                                                                                <td align="center"
+                                                                                    style="padding:5px;Margin:0;font-size:0">
+                                                                                    <table border="0" width="100%" height="100%"
+                                                                                        cellpadding="0" cellspacing="0"
+                                                                                        role="presentation"
+                                                                                        style="mso-table-lspace:0pt;mso-table-rspace:0pt;border-collapse:collapse;border-spacing:0px">
+                                                                                        <tr style="border-collapse:collapse">
+                                                                                            <td
+                                                                                                style="padding:0;Margin:0;border-bottom:2px solid #002366;background:unset;height:1px;width:100%;margin:0px">
+                                                                                            </td>
+                                                                                        </tr>
+                                                                                    </table>
+                                                                                </td>
+                                                                            </tr>
+                                                                        </table>
+
+                                                                    </td>
+                                                                </tr>
+                                                            </tbody>
+                                                        </table>
+
+                                                        <!--[if (!mso)&(!IE)]><!-->
+                                                    </div><!--<![endif]-->
+                                                </div>
+                                            </div>
+                                            <!--[if (mso)|(IE)]></td><![endif]-->
+                                            <!--[if (mso)|(IE)]></tr></table></td></tr></table><![endif]-->
+                                        </div>
+                                    </div>
+                                </div>
+
+
+
+
+
+                                <div class="u-row-container" style="padding: 0px;background-color: transparent">
+                                    <div class="u-row"
+                                        style="margin: 0 auto;min-width: 320px;max-width: 640px;overflow-wrap: break-word;word-wrap: break-word;word-break: break-word;background-color: #ffffff;">
+                                        <div
+                                            style="border-collapse: collapse;display: table;width: 100%;height: 100%;background-color: transparent;">
+                                            <!--[if (mso)|(IE)]><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding: 0px;background-color: transparent;" align="center"><table cellpadding="0" cellspacing="0" border="0" style="width:640px;"><tr style="background-color: #ffffff;"><![endif]-->
+
+                                            <!--[if (mso)|(IE)]><td align="center" width="640" style="width: 640px;padding: 0px;border-top: 0px solid transparent;border-left: 0px solid transparent;border-right: 0px solid transparent;border-bottom: 0px solid transparent;" valign="top"><![endif]-->
+                                            <div class="u-col u-col-100"
+                                                style="max-width: 320px;min-width: 640px;display: table-cell;vertical-align: top;">
+                                                <div style="height: 100%;width: 100% !important;">
+                                                    <!--[if (!mso)&(!IE)]><!-->
+                                                    <div
+                                                        style="box-sizing: border-box; height: 100%; padding: 0px;border-top: 0px solid transparent;border-left: 0px solid transparent;border-right: 0px solid transparent;border-bottom: 0px solid transparent;">
+                                                        <!--<![endif]-->
+
+                                                        <table style="font-family:arial,helvetica,sans-serif;" role="presentation"
+                                                            cellpadding="0" cellspacing="0" width="100%" border="0">
+                                                            <tbody>
+                                                                <tr>
+                                                                    <td style="overflow-wrap:break-word;word-break:break-word;padding:0px 25px 5px;font-family:arial,helvetica,sans-serif;"
+                                                                        align="left">
+
+                                                                        <div class="v-line-height"
+                                                                            style="font-size: 14px; line-height: 150%; text-align: left; word-wrap: break-word;">
+                                                                            <p
+                                                                                style="font-size: 14px; line-height: 150%; text-align: left;">
+                                                                                <span
+                                                                                    style="font-size: 24px; line-height: 36px;"><span
+                                                                                        style="color:#002366; line-height: 21px;"><strong><span
+                                                                                                style="line-height: 21px;">Hi,
+                                                                                            </span></strong></span><strong><span
+                                                                                            style="line-height: 21px;"><span
+                                                                                                style="color: #CB6015; line-height: 21px;">${data.beneficiary_name}</span></span></strong></span>
+
+                                                                            </p>
+                                                                        </div>
+
+                                                                    </td>
+                                                                </tr>
+                                                            </tbody>
+                                                        </table>
+
+                                                        <table style="font-family:arial,helvetica,sans-serif;" role="presentation"
+                                                            cellpadding="0" cellspacing="0" width="100%" border="0">
+                                                            <tbody>
+                                                                <tr>
+                                                                    <td style="overflow-wrap:break-word;word-break:break-word;padding:0px 25px 5px;font-family:arial,helvetica,sans-serif;"
+                                                                        align="left">
+
+                                                                        <div class="v-line-height"
+                                                                            style="font-size: 18px; line-height: 150%; text-align: left; word-wrap: break-word;color:#002366;">
+                                                                            <p style="font-size: 18px; line-height: 150%;"></p>
+                                                                            We are pleased to inform you that you have been
+                                                                            successfully scheduled for the
+                                                                            <span><strong>${data.project_name}</strong></span>
+                                                                            project with batch number ${data.batch_delivery_number}.
+                                                                            </p>
+
+                                                                        </div>
+                                                                    </td>
+                                                                </tr>
+                                                            </tbody>
+                                                        </table>
+
+                                                        <table style="font-family:arial,helvetica,sans-serif;" role="presentation"
+                                                            cellpadding="0" cellspacing="0" width="100%" border="0">
+                                                            <tbody>
+                                                                <tr>
+                                                                    <td style="overflow-wrap:break-word;word-break:break-word;padding:0px 25px 5px;font-family:arial,helvetica,sans-serif;"
+                                                                        align="left">
+
+                                                                        <div class="v-line-height"
+                                                                            style="font-size: 18px; line-height: 150%; text-align: left; word-wrap: break-word;color:#002366;">
+                                                                            <p style="font-size: 18px; line-height: 150%;">
+                                                                                This award marks an important milestone, and we are
+                                                                                excited about the positive impact this project will
+                                                                                have on you.
+                                                                            </p>
+                                                                        </div>
+                                                                    </td>
+                                                                </tr>
+                                                            </tbody>
+                                                        </table>
+
+
+                                                        <!--[if (!mso)&(!IE)]><!-->
+                                                    </div><!--<![endif]-->
+                                                </div>
+                                            </div>
+                                            <!--[if (mso)|(IE)]></td><![endif]-->
+                                            <!--[if (mso)|(IE)]></tr></table></td></tr></table><![endif]-->
+                                        </div>
+                                    </div>
+                                </div>
+
+
+
+
+
+                                <div class="u-row-container" style="padding: 0px;background-color: transparent">
+                                    <div class="u-row"
+                                        style="margin: 0 auto;min-width: 320px;max-width: 640px;overflow-wrap: break-word;word-wrap: break-word;word-break: break-word;background-color: white;">
+                                        <div
+                                            style="border-collapse: collapse;display: table;width: 100%;height: 100%;background-color: transparent;">
+                                            <!--[if (mso)|(IE)]><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding: 0px;background-color: transparent;" align="center"><table cellpadding="0" cellspacing="0" border="0" style="width:640px;"><tr style="background-color: #e67e23;"><![endif]-->
+
+                                            <!--[if (mso)|(IE)]><td align="center" width="640" style="width: 640px;padding: 0px;border-top: 0px solid transparent;border-left: 0px solid transparent;border-right: 0px solid transparent;border-bottom: 0px solid transparent;" valign="top"><![endif]-->
+                                            <div class="u-col u-col-100"
+                                                style="max-width: 320px;min-width: 640px;display: table-cell;vertical-align: top;">
+                                                <div style="height: 100%;width: 100% !important;">
+                                                    <!--[if (!mso)&(!IE)]><!-->
+                                                    <div
+                                                        style="box-sizing: border-box; height: 100%; padding: 0px;border-top: 0px solid transparent;border-left: 0px solid transparent;border-right: 0px solid transparent;border-bottom: 0px solid transparent;">
+                                                        <!--<![endif]-->
+
+                                                        <table style="font-family:arial,helvetica,sans-serif;" role="presentation"
+                                                            cellpadding="0" cellspacing="0" width="100%" border="0">
+                                                            <div>
+                                                                <tbody>
+                                                                    <tr>
+                                                                        <td style="overflow-wrap:break-word;word-break:break-word;padding:20px 10px 18px;font-family:arial,helvetica,sans-serif;"
+                                                                            align="left">
+
+                                                                            <div align="center">
+                                                                    <tr style="border-collapse:collapse">
+                                                                        <td align="center"
+                                                                            style="padding-bottom: 30px;Margin:0;font-size:0">
+                                                                            <table cellpadding="0" cellspacing="0"
+                                                                                class="es-table-not-adapt es-social"
+                                                                                role="presentation"
+                                                                                style="mso-table-lspace:0pt;mso-table-rspace:0pt;border-collapse:collapse;border-spacing:0px">
+                                                                                <tr style="border-collapse:collapse">
+                                                                                    <td align="left" valign="middle"
+                                                                                        style="word-break: break-word;border-collapse: collapse !important;vertical-align: top;padding-right:10px">
+                                                                                        <a href="https://twitter.com/akilaahdigital"
+                                                                                            title="twitter" target="_blank">
+                                                                                            <img src="https://cdn.tools.unlayer.com/social/icons/circle/twitter.png"
+                                                                                                alt="twitter" title="twitter"
+                                                                                                width="32"
+                                                                                                style="outline: none;text-decoration: none;-ms-interpolation-mode: bicubic;clear: both;display: block !important;border: none;height: auto;float: none;max-width: 32px !important">
+                                                                                        </a>
+                                                                                    </td>
+                                                                                    <td align="left" valign="middle"
+                                                                                        style="word-break: break-word;border-collapse: collapse !important;vertical-align: top; padding-right:10px">
+                                                                                        <a href="https://www.instagram.com/akilaahdigital/"
+                                                                                            title="Instagram" target="_blank">
+                                                                                            <img src="https://cdn.tools.unlayer.com/social/icons/circle/instagram.png"
+                                                                                                alt="Instagram" title="Instagram"
+                                                                                                width="32"
+                                                                                                style="outline: none;text-decoration: none;-ms-interpolation-mode: bicubic;clear: both;display: block !important;border: none;height: auto;float: none;max-width: 32px !important">
+                                                                                        </a>
+                                                                                    </td>
+                                                                                    <td align="left" valign="middle"
+                                                                                        style="word-break: break-word;border-collapse: collapse !important;vertical-align: top;padding-right:10px">
+                                                                                        <a href="https://www.linkedin.com/company/akilaah/"
+                                                                                            title="linkedin" target="_blank">
+                                                                                            <img src="https://cdn.tools.unlayer.com/social/icons/circle/linkedin.png"
+                                                                                                alt="linkedin" title="linkedin"
+                                                                                                width="32"
+                                                                                                style="outline: none;text-decoration: none;-ms-interpolation-mode: bicubic;clear: both;display: block !important;border: none;height: auto;float: none;max-width: 32px !important">
+                                                                                        </a>
+                                                                                    </td>
+                                                                                    <td align="left" valign="middle"
+                                                                                        style="word-break: break-word;border-collapse: collapse !important;vertical-align: top">
+                                                                                        <a href="https://www.facebook.com/profile.php?id=61551381704492&mibextid=ZbWKwL"
+                                                                                            title="Facebook" target="_blank">
+                                                                                            <img src="https://cdn.tools.unlayer.com/social/icons/circle/facebook.png"
+                                                                                                alt="Facebook" title="Facebook"
+                                                                                                width="32"
+                                                                                                style="outline: none;text-decoration: none;-ms-interpolation-mode: bicubic;clear: both;display: block !important;border: none;height: auto;float: none;max-width: 32px !important">
+                                                                                        </a>
+                                                                                    </td>
+                                                                                </tr>
+                                                                            </table>
+                                                                    <tr>
+                                                            </div>
+
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <table style="font-family:arial,helvetica,sans-serif;" role="presentation" cellpadding="0" cellspacing="0"
+                    width="100%" border="0">
+                    <tbody>
+                        <tr>
+                            <td style="overflow-wrap:break-word;word-break:break-word;padding:10px;font-family:arial,helvetica,sans-serif;"
+                                align="left">
+
+                                <div class="v-line-height"
+                                    style="font-size: 11px; line-height: 140%; text-align: center; word-wrap: break-word;">
+                                    <p style="line-height: 140%;"><span style="color: #002366; line-height: 19.6px;">Copyright Ⓒ
+                                            2024 MAJ
+                                            FINTECH Limited RC
+                                            1731274</span></p>
+                                </div>
+
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <!--[if (!mso)&(!IE)]><!-->
+                </div><!--<![endif]-->
+                </div>
+                </div>
+                <!--[if (mso)|(IE)]></td><![endif]-->
+                <!--[if (mso)|(IE)]></tr></table></td></tr></table><![endif]-->
+                </div>
+                </div>
+                </div>
+
+
+
+                <!--[if (mso)|(IE)]></td></tr></table><![endif]-->
+                </td>
+                </tr>
+                </tbody>
+                </table>
+                <!--[if mso]></div><![endif]-->
+                <!--[if IE]></div><![endif]-->
+            </body>
+
+            </html>
+        `,
+    text: `Dear
+        We are pleased to inform you that beneficiaries has been successfully scheduled for the 
+        ${data.project_name} project with batch number ${data.batch_delivery_number}\n.
+        
+        This award marks an important milestone, and we are excited about the positive impact this project will have on you.
+        `
+  };
 };
 
 export const beneficiarySuccefullyAllocatedEmail = (data) => {
-    return {
-      html: 
-        `
+  return {
+    html: `
             <!DOCTYPE HTML
             PUBLIC "-//W3C//DTD XHTML 1.0 Transitional //EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
             <html xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml"
@@ -4905,7 +5350,7 @@ export const beneficiarySuccefullyAllocatedEmail = (data) => {
 
             </html>
         `,
-        text: `Dear ${data.sponsor_name}\n
+    text: `Dear ${data.sponsor_name}\n
         We are pleased to inform you that beneficiaries has been successfully allocated the 
         ${data.project_name} project\n.
         
@@ -4914,13 +5359,12 @@ export const beneficiarySuccefullyAllocatedEmail = (data) => {
         Thanks for choosing us\n
         Akilaah Team
         `
-    };
+  };
 };
 
 export const batchDeliveryCreatedEmail = (data) => {
-    return {
-      html: 
-        `
+  return {
+    html: `
            <!DOCTYPE HTML
 PUBLIC "-//W3C//DTD XHTML 1.0 Transitional //EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml"
@@ -5360,7 +5804,7 @@ PUBLIC "-//W3C//DTD XHTML 1.0 Transitional //EN" "http://www.w3.org/TR/xhtml1/DT
 
 </html>
         `,
-        text: `Dear ${data.sponsor_name}\n
+    text: `Dear ${data.sponsor_name}\n
         We are pleased to inform you that a new batch delivery ${data.batch_delivery_number} has\n
         been created for the ${data.project_name} project.\n
         
@@ -5370,13 +5814,12 @@ PUBLIC "-//W3C//DTD XHTML 1.0 Transitional //EN" "http://www.w3.org/TR/xhtml1/DT
         Thanks for choosing us\n
         Akilaah Team
         `
-    };
+  };
 };
 
 export const batchDeliveryStartedEmail = (data) => {
-    return {
-      html: 
-        `
+  return {
+    html: `
             <!DOCTYPE HTML
             PUBLIC "-//W3C//DTD XHTML 1.0 Transitional //EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
             <html xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml"
@@ -5816,7 +6259,7 @@ export const batchDeliveryStartedEmail = (data) => {
 
             </html>
         `,
-        text: `Dear ${data.sponsor_name}\n
+    text: `Dear ${data.sponsor_name}\n
         We are pleased to inform you that the batch delivery ${data.batch_delivery_number} for\n
         the ${data.project_name} project has officially started.\n
         
@@ -5827,13 +6270,12 @@ export const batchDeliveryStartedEmail = (data) => {
         Thanks for choosing us\n
         Akilaah Team
         `
-    };
+  };
 };
 
 export const batchDeliveryCompletedEmail = (data) => {
-    return {
-      html: 
-        `
+  return {
+    html: `
             <!DOCTYPE HTML
             PUBLIC "-//W3C//DTD XHTML 1.0 Transitional //EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
             <html xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml"
@@ -6271,7 +6713,7 @@ export const batchDeliveryCompletedEmail = (data) => {
 
             </html>  
         `,
-        text: `Dear ${data.sponsor_name}\n
+    text: `Dear ${data.sponsor_name}\n
         We are pleased to inform you that the batch delivery ${data.batch_delivery_number} for\n
         the ${data.project_name} project has been successfully disbursed in full.\n
         
@@ -6281,13 +6723,12 @@ export const batchDeliveryCompletedEmail = (data) => {
         Thanks for choosing us\n
         Akilaah Team
         `
-    };
+  };
 };
 
 export const batchDeliveryClosedEmail = (data) => {
-    return {
-      html: 
-        `
+  return {
+    html: `
         <!DOCTYPE HTML
             PUBLIC "-//W3C//DTD XHTML 1.0 Transitional //EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
         <html xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml"
@@ -6729,7 +7170,7 @@ export const batchDeliveryClosedEmail = (data) => {
 
         </html>
         `,
-        text: `Dear ${data.sponsor_name}\n
+    text: `Dear ${data.sponsor_name}\n
         We are pleased to inform you that the batch delivery ${data.batch_delivery_number} for\n
         the ${data.project_name} project, which began on ${data.start_date}, has been successfully closed.\n
         
@@ -6740,13 +7181,12 @@ export const batchDeliveryClosedEmail = (data) => {
         Thanks for choosing us\n
         Akilaah Team
         `
-    };
+  };
 };
 
 export const batchDeliveryDeletedEmail = (data) => {
-    return {
-      html: 
-        `
+  return {
+    html: `
        <!DOCTYPE HTML
 PUBLIC "-//W3C//DTD XHTML 1.0 Transitional //EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml"
@@ -7186,7 +7626,7 @@ style="margin: 0;padding: 0;-webkit-text-size-adjust: 100%;background-color: #e7
 
 </html>
         `,
-        text: `Dear ${data.sponsor_name}\n
+    text: `Dear ${data.sponsor_name}\n
         We are writing to inform you that the batch delivery ${data.batch_delivery_number} for\n
         the ${data.project_name} project, which began on ${data.start_date}, has been deleted.\n
         
@@ -7195,13 +7635,12 @@ style="margin: 0;padding: 0;-webkit-text-size-adjust: 100%;background-color: #e7
         Thanks for choosing us\n
         Akilaah Team
         `
-    };
+  };
 };
 
 export const projectCompletionEmail = (data) => {
-    return {
-      html: 
-        `
+  return {
+    html: `
         <!DOCTYPE HTML
             PUBLIC "-//W3C//DTD XHTML 1.0 Transitional //EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
         <html xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml"
@@ -7638,7 +8077,7 @@ export const projectCompletionEmail = (data) => {
 
         </html>   
         `,
-        text: `Dear ${data.sponsor_name}\n
+    text: `Dear ${data.sponsor_name}\n
         We are delighted to inform you that the ${data.project_name} project has successfully completed.\n
         
         This achievement marks a significant milestone, and we are excited for this journey. Detailed\n
@@ -7647,13 +8086,12 @@ export const projectCompletionEmail = (data) => {
         Thanks for choosing us\n
         Akilaah Team
         `
-    };
+  };
 };
 
 export const projectClosureEmail = (data) => {
-    return {
-      html: 
-        `
+  return {
+    html: `
         <!DOCTYPE HTML
             PUBLIC "-//W3C//DTD XHTML 1.0 Transitional //EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
         <html xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml"
@@ -8092,7 +8530,7 @@ export const projectClosureEmail = (data) => {
 
         </html>
         `,
-        text: `Dear ${data.sponsor_name}\n
+    text: `Dear ${data.sponsor_name}\n
         We are writing to inform you that the ${data.project_name}project has been\n 
         officially closed as of ${data.closure_date}.\n
         
@@ -8103,7 +8541,7 @@ export const projectClosureEmail = (data) => {
         Thanks for choosing us\n
         Akilaah Team
         `
-    };
+  };
 };
 
 export const paymentVerificationMail = (data) => {
@@ -8637,7 +9075,7 @@ export const paymentVerificationMail = (data) => {
 
         </html>
        `,
-      text: `Dear Akilaah Team,\n\n
+    text: `Dear Akilaah Team,\n\n
 
       I am writing to confirm my decision to proceed with the sponsor subscription package. \n
       I have reviewed the details and believe this package best suits my needs.\n
@@ -12135,7 +12573,9 @@ export const newProductMail = (data) => {
                                                                                         style="line-height: 21px;">Dear,
                                                                                     </span></strong></span><strong><span
                                                                                     style="line-height: 21px;"><span
-                                                                                        style="color: #CB6015; line-height: 21px;">${data.sponsors_name}</span></span></strong></span>
+                                                                                        style="color: #CB6015; line-height: 21px;">${
+                                                                                          data.sponsors_name
+                                                                                        }</span></span></strong></span>
 
                                                                     </p>
                                                                 </div>
@@ -12157,7 +12597,7 @@ export const newProductMail = (data) => {
                                                                     <p style="font-size: 18px; line-height: 150%;"></p>
                                                                     We are pleased to inform you that a new contribution
                                                                     product <strong>${
-                                                                    data.product_name
+                                                                      data.product_name
                                                                     }</strong> has been successfully created on
                                                                     Akilaah. This product is now available within the
                                                                     Contribution Module for beneficiaries to engage with.
@@ -12193,17 +12633,15 @@ export const newProductMail = (data) => {
                                                                                 style="font-size: 14px; line-height: 23.8px; color: #002366;">
                                                                                 <li>Product Name:
                                                                                     ${
-                                                                                    data.product_name
+                                                                                      data.product_name
                                                                                     }
                                                                                 </li>
-                                                                                <li>Product SLUG: ${
-                                                                                data.product_slug.toUpperCase()
-                                                                                }</li>
+                                                                                <li>Product SLUG: ${data.product_slug.toUpperCase()}</li>
                                                                                 <li>Creation Date: ${
-                                                                                data.date
+                                                                                  data.date
                                                                                 }</li>
                                                                                 <li>Status: ${
-                                                                                data.status
+                                                                                  data.status
                                                                                 }</li>
                                                                             </ul>
                                                                             <br>
@@ -12408,8 +12846,8 @@ export const newProductMail = (data) => {
 };
 
 export const disbursementBeneficiariesEmail = (data) => {
-    return {
-      html: `
+  return {
+    html: `
         <!DOCTYPE HTML
             PUBLIC "-//W3C//DTD XHTML 1.0 Transitional //EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
         <html xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml"
@@ -12709,19 +13147,11 @@ export const disbursementBeneficiariesEmail = (data) => {
                                                                                 <ul
                                                                                     style="font-size: 16px; line-height: 23.8px; color: #002366;">
                                                                                     <li>Your One-Time Password (OTP):
-                                                                                        <strong style="font-size: 20px; color: #CB6015;">${
-                                                                                        data.code
-                                                                                        }</strong>
+                                                                                        <strong style="font-size: 20px; color: #CB6015;">${data.code}</strong>
                                                                                     </li>
-                                                                                    <li>From : ${
-                                                                                        data.start_date
-                                                                                        }</li>
-                                                                                    <li> To: ${
-                                                                                        data.end_date
-                                                                                        }</li>
-                                                                                    <li> Location: ${
-                                                                                        data.location
-                                                                                        }</li>
+                                                                                    <li>From : ${data.start_date}</li>
+                                                                                    <li> To: ${data.end_date}</li>
+                                                                                    <li> Location: ${data.location}</li>
                                                                                 </ul>
                                                                             </span>
                                                                         </p>
@@ -12916,7 +13346,7 @@ export const disbursementBeneficiariesEmail = (data) => {
 
         </html>
         `,
-      text: `welcome to MAJFINTECH Onboarding\n
+    text: `welcome to MAJFINTECH Onboarding\n
     Your login Credentials can be seen below\n
     \n
     Name of Coopoeration</strong>: ${data.name}\n
@@ -12925,8 +13355,8 @@ export const disbursementBeneficiariesEmail = (data) => {
     company Unique Code:${data.company_code}\n
     Login url: https://organization.akilaah.com \n\n
     NB: You Company Unique code should be share to beneficiaries `
-    };
   };
+};
 
 export const paymentReceiptMail = (data) => {
   return paymentReceiptHTML
