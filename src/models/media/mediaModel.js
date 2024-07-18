@@ -35,6 +35,10 @@ const mediaSchema = new Schema(
       type: String,
       trim: true
     },
+    is_viewed: {
+      type: Boolean,
+      default: false
+    },
     status: {
       type: String,
       default: 'unpublished',
