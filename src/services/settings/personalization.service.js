@@ -85,10 +85,11 @@ export const fetchInformation = async ({ param }) => {
 export const fetchUserInformation = async ({ user }) => {
   const userId = user._id;
   const info = await personalizationModel.findOne({ sponsor_id: userId });
-  if (!info) throw new NotFoundError('this user doesnt have personalization turned on');
+
+  if (!info) return null;
 
   return {
-    ...info.toJSON(),
+    ...info?.toJSON(),
     hasPaid_personalization_fee: user.hasPaid_personalization_fee,
     psd_start: user?.psdStart || null,
     psd_end: user?.psdEnd || null
