@@ -10,7 +10,8 @@ export const createNewSupplier = async ({ user, body }) => {
     acctstatus: 'active'
   };
   const supplier = await SupplierModel.findOne({
-    supplier_name: body.supplier_name
+    supplier_name: body.supplier_name,
+    sponsor_id: user._id,
   });
 
   if (supplier) throw new DuplicateError('Duplicate supplier found');

@@ -496,7 +496,12 @@ export const verifyForgotOtp = async ({ body }) => {
   // await checkOrg.save();
 
   const tokenEncryption = jwt.sign(
-    { _id: checkOrg._id, email: checkOrg.email, user: userData },
+    {
+      _id: checkOrg._id,
+      email: checkOrg.email,
+      user: userData,
+      adminType: checkOrg ? 'sponsor' : 'user'
+    },
     env.jwt_key
   );
 
