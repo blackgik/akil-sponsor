@@ -860,7 +860,11 @@ export const fetchBeneficiariesForProjects = async ({ user, param, project_id })
   page_no = Number(page_no) || 1;
   no_of_requests = Number(no_of_requests) || 20;
 
-  const filterData = { organization_id: user._id, project_ids: { $nin: [project_id] } };
+  const filterData = {
+    organization_id: user._id,
+    project_ids: { $nin: [project_id] },
+    acctstatus: 'active'
+  };
 
   const query = typeof search !== 'undefined' ? search.trim() : false;
 

@@ -2,7 +2,7 @@ import axios from 'axios';
 import env from '../../config/env.js';
 import _ from 'lodash';
 import personalizationModel from '../../models/settings/personalization.model.js';
-import { NotFoundError } from '../../../lib/appErrors.js';
+import { DuplicateError, NotFoundError } from '../../../lib/appErrors.js';
 import organizationModel from '../../models/organizationModel.js';
 
 export const buildPersonlaization = async ({ user, param, body }) => {
@@ -15,6 +15,14 @@ export const buildPersonlaization = async ({ user, param, body }) => {
   };
 
   const updates = Object.keys(data);
+
+  const duplicateurlCheck = await personalizationModel.findOne({
+    'general_info.url_name': data.general_info.url_name,
+    sponsor_id: { $nin: [user._id] }
+  });
+
+  if (duplicateurlCheck)
+    throw new DuplicateError('Host address already exists. please choose a different host url');
 
   let check_personalization = await personalizationModel.findOne({ sponsor_id: user._id });
 
@@ -50,6 +58,8 @@ export const buildPersonlaization = async ({ user, param, body }) => {
       type: 'personalization_payment'
     }
   };
+
+  if (user.hasPaid_personalization_fee) return { gateway: pay_data.callback_url };
 
   const url = `${env.paystack_api_url}/transaction/initialize`;
 
@@ -97,12 +107,15 @@ export const fetchUserInformation = async ({ user }) => {
 };
 
 export const editPersonalization = async ({ personalization_id, body }) => {
+  console.log('This is body', body);
   let personalisationData = await personalizationModel.findById(personalization_id);
   if (!personalisationData) throw new NotFoundError('personalisation data not found');
 
   const updates = Object.keys(body);
 
   updates.forEach((update) => (personalisationData[update] = body[update]));
+
+  console.log('This is updated', personalisationData);
 
   await personalisationData.save();
 
