@@ -1,6 +1,7 @@
 import appResponse from '../../../lib/appResponse.js';
 import {
   fetchAllRequests,
+  renewSponsorshipRequest,
   updateRequestStatus,
   viewSponsorRequest
 } from '../../services/beneficiaries/requestService.js';
@@ -8,7 +9,7 @@ import {
 export const fetchAllRequestsHandler = async (req, res) => {
   const { query, user } = req;
   const params = query;
-  console.log(user)
+  console.log(user);
 
   const response = await fetchAllRequests({ params, user });
 
@@ -26,10 +27,19 @@ export const viewSponsorRequestHandler = async (req, res) => {
 export const updateRequestStatusHandler = async (req, res) => {
   const { user, body } = req;
 
-  console.log(body);
   const { request_id } = req.params;
 
   const response = await updateRequestStatus({ request_id, body, user });
 
   res.send(appResponse('request status changed', response));
+};
+
+export const renewSponsorshipRequestHandler = async (req, res) => {
+  const { user } = req;
+
+  const { request_id } = req.params;
+
+  const response = await renewSponsorshipRequest({ request_id, user });
+
+  res.send(appResponse('request status renewed', response));
 };

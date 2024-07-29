@@ -2,6 +2,7 @@ import mongoose from 'mongoose';
 import {
   BadRequestError,
   DuplicateError,
+  ForbiddenError,
   InternalServerError,
   NotFoundError
 } from '../../../lib/appErrors.js';
@@ -161,43 +162,47 @@ export const updateRequestStatus = async ({ request_id, body, user }) => {
 
 export const renewSponsorshipRequest = async ({ request_id, user }) => {
   // Check for existing sponsorship requests
-  const existingRequest = await sponsorRequestsModel.findById(request_id);
-  if (!existingRequest) throw new NotFoundError('Sponsorship request not found');
-  if (existingRequest.status !== 'paid') {
-    throw new BadRequestError(
-      'this project hasnt been completed, make payment before you can renew'
+  const existingRequest = await sponsorRequestsModel.findOne({
+    _id: request_id,
+    status: 'paid'
+  });
+  if (!existingRequest)
+    throw new NotFoundError(
+      'Sponsorship request not found or This project hasn’t been completed, make payment before you can renew'
     );
-  }
+
   if (existingRequest.recuring.status === false) {
-    throw new BadRequestError('this request doesnt support renewal');
+    throw new BadRequestError('This request doesn’t support renewal');
   }
 
-  if (
-    existingRequest.recuring.status === true &&
-    existingRequest.recuring.end_timeline < new Date()
-  ) {
-    // recuring.status to false
+  if (existingRequest.recuring.end_timeline < Date.now()) {
     existingRequest.recuring.status = false;
     await existingRequest.save();
+    throw new ForbiddenError('Timeline for renewal has long passed');
   }
 
-  const benefi = await organizationBeneficiaryModel.findById(request.beneficiary_id);
+  existingRequest.status = 'accepted';
+  existingRequest.request_state = 'renewed';
+  existingRequest.recuring.count += 1;
+  await existingRequest.save();
+
+  const benefi = await organizationBeneficiaryModel.findById(existingRequest.beneficiary_id);
 
   // Create notifications
   const notifications = [
     {
-      note: `your completed sponsorship request has been renewed`,
+      note: `Your  ${existingRequest.subject_request} sponsorship request has been renewed`,
       type: 'update',
       who_is_reading: 'beneficiary',
-      member_id: request.beneficiary_id,
-      organization_id: user._id
+      member_id: existingRequest.beneficiary_id,
+      organization_id: user.organization_id
     },
     {
-      note: `you have renewed the just completed request of ${benefi.personal.member_name}`,
+      note: `You have renewed the ${existingRequest.subject_request} request of ${benefi.personal.member_name}`,
       type: 'update',
       who_is_reading: 'sponsor',
-      member_id: request.beneficiary_id,
-      organization_id: user._id
+      member_id: existingRequest.beneficiary_id,
+      organization_id: user.organization_id
     }
   ];
 

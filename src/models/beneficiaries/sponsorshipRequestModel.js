@@ -32,7 +32,7 @@ const SponsorShipSchema = new Schema(
       status: { type: Boolean, default: false },
       start_timeline: { type: Date },
       end_timeline: { type: Date },
-      count: { type: Number }
+      count: { type: Number, default: 0 }
     },
     urgency: { type: String },
     upload: [
