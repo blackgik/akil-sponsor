@@ -8,6 +8,7 @@ import {
 export const fetchAllRequestsHandler = async (req, res) => {
   const { query, user } = req;
   const params = query;
+  console.log(user)
 
   const response = await fetchAllRequests({ params, user });
 
@@ -23,10 +24,12 @@ export const viewSponsorRequestHandler = async (req, res) => {
 };
 
 export const updateRequestStatusHandler = async (req, res) => {
-  const { body } = req;
+  const { user, body } = req;
+
+  console.log(body);
   const { request_id } = req.params;
 
-  const response = await updateRequestStatus({ request_id, body });
+  const response = await updateRequestStatus({ request_id, body, user });
 
   res.send(appResponse('request status changed', response));
 };

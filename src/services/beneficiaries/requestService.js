@@ -8,6 +8,7 @@ import {
 import notificationsModel from '../../models/settings/notificationsModel.js';
 import sponsorRequestsModel from '../../models/beneficiaries/sponsorshipRequestModel.js';
 import { dateFilters } from '../../utils/timeFilters.js';
+import organizationBeneficiaryModel from '../../models/beneficiaries/organizationBeneficiaryModel.js';
 
 export const fetchAllRequests = async ({ params, user }) => {
   let {
@@ -81,7 +82,7 @@ export const viewSponsorRequest = async ({ request_id }) => {
   return request;
 };
 
-export const updateRequestStatus = async ({ request_id, body }) => {
+export const updateRequestStatus = async ({ request_id, body, user }) => {
   // Determine the new request_state based on the body.status
   let requestStateUpdate = {};
   if (body.status === 'accepted') {
@@ -93,6 +94,28 @@ export const updateRequestStatus = async ({ request_id, body }) => {
   // Check if status is not provided and set upload_more accordingly
   if (!body.status) {
     body.upload_more = true;
+    const request = await sponsorRequestsModel.findById(request_id);
+    const benefi = await organizationBeneficiaryModel.findById(request.beneficiary_id);
+
+    // Create notifications
+    const notifications = [
+      {
+        note: `your sponsor needs you to upload more document for your ${request.subject_request} `,
+        type: 'update',
+        who_is_reading: 'beneficiary',
+        member_id: request.beneficiary_id,
+        organization_id: user._id
+      },
+      {
+        note: `you have requested for ${benefi.personal.member_name} of to upload more documents for his ${request.subject_request} request`,
+        type: 'update',
+        who_is_reading: 'sponsor',
+        member_id: request.beneficiary_id,
+        organization_id: user._id
+      }
+    ];
+
+    await notificationsModel.insertMany(notifications);
   }
 
   // Merge the requestStateUpdate with the body to create the update payload
@@ -109,6 +132,30 @@ export const updateRequestStatus = async ({ request_id, body }) => {
   );
 
   if (!request) throw new NotFoundError('Sponsorship request not found or not in pending status');
+
+  const benefi = await organizationBeneficiaryModel.findById(request.beneficiary_id);
+
+  if (body.status) {
+    // Create notifications
+    const notifications = [
+      {
+        note: `your sponsorship request status have been ${body.status}`,
+        type: 'update',
+        who_is_reading: 'beneficiary',
+        member_id: request.beneficiary_id,
+        organization_id: user._id
+      },
+      {
+        note: `you have updated the request status of ${benefi.personal.member_name} to ${body.status}`,
+        type: 'update',
+        who_is_reading: 'sponsor',
+        member_id: request.beneficiary_id,
+        organization_id: user._id
+      }
+    ];
+
+    await notificationsModel.insertMany(notifications);
+  }
   return request;
 };
 
@@ -134,22 +181,25 @@ export const renewSponsorshipRequest = async ({ request_id, user }) => {
     await existingRequest.save();
   }
 
+  const benefi = await organizationBeneficiaryModel.findById(request.beneficiary_id);
+
   // Create notifications
   const notifications = [
     {
-      note: 'You have successfully sent out a sponsorship request',
+      note: `your completed sponsorship request has been renewed`,
       type: 'update',
       who_is_reading: 'beneficiary',
-      member_id: user._id,
-      organization_id: user.organization_id
+      member_id: request.beneficiary_id,
+      organization_id: user._id
     },
     {
-      note: `${user.personal.member_name} has successfully sent out a sponsorship request to you`,
+      note: `you have renewed the just completed request of ${benefi.personal.member_name}`,
       type: 'update',
       who_is_reading: 'sponsor',
-      member_id: user._id,
-      organization_id: user.organization_id
+      member_id: request.beneficiary_id,
+      organization_id: user._id
     }
   ];
 
+  await notificationsModel.insertMany(notifications);
 };

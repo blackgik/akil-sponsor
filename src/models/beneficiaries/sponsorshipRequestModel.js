@@ -19,7 +19,7 @@ const SponsorShipSchema = new Schema(
     },
     subject_request: { type: String, default: '' },
     description: { type: String, default: '' },
-    product_type: { type: String, default: 'Finance' },
+    product_type: { type: Schema.Types.ObjectId, ref: 'Product' },
     amount: { type: Number },
     amount_in_words: { type: String },
     start_timeline: { type: Date },
@@ -32,7 +32,7 @@ const SponsorShipSchema = new Schema(
       status: { type: Boolean, default: false },
       start_timeline: { type: Date },
       end_timeline: { type: Date },
-      count:{ type: Number}
+      count: { type: Number }
     },
     urgency: { type: String },
     upload: [
