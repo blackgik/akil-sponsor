@@ -195,14 +195,14 @@ export const renewSponsorshipRequest = async ({ request_id, user }) => {
       type: 'update',
       who_is_reading: 'beneficiary',
       member_id: existingRequest.beneficiary_id,
-      organization_id: user.organization_id
+      organization_id: user._id
     },
     {
       note: `You have renewed the ${existingRequest.subject_request} request of ${benefi.personal.member_name}`,
       type: 'update',
       who_is_reading: 'sponsor',
       member_id: existingRequest.beneficiary_id,
-      organization_id: user.organization_id
+      organization_id: user._id
     }
   ];
 
