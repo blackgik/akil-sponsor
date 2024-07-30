@@ -38,7 +38,8 @@ const SponsorShipSchema = new Schema(
     upload: [
       {
         file_type: { type: String },
-        file: { type: String }
+        file: { type: String },
+        uploadedAt: { type: String }
       }
     ],
     upload_more: { type: Boolean, default: false }
