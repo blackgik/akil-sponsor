@@ -28,7 +28,7 @@ const SponsorShipSchema = new Schema(
     bank_name: { type: String },
     acct_name: { type: String },
     acct_number: { type: String },
-    recuring: {
+    recurring: {
       status: { type: Boolean, default: false },
       start_timeline: { type: Date },
       end_timeline: { type: Date },
