@@ -208,3 +208,31 @@ export const renewSponsorshipRequest = async ({ request_id, user }) => {
 
   await notificationsModel.insertMany(notifications);
 };
+
+export const viewSponsorRequestCounts = async ({ user }) => {
+  const totalRequest = await sponsorRequestsModel.countDocuments({
+    sponsor_id: user._id,
+    status: { $in: ['eligible', 'pending', 'accepted', 'denied'] }
+  });
+  const pendingRequest = await sponsorRequestsModel.countDocuments({
+    sponsor_id: user._id,
+    status: { $in: ['eligible', 'pending'] }
+  });
+  const approvedRequests = await sponsorRequestsModel.countDocuments({
+    sponsor_id: user._id,
+    status: 'accepted'
+  });
+  const deniedRequests = await sponsorRequestsModel.countDocuments({
+    sponsor_id: user._id,
+    status: 'denied'
+  });
+  const totalSpentFunds = '0';
+
+  return {
+    totalRequest,
+    pendingRequest,
+    approvedRequests,
+    deniedRequests,
+    totalSpentFunds
+  };
+};
