@@ -23,7 +23,7 @@ export const fetchAllRequests = async ({ params, user }) => {
     to,
     todayTime,
     upload_more,
-    recuring
+    recurring
   } = params;
   page_no = Number(page_no) || 1;
   no_of_requests = Number(no_of_requests) || 10;
@@ -51,8 +51,8 @@ export const fetchAllRequests = async ({ params, user }) => {
     filter.upload_more = upload_more;
   }
 
-  // if (recuring) {
-  //   filter.recuring.status = recuring;
+  // if (recurring) {
+  //   filter.recurring.status = recurring;
   // }
 
   const skip = (page_no - 1) * no_of_requests;
@@ -171,19 +171,19 @@ export const renewSponsorshipRequest = async ({ request_id, user }) => {
       'Sponsorship request not found or This project hasn’t been completed, make payment before you can renew'
     );
 
-  if (existingRequest.recuring.status === false) {
+  if (existingRequest.recurring.status === false) {
     throw new BadRequestError('This request doesn’t support renewal');
   }
 
-  if (existingRequest.recuring.end_timeline < Date.now()) {
-    existingRequest.recuring.status = false;
+  if (existingRequest.recurring.end_timeline < Date.now()) {
+    existingRequest.recurring.status = false;
     await existingRequest.save();
     throw new ForbiddenError('Timeline for renewal has long passed');
   }
 
   existingRequest.status = 'accepted';
   existingRequest.request_state = 'renewed';
-  existingRequest.recuring.count += 1;
+  existingRequest.recurring.count += 1;
   await existingRequest.save();
 
   const benefi = await organizationBeneficiaryModel.findById(existingRequest.beneficiary_id);
