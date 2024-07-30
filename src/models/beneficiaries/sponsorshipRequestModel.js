@@ -19,7 +19,7 @@ const SponsorShipSchema = new Schema(
     },
     subject_request: { type: String, default: '' },
     description: { type: String, default: '' },
-    product_type: { type: Schema.Types.ObjectId, ref: 'Product' },
+    product_type: { type: Schema.Types.ObjectId, ref: 'ProductCategory' },
     amount: { type: Number },
     amount_in_words: { type: String },
     start_timeline: { type: Date },
