@@ -3,7 +3,8 @@ import {
   fetchAllRequests,
   renewSponsorshipRequest,
   updateRequestStatus,
-  viewSponsorRequest
+  viewSponsorRequest,
+  viewSponsorRequestCounts
 } from '../../services/beneficiaries/requestService.js';
 
 export const fetchAllRequestsHandler = async (req, res) => {
@@ -42,4 +43,12 @@ export const renewSponsorshipRequestHandler = async (req, res) => {
   const response = await renewSponsorshipRequest({ request_id, user });
 
   res.send(appResponse('request status renewed', response));
+};
+
+export const viewSponsorRequestCountsHandler = async (req, res) => {
+  const { user } = req;
+
+  const response = await viewSponsorRequestCounts({ user });
+
+  res.send(appResponse('request count listed successfully', response));
 };
