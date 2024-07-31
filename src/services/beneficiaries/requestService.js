@@ -66,7 +66,8 @@ export const fetchAllRequests = async ({ params, user }) => {
     .sort({ createdAt: -1 })
     .skip(skip)
     .limit(limit)
-    .lean();
+    .lean()
+    .populate('beneficiary_id');
 
   return {
     page_no,
@@ -76,7 +77,7 @@ export const fetchAllRequests = async ({ params, user }) => {
 };
 
 export const viewSponsorRequest = async ({ request_id }) => {
-  const request = await sponsorRequestsModel.findById(request_id);
+  const request = await sponsorRequestsModel.findById(request_id).populate('beneficiary_id');
 
   if (!request) throw new NotFoundError('Request not Found');
 
