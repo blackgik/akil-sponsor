@@ -42,7 +42,10 @@ const SponsorShipSchema = new Schema(
         uploadedAt: { type: String }
       }
     ],
-    upload_more: { type: Boolean, default: false }
+    upload_more: { type: Boolean, default: false },
+    upload_more_documents: [{ type: String }],
+    upload_more_description: { type: String },
+    denial_reason: { type: String }
   },
   { timestamps: true, versionKey: false }
 );
