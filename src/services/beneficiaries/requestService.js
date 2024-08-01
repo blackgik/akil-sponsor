@@ -29,8 +29,9 @@ export const fetchAllRequests = async ({ params, user }) => {
   no_of_requests = Number(no_of_requests) || 10;
 
   const { today, timeDiff } = dateFilters({ duration, from, to, todayTime });
+
   const filter = {
-    // sponsor_id: mongoose.Types.ObjectId(user._id),
+    sponsor_id: user._id,
     createdAt: { $gte: timeDiff, $lte: today }
   };
 
@@ -67,7 +68,8 @@ export const fetchAllRequests = async ({ params, user }) => {
     .skip(skip)
     .limit(limit)
     .lean()
-    .populate('beneficiary_id');
+    .populate('beneficiary_id')
+    .populate('product_type');
 
   return {
     page_no,
@@ -77,7 +79,10 @@ export const fetchAllRequests = async ({ params, user }) => {
 };
 
 export const viewSponsorRequest = async ({ request_id }) => {
-  const request = await sponsorRequestsModel.findById(request_id).populate('beneficiary_id');
+  const request = await sponsorRequestsModel
+    .findById(request_id)
+    .populate('beneficiary_id')
+    .populate('product_type');
 
   if (!request) throw new NotFoundError('Request not Found');
 
@@ -127,7 +132,7 @@ export const updateRequestStatus = async ({ request_id, body, user }) => {
   const request = await sponsorRequestsModel.findOneAndUpdate(
     {
       _id: request_id,
-      status: { $in: ['eligible', 'pending'] }
+      $or: [{ status: 'pending' }, { status: 'eligible' }]
     },
     { $set: updatePayload },
     { new: true, runValidators: true }

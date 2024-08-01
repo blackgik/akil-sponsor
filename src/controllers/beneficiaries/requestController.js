@@ -10,7 +10,6 @@ import {
 export const fetchAllRequestsHandler = async (req, res) => {
   const { query, user } = req;
   const params = query;
-  console.log(user);
 
   const response = await fetchAllRequests({ params, user });
 
