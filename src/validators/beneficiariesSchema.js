@@ -7,7 +7,7 @@ export const CreateBeneficiarySchema = Joi.object({
   email: Joi.string().required(),
   phone: Joi.string().required(),
   country: Joi.string().required(),
-  gender: Joi.string().required(),
+  gender: Joi.string().required()
 });
 
 export const UpdateBeneficiarySchema = Joi.object({
@@ -18,6 +18,13 @@ export const UpdateBeneficiarySchema = Joi.object({
   email: Joi.string().optional().allow('', null),
   phone: Joi.string().optional().allow('', null),
   country: Joi.string().optional().allow('', null),
-  gender: Joi.string().optional().allow('', null),
+  gender: Joi.string().optional().allow('', null)
 });
 
+export const payRequessSchema = Joi.object({
+  requests: Joi.array().items(Joi.string()).required()
+});
+
+export const validatePaymentRequestSchema = Joi.object({
+  reference: Joi.string().required()
+});

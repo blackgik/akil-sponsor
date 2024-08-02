@@ -26,6 +26,7 @@ const SponsorShipSchema = new Schema(
     end_timeline: { type: Date },
     name: { type: String },
     bank_name: { type: String },
+    bank_code: { type: String },
     acct_name: { type: String },
     acct_number: { type: String },
     recurring: {
