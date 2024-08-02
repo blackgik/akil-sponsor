@@ -1,9 +1,11 @@
 import appResponse from '../../../lib/appResponse.js';
 import {
+  approveRequests,
+  denyRequests,
   fetchAllRequests,
   makeRequestedPayment,
-  renewSponsorshipRequest,
-  updateRequestStatus,
+  renewSponsorshipRequests,
+  uploadMore,
   validateRequestPayments,
   viewSponsorRequest,
   viewSponsorRequestCounts
@@ -27,21 +29,33 @@ export const viewSponsorRequestHandler = async (req, res) => {
 };
 
 export const updateRequestStatusHandler = async (req, res) => {
+
+  const { user, body, query } = req;
+
+  const { status } = query;
+  if (status == 'accepted') {
+    const response = await approveRequests({ body, user, status });
+    res.send(appResponse('request accepted', response));
+  } else if (status == 'denied') {
+    const response = await denyRequests({ body, status, user });
+    res.send(appResponse('request denied', response));
+  }
+};
+
+export const uploadMoreHandler = async (req, res) => {
   const { user, body } = req;
 
   const { request_id } = req.params;
 
-  const response = await updateRequestStatus({ request_id, body, user });
+  const response = await uploadMore({ request_id, body, user });
 
-  res.send(appResponse('request status changed', response));
+  res.send(appResponse('requested for upload more', response));
 };
 
 export const renewSponsorshipRequestHandler = async (req, res) => {
-  const { user } = req;
+  const { user, body } = req;
 
-  const { request_id } = req.params;
-
-  const response = await renewSponsorshipRequest({ request_id, user });
+  const response = await renewSponsorshipRequests({ body, user });
 
   res.send(appResponse('request status renewed', response));
 };

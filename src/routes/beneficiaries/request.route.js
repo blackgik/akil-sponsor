@@ -5,6 +5,7 @@ import {
   makeRequestedPaymentHandler,
   renewSponsorshipRequestHandler,
   updateRequestStatusHandler,
+  uploadMoreHandler,
   validateRequestPaymentsHandler,
   viewSponsorRequestCountsHandler,
   viewSponsorRequestHandler
@@ -20,7 +21,8 @@ const request_router = Router();
 request_router.get('/fetch-requests', authentication, fetchAllRequestsHandler);
 request_router.get('/view-request/:request_id', authentication, viewSponsorRequestHandler);
 request_router.patch('/update-status/:request_id', authentication, updateRequestStatusHandler);
-request_router.patch('/renew-request/:request_id', authentication, renewSponsorshipRequestHandler);
+request_router.patch('/renew-request', authentication, renewSponsorshipRequestHandler);
+request_router.patch('/upload-more/:request_id', authentication, uploadMoreHandler);
 request_router.get('/request-count', authentication, viewSponsorRequestCountsHandler);
 request_router.post(
   '/make-requested-payment',
