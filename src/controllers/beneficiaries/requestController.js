@@ -3,8 +3,10 @@ import {
   approveRequests,
   denyRequests,
   fetchAllRequests,
+  makeRequestedPayment,
   renewSponsorshipRequests,
   uploadMore,
+  validateRequestPayments,
   viewSponsorRequest,
   viewSponsorRequestCounts
 } from '../../services/beneficiaries/requestService.js';
@@ -64,4 +66,20 @@ export const viewSponsorRequestCountsHandler = async (req, res) => {
   const response = await viewSponsorRequestCounts({ user });
 
   res.send(appResponse('request count listed successfully', response));
+};
+
+export const makeRequestedPaymentHandler = async (req, res) => {
+  const { user, body } = req;
+
+  const response = await makeRequestedPayment({ user, body });
+
+  res.send(appResponse('Initiated gateway', response));
+};
+
+export const validateRequestPaymentsHandler = async (req, res) => {
+  const { user, body } = req;
+
+  const response = await validateRequestPayments({ user, body });
+
+  res.send(appResponse('Initiated transfer successfully', response));
 };

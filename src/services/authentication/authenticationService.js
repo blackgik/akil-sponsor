@@ -283,7 +283,6 @@ export const loginOrganization = async (body, clienturl) => {
     loginData.is_first_time = false;
     await loginData.save();
   }
-
   console.log({ clienturl });
 
   const allowdOrigin = [
@@ -292,7 +291,9 @@ export const loginOrganization = async (body, clienturl) => {
     'http://localhost:4000',
     'http://localhost:4005',
     'http://localhost:3000',
-    'http://localhost:3005'
+    'http://localhost:3005',
+    'https://postman:akilaah',
+    'postman:akilaah'
   ];
 
   if (!allowdOrigin.includes(clienturl)) {
@@ -302,6 +303,8 @@ export const loginOrganization = async (body, clienturl) => {
     const findPersonalization = await personalizationModel.findOne({
       'general_info.url_name': searchRgx
     });
+
+    if (!findPersonalization) throw new NotFoundError('Invalid account user');
 
     if (
       String(findPersonalization.sponsor_id) !== String(checkOrg ? checkOrg._id : user?.sponsor_id)

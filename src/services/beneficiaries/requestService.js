@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import axios from 'axios';
 import {
   BadRequestError,
   DuplicateError,
@@ -10,6 +11,7 @@ import notificationsModel from '../../models/settings/notificationsModel.js';
 import sponsorRequestsModel from '../../models/beneficiaries/sponsorshipRequestModel.js';
 import { dateFilters } from '../../utils/timeFilters.js';
 import organizationBeneficiaryModel from '../../models/beneficiaries/organizationBeneficiaryModel.js';
+import env from '../../config/env.js';
 
 export const fetchAllRequests = async ({ params, user }) => {
   let {
@@ -349,4 +351,140 @@ export const viewSponsorRequestCounts = async ({ user }) => {
     deniedRequests,
     totalSpentFunds
   };
+};
+
+export const makeRequestedPayment = async ({ user, body }) => {
+  let amount = 0;
+  const requests = [];
+
+  for (const request of body.requests) {
+    const checkRequest = await sponsorRequestsModel.findById(request);
+
+    if (!checkRequest) continue;
+
+    if (!checkRequest.amount) continue;
+
+    if (checkRequest.status === 'paid') continue;
+
+    // check the member
+    const benefic = await organizationBeneficiaryModel.findById(checkRequest.beneficiary_id);
+
+    if (!benefic) continue;
+
+    requests.push(request);
+
+    amount += checkRequest.amount;
+  }
+
+  if (!amount)
+    throw new BadRequestError(
+      'Seams all requests have no amount attached. Please contact the beneficiaries'
+    );
+
+  if (!requests.length) throw new BadRequestError('You have all members as invalid');
+
+  const config = {
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: 'Bearer ' + env.paystack_secret_key
+    }
+  };
+
+  const paymentata = {
+    email: user.email,
+    amount: amount * 100,
+    callback_url: `${env.dev_base_url_org}/projects/sponsorship`,
+    metadata: {
+      requests: requests,
+      type: 'request_transfers'
+    }
+  };
+
+  const url = `${env.paystack_api_url}/transaction/initialize`;
+
+  const response = await axios.post(url, paymentata, config);
+
+  if (response.status !== 200) throw new BadRequestError('Could not initialize transaction');
+
+  return response.data.data.authorization_url;
+};
+
+export const validateRequestPayments = async ({ user, body }) => {
+  const { reference } = body;
+
+  // validate the reference and get the metadata
+  const url = `${env.paystack_api_url}/transaction/verify/${reference}`;
+
+  const config = {
+    headers: {
+      Authorization: `Bearer ${env.paystack_secret_key}`
+    }
+  };
+
+  const response = await axios.get(url, config);
+
+  const paymentdata = response.data.data;
+  const metadata = response.data.data.metadata;
+
+  const bulkreceiptientData = [];
+
+  // initate transfers on account
+  for (const request of metadata.requests) {
+    const checkRequest = await sponsorRequestsModel.findById(request);
+
+    if (!checkRequest) continue;
+
+    if (!checkRequest.amount) continue;
+
+    const benefic = await organizationBeneficiaryModel.findById(checkRequest.beneficiary_id);
+
+    if (!benefic) continue;
+
+    const receiptientData = {
+      type: 'nuban',
+      name: benefic.personal.member_name,
+      account_number: checkRequest.acct_number,
+      bank_code: checkRequest.bank_code,
+      currency: 'NGN'
+    };
+
+    const configRecipient = {
+      headers: {
+        Authorization: `Bearer ${env.paystack_secret_key}`,
+        'Content-Type': 'application/json'
+      }
+    };
+
+    const url = `${env.paystack_api_url}/transferrecipient`;
+
+    const recipientask = await axios.post(url, receiptientData, configRecipient);
+
+    if (recipientask.status != 200) return;
+
+    const recipient_code = recipientask.data.data.recipient_code;
+
+    const refData = {
+      amount: checkRequest.amount,
+      reference: checkRequest._id,
+      reason: checkRequest.subject_request,
+      recipient: recipient_code
+    };
+
+    bulk.push(refData);
+  }
+
+  const refConfig = {
+    headers: {
+      Authorization: `Bearer ${env.paystack_secret_key}`,
+      'Content-Type': 'application/json'
+    }
+  };
+
+  const urlref = `${env.paystack_api_url}/transfer/bulk`;
+
+  const bulkTransfer = await axios.post(urlref, refData, refConfig);
+
+  if (bulkTransfer.status !== 2000) throw new BadRequestError('Bad Request Error');
+
+  return {};
 };
