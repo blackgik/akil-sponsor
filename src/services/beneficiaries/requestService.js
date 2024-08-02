@@ -89,131 +89,297 @@ export const viewSponsorRequest = async ({ request_id }) => {
   return request;
 };
 
-export const updateRequestStatus = async ({ request_id, body, user }) => {
-  // Determine the new request_state based on the body.status
-  let requestStateUpdate = {};
-  if (body.status === 'accepted') {
-    requestStateUpdate.request_state = 'accepted';
-  } else if (body.status === 'denied') {
-    requestStateUpdate.request_state = 'denied';
+export const approveRequests = async ({ body, user, status }) => {
+  // Ensure the status is 'accepted'
+  if (status !== 'accepted') {
+    throw new BadRequestError('Only acceptance of requests is allowed');
   }
 
-  // Check if status is not provided and set upload_more accordingly
-  if (!body.status) {
-    body.upload_more = true;
-    const request = await sponsorRequestsModel.findById(request_id);
+  // Determine the new request_state based on the status
+  const requestStateUpdate = { request_state: 'accepted', status };
+
+  // Merge the requestStateUpdate with the body to create the update payload
+  const updatePayload = { ...requestStateUpdate };
+
+  // Ensure request_ids is an array
+  if (!Array.isArray(body.request_ids)) {
+    throw new BadRequestError('request_ids should be an array');
+  }
+
+  const updatedRequests = [];
+  const notifications = [];
+
+  for (const request_id of body.request_ids) {
+    // Update each request
+    const request = await sponsorRequestsModel.findOneAndUpdate(
+      { _id: request_id },
+      { $set: updatePayload },
+      { new: true, runValidators: true }
+    );
+
+    if (!request)
+      throw new NotFoundError(
+        `Sponsorship request not found or not in pending status for id ${request_id}`
+      );
+
+    updatedRequests.push(request);
+
     const benefi = await organizationBeneficiaryModel.findById(request.beneficiary_id);
 
-    // Create notifications
-    const notifications = [
+    // Create notifications for each request
+    notifications.push(
       {
-        note: `your sponsor needs you to upload more document for your ${request.subject_request} `,
+        note: `your sponsorship request status has been accepted`,
         type: 'update',
         who_is_reading: 'beneficiary',
         member_id: request.beneficiary_id,
         organization_id: user._id
       },
       {
-        note: `you have requested for ${benefi.personal.member_name} of to upload more documents for his ${request.subject_request} request`,
+        note: `you have updated the request status of ${benefi.personal.member_name} to accepted`,
         type: 'update',
         who_is_reading: 'sponsor',
         member_id: request.beneficiary_id,
         organization_id: user._id
       }
-    ];
-
-    await notificationsModel.insertMany(notifications);
+    );
   }
 
-  // Merge the requestStateUpdate with the body to create the update payload
-  const updatePayload = { ...body, ...requestStateUpdate };
+  // Insert all notifications at once
+  await notificationsModel.insertMany(notifications);
 
+  return updatedRequests;
+};
+
+export const denyRequests = async ({ body, status, user }) => {
+  // Ensure the status is 'denied'
+  if (status !== 'denied') {
+    throw new BadRequestError('Only denial of requests is allowed');
+  }
+
+  const updatedRequests = [];
+  const notifications = [];
+
+  if (!Array.isArray(body.denial_reason) || body.denial_reason.length !== body.request_ids.length) {
+    throw new BadRequestError('Each request ID must have a corresponding denial reason');
+  }
+
+  for (let i = 0; i < body.request_ids.length; i++) {
+    const request_id = body.request_ids[i];
+    const denial_reason = body.denial_reason[i];
+
+    // Ensure each request has a denial reason
+    if (!denial_reason) {
+      throw new BadRequestError(`Request id ${request_id} must have a denial reason`);
+    }
+
+    // Determine the new request_state based on the status
+    const requestStateUpdate = {
+      request_state: 'denied',
+      status,
+      denial_reason: denial_reason
+    };
+
+    // Update each request
+    const request = await sponsorRequestsModel.findOneAndUpdate(
+      { _id: request_id },
+      { $set: requestStateUpdate },
+      { new: true, runValidators: true }
+    );
+
+    if (!request)
+      throw new NotFoundError(
+        `Sponsorship request not found or not in pending status for id ${request_id}`
+      );
+
+    updatedRequests.push(request);
+
+    const benefi = await organizationBeneficiaryModel.findById(request.beneficiary_id);
+
+    // Create notifications for each request
+    notifications.push(
+      {
+        note: `your sponsorship request status has been denied with reason: ${denial_reason}`,
+        type: 'update',
+        who_is_reading: 'beneficiary',
+        member_id: request.beneficiary_id,
+        organization_id: user._id
+      },
+      {
+        note: `you have updated the request status of ${benefi.personal.member_name} to denied with reason: ${denial_reason}`,
+        type: 'update',
+        who_is_reading: 'sponsor',
+        member_id: request.beneficiary_id,
+        organization_id: user._id
+      }
+    );
+  }
+
+  // Insert all notifications at once
+  await notificationsModel.insertMany(notifications);
+
+  return updatedRequests;
+};
+
+export const uploadMore = async ({ request_id, body, user }) => {
   // Update the request
   const request = await sponsorRequestsModel.findOneAndUpdate(
     {
-      _id: request_id,
-      $or: [{ status: 'pending' }, { status: 'eligible' }]
+      _id: request_id
     },
-    { $set: updatePayload },
+    { $set: body },
     { new: true, runValidators: true }
   );
 
   if (!request) throw new NotFoundError('Sponsorship request not found or not in pending status');
 
   const benefi = await organizationBeneficiaryModel.findById(request.beneficiary_id);
-
-  if (body.status) {
-    // Create notifications
-    const notifications = [
-      {
-        note: `your sponsorship request status have been ${body.status}`,
-        type: 'update',
-        who_is_reading: 'beneficiary',
-        member_id: request.beneficiary_id,
-        organization_id: user._id
-      },
-      {
-        note: `you have updated the request status of ${benefi.personal.member_name} to ${body.status}`,
-        type: 'update',
-        who_is_reading: 'sponsor',
-        member_id: request.beneficiary_id,
-        organization_id: user._id
-      }
-    ];
-
-    await notificationsModel.insertMany(notifications);
-  }
-  return request;
-};
-
-export const renewSponsorshipRequest = async ({ request_id, user }) => {
-  // Check for existing sponsorship requests
-  const existingRequest = await sponsorRequestsModel.findOne({
-    _id: request_id,
-    status: 'paid'
-  });
-  if (!existingRequest)
-    throw new NotFoundError(
-      'Sponsorship request not found or This project hasn’t been completed, make payment before you can renew'
-    );
-
-  if (existingRequest.recurring.status === false) {
-    throw new BadRequestError('This request doesn’t support renewal');
-  }
-
-  if (existingRequest.recurring.end_timeline < Date.now()) {
-    existingRequest.recurring.status = false;
-    await existingRequest.save();
-    throw new ForbiddenError('Timeline for renewal has long passed');
-  }
-
-  existingRequest.status = 'accepted';
-  existingRequest.request_state = 'renewed';
-  existingRequest.recurring.count += 1;
-  await existingRequest.save();
-
-  const benefi = await organizationBeneficiaryModel.findById(existingRequest.beneficiary_id);
-
   // Create notifications
   const notifications = [
     {
-      note: `Your  ${existingRequest.subject_request} sponsorship request has been renewed`,
+      note: `your sponsor needs you to upload more document for your ${request.subject_request} `,
       type: 'update',
       who_is_reading: 'beneficiary',
-      member_id: existingRequest.beneficiary_id,
+      member_id: request.beneficiary_id,
       organization_id: user._id
     },
     {
-      note: `You have renewed the ${existingRequest.subject_request} request of ${benefi.personal.member_name}`,
+      note: `you have requested for ${benefi.personal.member_name} of to upload more documents for his ${request.subject_request} request`,
       type: 'update',
       who_is_reading: 'sponsor',
-      member_id: existingRequest.beneficiary_id,
+      member_id: request.beneficiary_id,
       organization_id: user._id
     }
   ];
-
   await notificationsModel.insertMany(notifications);
+
+  return { request };
 };
+
+export const renewSponsorshipRequests = async ({ body, user }) => {
+  const updatedRequests = [];
+  const notifications = [];
+
+  for (const request_id of body.request_ids) {
+    // Check for existing sponsorship requests
+    const existingRequest = await sponsorRequestsModel.findOne({
+      _id: request_id,
+      status: "paid",
+    });
+
+    if (!existingRequest) {
+      throw new NotFoundError(
+        'Sponsorship request not found or This project hasn’t been completed, make payment before you can renew'
+      );
+    }
+
+    if (existingRequest.feedback_stats !== true) {
+      throw new BadRequestError(
+        "you havent givien feedback for your first payment"
+      );
+    }
+
+    if (existingRequest.recurring.status === false) {
+      throw new BadRequestError('This request doesn’t support renewal');
+    }
+
+    if (existingRequest.recurring.end_timeline < Date.now()) {
+      existingRequest.recurring.status = false;
+      await existingRequest.save();
+      throw new BadRequestError('Timeline for renewal has long passed');
+    }
+
+    existingRequest.status = 'accepted';
+    existingRequest.request_state = 'renewed';
+    existingRequest.recurring.count += 1;
+    await existingRequest.save();
+
+    const benefi = await organizationBeneficiaryModel.findById(existingRequest.beneficiary_id);
+
+    // Create notifications
+    notifications.push(
+      {
+        note: `Your ${existingRequest.subject_request} sponsorship request has been renewed`,
+        type: 'update',
+        who_is_reading: 'beneficiary',
+        member_id: existingRequest.beneficiary_id,
+        organization_id: user._id
+      },
+      {
+        note: `You have renewed the ${existingRequest.subject_request} request of ${benefi.personal.member_name}`,
+        type: 'update',
+        who_is_reading: 'sponsor',
+        member_id: existingRequest.beneficiary_id,
+        organization_id: user._id
+      }
+    );
+
+    updatedRequests.push(existingRequest);
+  }
+
+  // Insert all notifications at once
+  await notificationsModel.insertMany(notifications);
+
+  return updatedRequests;
+};
+
+// export const acceptRequest = async ({ request_id, body, user, params }) => {
+//   const { status } = params;
+//   // Determine the new request_state based on the status
+//   let requestStateUpdate = {};
+//   if (status === "accepted") {
+//     requestStateUpdate.request_state = "accepted";
+//   } else if (status === "denied") {
+//     if (!body.denial_reason) {
+//       throw new BadRequestError("Please provide a denial reason");
+//     }
+//     requestStateUpdate.request_state = "denied";
+//   }
+
+//   // Merge the requestStateUpdate with the body to create the update payload
+//   const updatePayload = { ...body, ...requestStateUpdate };
+
+//   // Update the request
+//   const request = await sponsorRequestsModel.findOneAndUpdate(
+//     {
+//       _id: request_id,
+//     },
+//     { $set: updatePayload },
+//     { new: true, runValidators: true }
+//   );
+
+//   if (!request)
+//     throw new NotFoundError(
+//       "Sponsorship request not found or not in pending status"
+//     );
+
+//   const benefi = await organizationBeneficiaryModel.findById(
+//     request.beneficiary_id
+//   );
+
+//   if (body.status) {
+//     // Create notifications
+//     const notifications = [
+//       {
+//         note: `your sponsorship request status have been ${body.status}`,
+//         type: "update",
+//         who_is_reading: "beneficiary",
+//         member_id: request.beneficiary_id,
+//         organization_id: user._id,
+//       },
+//       {
+//         note: `you have updated the request status of ${benefi.personal.member_name} to ${body.status}`,
+//         type: "update",
+//         who_is_reading: "sponsor",
+//         member_id: request.beneficiary_id,
+//         organization_id: user._id,
+//       },
+//     ];
+
+//     await notificationsModel.insertMany(notifications);
+//   }
+//   return request;
+// };
 
 export const viewSponsorRequestCounts = async ({ user }) => {
   const totalRequest = await sponsorRequestsModel.countDocuments({
