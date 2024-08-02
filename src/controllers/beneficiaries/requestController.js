@@ -5,6 +5,7 @@ import {
   fetchAllRequests,
   makeRequestedPayment,
   renewSponsorshipRequests,
+  sponsorRequestInfo,
   uploadMore,
   validateRequestPayments,
   viewSponsorRequest,
@@ -29,7 +30,6 @@ export const viewSponsorRequestHandler = async (req, res) => {
 };
 
 export const updateRequestStatusHandler = async (req, res) => {
-
   const { user, body, query } = req;
 
   const { status } = query;
@@ -82,4 +82,12 @@ export const validateRequestPaymentsHandler = async (req, res) => {
   const response = await validateRequestPayments({ user, body });
 
   res.send(appResponse('Initiated transfer successfully', response));
+};
+
+export const sponsorRequestInfoHandler = async (req, res) => {
+  const { user } = req;
+
+  const response = await sponsorRequestInfo({ user });
+
+  res.send(appResponse('fetched dashboard info', response));
 };
