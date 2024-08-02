@@ -12,6 +12,7 @@ import sponsorRequestsModel from '../../models/beneficiaries/sponsorshipRequestM
 import { dateFilters } from '../../utils/timeFilters.js';
 import organizationBeneficiaryModel from '../../models/beneficiaries/organizationBeneficiaryModel.js';
 import env from '../../config/env.js';
+import ProductCategoryModel from '../../models/products/ProductCategoryModel.js';
 
 export const fetchAllRequests = async ({ params, user }) => {
   let {
@@ -266,7 +267,7 @@ export const renewSponsorshipRequests = async ({ body, user }) => {
     // Check for existing sponsorship requests
     const existingRequest = await sponsorRequestsModel.findOne({
       _id: request_id,
-      status: "paid",
+      status: 'paid'
     });
 
     if (!existingRequest) {
@@ -276,9 +277,7 @@ export const renewSponsorshipRequests = async ({ body, user }) => {
     }
 
     if (existingRequest.feedback_stats !== true) {
-      throw new BadRequestError(
-        "you havent givien feedback for your first payment"
-      );
+      throw new BadRequestError('you havent givien feedback for your first payment');
     }
 
     if (existingRequest.recurring.status === false) {
@@ -328,7 +327,7 @@ export const renewSponsorshipRequests = async ({ body, user }) => {
 export const viewSponsorRequestCounts = async ({ user }) => {
   const totalRequest = await sponsorRequestsModel.countDocuments({
     sponsor_id: user._id,
-    status: { $in: ['eligible', 'pending', 'accepted', 'denied'] }
+    status: { $in: ['eligible', 'pending', 'accepted', 'denied', 'paid'] }
   });
   const pendingRequest = await sponsorRequestsModel.countDocuments({
     sponsor_id: user._id,
@@ -342,14 +341,23 @@ export const viewSponsorRequestCounts = async ({ user }) => {
     sponsor_id: user._id,
     status: 'denied'
   });
-  const totalSpentFunds = '0';
+
+  const totalPaid = await sponsorRequestsModel.find({
+    sponsor_id: user._id,
+    status: 'paid'
+  });
+
+  const totalAmountPaid = totalPaid.reduce((accumulator, request) => {
+    return accumulator + (request.amount || 0);
+  }, 0);
 
   return {
     totalRequest,
     pendingRequest,
-    approvedRequests,
     deniedRequests,
-    totalSpentFunds
+    approvedRequests,
+    totalPaid: totalPaid.length,
+    totalSpentFunds: totalAmountPaid
   };
 };
 
@@ -487,4 +495,98 @@ export const validateRequestPayments = async ({ user, body }) => {
   if (bulkTransfer.status !== 2000) throw new BadRequestError('Bad Request Error');
 
   return {};
+};
+
+export const sponsorRequestInfo = async ({ user }) => {
+  const requests = await sponsorRequestsModel
+    .find({ sponsor_id: user._id })
+    .populate({ path: 'product_type', select: 'product_category_name' })
+    .exec();
+
+  const financeRequests = requests.filter(
+    (request) => request.product_type.product_category_name === 'finance'
+  );
+
+  const foodRequests = requests.filter(
+    (request) => request.product_type.product_category_name === 'food'
+  );
+
+  const healthRequests = requests.filter(
+    (request) => request.product_type.product_category_name === 'health'
+  );
+
+  const educationRequests = requests.filter(
+    (request) => request.product_type.product_category_name === 'education'
+  );
+
+  const housingRequests = requests.filter(
+    (request) => request.product_type.product_category_name === 'housing'
+  );
+
+  const transportationRequests = requests.filter(
+    (request) => request.product_type.product_category_name === 'transportation'
+  );
+
+  const totalCount =
+    financeRequests.length +
+    foodRequests.length +
+    healthRequests.length +
+    educationRequests.length +
+    housingRequests.length +
+    transportationRequests.length;
+
+  const groupedPaidRequests = await sponsorRequestsModel.aggregate([
+    {
+      $match: {
+        sponsor_id: mongoose.Types.ObjectId(user._id),
+        status: { $in: ['pending', 'accepted', 'denied', 'paid', 'ineligible'] }
+      }
+    },
+    {
+      $group: {
+        _id: {
+          year: { $year: '$createdAt' },
+          month: { $month: '$createdAt' }
+        },
+        count: { $sum: 1 },
+        totalAmount: { $sum: '$amount' }
+      }
+    },
+    {
+      $sort: { '_id.year': 1, '_id.month': 1 }
+    },
+    {
+      $group: {
+        _id: null,
+        monthlyData: { $push: { month: '$_id', count: '$count', totalAmount: '$totalAmount' } },
+        overallTotalAmount: { $sum: '$totalAmount' }
+      }
+    }
+  ]);
+
+  const result = groupedPaidRequests.map((info) => {
+    const { monthlyData, overallTotalAmount } = info;
+    // Assuming you only have one month in the monthlyData
+    const monthData = monthlyData[0];
+    const { year, month } = monthData.month;
+    const totalMonthAmount = monthData.totalAmount;
+
+    return {
+      year,
+      month,
+      totalMonthAmount,
+      totalYearAmount: overallTotalAmount
+    };
+  });
+
+  return {
+    finance: financeRequests.length,
+    food: foodRequests.length,
+    health: healthRequests.length,
+    education: educationRequests.length,
+    housing: housingRequests.length,
+    transportation: transportationRequests.length,
+    totalCount,
+    graphInfo: result
+  };
 };
