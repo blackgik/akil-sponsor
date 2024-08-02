@@ -266,7 +266,7 @@ export const renewSponsorshipRequests = async ({ body, user }) => {
     // Check for existing sponsorship requests
     const existingRequest = await sponsorRequestsModel.findOne({
       _id: request_id,
-      status: "paid",
+      status: 'paid'
     });
 
     if (!existingRequest) {
@@ -276,9 +276,7 @@ export const renewSponsorshipRequests = async ({ body, user }) => {
     }
 
     if (existingRequest.feedback_stats !== true) {
-      throw new BadRequestError(
-        "you havent givien feedback for your first payment"
-      );
+      throw new BadRequestError('you havent givien feedback for your first payment');
     }
 
     if (existingRequest.recurring.status === false) {
@@ -410,81 +408,100 @@ export const makeRequestedPayment = async ({ user, body }) => {
 };
 
 export const validateRequestPayments = async ({ user, body }) => {
-  const { reference } = body;
+  try {
+    const { reference } = body;
 
-  // validate the reference and get the metadata
-  const url = `${env.paystack_api_url}/transaction/verify/${reference}`;
+    // validate the reference and get the metadata
+    const url = `${env.paystack_api_url}/transaction/verify/${reference}`;
 
-  const config = {
-    headers: {
-      Authorization: `Bearer ${env.paystack_secret_key}`
-    }
-  };
-
-  const response = await axios.get(url, config);
-
-  const paymentdata = response.data.data;
-  const metadata = response.data.data.metadata;
-
-  const bulkreceiptientData = [];
-
-  // initate transfers on account
-  for (const request of metadata.requests) {
-    const checkRequest = await sponsorRequestsModel.findById(request);
-
-    if (!checkRequest) continue;
-
-    if (!checkRequest.amount) continue;
-
-    const benefic = await organizationBeneficiaryModel.findById(checkRequest.beneficiary_id);
-
-    if (!benefic) continue;
-
-    const receiptientData = {
-      type: 'nuban',
-      name: benefic.personal.member_name,
-      account_number: checkRequest.acct_number,
-      bank_code: checkRequest.bank_code,
-      currency: 'NGN'
+    const config = {
+      headers: {
+        Authorization: `Bearer ${env.paystack_secret_key}`
+      }
     };
 
-    const configRecipient = {
+    const response = await axios.get(url, config);
+
+    const paymentdata = response.data.data;
+    const metadata = response.data.data.metadata;
+
+    const bulkreceiptientData = [];
+
+    // initate transfers on account
+    for (const request of metadata.requests) {
+      const checkRequest = await sponsorRequestsModel.findById(request);
+
+      if (!checkRequest) continue;
+
+      if (!checkRequest.amount) continue;
+
+      const benefic = await organizationBeneficiaryModel.findById(checkRequest.beneficiary_id);
+
+      if (!benefic) continue;
+
+      const receiptientData = {
+        type: 'nuban',
+        name: benefic.personal.member_name,
+        account_number: '0151712510',
+        bank_code: checkRequest?.bank_code || '058',
+        currency: 'NGN'
+      };
+
+      const configRecipient = {
+        headers: {
+          Authorization: `Bearer ${env.paystack_secret_key}`,
+          'Content-Type': 'application/json'
+        }
+      };
+
+      const url = `${env.paystack_api_url}/transferrecipient`;
+
+      const recipientask = await axios.post(url, receiptientData, configRecipient);
+
+      console.log({ status: recipientask.status });
+
+      if (recipientask.status !== 201) continue;
+
+      const recipient_code = recipientask.data.data.recipient_code;
+
+      console.log({ recipientask: recipientask.data.data });
+
+      const refData = {
+        amount: checkRequest.amount,
+        reference: checkRequest._id,
+        reason: checkRequest.subject_request,
+        recipient: recipient_code
+      };
+
+      console.log(refData);
+      bulkreceiptientData.push(refData);
+    }
+
+    const refConfig = {
       headers: {
         Authorization: `Bearer ${env.paystack_secret_key}`,
         'Content-Type': 'application/json'
       }
     };
 
-    const url = `${env.paystack_api_url}/transferrecipient`;
-
-    const recipientask = await axios.post(url, receiptientData, configRecipient);
-
-    if (recipientask.status != 200) return;
-
-    const recipient_code = recipientask.data.data.recipient_code;
-
-    const refData = {
-      amount: checkRequest.amount,
-      reference: checkRequest._id,
-      reason: checkRequest.subject_request,
-      recipient: recipient_code
+    const transferData = {
+      currency: 'NGN',
+      source: 'balance',
+      transfers: bulkreceiptientData
     };
 
-    bulk.push(refData);
+    console.log(transferData);
+
+    const urlref = `${env.paystack_api_url}/transfer/bulk`;
+
+    const bulkTransfer = await axios.post(urlref, transferData, refConfig);
+
+    console.log({ status: bulkTransfer.status });
+
+    // if (bulkTransfer.status !== 2000) throw new BadRequestError('Bad Request Error');
+
+    return bulkTransfer.data.data;
+  } catch (err) {
+    console.error(err);
   }
-
-  const refConfig = {
-    headers: {
-      Authorization: `Bearer ${env.paystack_secret_key}`,
-      'Content-Type': 'application/json'
-    }
-  };
-
-  const urlref = `${env.paystack_api_url}/transfer/bulk`;
-
-  const bulkTransfer = await axios.post(urlref, refData, refConfig);
-
-  if (bulkTransfer.status !== 2000) throw new BadRequestError('Bad Request Error');
-
-  return {};
 };
