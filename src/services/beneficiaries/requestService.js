@@ -323,64 +323,6 @@ export const renewSponsorshipRequests = async ({ body, user }) => {
   return updatedRequests;
 };
 
-// export const acceptRequest = async ({ request_id, body, user, params }) => {
-//   const { status } = params;
-//   // Determine the new request_state based on the status
-//   let requestStateUpdate = {};
-//   if (status === "accepted") {
-//     requestStateUpdate.request_state = "accepted";
-//   } else if (status === "denied") {
-//     if (!body.denial_reason) {
-//       throw new BadRequestError("Please provide a denial reason");
-//     }
-//     requestStateUpdate.request_state = "denied";
-//   }
-
-//   // Merge the requestStateUpdate with the body to create the update payload
-//   const updatePayload = { ...body, ...requestStateUpdate };
-
-//   // Update the request
-//   const request = await sponsorRequestsModel.findOneAndUpdate(
-//     {
-//       _id: request_id,
-//     },
-//     { $set: updatePayload },
-//     { new: true, runValidators: true }
-//   );
-
-//   if (!request)
-//     throw new NotFoundError(
-//       "Sponsorship request not found or not in pending status"
-//     );
-
-//   const benefi = await organizationBeneficiaryModel.findById(
-//     request.beneficiary_id
-//   );
-
-//   if (body.status) {
-//     // Create notifications
-//     const notifications = [
-//       {
-//         note: `your sponsorship request status have been ${body.status}`,
-//         type: "update",
-//         who_is_reading: "beneficiary",
-//         member_id: request.beneficiary_id,
-//         organization_id: user._id,
-//       },
-//       {
-//         note: `you have updated the request status of ${benefi.personal.member_name} to ${body.status}`,
-//         type: "update",
-//         who_is_reading: "sponsor",
-//         member_id: request.beneficiary_id,
-//         organization_id: user._id,
-//       },
-//     ];
-
-//     await notificationsModel.insertMany(notifications);
-//   }
-//   return request;
-// };
-
 export const viewSponsorRequestCounts = async ({ user }) => {
   const totalRequest = await sponsorRequestsModel.countDocuments({
     sponsor_id: user._id,
