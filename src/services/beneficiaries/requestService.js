@@ -506,34 +506,52 @@ export const sponsorRequestInfo = async ({ user }) => {
   const financeRequests = requests.filter(
     (request) => request.product_type.product_category_name === 'finance'
   );
+  const totalFinanceAmount = financeRequests.reduce((accumulator, request) => {
+    return accumulator + (request.amount || 0);
+  }, 0);
 
   const foodRequests = requests.filter(
     (request) => request.product_type.product_category_name === 'food'
   );
+  const totalFoodAmount = foodRequests.reduce((accumulator, request) => {
+    return accumulator + (request.amount || 0);
+  }, 0);
 
   const healthRequests = requests.filter(
     (request) => request.product_type.product_category_name === 'health'
   );
+  const totalHealthAmount = healthRequests.reduce((accumulator, request) => {
+    return accumulator + (request.amount || 0);
+  }, 0);
 
   const educationRequests = requests.filter(
     (request) => request.product_type.product_category_name === 'education'
   );
+  const totalEducationAmount = educationRequests.reduce((accumulator, request) => {
+    return accumulator + (request.amount || 0);
+  }, 0);
 
   const housingRequests = requests.filter(
     (request) => request.product_type.product_category_name === 'housing'
   );
+  const totalHousingAmount = housingRequests.reduce((accumulator, request) => {
+    return accumulator + (request.amount || 0);
+  }, 0);
 
   const transportationRequests = requests.filter(
     (request) => request.product_type.product_category_name === 'transportation'
   );
+  const totalTransportationAmount = transportationRequests.reduce((accumulator, request) => {
+    return accumulator + (request.amount || 0);
+  }, 0);
 
   const totalCount =
-    financeRequests.length +
-    foodRequests.length +
-    healthRequests.length +
-    educationRequests.length +
-    housingRequests.length +
-    transportationRequests.length;
+    totalFinanceAmount +
+    totalFoodAmount +
+    totalHealthAmount +
+    totalEducationAmount +
+    totalHousingAmount +
+    totalTransportationAmount;
 
   const groupedPaidRequests = await sponsorRequestsModel.aggregate([
     {
@@ -580,12 +598,12 @@ export const sponsorRequestInfo = async ({ user }) => {
   });
 
   return {
-    finance: financeRequests.length,
-    food: foodRequests.length,
-    health: healthRequests.length,
-    education: educationRequests.length,
-    housing: housingRequests.length,
-    transportation: transportationRequests.length,
+    finance: totalFinanceAmount,
+    food: totalFoodAmount,
+    health: totalHealthAmount,
+    education: totalEducationAmount,
+    housing: totalHousingAmount,
+    transportation: totalTransportationAmount,
     totalCount,
     graphInfo: result
   };
