@@ -32,9 +32,9 @@ request_router.post(
   authentication,
   makeRequestedPaymentHandler
 );
-request_router.post(
+request_router.get(
   '/validate-request-payments',
-  validators(validatePaymentRequestSchema),
+  validators(validatePaymentRequestSchema, 'query'),
   authentication,
   validateRequestPaymentsHandler
 );

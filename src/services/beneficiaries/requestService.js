@@ -445,6 +445,10 @@ export const validateRequestPayments = async ({ user, body }) => {
 
       if (!checkRequest.amount) continue;
 
+      checkRequest.status = 'paid';
+
+      await checkRequest.save();
+
       const benefic = await organizationBeneficiaryModel.findById(checkRequest.beneficiary_id);
 
       if (!benefic) continue;
@@ -474,8 +478,6 @@ export const validateRequestPayments = async ({ user, body }) => {
 
       const recipient_code = recipientask.data.data.recipient_code;
 
-      console.log({ recipientask: recipientask.data.data });
-
       const refData = {
         amount: checkRequest.amount,
         reference: checkRequest._id,
@@ -483,7 +485,6 @@ export const validateRequestPayments = async ({ user, body }) => {
         recipient: recipient_code
       };
 
-      console.log(refData);
       bulkreceiptientData.push(refData);
     }
 

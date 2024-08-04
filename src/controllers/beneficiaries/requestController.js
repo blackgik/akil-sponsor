@@ -77,7 +77,9 @@ export const makeRequestedPaymentHandler = async (req, res) => {
 };
 
 export const validateRequestPaymentsHandler = async (req, res) => {
-  const { user, body } = req;
+  const { user, query } = req;
+
+  const body = query;
 
   const response = await validateRequestPayments({ user, body });
 
