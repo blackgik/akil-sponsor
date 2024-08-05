@@ -46,6 +46,7 @@ import paymentModel from '../../models/paymentModel.js';
 import validator from 'validator';
 import usersModels from '../../models/settings/users.models.js';
 import { capitalizeWords } from '../../utils/general.js';
+import subscription from '../../models/subscriptions/subscription.js';
 
 export const onboardNewOrganization = async ({ body, dbConnection }) => {
   if (!body.tosAgreement) throw new BadRequestError(`Terms and conditions not met`);
@@ -908,8 +909,16 @@ export const onboardingPayment = async ({ user, body }) => {
   amountToPay = (amountToPay + paystackAmount) * 100;
 
   const subscriptionData = {
-    
-  }
+    sender: user.user_info ? user.user_info.user_name : `${user.firstname} ${user.lastname}`,
+    amount: body.total_amount,
+    deposit_method: 'online',
+    date: new Date(),
+    ref_no: codeGenerator(15),
+    sponsor_id: user._id,
+    metadata: { ...body }
+  };
+
+  const createSubscriptionHistory = await subscription.create(subscriptionData);
 
   const data = {
     amount: amountToPay,
@@ -928,6 +937,7 @@ export const onboardingPayment = async ({ user, body }) => {
       paystackFee: paystackAmount,
       hasPaid: true,
       acctstatus: 'active',
+      subscription_id: createSubscriptionHistory._id,
       type: 'sponsor-onboarding'
     }
   };
@@ -999,10 +1009,23 @@ export const onboardingPaymentInfo = async ({ user, params }) => {
             checkIfOnboarded.hasPaid = true;
             if (metadata.package.personalization.psdAgreement) {
               checkIfOnboarded.hasPaid_personalization_fee = true;
+              checkIfOnboarded.psdStart = new Date();
+              checkIfOnboarded.psdEnd = new Date(Date.now() + 1000 * 60 * 60 * 24 * 365);
             }
 
             checkIfOnboarded.paymentstatus = 'paid';
             await checkIfOnboarded.save();
+          }
+
+          // update the subscription payment to accepted
+          const subscriptionCheck = await subscription.findById(
+            response.data.metadata.subscription_id
+          );
+
+          if (subscriptionCheck) {
+            subscriptionCheck.status = 'paid';
+
+            await subscriptionCheck.save();
           }
           return resolve(payment);
         }
