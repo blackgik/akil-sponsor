@@ -907,6 +907,10 @@ export const onboardingPayment = async ({ user, body }) => {
 
   amountToPay = (amountToPay + paystackAmount) * 100;
 
+  const subscriptionData = {
+    
+  }
+
   const data = {
     amount: amountToPay,
     email: user.email,
