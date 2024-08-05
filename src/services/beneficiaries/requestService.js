@@ -402,6 +402,7 @@ export const makeRequestedPayment = async ({ user, body }) => {
     email: user.email,
     amount: amount * 100,
     callback_url: `${env.dev_base_url_org}/projects/sponsorship`,
+    channels: ['bank'],
     metadata: {
       requests: requests,
       type: 'request_transfers'
@@ -446,6 +447,8 @@ export const validateRequestPayments = async ({ user, body }) => {
       if (!checkRequest.amount) continue;
 
       checkRequest.status = 'paid';
+
+      checkRequest.request_state = 'completed';
 
       await checkRequest.save();
 
