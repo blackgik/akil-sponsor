@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { authentication } from '../../middlewares/authentication.js';
 import {
   fetchSubscriptionsHistoryHandler,
+  subcriptionThroughAgentHandler,
   subscriptionStatisticsHandler,
   subscriptionUpdatehandler,
   validatePaymentHandler
@@ -17,6 +18,12 @@ subscriptionHistory.post(
   validators(validateSubscriptionPackageSchema),
   authentication,
   subscriptionUpdatehandler
+);
+subscriptionHistory.post(
+  '/update-subscription-agent',
+  validators(validateSubscriptionPackageSchema),
+  authentication,
+  subcriptionThroughAgentHandler
 );
 subscriptionHistory.get('/validate-payment', authentication, validatePaymentHandler);
 subscriptionHistory.get('/statistics', authentication, subscriptionStatisticsHandler);

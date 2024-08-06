@@ -2,6 +2,7 @@ import { BadRequestError } from '../../../lib/appErrors.js';
 import appResponse from '../../../lib/appResponse.js';
 import {
   fetchSubscriptionsHistory,
+  subcriptionThroughAgent,
   subscriptionStatistics,
   subscriptionUpdate,
   subscriptionVerification
@@ -48,4 +49,12 @@ export const subscriptionStatisticsHandler = async (req, res) => {
   const response = await subscriptionStatistics({ user });
 
   res.send(appResponse('Fetched Successfully', response));
+};
+
+export const subcriptionThroughAgentHandler = async (req, res) => {
+  const { user, body } = req;
+
+  const response = await subcriptionThroughAgent({ user, body });
+
+  res.send(appResponse('Initiated payment through an agent successfully', response));
 };
