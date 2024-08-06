@@ -1,4 +1,4 @@
-import { BadRequestError } from '../../../lib/appErrors.js';
+import { BadRequestError, NotFoundError } from '../../../lib/appErrors.js';
 import env from '../../config/env.js';
 import { plans } from '../../config/modules.js';
 import subscription from '../../models/subscriptions/subscription.js';
@@ -226,4 +226,12 @@ export const subscriptionStatistics = async ({ user }) => {
   ]);
 
   return result[0];
+};
+
+export const viewSubscription = async ({ user, id }) => {
+  const viewsubscription = await subscription.findById(id);
+
+  if (!viewsubscription) throw new NotFoundError('No subscription found');
+
+  return viewsubscription;
 };

@@ -4,7 +4,8 @@ import {
   fetchSubscriptionsHistory,
   subscriptionStatistics,
   subscriptionUpdate,
-  subscriptionVerification
+  subscriptionVerification,
+  viewSubscription
 } from '../../services/subscription/subscription.service.js';
 
 export const fetchSubscriptionsHistoryHandler = async (req, res) => {
@@ -46,6 +47,15 @@ export const subscriptionStatisticsHandler = async (req, res) => {
   const { user } = req;
 
   const response = await subscriptionStatistics({ user });
+
+  res.send(appResponse('Fetched Successfully', response));
+};
+
+export const viewSubscriptionHandler = async (req, res) => {
+  const { user } = req;
+  const { id } = req.params;
+
+  const response = await viewSubscription({ user, id });
 
   res.send(appResponse('Fetched Successfully', response));
 };

@@ -4,7 +4,8 @@ import {
   fetchSubscriptionsHistoryHandler,
   subscriptionStatisticsHandler,
   subscriptionUpdatehandler,
-  validatePaymentHandler
+  validatePaymentHandler,
+  viewSubscriptionHandler
 } from '../../controllers/subscription/subcription.controller.js';
 import validators from '../../validators/index.js';
 import { validateSubscriptionPackageSchema } from '../../validators/subscriptionSchema.js';
@@ -20,5 +21,6 @@ subscriptionHistory.post(
 );
 subscriptionHistory.get('/validate-payment', authentication, validatePaymentHandler);
 subscriptionHistory.get('/statistics', authentication, subscriptionStatisticsHandler);
+subscriptionHistory.get('/view-subscription/:id', authentication, viewSubscriptionHandler);
 
 export default subscriptionHistory;
