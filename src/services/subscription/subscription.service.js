@@ -145,7 +145,17 @@ export const subscriptionUpdate = async ({ user, body, param }) => {
       type: 'subscription-payment'
     }
   };
+  // create notification
+  const notify = await notificationsModel.create({
+    note: `You have successfully Initiated an Account Upgrade Subscription`,
+    type: 'creation',
+    who_is_reading: 'sponsor',
+    organization_id: user._id
+  });
 
+  if (!notify) {
+    throw new InternalServerError('server slip. Notification wasnt sent');
+  }
   return new Promise(async (resolve, reject) => {
     try {
       initializePayment(data, (error, body) => {
@@ -291,7 +301,7 @@ export const subcriptionThroughAgent = async ({ user, body }) => {
   const subscriptionData = {
     sender: user.user_info ? user.user_info.user_name : `${user.firstname} ${user.lastname}`,
     amount: body.total_amount,
-    deposit_method: 'online',
+    deposit_method: 'agent',
     date: new Date(),
     ref_no: await codeGenerator(15),
     sponsor_id: user._id,
