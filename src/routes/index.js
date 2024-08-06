@@ -17,6 +17,7 @@ import disbursement_router from './projects/disbursement.route.js';
 import feedbackRoots from './settings/feedbackRoute.js';
 import mediaFileRoots from './media/mediaRoute.js';
 import request_router from './beneficiaries/request.route.js';
+import subscriptionHistory from './subscriptions/subscription.route.js';
 
 export default (router) => {
   router.use('/auth', organizationRoute());
@@ -38,6 +39,7 @@ export default (router) => {
   router.use('/project/schedule', scheduling_route);
   router.use('/project/disbursement', disbursement_router);
   router.use('/request', request_router);
+  router.use('/subscription', subscriptionHistory);
 
   return router;
 };
