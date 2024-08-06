@@ -913,7 +913,7 @@ export const onboardingPayment = async ({ user, body }) => {
     amount: body.total_amount,
     deposit_method: 'online',
     date: new Date(),
-    ref_no: codeGenerator(15),
+    ref_no: await codeGenerator(15),
     sponsor_id: user._id,
     metadata: { ...body }
   };
