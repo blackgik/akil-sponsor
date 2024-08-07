@@ -1,4 +1,4 @@
-import { BadRequestError, InternalServerError, NotFoundError } from '../../../lib/appErrors.js';
+import { BadRequestError, InternalServerError, NotFoundError, NotFoundError } from '../../../lib/appErrors.js';
 import env from '../../config/env.js';
 import { subscriptionPay2ruAgentEmail, uploadReceiptEmail } from '../../config/mail.js';
 import { plans } from '../../config/modules.js';
@@ -407,4 +407,12 @@ export const uploadReceipt = async ({ user, body, subscription_id }) => {
   }
 
   return {uploadReceipt}
+};
+
+export const viewSubscription = async ({ user, id }) => {
+  const viewsubscription = await subscription.findById(id);
+
+  if (!viewsubscription) throw new NotFoundError('No subscription found');
+
+  return viewsubscription;
 };

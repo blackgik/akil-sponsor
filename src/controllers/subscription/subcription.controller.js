@@ -6,7 +6,8 @@ import {
   subscriptionThroughAgent,
   subscriptionUpdate,
   subscriptionVerification,
-  uploadReceipt
+  uploadReceipt,
+  viewSubscription
 } from '../../services/subscription/subscription.service.js';
 
 export const fetchSubscriptionsHistoryHandler = async (req, res) => {
@@ -68,4 +69,13 @@ export const uploadReceiptHandler = async (req, res) => {
   const response = await uploadReceipt({ user, body, subscription_id });
 
   res.send(appResponse('submitted subscription receipt successfully', response));
+};
+
+export const viewSubscriptionHandler = async (req, res) => {
+  const { user } = req;
+  const { id } = req.params;
+
+  const response = await viewSubscription({ user, id });
+
+  res.send(appResponse('Fetched Successfully', response));
 };
