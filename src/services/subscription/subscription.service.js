@@ -235,3 +235,14 @@ export const viewSubscription = async ({ user, id }) => {
 
   return viewsubscription;
 };
+
+export const deleteSubscription = async ({ user, id }) => {
+  const viewsubscription = await subscription.findById(id);
+
+  if (!viewsubscription) throw new NotFoundError('No subscription found');
+
+  if (viewsubscription.status !== 'pending')
+    throw new BadRequestError('Only pending subscriptions are allowed to be deleted');
+
+  await viewsubscription.remove();
+};
