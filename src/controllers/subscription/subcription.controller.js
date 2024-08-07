@@ -1,6 +1,7 @@
 import { BadRequestError } from '../../../lib/appErrors.js';
 import appResponse from '../../../lib/appResponse.js';
 import {
+  deleteSubscription,
   fetchSubscriptionsHistory,
   subscriptionStatistics,
   subscriptionThroughAgent,
@@ -76,4 +77,13 @@ export const viewSubscriptionHandler = async (req, res) => {
   const response = await viewSubscription({ user, id });
 
   res.send(appResponse('Fetched Successfully', response));
+};
+
+export const deleteSubscriptionHandler = async (req, res) => {
+  const { user } = req;
+  const { id } = req.params;
+
+  const response = await deleteSubscription({ user, id });
+
+  res.send(appResponse('Deleted Successfully', response));
 };

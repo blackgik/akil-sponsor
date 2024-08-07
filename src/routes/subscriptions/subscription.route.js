@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { authentication } from '../../middlewares/authentication.js';
 import {
+  deleteSubscriptionHandler,
   fetchSubscriptionsHistoryHandler,
   subscriptionStatisticsHandler,
   subscriptionThroughAgentHandler,
@@ -36,5 +37,6 @@ subscriptionHistory.post(
 subscriptionHistory.get('/validate-payment', authentication, validatePaymentHandler);
 subscriptionHistory.get('/statistics', authentication, subscriptionStatisticsHandler);
 subscriptionHistory.get('/view-subscription/:id', authentication, viewSubscriptionHandler);
+subscriptionHistory.delete('/delete-subscription/:id', authentication, deleteSubscriptionHandler);
 
 export default subscriptionHistory;
