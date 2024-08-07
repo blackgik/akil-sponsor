@@ -245,6 +245,9 @@ export const subscriptionVerification = async ({ user, reference, trxref }) => {
 export const subscriptionStatistics = async ({ user }) => {
   const result = await subscriptionModel.aggregate([
     {
+      $match: { sponsor_id: user._id }
+    },
+    {
       $group: {
         _id: null,
         total_number_of_beneficiaries_chosen: {
