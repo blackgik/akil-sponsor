@@ -918,11 +918,17 @@ export const onboardingPayment = async ({ user, body }) => {
     metadata: { ...body }
   };
 
-  const createSubscriptionHistory = await subscription.create(subscriptionData);
+  let subid = await subscription.findOne({ sponsor_id: user._id, status: 'pending' });
+
+  if (!subid) {
+    subid = await subscription.create(subscriptionData);
+    subid = await subscription.findOne({ sponsor_id: user._id, status: 'pending' });
+  }
 
   const data = {
     amount: amountToPay,
     email: user.email,
+    channels: ['bank', 'bank_transfer'],
     callback_url:
       env.node_env === 'development'
         ? `${env.dev_base_url_org}/home`
@@ -930,14 +936,14 @@ export const onboardingPayment = async ({ user, body }) => {
     metadata: {
       full_name: user.firstname + ' ' + user.lastname,
       phone: user.phone,
-      userId: user._id,
+      userId: String(user._id),
       package: body,
       amountToPay,
       on_trial: false,
       paystackFee: paystackAmount,
       hasPaid: true,
       acctstatus: 'active',
-      subscription_id: createSubscriptionHistory._id,
+      subscription_id: String(subid._id),
       type: 'sponsor-onboarding'
     }
   };
@@ -972,7 +978,9 @@ export const onboardingPaymentInfo = async ({ user, params }) => {
         if (error) {
           reject(new BadRequestError(error.message));
         }
+
         const response = JSON.parse(body);
+
         const { status } = response.data ? response.data : response;
         if (status == 'success' && response.data.metadata?.full_name) {
           const { email } = response.data.customer;
@@ -1002,6 +1010,7 @@ export const onboardingPaymentInfo = async ({ user, params }) => {
             paid_at,
             status
           };
+
           const payment = paymentModel.create(newPayment);
 
           const checkIfOnboarded = await organizationModel.findOne({ email: email });

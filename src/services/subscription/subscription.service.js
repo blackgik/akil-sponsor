@@ -4,6 +4,7 @@ import { subscriptionPay2ruAgentEmail, uploadReceiptEmail } from '../../config/m
 import { plans } from '../../config/modules.js';
 import notificationsModel from '../../models/settings/notificationsModel.js';
 import paymentReceipt from '../../models/subscriptions/paymentReceipt.js';
+import subscription from '../../models/subscriptions/subscription.js';
 import subscriptionModel from '../../models/subscriptions/subscription.js';
 import { codeGenerator } from '../../utils/codeGenerator.js';
 import { capitalizeWords, formatAmount } from '../../utils/general.js';
@@ -147,14 +148,14 @@ export const subscriptionUpdate = async ({ user, body, param }) => {
         ? `${env.dev_base_url_org}/home`
         : `${env.prod_base_url_org}/home`,
     metadata: {
-      userId: user._id,
+      userId: String(user._id),
       package: paymentData,
       amountToPay,
       on_trial: false,
       paystackFee: paystackAmount,
       hasPaid: true,
       acctstatus: 'active',
-      subscription_id: createSubscriptionHistory._id,
+      subscription_id: String(createSubscriptionHistory._id),
       type: 'subscription-payment'
     }
   };
@@ -245,7 +246,7 @@ export const subscriptionVerification = async ({ user, reference, trxref }) => {
 export const subscriptionStatistics = async ({ user }) => {
   const result = await subscriptionModel.aggregate([
     {
-      $match: { sponsor_id: user._id }
+      $match: { sponsor_id: user._id, status: 'paid' }
     },
     {
       $group: {

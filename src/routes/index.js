@@ -18,6 +18,7 @@ import feedbackRoots from './settings/feedbackRoute.js';
 import mediaFileRoots from './media/mediaRoute.js';
 import request_router from './beneficiaries/request.route.js';
 import subscriptionHistory from './subscriptions/subscription.route.js';
+import donorROute from './donor/donor.route.js';
 
 export default (router) => {
   router.use('/auth', organizationRoute());
@@ -40,6 +41,7 @@ export default (router) => {
   router.use('/project/disbursement', disbursement_router);
   router.use('/request', request_router);
   router.use('/subscription', subscriptionHistory);
+  router.use('/donor', donorROute);
 
   return router;
 };
