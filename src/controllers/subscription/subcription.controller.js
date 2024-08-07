@@ -4,8 +4,10 @@ import {
   deleteSubscription,
   fetchSubscriptionsHistory,
   subscriptionStatistics,
+  subscriptionThroughAgent,
   subscriptionUpdate,
   subscriptionVerification,
+  uploadReceipt,
   viewSubscription
 } from '../../services/subscription/subscription.service.js';
 
@@ -50,6 +52,22 @@ export const subscriptionStatisticsHandler = async (req, res) => {
   const response = await subscriptionStatistics({ user });
 
   res.send(appResponse('Fetched Successfully', response));
+};
+
+export const subscriptionThroughAgentHandler = async (req, res) => {
+  const { user, body } = req;
+
+  const response = await subscriptionThroughAgent({ user, body });
+
+  res.send(appResponse('Initiated payment through an agent successfully', response));
+};
+
+export const uploadReceiptHandler = async (req, res) => {
+  const { user, body } = req;
+
+  const response = await uploadReceipt({ user, body });
+
+  res.send(appResponse('submitted subscription receipt successfully', response));
 };
 
 export const viewSubscriptionHandler = async (req, res) => {

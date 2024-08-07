@@ -1,8 +1,14 @@
-import { BadRequestError, NotFoundError } from '../../../lib/appErrors.js';
+import { BadRequestError, InternalServerError, NotFoundError } from '../../../lib/appErrors.js';
 import env from '../../config/env.js';
+import { subscriptionPay2ruAgentEmail, uploadReceiptEmail } from '../../config/mail.js';
 import { plans } from '../../config/modules.js';
-import subscription from '../../models/subscriptions/subscription.js';
+import notificationsModel from '../../models/settings/notificationsModel.js';
+import paymentReceipt from '../../models/subscriptions/paymentReceipt.js';
+import subscriptionModel from '../../models/subscriptions/subscription.js';
 import { codeGenerator } from '../../utils/codeGenerator.js';
+import { capitalizeWords, formatAmount } from '../../utils/general.js';
+import { formattMailInfo } from '../../utils/mailFormatter.js';
+import { messageBird } from '../../utils/msgBird.js';
 import { initializePayment, verifyPayment } from '../../utils/payment.js';
 
 export const fetchSubscriptionsHistory = async ({ param, user }) => {
@@ -26,8 +32,8 @@ export const fetchSubscriptionsHistory = async ({ param, user }) => {
     filterData.status = status;
   }
 
-  const count = await subscription.countDocuments(filterData);
-  const fetched_data = await subscription
+  const count = await subscriptionModel.countDocuments(filterData);
+  const fetched_data = await subscriptionModel
     .find(filterData)
     .sort({ createdAt: -1 })
     .skip((page_no - 1) * no_of_requests)
@@ -119,7 +125,19 @@ export const subscriptionUpdate = async ({ user, body, param }) => {
     metadata: { ...paymentData }
   };
 
-  const createSubscriptionHistory = await subscription.create(subscriptionData);
+  let existingRequest = await subscriptionModel.findOne({
+    status: 'pending',
+    sponsor_id: user._id
+  });
+  let createSubscriptionHistory;
+  if (existingRequest) {
+    createSubscriptionHistory = await subscriptionModel.updateOne(
+      { _id: existingRequest._id },
+      { $set: { ...subscriptionData, updatedAt: new Date() } }
+    );
+  } else {
+    createSubscriptionHistory = await subscriptionModel.create(subscriptionData);
+  }
 
   const data = {
     amount: amountToPay,
@@ -141,11 +159,23 @@ export const subscriptionUpdate = async ({ user, body, param }) => {
     }
   };
 
-  return new Promise(async (resolve, reject) => {
+  // create notification
+  const notify = await notificationsModel.create({
+    note: `You have successfully initiated an account upgrade subscription`,
+    type: 'creation',
+    who_is_reading: 'sponsor',
+    organization_id: user._id
+  });
+
+  if (!notify) {
+    throw new InternalServerError("Server slip. Notification wasn't sent");
+  }
+
+  return new Promise((resolve, reject) => {
     try {
       initializePayment(data, (error, body) => {
         if (error) {
-          reject(new BadRequestError(error.message));
+          return reject(new BadRequestError(error.message));
         }
         const response = JSON.parse(body);
         return resolve({ gateway: response.data.authorization_url });
@@ -190,21 +220,30 @@ export const subscriptionVerification = async ({ user, reference, trxref }) => {
 
       await organizationExists.save();
 
-      const subscriptionCheck = await subscription.findById(data.subscription_id);
+      const subscriptionCheck = await subscriptionModel.findById(data.subscription_id);
 
       if (subscriptionCheck) {
         subscriptionCheck.status = 'paid';
 
         await subscriptionCheck.save();
       }
-
+      // create notification
+      const notify = await notificationsModel.create({
+        note: `You have successfully paid for your subscription fee`,
+        type: 'payment',
+        who_is_reading: 'sponsor',
+        organization_id: user._id
+      });
+      if (!notify) {
+        throw new InternalServerError('server slip. Notification wasnt sent');
+      }
       return resolve({ payment: 'successful' });
     });
   });
 };
 
 export const subscriptionStatistics = async ({ user }) => {
-  const result = await subscription.aggregate([
+  const result = await subscriptionModel.aggregate([
     {
       $group: {
         _id: null,
@@ -226,6 +265,181 @@ export const subscriptionStatistics = async ({ user }) => {
   ]);
 
   return result[0];
+};
+
+export const subscriptionThroughAgent = async ({ user, body }) => {
+  const organizationExists = user;
+
+  let amountToPay = 0;
+  let supSmsFee = 0;
+  let supBeneficiaryFee = 0;
+  let personalizationFee = 0;
+  let dataCollectionFee = 0;
+
+  if (
+    body.psdAgreement &&
+    organizationExists.hasPaid_personalization_fee &&
+    organizationExists.psdEnd > new Date()
+  ) {
+    throw new BadRequestError('You already have Personalization running');
+  }
+
+  if (body.psdAgreement && !organizationExists.hasPaid_personalization_fee) {
+    personalizationFee = plans.sponsor_onboarding_settings.personalization_fee;
+    amountToPay += personalizationFee;
+  }
+
+  supBeneficiaryFee = body?.total_number_of_beneficiaries_chosen || 0;
+  amountToPay += supBeneficiaryFee;
+
+  supSmsFee = (body?.total_number_of_sms || 0) * plans.sponsor_onboarding_settings.sup_sms_fee;
+  amountToPay += supSmsFee;
+
+  if (body.data_collection_quantity > 0) {
+    dataCollectionFee =
+      body.data_collection_quantity * plans.sponsor_onboarding_settings.data_collection_fee;
+    amountToPay += dataCollectionFee;
+  }
+
+  body.total_amount = amountToPay;
+
+  const paymentData = {
+    beneficiaries: {
+      total_number_of_beneficiaries_chosen: body?.total_number_of_beneficiaries_chosen || 0,
+      sup_beneficiary_fee: supBeneficiaryFee
+    },
+    sms: {
+      total_number_of_sms: body?.total_number_of_sms || 0,
+      sup_sms_fee: supSmsFee
+    },
+    personalization: {
+      psdAgreement: body?.psdAgreement || false,
+      personalization_fee: personalizationFee
+    },
+    data_collection: {
+      data_collection_quantity: body.data_collection_quantity,
+      data_collection_fee: dataCollectionFee
+    },
+    total_amount: amountToPay
+  };
+
+  const subscriptionData = {
+    sender: user.user_info ? user.user_info.user_name : `${user.firstname} ${user.lastname}`,
+    amount: body.total_amount,
+    deposit_method: 'agent',
+    date: new Date(),
+    ref_no: await codeGenerator(15),
+    sponsor_id: user._id,
+    metadata: { ...paymentData }
+  };
+
+  let createSubscriptionHistory;
+  let existingRequest = await subscriptionModel.findOne({
+    status: 'pending',
+    sponsor_id: user._id
+  });
+  if (existingRequest) {
+    console.log('i am here');
+    await subscriptionModel.updateOne(
+      { _id: existingRequest._id },
+      { $set: { ...subscriptionData, updatedAt: new Date() } }
+    );
+    createSubscriptionHistory = existingRequest;
+  } else {
+    createSubscriptionHistory = await subscriptionModel.create(subscriptionData);
+  }
+
+  if (!createSubscriptionHistory) {
+    throw new InternalServerError('Cannot initiate upgrade');
+  }
+
+  // Create email profile here
+  const creationData = {
+    sponsor_name: capitalizeWords(subscriptionData.sender),
+    amount: formatAmount(subscriptionData.amount)
+  };
+  const mailData = {
+    email: user.email,
+    subject: 'Account Upgrade Initialization Through Agent',
+    type: 'html',
+    html: subscriptionPay2ruAgentEmail(creationData).html,
+    text: subscriptionPay2ruAgentEmail(creationData).text
+  };
+
+  const msg = await formattMailInfo(mailData, env);
+  const msgDelivered = await messageBird(msg);
+
+  if (!msgDelivered) {
+    throw new InternalServerError(
+      "Server slip. Bulk Account Upgrade Initialization email wasn't sent"
+    );
+  }
+
+  // Create notification
+  const notify = await notificationsModel.create({
+    note: 'You have successfully Initiated an Account Upgrade Subscription',
+    type: 'creation',
+    who_is_reading: 'sponsor',
+    organization_id: user._id
+  });
+
+  if (!notify) {
+    throw new InternalServerError("Server slip. Notification wasn't sent");
+  }
+
+  const ava = await subscriptionModel.find({ sponsor_id: user._id });
+
+  return { ava };
+};
+
+export const uploadReceipt = async ({ user, body }) => {
+  const subscription = await subscriptionModel.findOne({
+    status: 'pending',
+    sponsor_id: user._id
+  });
+  if (!subscription) {
+    throw new NotFoundError('we cant find this subscription item');
+  }
+  const uploadReceiptData = {
+    receipt: body.receipt,
+    subscription_id: subscription._id,
+    sponsor_id: user._id
+  };
+  const uploadReceipt = await paymentReceipt.create(uploadReceiptData);
+
+  if (!uploadReceipt) {
+    throw new InternalServerError('unable to upload payment receipt');
+  }
+
+  //create email profile here
+  const creationData = {
+    sponsor_name: capitalizeWords(`${user.firstname} ${user.lastname}`)
+  };
+  const mailData = {
+    email: 'test@yopmail.com',
+    subject: `Payment Receipt upload for Subscription by ${creationData.sponsor_name}`,
+    type: 'html',
+    html: uploadReceiptEmail(creationData).html,
+    text: uploadReceiptEmail(creationData).text
+  };
+  const msg = await formattMailInfo(mailData, env);
+
+  const msgDelivered = await messageBird(msg);
+  if (!msgDelivered) throw new InternalServerError('server slip. receipt upload email wasnt sent');
+
+  // create notification
+  const notify = await notificationsModel.create({
+    note: `You have successfully uploaded your subscription payment receipt to the admin`,
+    type: 'payment',
+    who_is_reading: 'sponsor',
+    organization_id: user._id
+  });
+
+  if (!notify) {
+    throw new InternalServerError('server slip. Notification wasnt sent');
+  }
+
+  return { uploadReceipt };
 };
 
 export const viewSubscription = async ({ user, id }) => {

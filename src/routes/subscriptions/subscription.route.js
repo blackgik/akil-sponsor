@@ -4,12 +4,14 @@ import {
   deleteSubscriptionHandler,
   fetchSubscriptionsHistoryHandler,
   subscriptionStatisticsHandler,
+  subscriptionThroughAgentHandler,
   subscriptionUpdatehandler,
+  uploadReceiptHandler,
   validatePaymentHandler,
   viewSubscriptionHandler
 } from '../../controllers/subscription/subcription.controller.js';
 import validators from '../../validators/index.js';
-import { validateSubscriptionPackageSchema } from '../../validators/subscriptionSchema.js';
+import { validateReceiptpload, validateSubscriptionPackageSchema } from '../../validators/subscriptionSchema.js';
 
 const subscriptionHistory = Router();
 
@@ -19,6 +21,18 @@ subscriptionHistory.post(
   validators(validateSubscriptionPackageSchema),
   authentication,
   subscriptionUpdatehandler
+);
+subscriptionHistory.post(
+  '/update-subscription-agent',
+  validators(validateSubscriptionPackageSchema),
+  authentication,
+  subscriptionThroughAgentHandler
+);
+subscriptionHistory.post(
+  '/upload-receipt',
+  validators(validateReceiptpload),
+  authentication,
+  uploadReceiptHandler
 );
 subscriptionHistory.get('/validate-payment', authentication, validatePaymentHandler);
 subscriptionHistory.get('/statistics', authentication, subscriptionStatisticsHandler);

@@ -17,6 +17,13 @@ export const capitalizeWords = (str) => {
     .replace(/\B\w/g, (char) => char.toLowerCase());
 };
 
+export const formatAmount = (amount) => {
+  let formattedAmount = parseFloat(amount).toFixed(2);
+  formattedAmount = formattedAmount.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+
+  return formattedAmount;
+};
+
 export const downloadExcel = async (worksheetTitle, worksheetHearders, rows) => {
   let workbook = new excel.Workbook();
   let worksheet = workbook.addWorksheet(worksheetTitle);

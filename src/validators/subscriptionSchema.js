@@ -6,3 +6,7 @@ export const validateSubscriptionPackageSchema = Joi.object({
   total_number_of_sms: Joi.number().optional(),
   data_collection_quantity: Joi.number().optional()
 });
+
+export const validateReceiptpload = Joi.object({
+  receipt: Joi.string().required()
+});
