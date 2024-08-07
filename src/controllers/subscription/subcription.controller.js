@@ -2,10 +2,11 @@ import { BadRequestError } from '../../../lib/appErrors.js';
 import appResponse from '../../../lib/appResponse.js';
 import {
   fetchSubscriptionsHistory,
-  subcriptionThroughAgent,
   subscriptionStatistics,
+  subscriptionThroughAgent,
   subscriptionUpdate,
-  subscriptionVerification
+  subscriptionVerification,
+  uploadReceipt
 } from '../../services/subscription/subscription.service.js';
 
 export const fetchSubscriptionsHistoryHandler = async (req, res) => {
@@ -51,10 +52,20 @@ export const subscriptionStatisticsHandler = async (req, res) => {
   res.send(appResponse('Fetched Successfully', response));
 };
 
-export const subcriptionThroughAgentHandler = async (req, res) => {
+export const subscriptionThroughAgentHandler = async (req, res) => {
   const { user, body } = req;
 
-  const response = await subcriptionThroughAgent({ user, body });
+  const response = await subscriptionThroughAgent({ user, body });
 
   res.send(appResponse('Initiated payment through an agent successfully', response));
+};
+
+export const uploadReceiptHandler = async (req, res) => {
+  const { user, body, query } = req;
+
+  const { subscription_id } = query;
+
+  const response = await uploadReceipt({ user, body, subscription_id });
+
+  res.send(appResponse('submitted subscription receipt successfully', response));
 };

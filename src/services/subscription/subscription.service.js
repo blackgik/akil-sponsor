@@ -1,9 +1,10 @@
-import { BadRequestError, InternalServerError } from '../../../lib/appErrors.js';
+import { BadRequestError, InternalServerError, NotFoundError } from '../../../lib/appErrors.js';
 import env from '../../config/env.js';
-import { subscriptionPay2ruAgentEmail } from '../../config/mail.js';
+import { subscriptionPay2ruAgentEmail, uploadReceiptEmail } from '../../config/mail.js';
 import { plans } from '../../config/modules.js';
 import notificationsModel from '../../models/settings/notificationsModel.js';
-import subscription from '../../models/subscriptions/subscription.js';
+import paymentReceipt from '../../models/subscriptions/paymentReceipt.js';
+import subscriptionModel from '../../models/subscriptions/subscription.js';
 import { codeGenerator } from '../../utils/codeGenerator.js';
 import { capitalizeWords, formatAmount } from '../../utils/general.js';
 import { formattMailInfo } from '../../utils/mailFormatter.js';
@@ -31,8 +32,8 @@ export const fetchSubscriptionsHistory = async ({ param, user }) => {
     filterData.status = status;
   }
 
-  const count = await subscription.countDocuments(filterData);
-  const fetched_data = await subscription
+  const count = await subscriptionModel.countDocuments(filterData);
+  const fetched_data = await subscriptionModel
     .find(filterData)
     .sort({ createdAt: -1 })
     .skip((page_no - 1) * no_of_requests)
@@ -124,7 +125,7 @@ export const subscriptionUpdate = async ({ user, body, param }) => {
     metadata: { ...paymentData }
   };
 
-  const createSubscriptionHistory = await subscription.create(subscriptionData);
+  const createSubscriptionHistory = await subscriptionModel.create(subscriptionData);
 
   const data = {
     amount: amountToPay,
@@ -205,21 +206,30 @@ export const subscriptionVerification = async ({ user, reference, trxref }) => {
 
       await organizationExists.save();
 
-      const subscriptionCheck = await subscription.findById(data.subscription_id);
+      const subscriptionCheck = await subscriptionModel.findById(data.subscription_id);
 
       if (subscriptionCheck) {
         subscriptionCheck.status = 'paid';
 
         await subscriptionCheck.save();
       }
-
+      // create notification
+      const notify = await notificationsModel.create({
+        note: `You have successfully paid for your subscription fee`,
+        type: 'payment',
+        who_is_reading: 'sponsor',
+        organization_id: user._id
+      });
+      if (!notify) {
+        throw new InternalServerError('server slip. Notification wasnt sent');
+      }
       return resolve({ payment: 'successful' });
     });
   });
 };
 
 export const subscriptionStatistics = async ({ user }) => {
-  const result = await subscription.aggregate([
+  const result = await subscriptionModel.aggregate([
     {
       $group: {
         _id: null,
@@ -243,7 +253,7 @@ export const subscriptionStatistics = async ({ user }) => {
   return result[0];
 };
 
-export const subcriptionThroughAgent = async ({ user, body }) => {
+export const subscriptionThroughAgent = async ({ user, body }) => {
   const organizationExists = user;
 
   let amountToPay = 0;
@@ -308,7 +318,7 @@ export const subcriptionThroughAgent = async ({ user, body }) => {
     metadata: { ...paymentData }
   };
 
-  const createSubscriptionHistory = await subscription.create(subscriptionData);
+  const createSubscriptionHistory = await subscriptionModel.create(subscriptionData);
 
   if (!createSubscriptionHistory) {
     throw new InternalServerError('cannot initiate upgrade');
@@ -347,4 +357,54 @@ export const subcriptionThroughAgent = async ({ user, body }) => {
   }
 
   return { createSubscriptionHistory };
+};
+
+export const uploadReceipt = async ({ user, body, subscription_id }) => {
+  const subscription = await subscriptionModel.findOne({
+    _id: subscription_id,
+    sponsor_id: user._id
+  });
+  if (!subscription) {
+    throw new NotFoundError('we cant find this subscription item');
+  }
+  const uploadReceiptData = {
+    receipt: body.receipt,
+    subscription_id,
+    sponsor_id: user._id
+  };
+  const uploadReceipt = await paymentReceipt.create(uploadReceiptData);
+
+  if (!uploadReceipt) {
+    throw new InternalServerError('unable to upload payment receipt');
+  }
+
+  //create email profile here
+  const creationData = {
+    sponsor_name: capitalizeWords(`${user.firstname} ${user.lastname}`)
+  };
+  const mailData = {
+    email: 'test@yopmail.com',
+    subject: `Payment Receipt upload for Subscription by ${creationData.sponsor_name}`,
+    type: 'html',
+    html: uploadReceiptEmail(creationData).html,
+    text: uploadReceiptEmail(creationData).text
+  };
+  const msg = await formattMailInfo(mailData, env);
+
+  const msgDelivered = await messageBird(msg);
+  if (!msgDelivered) throw new InternalServerError('server slip. receipt upload email wasnt sent');
+
+  // create notification
+  const notify = await notificationsModel.create({
+    note: `You have successfully uploaded your subscription payment receipt to the admin`,
+    type: 'payment',
+    who_is_reading: 'sponsor',
+    organization_id: user._id
+  });
+
+  if (!notify) {
+    throw new InternalServerError('server slip. Notification wasnt sent');
+  }
+
+  return {uploadReceipt}
 };

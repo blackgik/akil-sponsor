@@ -2,13 +2,14 @@ import { Router } from 'express';
 import { authentication } from '../../middlewares/authentication.js';
 import {
   fetchSubscriptionsHistoryHandler,
-  subcriptionThroughAgentHandler,
   subscriptionStatisticsHandler,
+  subscriptionThroughAgentHandler,
   subscriptionUpdatehandler,
+  uploadReceiptHandler,
   validatePaymentHandler
 } from '../../controllers/subscription/subcription.controller.js';
 import validators from '../../validators/index.js';
-import { validateSubscriptionPackageSchema } from '../../validators/subscriptionSchema.js';
+import { validateReceiptpload, validateSubscriptionPackageSchema } from '../../validators/subscriptionSchema.js';
 
 const subscriptionHistory = Router();
 
@@ -23,7 +24,13 @@ subscriptionHistory.post(
   '/update-subscription-agent',
   validators(validateSubscriptionPackageSchema),
   authentication,
-  subcriptionThroughAgentHandler
+  subscriptionThroughAgentHandler
+);
+subscriptionHistory.post(
+  '/upload-receipt',
+  validators(validateReceiptpload),
+  authentication,
+  uploadReceiptHandler
 );
 subscriptionHistory.get('/validate-payment', authentication, validatePaymentHandler);
 subscriptionHistory.get('/statistics', authentication, subscriptionStatisticsHandler);
