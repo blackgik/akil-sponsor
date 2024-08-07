@@ -62,11 +62,9 @@ export const subscriptionThroughAgentHandler = async (req, res) => {
 };
 
 export const uploadReceiptHandler = async (req, res) => {
-  const { user, body, query } = req;
+  const { user, body } = req;
 
-  const { subscription_id } = query;
-
-  const response = await uploadReceipt({ user, body, subscription_id });
+  const response = await uploadReceipt({ user, body });
 
   res.send(appResponse('submitted subscription receipt successfully', response));
 };

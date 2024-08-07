@@ -125,7 +125,19 @@ export const subscriptionUpdate = async ({ user, body, param }) => {
     metadata: { ...paymentData }
   };
 
-  const createSubscriptionHistory = await subscriptionModel.create(subscriptionData);
+  let existingRequest = await subscriptionModel.findOne({
+    status: 'pending',
+    sponsor_id: user._id
+  });
+  let createSubscriptionHistory;
+  if (existingRequest) {
+    createSubscriptionHistory = await subscriptionModel.updateOne(
+      { _id: existingRequest._id },
+      { $set: { ...subscriptionData, updatedAt: new Date() } }
+    );
+  } else {
+    createSubscriptionHistory = await subscriptionModel.create(subscriptionData);
+  }
 
   const data = {
     amount: amountToPay,
@@ -146,22 +158,24 @@ export const subscriptionUpdate = async ({ user, body, param }) => {
       type: 'subscription-payment'
     }
   };
+
   // create notification
   const notify = await notificationsModel.create({
-    note: `You have successfully Initiated an Account Upgrade Subscription`,
+    note: `You have successfully initiated an account upgrade subscription`,
     type: 'creation',
     who_is_reading: 'sponsor',
     organization_id: user._id
   });
 
   if (!notify) {
-    throw new InternalServerError('server slip. Notification wasnt sent');
+    throw new InternalServerError("Server slip. Notification wasn't sent");
   }
-  return new Promise(async (resolve, reject) => {
+
+  return new Promise((resolve, reject) => {
     try {
       initializePayment(data, (error, body) => {
         if (error) {
-          reject(new BadRequestError(error.message));
+          return reject(new BadRequestError(error.message));
         }
         const response = JSON.parse(body);
         return resolve({ gateway: response.data.authorization_url });
@@ -266,17 +280,19 @@ export const subscriptionThroughAgent = async ({ user, body }) => {
     body.psdAgreement &&
     organizationExists.hasPaid_personalization_fee &&
     organizationExists.psdEnd > new Date()
-  )
+  ) {
     throw new BadRequestError('You already have Personalization running');
+  }
 
   if (body.psdAgreement && !organizationExists.hasPaid_personalization_fee) {
-    amountToPay += plans.sponsor_onboarding_settings.personalization_fee;
     personalizationFee = plans.sponsor_onboarding_settings.personalization_fee;
+    amountToPay += personalizationFee;
   }
+
   supBeneficiaryFee = body?.total_number_of_beneficiaries_chosen || 0;
   amountToPay += supBeneficiaryFee;
 
-  supSmsFee = body?.total_number_of_sms || 0 * plans.sponsor_onboarding_settings.sup_sms_fee;
+  supSmsFee = (body?.total_number_of_sms || 0) * plans.sponsor_onboarding_settings.sup_sms_fee;
   amountToPay += supSmsFee;
 
   if (body.data_collection_quantity > 0) {
@@ -300,7 +316,6 @@ export const subscriptionThroughAgent = async ({ user, body }) => {
       psdAgreement: body?.psdAgreement || false,
       personalization_fee: personalizationFee
     },
-
     data_collection: {
       data_collection_quantity: body.data_collection_quantity,
       data_collection_fee: dataCollectionFee
@@ -318,13 +333,27 @@ export const subscriptionThroughAgent = async ({ user, body }) => {
     metadata: { ...paymentData }
   };
 
-  const createSubscriptionHistory = await subscriptionModel.create(subscriptionData);
-
-  if (!createSubscriptionHistory) {
-    throw new InternalServerError('cannot initiate upgrade');
+  let createSubscriptionHistory;
+  let existingRequest = await subscriptionModel.findOne({
+    status: 'pending',
+    sponsor_id: user._id
+  });
+  if (existingRequest) {
+    console.log('i am here');
+    await subscriptionModel.updateOne(
+      { _id: existingRequest._id },
+      { $set: { ...subscriptionData, updatedAt: new Date() } }
+    );
+    createSubscriptionHistory = existingRequest;
+  } else {
+    createSubscriptionHistory = await subscriptionModel.create(subscriptionData);
   }
 
-  //create email profile here
+  if (!createSubscriptionHistory) {
+    throw new InternalServerError('Cannot initiate upgrade');
+  }
+
+  // Create email profile here
   const creationData = {
     sponsor_name: capitalizeWords(subscriptionData.sender),
     amount: formatAmount(subscriptionData.amount)
@@ -336,32 +365,36 @@ export const subscriptionThroughAgent = async ({ user, body }) => {
     html: subscriptionPay2ruAgentEmail(creationData).html,
     text: subscriptionPay2ruAgentEmail(creationData).text
   };
+
   const msg = await formattMailInfo(mailData, env);
-
   const msgDelivered = await messageBird(msg);
-  if (!msgDelivered)
-    throw new InternalServerError(
-      'server slip. Bulk Account Upgrade Initialization email wasnt sent'
-    );
 
-  // create notification
+  if (!msgDelivered) {
+    throw new InternalServerError(
+      "Server slip. Bulk Account Upgrade Initialization email wasn't sent"
+    );
+  }
+
+  // Create notification
   const notify = await notificationsModel.create({
-    note: `You have successfully Initiated an Account Upgrade Subscription`,
+    note: 'You have successfully Initiated an Account Upgrade Subscription',
     type: 'creation',
     who_is_reading: 'sponsor',
     organization_id: user._id
   });
 
   if (!notify) {
-    throw new InternalServerError('server slip. Notification wasnt sent');
+    throw new InternalServerError("Server slip. Notification wasn't sent");
   }
 
-  return { createSubscriptionHistory };
+  const ava = await subscriptionModel.find({ sponsor_id: user._id });
+
+  return { ava };
 };
 
-export const uploadReceipt = async ({ user, body, subscription_id }) => {
+export const uploadReceipt = async ({ user, body }) => {
   const subscription = await subscriptionModel.findOne({
-    _id: subscription_id,
+    status: 'pending',
     sponsor_id: user._id
   });
   if (!subscription) {
@@ -369,7 +402,7 @@ export const uploadReceipt = async ({ user, body, subscription_id }) => {
   }
   const uploadReceiptData = {
     receipt: body.receipt,
-    subscription_id,
+    subscription_id: subscription._id,
     sponsor_id: user._id
   };
   const uploadReceipt = await paymentReceipt.create(uploadReceiptData);
@@ -406,7 +439,7 @@ export const uploadReceipt = async ({ user, body, subscription_id }) => {
     throw new InternalServerError('server slip. Notification wasnt sent');
   }
 
-  return {uploadReceipt}
+  return { uploadReceipt };
 };
 
 export const viewSubscription = async ({ user, id }) => {
