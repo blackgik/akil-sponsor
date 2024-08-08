@@ -23,7 +23,7 @@ request_router.get('/fetch-requests', authentication, fetchAllRequestsHandler);
 request_router.get('/deshboard-info', authentication, sponsorRequestInfoHandler);
 request_router.get('/view-request/:request_id', authentication, viewSponsorRequestHandler);
 request_router.patch('/update-status', authentication, updateRequestStatusHandler);
-request_router.patch('/renew-request', authentication, renewSponsorshipRequestHandler);
+// request_router.patch('/renew-request', authentication, renewSponsorshipRequestHandler);
 request_router.patch('/upload-more/:request_id', authentication, uploadMoreHandler);
 request_router.get('/request-count', authentication, viewSponsorRequestCountsHandler);
 request_router.post(
