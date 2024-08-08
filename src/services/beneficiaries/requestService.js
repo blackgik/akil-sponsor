@@ -13,6 +13,11 @@ import { dateFilters } from '../../utils/timeFilters.js';
 import organizationBeneficiaryModel from '../../models/beneficiaries/organizationBeneficiaryModel.js';
 import env from '../../config/env.js';
 import ProductCategoryModel from '../../models/products/ProductCategoryModel.js';
+import { capitalizeWords } from '../../utils/general.js';
+import personalizationModel from '../../models/settings/personalization.model.js';
+import { uploadMoreEmail } from '../../config/mail.js';
+import { formattMailInfo } from '../../utils/mailFormatter.js';
+import { messageBird } from '../../utils/msgBird.js';
 
 export const fetchAllRequests = async ({ params, user }) => {
   let {
@@ -237,6 +242,22 @@ export const uploadMore = async ({ request_id, body, user }) => {
   if (!request) throw new NotFoundError('Sponsorship request not found or not in pending status');
 
   const benefi = await organizationBeneficiaryModel.findById(request.beneficiary_id);
+
+  //create email profile here
+  const creationData = {
+    member_name: capitalizeWords(`${benefi.personal.member_name}`)
+  };
+  const mailData = {
+    email: benefi.contact.email,
+    subject: `Request for Additional Documents to Support Your Sponsorship Application`,
+    type: 'html',
+    html: uploadMoreEmail(creationData).html,
+    text: uploadMoreEmail(creationData).text
+  };
+  const msg = await formattMailInfo(mailData, env);
+  const msgDelivered = await messageBird(msg);
+  if (!msgDelivered) throw new InternalServerError('server slip. reequest sent but email not sent');
+
   // Create notifications
   const notifications = [
     {
