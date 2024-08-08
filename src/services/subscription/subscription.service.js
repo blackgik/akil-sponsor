@@ -130,14 +130,14 @@ export const subscriptionUpdate = async ({ user, body, param }) => {
     status: 'pending',
     sponsor_id: user._id
   });
-  let createSubscriptionHistory;
+
   if (existingRequest) {
-    createSubscriptionHistory = await subscriptionModel.updateOne(
+    await subscriptionModel.updateOne(
       { _id: existingRequest._id },
-      { $set: { ...subscriptionData, updatedAt: new Date() } }
+      { $set: { ...subscriptionData } }
     );
   } else {
-    createSubscriptionHistory = await subscriptionModel.create(subscriptionData);
+    existingRequest = await subscriptionModel.create(subscriptionData);
   }
 
   const data = {
@@ -145,8 +145,8 @@ export const subscriptionUpdate = async ({ user, body, param }) => {
     email: user.email,
     callback_url:
       env.node_env === 'development'
-        ? `${env.dev_base_url_org}/home`
-        : `${env.prod_base_url_org}/home`,
+        ? `${env.dev_base_url_org}/payment/my-subscription`
+        : `${env.prod_base_url_org}/payment/my-subscription`,
     metadata: {
       userId: String(user._id),
       package: paymentData,
@@ -155,11 +155,12 @@ export const subscriptionUpdate = async ({ user, body, param }) => {
       paystackFee: paystackAmount,
       hasPaid: true,
       acctstatus: 'active',
-      subscription_id: String(createSubscriptionHistory._id),
+      subscription_id: String(existingRequest._id),
       type: 'subscription-payment'
     }
   };
 
+  console.log(data);
   // create notification
   const notify = await notificationsModel.create({
     note: `You have successfully initiated an account upgrade subscription`,
