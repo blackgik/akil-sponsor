@@ -15,7 +15,12 @@ import env from '../../config/env.js';
 import ProductCategoryModel from '../../models/products/ProductCategoryModel.js';
 import { capitalizeWords } from '../../utils/general.js';
 import personalizationModel from '../../models/settings/personalization.model.js';
-import { approvedRequestEmail, deniedRequestEmail, uploadMoreEmail } from '../../config/mail.js';
+import {
+  approvedRequestEmail,
+  deniedRequestEmail,
+  paidRequestEmail,
+  uploadMoreEmail
+} from '../../config/mail.js';
 import { formattMailInfo } from '../../utils/mailFormatter.js';
 import { messageBird } from '../../utils/msgBird.js';
 
@@ -507,6 +512,47 @@ export const validateRequestPayments = async ({ user, body }) => {
       const benefic = await organizationBeneficiaryModel.findById(checkRequest.beneficiary_id);
 
       if (!benefic) continue;
+      // Create notifications for each request
+      const notifications = [];
+
+      notifications.push(
+        {
+          note: `your sponsorship request to ${user.firstname} ${user.lastname} has been paid`,
+          type: 'update',
+          who_is_reading: 'beneficiary',
+          member_id: checkRequest.beneficiary_id,
+          organization_id: user._id
+        },
+        {
+          note: `you have paid the sponsorship request for ${benefic.personal.member_name}`,
+          type: 'update',
+          who_is_reading: 'sponsor',
+          member_id: checkRequest.beneficiary_id,
+          organization_id: user._id
+        }
+      );
+
+      // Insert all notifications at once
+      const notifiii = await notificationsModel.insertMany(notifications);
+      if (!notifiii) throw new NotFoundError('problem');
+
+      //create email profile here
+      const creationData = {
+        member_name: capitalizeWords(`${benefic.personal.member_name}`),
+        sponsor_name: capitalizeWords(`${user.firstname} ${user.lastname}`),
+        product_name: checkRequest.subject_request
+      };
+      const mailData = {
+        email: benefic.contact.email,
+        subject: `Payment Confirmation for Your Request`,
+        type: 'html',
+        html: paidRequestEmail(creationData).html,
+        text: paidRequestEmail(creationData).text
+      };
+      const msg = await formattMailInfo(mailData, env);
+      const msgDelivered = await messageBird(msg);
+      if (!msgDelivered)
+        throw new InternalServerError('server slip. reequest sent but email not sent');
 
       const receiptientData = {
         type: 'nuban',
