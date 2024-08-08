@@ -15,7 +15,7 @@ import env from '../../config/env.js';
 import ProductCategoryModel from '../../models/products/ProductCategoryModel.js';
 import { capitalizeWords } from '../../utils/general.js';
 import personalizationModel from '../../models/settings/personalization.model.js';
-import { uploadMoreEmail } from '../../config/mail.js';
+import { approvedRequestEmail, uploadMoreEmail } from '../../config/mail.js';
 import { formattMailInfo } from '../../utils/mailFormatter.js';
 import { messageBird } from '../../utils/msgBird.js';
 
@@ -133,6 +133,23 @@ export const approveRequests = async ({ body, user, status }) => {
     updatedRequests.push(request);
 
     const benefi = await organizationBeneficiaryModel.findById(request.beneficiary_id);
+
+    //create email profile here
+    const creationData = {
+      member_name: capitalizeWords(`${benefi.personal.member_name}`),
+      product_name: request.subject_request
+    };
+    const mailData = {
+      email: benefi.contact.email,
+      subject: `Great News! Your Sponsorship Request Has Been Approved`,
+      type: 'html',
+      html: approvedRequestEmail(creationData).html,
+      text: approvedRequestEmail(creationData).text
+    };
+    const msg = await formattMailInfo(mailData, env);
+    const msgDelivered = await messageBird(msg);
+    if (!msgDelivered)
+      throw new InternalServerError('server slip. reequest sent but email not sent');
 
     // Create notifications for each request
     notifications.push(
