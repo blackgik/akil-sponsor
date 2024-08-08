@@ -160,7 +160,6 @@ export const subscriptionUpdate = async ({ user, body, param }) => {
     }
   };
 
-  console.log(data);
   // create notification
   const notify = await notificationsModel.create({
     note: `You have successfully initiated an account upgrade subscription`,
@@ -239,7 +238,7 @@ export const subscriptionVerification = async ({ user, reference, trxref }) => {
       if (!notify) {
         throw new InternalServerError('server slip. Notification wasnt sent');
       }
-      return resolve({ payment: 'successful' });
+      return resolve(subscriptionCheck);
     });
   });
 };
