@@ -3,10 +3,13 @@ import { authentication } from '../../middlewares/authentication.js';
 import {
   confirmDisbursementHandler,
   disbursementCodeHandler,
+  makeRequestedPaymentHandler,
+  validateRequestPaymentsHandler,
   verifyCodeHandler
 } from '../../controllers/projects/disbursement.controller.js';
 import validators from '../../validators/index.js';
 import { verifyCodeSchema } from '../../validators/projectSchema.js';
+import { payRequessSchema, validatePaymentRequestSchema } from '../../validators/beneficiariesSchema.js';
 
 const disbursement_router = Router();
 
@@ -21,6 +24,18 @@ disbursement_router.patch(
   '/confirm-disbursement/:awardee_id',
   authentication,
   confirmDisbursementHandler
+);
+disbursement_router.post(
+  '/make-requested-payment',
+  validators(payRequessSchema),
+  authentication,
+  makeRequestedPaymentHandler
+);
+disbursement_router.get(
+  '/validate-request-payments',
+  validators(validatePaymentRequestSchema, 'query'),
+  authentication,
+  validateRequestPaymentsHandler
 );
 
 export default disbursement_router;

@@ -9,6 +9,7 @@ const SubscriptionHistorySchema = new Schema(
     deposit_method: { type: String, required: true },
     date: { type: Date, required: true },
     ref_no: { type: String, required: true },
+    receipt: { type: String},
     status: { type: String, enum: ['pending', 'paid'], default: 'pending' },
     sponsor_id: { type: Schema.Types.ObjectId, ref: 'Organization' },
     metadata: { type: Schema.Types.Mixed }

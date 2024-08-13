@@ -28,12 +28,12 @@ subscriptionHistory.post(
   authentication,
   subscriptionThroughAgentHandler
 );
-subscriptionHistory.post(
-  '/upload-receipt',
-  validators(validateReceiptpload),
-  authentication,
-  uploadReceiptHandler
-);
+// subscriptionHistory.post(
+//   '/upload-receipt',
+//   validators(validateReceiptpload),
+//   authentication,
+//   uploadReceiptHandler
+// );
 subscriptionHistory.get('/validate-payment', authentication, validatePaymentHandler);
 subscriptionHistory.get('/statistics', authentication, subscriptionStatisticsHandler);
 subscriptionHistory.get('/view-subscription/:id', authentication, viewSubscriptionHandler);
