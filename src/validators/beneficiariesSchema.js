@@ -22,7 +22,7 @@ export const UpdateBeneficiarySchema = Joi.object({
 });
 
 export const payRequessSchema = Joi.object({
-  requests: Joi.array().items(Joi.string()).required()
+  beneficiary_ids: Joi.array().items(Joi.string()).required()
 });
 
 export const validatePaymentRequestSchema = Joi.object({

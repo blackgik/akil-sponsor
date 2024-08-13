@@ -2,6 +2,8 @@ import appResponse from '../../../lib/appResponse.js';
 import {
   confirmDisbursement,
   disbursementCode,
+  makeRequestedPayment,
+  validateRequestPayments,
   verifyCode
 } from '../../services/projects/disbursement.service.js';
 
@@ -30,4 +32,22 @@ export const confirmDisbursementHandler = async (req, res) => {
   const response = await confirmDisbursement({ user, awardee_id });
 
   res.send(appResponse('Confirmed successfully', response));
+};
+
+export const makeRequestedPaymentHandler = async (req, res) => {
+  const { user, body } = req;
+
+  const response = await makeRequestedPayment({ user, body });
+
+  res.send(appResponse('Initiated gateway', response));
+};
+
+export const validateRequestPaymentsHandler = async (req, res) => {
+  const { user, query } = req;
+
+  const body = query;
+
+  const response = await validateRequestPayments({ user, body });
+
+  res.send(appResponse('Initiated transfer successfully', response));
 };
