@@ -11,7 +11,6 @@ import baseRoutes from './routes/index.js';
 import { ErrorHandler } from './middlewares/errorHandler.js';
 import { socketBlock } from './jobs/socketio.js';
 import { onboardingTrialCheck } from './jobs/onboard.cronjob.js';
-import { createKeys } from './utils/vault.js';
 
 const router = Router();
 const rootRouter = baseRoutes(router);
@@ -19,7 +18,6 @@ const rootRouter = baseRoutes(router);
 const app = express();
 
 const server = http.createServer(app);
-
 
 let routePath;
 if (env.node_env === 'production') {
