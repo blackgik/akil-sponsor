@@ -1,10 +1,19 @@
-import { DuplicateError, InternalServerError, NotFoundError } from '../../../lib/appErrors.js';
+import axios from 'axios';
+import {
+  BadRequestError,
+  DuplicateError,
+  InternalServerError,
+  NotFoundError
+} from '../../../lib/appErrors.js';
+import env from '../../config/env.js';
 import sponsorshipRequestModel from '../../models/beneficiaries/sponsorshipRequestModel.js';
 import donor from '../../models/donor/donor.js';
 import organizationModel from '../../models/organizationModel.js';
 import rolepermissionModel from '../../models/settings/rolepermission.model.js';
 import { codeGenerator } from '../../utils/codeGenerator.js';
 import { craeteNewUser } from '../settings/users.service.js';
+import { verifyPayment } from '../../utils/payment.js';
+import donorReceiptModel from '../../models/donor/donor.receipt.model.js';
 
 export const createDonor = async ({ body }) => {
   const sponsor = await organizationModel.findOne({ company_code: body.sponsor_code });
@@ -183,4 +192,118 @@ export const fetchBeneficiries = async ({ user, param }) => {
     count,
     fetched_data: fetchedData
   };
+};
+
+export const makeDonationPayment = async ({ user, body }) => {
+  const amount = body.amount;
+
+  const config = {
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: 'Bearer ' + env.paystack_secret_key
+    }
+  };
+
+  const paymentata = {
+    email: user.email,
+    amount: amount * 100,
+    callback_url: `${env.dev_base_url_org}/projects/sponsorship`,
+    channels: ['bank', 'bank_transfer'],
+    metadata: {
+      donor: String(user._id),
+      type: 'Donor-Payment'
+    }
+  };
+
+  const url = `${env.paystack_api_url}/transaction/initialize`;
+
+  const response = await axios.post(url, paymentata, config);
+
+  if (response.status !== 200) throw new BadRequestError('Could not initialize transaction');
+
+  return response.data.data.authorization_url;
+};
+
+export const verifyDonationPayment = async ({ reference, user }) => {
+  const donor = user;
+
+  return new Promise(async (resolve, reject) => {
+    verifyPayment(reference, async (error, body) => {
+      if (error) {
+        reject(new BadRequestError(error.message));
+      }
+
+      const response = JSON.parse(body);
+
+      if (response.data.status !== 'success')
+        throw new BadRequestError('Could not verify payment. Please contact support');
+
+      const paymentData = {
+        paymentType: 'credit',
+        amount: response.data.amount / 100,
+        paymentmethod: 'transfer',
+        transactionId: `TXN-${await codeGenerator(12)}`,
+        reference: reference,
+        status: 'paid',
+        donor: user._id
+      };
+
+      const receipt = await donorReceiptModel.create(paymentData);
+
+      return resolve(receipt);
+    });
+  });
+};
+
+export const fetchDonationReceipt = async ({ param, user }) => {
+  let { page_no, no_of_requests, search } = param;
+
+  page_no = Number(page_no) || 1;
+  no_of_requests = Number(no_of_requests) || 20;
+
+  const filterData = { donor: user._id };
+
+  const query = typeof search !== 'undefined' ? search.trim() : false;
+
+  const rgx = (pattern) => new RegExp(`.*${pattern}.*`, 'i');
+  const searchRgx = rgx(query);
+
+  if (query) {
+    filterData['$or'] = [{ transactionId: searchRgx }, { reference: searchRgx }];
+  }
+
+  const count = await donorReceiptModel.countDocuments({ ...filterData });
+  const fetched_data = await donorReceiptModel
+    .find({ ...filterData })
+    .sort({ createdAt: -1 })
+    .skip((page_no - 1) * no_of_requests)
+    .limit(no_of_requests);
+
+  const available_pages = Math.ceil(count / no_of_requests);
+
+  return { page_no, available_pages, count, fetched_data };
+};
+
+export const statGraph = async ({ user, year = new Date().getFullYear() }) => {
+  const result = await donorReceiptModel.aggregate([
+    {
+      $match: {
+        createdAt: {
+          $gte: new Date(`${year}-01-01T00:00:00.000Z`),
+          $lt: new Date(`${year + 1}-01-01T00:00:00.000Z`)
+        }
+      }
+    },
+    {
+      $group: {
+        _id: { month: { $month: '$createdAt' } },
+        totalAmount: { $sum: '$amount' }
+      }
+    },
+    {
+      $sort: { '_id.month': 1 } // Sort by month in ascending order
+    }
+  ]);
+
+  return result; // Return the aggregated result
 };

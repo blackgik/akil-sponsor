@@ -8,3 +8,7 @@ export const createDonorSchema = Joi.object({
   donation_amount: Joi.number().required(),
   sponsor_code: Joi.string().required()
 });
+
+export const makeDonationSchema = Joi.object({
+  amount: Joi.number().required()
+});
