@@ -13665,9 +13665,11 @@ export const subscriptionPay2ruAgentEmail = (data) => {
                                                                                 <ul
                                                                                     style="font-size: 14px; line-height: 23.8px; color: #002366;">
 
-                                                                                    <li>Bank Name: : ***************
+                                                                                    <li>Bank Name: : Zenith Bank
                                                                                     </li>
-                                                                                    <li>Account Number: **************
+                                                                                    <li>Account Name: MAJ FINTECH LIMITED
+                                                                                    </li>
+                                                                                    <li>Account Number: 1228541186
                                                                                     </li>
                                                                                     <li>Amount: NGN ${data.amount}</li>
                                                                                 </ul>
