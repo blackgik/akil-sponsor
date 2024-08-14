@@ -9,7 +9,7 @@ import {
 } from '../../controllers/projects/disbursement.controller.js';
 import validators from '../../validators/index.js';
 import { verifyCodeSchema } from '../../validators/projectSchema.js';
-import { payRequessSchema, validatePaymentRequestSchema } from '../../validators/beneficiariesSchema.js';
+import { payDisbursementSchema, validatePaymentRequestSchema } from '../../validators/beneficiariesSchema.js';
 
 const disbursement_router = Router();
 
@@ -27,7 +27,7 @@ disbursement_router.patch(
 );
 disbursement_router.post(
   '/make-requested-payment',
-  validators(payRequessSchema),
+  validators(payDisbursementSchema),
   authentication,
   makeRequestedPaymentHandler
 );
