@@ -24,7 +24,6 @@ export const subscriptionUpdatehandler = async (req, res) => {
 
   const allowableshow_details = ['yes', 'no'];
 
-  console.log(query);
   if (
     !query.show_details ||
     (query.show_details && !allowableshow_details.includes(query.show_details))
