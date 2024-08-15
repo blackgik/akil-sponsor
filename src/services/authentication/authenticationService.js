@@ -257,7 +257,9 @@ export const loginOrganization = async (body, clienturl) => {
   let user;
 
   if (!checkOrg) {
-    user = await usersModels.findOne({ email }).populate('role_id');
+    user = await usersModels
+      .findOne({ email })
+      .populate({ path: 'role_id', select: { role_name: 1 } });
 
     if (!user) throw new InvalidError('Invalid Sponsor');
   }

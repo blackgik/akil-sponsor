@@ -73,9 +73,11 @@ export const subscriptionUpdate = async ({ user, body, param }) => {
   }
 
   supBeneficiaryFee = body?.total_number_of_beneficiaries_chosen || 0;
+
   amountToPay += supBeneficiaryFee;
 
-  supSmsFee = body?.total_number_of_sms || 0 * plans.sponsor_onboarding_settings.sup_sms_fee;
+  supSmsFee = (body?.total_number_of_sms || 0) * plans.sponsor_onboarding_settings.sup_sms_fee;
+
   amountToPay += supSmsFee;
 
   if (body.data_collection_quantity > 0) {

@@ -5,7 +5,6 @@ export const createDonorSchema = Joi.object({
   email: Joi.string().required(),
   title: Joi.string().required(),
   comment: Joi.string().optional().allow(''),
-  donation_amount: Joi.number().required(),
   sponsor_code: Joi.string().required()
 });
 

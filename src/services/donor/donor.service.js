@@ -56,7 +56,7 @@ export const createDonor = async ({ body }) => {
     user_name: createDonor.name,
     gender: sponsor?.gender || 'Male',
     email: createDonor.email,
-    phone: sponsor.phone,
+    phone: `0703${await codeGenerator(7)}`,
     date_of_birth: '2000-01-01',
     role_id: donorRole._id,
     password: await codeGenerator(12, 'ABCDEFGHIJ1234567890#$'),
@@ -209,12 +209,15 @@ export const makeDonationPayment = async ({ user, body }) => {
     }
   };
 
+  const transactionId = 'TXN' + (await codeGenerator(11));
+
   const paymentata = {
     email: user.email,
     amount: amount * 100,
     callback_url: `${env.dev_base_url_org}/projects/sponsorship`,
     channels: ['bank', 'bank_transfer'],
     metadata: {
+      transactionId,
       donor: String(user._id),
       type: 'Donor-Payment'
     }
@@ -243,11 +246,18 @@ export const verifyDonationPayment = async ({ reference, user }) => {
       if (response.data.status !== 'success')
         throw new BadRequestError('Could not verify payment. Please contact support');
 
+      const confirmTRN = await donorReceiptModel.findOne({
+        _id: user._id,
+        transactionId: response.data.metadata.transactionId
+      });
+
+      if (confirmTRN) return confirmTRN;
+
       const paymentData = {
         paymentType: 'credit',
         amount: response.data.amount / 100,
         paymentmethod: 'transfer',
-        transactionId: `TXN-${await codeGenerator(12)}`,
+        transactionId: response.data.metadata.transactionId,
         reference: reference,
         status: 'paid',
         donor: user._id
