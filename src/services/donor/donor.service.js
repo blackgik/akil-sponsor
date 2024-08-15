@@ -14,6 +14,11 @@ import { codeGenerator } from '../../utils/codeGenerator.js';
 import { craeteNewUser } from '../settings/users.service.js';
 import { verifyPayment } from '../../utils/payment.js';
 import donorReceiptModel from '../../models/donor/donor.receipt.model.js';
+import { subscriptionPay2ruAgentEmail } from '../../config/mail.js';
+import { formattMailInfo } from '../../utils/mailFormatter.js';
+import { messageBird } from '../../utils/msgBird.js';
+import notificationsModel from '../../models/settings/notificationsModel.js';
+import { capitalizeWords, formatAmount } from '../../utils/general.js';
 
 export const createDonor = async ({ body }) => {
   const sponsor = await organizationModel.findOne({ company_code: body.sponsor_code });
@@ -306,4 +311,52 @@ export const statGraph = async ({ user, year = new Date().getFullYear() }) => {
   ]);
 
   return result; // Return the aggregated result
+};
+
+export const donateThroughAgent = async ({ user, body }) => {
+  const amount = body.amount;
+
+  const paymentData = {
+    paymentType: 'credit',
+    amount,
+    paymentmethod: 'agent',
+    transactionId: `TXN-${await codeGenerator(12)}`,
+    donor: user._id
+  };
+
+  const receipt = await donorReceiptModel.create(paymentData);
+
+  // Create email profile here
+  const creationData = {
+    sponsor_name: capitalizeWords(`${user.firstname} ${user.lastname}`),
+    amount: formatAmount(paymentData.amount)
+  };
+  const mailData = {
+    email: user.user_info.email,
+    subject: 'Donation Payment Initialization Through Agent',
+    type: 'html',
+    html: subscriptionPay2ruAgentEmail(creationData).html,
+    text: subscriptionPay2ruAgentEmail(creationData).text
+  };
+
+  const msg = await formattMailInfo(mailData, env);
+  const msgDelivered = await messageBird(msg);
+
+  if (!msgDelivered) {
+    throw new InternalServerError("Server slip. Donation Payment Initialization email wasn't sent");
+  }
+
+  // Create notification
+  const notify = await notificationsModel.create({
+    note: 'You have successfully Initiated a Donation Payment ',
+    type: 'creation',
+    who_is_reading: 'donor',
+    organization_id: user._id
+  });
+
+  if (!notify) {
+    throw new InternalServerError("Server slip. Notification wasn't sent");
+  }
+
+  return { receipt };
 };

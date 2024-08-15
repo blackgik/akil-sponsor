@@ -8,7 +8,7 @@ const DonorReceiptSchema = new Schema(
     amount: { type: Number, required: true },
     paymentmethod: { type: String, required: true },
     transactionId: { type: String, required: true },
-    reference: { type: String, required: true },
+    reference: { type: String },
     status: { type: String, default: 'pending' },
     donor: { type: Schema.Types.ObjectId, required: true, ref: 'User' }
   },
