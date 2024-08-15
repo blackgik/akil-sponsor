@@ -13672,6 +13672,7 @@ export const subscriptionPay2ruAgentEmail = (data) => {
                                                                                     <li>Account Number: 1228541186
                                                                                     </li>
                                                                                     <li>Amount: NGN ${data.amount}</li>
+                                                                                    <li>Reference Number: NGN ${data.reference}</li>
                                                                                 </ul>
                                                                             </span>
                                                                         </p>
