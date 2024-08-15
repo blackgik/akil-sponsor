@@ -514,13 +514,13 @@ export const updateBeneficiaryBatchListStatus = async ({ beneficiary_batch_id, b
             };
 
             const msg = await formattMailInfo(mailData, env);
-            const msgDelivered = await messageBird(msg);
+            // const msgDelivered = await messageBird(msg);
 
-            if (!msgDelivered) {
-              throw new InternalServerError(
-                'Server slip. Beneficiary was created without mail being sent'
-              );
-            }
+            // if (!msgDelivered) {
+            //   throw new InternalServerError(
+            //     'Server slip. Beneficiary was created without mail being sent'
+            //   );
+            // }
 
             // user.total_number_of_beneficiaries_created += 1;
           } else {
