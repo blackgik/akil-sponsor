@@ -349,8 +349,8 @@ export const donateThroughAgent = async ({ user, body }) => {
   // Create notification
   const notify = await notificationsModel.create({
     note: 'You have successfully Initiated a Donation Payment ',
-    type: 'creation',
-    who_is_reading: 'donor',
+    type: 'payment',
+    who_is_reading: 'sponsor',
     organization_id: user._id
   });
 

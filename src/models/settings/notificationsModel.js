@@ -27,7 +27,7 @@ const notificationSchema = new Schema(
     compliment_obj: { type: Schema.Types.Mixed, default: {} },
     who_is_reading: {
       type: String,
-      enum: ['member', 'organization', 'beneficiary', 'agent', 'sponsor','donor']
+      enum: ['member', 'organization', 'beneficiary', 'agent', 'sponsor']
     },
     organization_id: { type: Schema.Types.ObjectId, ref: 'Organization' },
     member_id: { type: Schema.Types.ObjectId, ref: 'Organization_Member' },
