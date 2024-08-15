@@ -328,7 +328,7 @@ export const donateThroughAgent = async ({ user, body }) => {
 
   // Create email profile here
   const creationData = {
-    sponsor_name: capitalizeWords(`${user.firstname} ${user.lastname}`),
+    sponsor_name: capitalizeWords(`${user.user_info.user_name}`),
     amount: formatAmount(paymentData.amount)
   };
   const mailData = {
@@ -358,5 +358,5 @@ export const donateThroughAgent = async ({ user, body }) => {
     throw new InternalServerError("Server slip. Notification wasn't sent");
   }
 
-  return { receipt };
+  return { receipt};
 };
