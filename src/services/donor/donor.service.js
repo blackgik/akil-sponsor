@@ -209,7 +209,7 @@ export const makeDonationPayment = async ({ user, body }) => {
   const paymentata = {
     email: user.email,
     amount: amount * 100,
-    callback_url: `${env.dev_base_url_org}/projects/sponsorship`,
+    callback_url: `${env.dev_base_url_org}/donations`,
     channels: ['bank', 'bank_transfer'],
     metadata: {
       transactionId,
