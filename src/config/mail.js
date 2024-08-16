@@ -13627,9 +13627,9 @@ export const subscriptionPay2ruAgentEmail = (data) => {
                                                                         style="font-size: 18px; line-height: 150%; text-align: left; word-wrap: break-word;color:#002366;">
                                                                         <p style="font-size: 18px; line-height: 150%;"></p>
 
-                                                                        We are writing to inform you that your request to
-                                                                        upgrade your account has been successfully received and
-                                                                        processed by our agent. The upgrade process will start
+                                                                        We are writing to inform you that your request to make payment 
+                                                                        through an agent has been successfully received and
+                                                                        processed by our agent. The update will start
                                                                         immediately the necessary payments have been made
                                                                         successfully
                                                                         </p>
@@ -13672,6 +13672,7 @@ export const subscriptionPay2ruAgentEmail = (data) => {
                                                                                     <li>Account Number: 1228541186
                                                                                     </li>
                                                                                     <li>Amount: NGN ${data.amount}</li>
+                                                                                    <li>Reference Number: NGN ${data.reference}</li>
                                                                                 </ul>
                                                                             </span>
                                                                         </p>
@@ -13692,12 +13693,13 @@ export const subscriptionPay2ruAgentEmail = (data) => {
                                                                     <div class="v-line-height"
                                                                         style="font-size: 18px; line-height: 150%; text-align: left; word-wrap: break-word;color:#002366;">
                                                                         <p style="font-size: 18px; line-height: 150%;">
-                                                                            Ensure to upload your proof of payment to enable us
-                                                                            verify your subscription payment.
+                                                                            Ensure to email us your proof of payment  at 
+                                                                            <a href="mailto:ask@akilaah.com" style="color: blue;">
+                                                                            <strong>ask@akilaah.com</strong></a>
+                                                                            to enable us verify your payment.
                                                                         </p>
                                                                         <p style="font-size: 18px; line-height: 150%;">
-                                                                            Once the payment is recieved and the upgrade is
-                                                                            complete, you will receive an
+                                                                            Once the payment is recieved you will receive an
                                                                             email confirmation along with detailed information
                                                                             about the new features and benefits available to
                                                                             you.
@@ -13851,13 +13853,14 @@ export const subscriptionPay2ruAgentEmail = (data) => {
         </html>
         `,
     text: `
-    We are writing to inform you that your request to upgrade your\n
-    account has been successfully received and processed by our agent. \n
+    We are writing to inform you that your payment request through an agent \n
+    has been successfully received and processed by our agent. \n
     The upgrade process will start immediately the necessary payments have \n
     been made successfully \n
     Payment informations:\n
-    Bank Name: : ***************\n
-    Account Number: **************\n
+    Bank Name: : Zenith Bank PLC\n
+    Account Name: MAJ FINTECH LIMITED\n
+    Account Number: 1228541186 \n
     Amount: ${data.amount}
       `
   };

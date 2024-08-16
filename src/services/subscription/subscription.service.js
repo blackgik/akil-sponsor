@@ -362,7 +362,8 @@ export const subscriptionThroughAgent = async ({ user, body }) => {
   // Create email profile here
   const creationData = {
     sponsor_name: capitalizeWords(subscriptionData.sender),
-    amount: formatAmount(subscriptionData.amount)
+    amount: formatAmount(subscriptionData.amount),
+    reference: subscriptionData.ref_no
   };
   const mailData = {
     email: user.email,
