@@ -2,6 +2,7 @@ import appResponse from '../../../lib/appResponse.js';
 import {
   createDonor,
   dashboardStatistics,
+  donateThroughAgent,
   fetchBeneficiries,
   fetchDonationReceipt,
   makeDonationPayment,
@@ -69,4 +70,12 @@ export const statGraphHandler = async (req, res) => {
   const response = await statGraph({ user, year: yearDate });
 
   res.send(appResponse('Fetched successfully', response));
+};
+
+export const donateThroughAgentHandler = async (req, res) => {
+  const { user, body } = req;
+
+  const response = await donateThroughAgent({ user, body });
+
+  res.send(appResponse('Created Successfully', response));
 };

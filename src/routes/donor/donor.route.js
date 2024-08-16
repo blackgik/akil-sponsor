@@ -4,6 +4,7 @@ import { createDonorSchema, makeDonationSchema } from '../../validators/donor.sc
 import {
   createDonorHandler,
   dashboardStatisticsHandler,
+  donateThroughAgentHandler,
   fetchBeneficiariesHandler,
   fetchDonationReceiptHandler,
   makeDonationPaymentHandler,
@@ -22,6 +23,12 @@ donorROute.post(
   validators(makeDonationSchema),
   authentication,
   makeDonationPaymentHandler
+);
+donorROute.post(
+  '/make-donation-payment-agent',
+  validators(makeDonationSchema),
+  authentication,
+  donateThroughAgentHandler
 );
 donorROute.get('/verify-donor-payment', authentication, verifyDonationPaymentHandler);
 donorROute.get('/donor-receipts', authentication, fetchDonationReceiptHandler);
