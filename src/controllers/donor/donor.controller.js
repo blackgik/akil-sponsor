@@ -6,6 +6,7 @@ import {
   fetchBeneficiries,
   fetchDonationReceipt,
   makeDonationPayment,
+  sendEmailtoAgent,
   statGraph,
   verifyDonationPayment
 } from '../../services/donor/donor.service.js';
@@ -78,4 +79,10 @@ export const donateThroughAgentHandler = async (req, res) => {
   const response = await donateThroughAgent({ user, body });
 
   res.send(appResponse('Created Successfully', response));
+};
+
+export const sendEmailtoAgentHandler = async (req, res) => {
+  const { user, body } = req;
+  const response = await sendEmailtoAgent({ user, body });
+  res.send(appResponse('Email sent successfully', response));
 };

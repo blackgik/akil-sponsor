@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import validators from '../../validators/index.js';
-import { createDonorSchema, makeDonationSchema } from '../../validators/donor.schema.js';
+import { createDonorSchema, makeDonationSchema, sendEmailSchema } from '../../validators/donor.schema.js';
 import {
   createDonorHandler,
   dashboardStatisticsHandler,
@@ -8,6 +8,7 @@ import {
   fetchBeneficiariesHandler,
   fetchDonationReceiptHandler,
   makeDonationPaymentHandler,
+  sendEmailtoAgentHandler,
   statGraphHandler,
   verifyDonationPaymentHandler
 } from '../../controllers/donor/donor.controller.js';
@@ -29,6 +30,12 @@ donorROute.post(
   validators(makeDonationSchema),
   authentication,
   donateThroughAgentHandler
+);
+donorROute.post(
+  '/contact-agent-for-donation',
+  validators(sendEmailSchema),
+  authentication,
+  sendEmailtoAgentHandler
 );
 donorROute.get('/verify-donor-payment', authentication, verifyDonationPaymentHandler);
 donorROute.get('/donor-receipts', authentication, fetchDonationReceiptHandler);
