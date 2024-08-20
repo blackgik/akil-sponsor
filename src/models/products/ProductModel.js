@@ -17,7 +17,7 @@ const ProductSchema = new Schema(
     product_unit: { type: String, trim: true },
     product_category_id: {
       type: Schema.Types.ObjectId,
-      ref: 'ProductCategory',
+      ref: ' ',
       required: true
     },
     product_image: {

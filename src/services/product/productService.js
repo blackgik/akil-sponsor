@@ -328,14 +328,16 @@ export const fetchAllProducts = async ({ user, params }) => {
 
 export const getSingleProduct = async ({ user, product_id }) => {
   let productInView;
-
   productInView = await ProductModel.findById(product_id).populate({
     path: 'product_category_id',
     model: 'ProductCategory'
   });
 
   if (!productInView) throw new NotFoundError('product  does not exist');
-
+  const warehouse = await warehouseProductModel.findOne({ product_id }).populate('warehouse_id');
+  productInView = productInView.toObject();
+  productInView.warehouse_id = warehouse._id;
+  productInView.warehouse_name = warehouse.warehouse_id.warehouse_name;
   return productInView;
 };
 
