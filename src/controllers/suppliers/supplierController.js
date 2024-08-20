@@ -77,7 +77,6 @@ export const updateSingleSupplierHandler = async (req, res) => {
 export const updateSupplierStatusHandler = async (req, res) => {
   const { user, params, body } = req;
   const { supplier_id } = params;
-
   const updated = await updateSupplierStatus({ supplier_id, body, user });
 
   res.send(appResponse(' supplier status updated successfully', updated));
