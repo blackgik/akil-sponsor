@@ -7,6 +7,8 @@ import {
 } from '../../validators/organizationSchema.js';
 import {
   addNewBankAccountHandler,
+  dashboardStatisticsHandler,
+  sponsorGraphHandler,
   updateOrganizationProfileHandler
 } from '../../controllers/profile/profileController.js';
 import validators from '../../validators/index.js';
@@ -27,6 +29,8 @@ const profileRoot = () => {
     authentication,
     addNewBankAccountHandler
   );
+  profileRooute.get('/statistics', authentication, dashboardStatisticsHandler);
+  profileRooute.get('/s-graph', authentication, sponsorGraphHandler);
 
   return profileRooute;
 };

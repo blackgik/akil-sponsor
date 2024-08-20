@@ -5,5 +5,6 @@ export const sendContactMailSchema = Joi.object({
   last_name: Joi.string().required(),
   email: Joi.string().required(),
   phone: Joi.string().required(),
+  amount: Joi.number().required(),
   description: Joi.string().required()
 });
