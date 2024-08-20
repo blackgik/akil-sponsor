@@ -19,6 +19,7 @@ import { formattMailInfo } from '../../utils/mailFormatter.js';
 import { messageBird } from '../../utils/msgBird.js';
 import notificationsModel from '../../models/settings/notificationsModel.js';
 import { capitalizeWords, formatAmount } from '../../utils/general.js';
+import { donorEmailText } from '../../htmls/donor/index.js';
 
 export const createDonor = async ({ body }) => {
   const sponsor = await organizationModel.findOne({ company_code: body.sponsor_code });
@@ -214,11 +215,11 @@ export const makeDonationPayment = async ({ user, body }) => {
   const paymentata = {
     email: user.email,
     amount: amount * 100,
-    callback_url: `${env.dev_base_url_org}/projects/sponsorship`,
+    callback_url: `${env.dev_base_url_org}/donations`,
     channels: ['bank', 'bank_transfer'],
     metadata: {
       transactionId,
-      donor: String(user._id),
+      donor: String(user.user_info._id),
       type: 'Donor-Payment'
     }
   };
@@ -233,7 +234,7 @@ export const makeDonationPayment = async ({ user, body }) => {
 };
 
 export const verifyDonationPayment = async ({ reference, user }) => {
-  const donor = user;
+  const donor = user.user_info;
 
   return new Promise(async (resolve, reject) => {
     verifyPayment(reference, async (error, body) => {
@@ -247,7 +248,7 @@ export const verifyDonationPayment = async ({ reference, user }) => {
         throw new BadRequestError('Could not verify payment. Please contact support');
 
       const confirmTRN = await donorReceiptModel.findOne({
-        _id: user._id,
+        donor: user.user_info._id,
         transactionId: response.data.metadata.transactionId
       });
 
@@ -260,7 +261,7 @@ export const verifyDonationPayment = async ({ reference, user }) => {
         transactionId: response.data.metadata.transactionId,
         reference: reference,
         status: 'paid',
-        donor: user._id
+        donor: donor._id
       };
 
       const receipt = await donorReceiptModel.create(paymentData);
@@ -331,7 +332,7 @@ export const donateThroughAgent = async ({ user, body }) => {
     amount,
     paymentmethod: 'agent',
     transactionId: `TXN-${await codeGenerator(12)}`,
-    donor: user._id
+    donor: user.user_info._id
   };
 
   const receipt = await donorReceiptModel.create(paymentData);
@@ -369,7 +370,30 @@ export const donateThroughAgent = async ({ user, body }) => {
     throw new InternalServerError("Server slip. Notification wasn't sent");
   }
 
-  return { receipt };
+  return { receipt  };
+};
+
+export const sendDonorEmail = async ({ user, body }) => {
+  const onboardingData = {
+    name: `${body.first_name} ${body.last_name}`,
+    email: body.phone,
+    donation: body.amount,
+    note: body.description
+  };
+
+  const mailData = {
+    email: 'support@majfintech.com',
+    subject: 'Onboarding Request',
+    type: 'html',
+    html: donorEmailText(onboardingData),
+    text: donorEmailText(onboardingData)
+  };
+  const msg = await formattMailInfo(mailData, env);
+
+  const msgDelivered = await messageBird(msg);
+
+  if (!msgDelivered)
+    throw new InternalServerError('server slip. Payment verification mail not sent');
 };
 
 export const sendEmailtoAgent = async ({ user, body }) => {
