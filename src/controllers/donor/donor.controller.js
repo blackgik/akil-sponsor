@@ -90,7 +90,6 @@ export const sendDonorEmailHandler = async (req, res) => {
   res.send(appResponse('Sent Successfully', response));
 };
 
-
 export const sendEmailtoAgentHandler = async (req, res) => {
   const { user, body } = req;
   const response = await sendEmailtoAgent({ user, body });
