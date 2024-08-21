@@ -620,7 +620,7 @@ export const validateRequestPayments = async ({ user, body }) => {
 
 export const sponsorRequestInfo = async ({ user }) => {
   const requests = await sponsorRequestsModel
-    .find({ sponsor_id: user._id })
+    .find({ sponsor_id: user._id, status: 'paid' })
     .populate({ path: 'product_type', select: 'product_category_name' })
     .exec();
 
@@ -678,7 +678,7 @@ export const sponsorRequestInfo = async ({ user }) => {
     {
       $match: {
         sponsor_id: mongoose.Types.ObjectId(user._id),
-        status: { $in: ['pending', 'accepted', 'denied', 'paid', 'ineligible'] }
+        status: 'paid'
       }
     },
     {
@@ -719,12 +719,12 @@ export const sponsorRequestInfo = async ({ user }) => {
   });
 
   return {
-    finance: totalFinanceAmount,
-    food: totalFoodAmount,
-    health: totalHealthAmount,
-    education: totalEducationAmount,
-    housing: totalHousingAmount,
-    transportation: totalTransportationAmount,
+    finance: (totalFinanceAmount / totalCount) * 100,
+    food: (totalFoodAmount / totalCount) * 100,
+    health: (totalHealthAmount / totalCount) * 100,
+    education: (totalEducationAmount / totalCount) * 100,
+    housing: (totalHousingAmount / totalCount) * 100,
+    transportation: (totalTransportationAmount / totalCount) * 100,
     totalCount,
     graphInfo: result
   };

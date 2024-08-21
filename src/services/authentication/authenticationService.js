@@ -455,7 +455,7 @@ export const sendSponsorEmail = async ({ body, user }) => {
   };
 
   const mailData = {
-    email: 'support@majfintech.com',
+    email: 'ask@akilaah.com',
     subject: 'Onboarding Request',
     type: 'html',
     html: paymentVerificationMail(onboardingData).html,

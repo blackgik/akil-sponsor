@@ -1,7 +1,13 @@
 import env from '../../config/env.js';
-import { DuplicateError, InternalServerError, NotFoundError } from '../../../lib/appErrors.js';
+import {
+  BadRequestError,
+  DuplicateError,
+  InternalServerError,
+  NotFoundError
+} from '../../../lib/appErrors.js';
 import SupplierModel from '../../models/suppliers/supplierModel.js';
 import notificationsModel from '../../models/settings/notificationsModel.js';
+import RestockModel from '../../models/products/RestockModel.js';
 
 export const createNewSupplier = async ({ user, body }) => {
   const supplierData = {
@@ -235,6 +241,11 @@ export const updateSingleSupplier = async ({ supplier_id, body, user }) => {
 };
 
 export const updateSupplierStatus = async ({ supplier_id, body, user }) => {
+  const active = await RestockModel.findOne({ supplier_id });
+  if (active)
+    throw new BadRequestError(
+      'you cannot update the status of this supplier because they are currently beign used'
+    );
   const suplier = await SupplierModel.findByIdAndUpdate(
     supplier_id,
     { $set: body },
@@ -251,5 +262,5 @@ export const updateSupplierStatus = async ({ supplier_id, body, user }) => {
     organization_id: user._id
   });
 
-  return suplier;
+  return { suplier };
 };

@@ -200,12 +200,15 @@ export const updateSingleWarehouse = async ({ warehouse_id, body, user }) => {
 export const removeWarehouse = async ({ user, warehouse_id }) => {
   const warehouse = await WarehouseModel.findById(warehouse_id);
   if (!warehouse) throw new NotFoundError('warehouse not found');
+  const product = await warehouseProductModel.find({ warehouse_id });
+  if (product && product.length > 0)
+    throw new BadRequestError('you cannot delete this warehouse beacuse it has products in it');
 
   await warehouse.remove();
 
   // create notification
   await notificationsModel.create({
-    note: `You have successfully removed a warehouse`,
+    note: `You have successfully removed ${warehouse.warehouse_name} warehouse`,
     type: 'update',
     who_is_reading: 'sponsor',
     organization_id: user._id

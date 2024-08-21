@@ -3,6 +3,7 @@ import { authentication } from '../../middlewares/authentication.js';
 import {
   deleteSubscriptionHandler,
   fetchSubscriptionsHistoryHandler,
+  sendAgentSubEmailHandler,
   subscriptionStatisticsHandler,
   subscriptionThroughAgentHandler,
   subscriptionUpdatehandler,
@@ -12,6 +13,7 @@ import {
 } from '../../controllers/subscription/subcription.controller.js';
 import validators from '../../validators/index.js';
 import { validateReceiptpload, validateSubscriptionPackageSchema } from '../../validators/subscriptionSchema.js';
+import { sendContactMailSchema } from '../../validators/sendContactMailSchema.js';
 
 const subscriptionHistory = Router();
 
@@ -28,12 +30,12 @@ subscriptionHistory.post(
   authentication,
   subscriptionThroughAgentHandler
 );
-// subscriptionHistory.post(
-//   '/upload-receipt',
-//   validators(validateReceiptpload),
-//   authentication,
-//   uploadReceiptHandler
-// );
+subscriptionHistory.post(
+  '/send-agent-email',
+  validators(sendContactMailSchema),
+  authentication,
+  sendAgentSubEmailHandler
+);
 subscriptionHistory.get('/validate-payment', authentication, validatePaymentHandler);
 subscriptionHistory.get('/statistics', authentication, subscriptionStatisticsHandler);
 subscriptionHistory.get('/view-subscription/:id', authentication, viewSubscriptionHandler);

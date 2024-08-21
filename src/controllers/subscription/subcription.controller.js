@@ -3,6 +3,7 @@ import appResponse from '../../../lib/appResponse.js';
 import {
   deleteSubscription,
   fetchSubscriptionsHistory,
+  sendAgentSubEmail,
   subscriptionStatistics,
   subscriptionThroughAgent,
   subscriptionUpdate,
@@ -85,4 +86,10 @@ export const deleteSubscriptionHandler = async (req, res) => {
   const response = await deleteSubscription({ user, id });
 
   res.send(appResponse('Deleted Successfully', response));
+};
+
+export const sendAgentSubEmailHandler = async (req, res) => {
+  const { user, body } = req;
+  const response = await sendAgentSubEmail({ user, body });
+  res.send(appResponse('Email sent successfully', response));
 };

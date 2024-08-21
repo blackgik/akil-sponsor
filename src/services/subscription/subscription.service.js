@@ -1,6 +1,10 @@
 import { BadRequestError, InternalServerError, NotFoundError } from '../../../lib/appErrors.js';
 import env from '../../config/env.js';
-import { subscriptionPay2ruAgentEmail, uploadReceiptEmail } from '../../config/mail.js';
+import {
+  subPayementAgentEmail,
+  subscriptionPay2ruAgentEmail,
+  uploadReceiptEmail
+} from '../../config/mail.js';
 import { plans } from '../../config/modules.js';
 import notificationsModel from '../../models/settings/notificationsModel.js';
 import paymentReceipt from '../../models/subscriptions/paymentReceipt.js';
@@ -359,28 +363,27 @@ export const subscriptionThroughAgent = async ({ user, body }) => {
     throw new InternalServerError('Cannot initiate upgrade');
   }
 
-  // Create email profile here
-  const creationData = {
-    sponsor_name: capitalizeWords(subscriptionData.sender),
-    amount: formatAmount(subscriptionData.amount),
-    reference: subscriptionData.ref_no
-  };
-  const mailData = {
-    email: user.email,
-    subject: 'Account Upgrade Initialization Through Agent',
-    type: 'html',
-    html: subscriptionPay2ruAgentEmail(creationData).html,
-    text: subscriptionPay2ruAgentEmail(creationData).text
-  };
+  // // Create email profile here
+  // const creationData = {
+  //   sponsor_name: capitalizeWords(subscriptionData.sender),
+  //   amount: formatAmount(subscriptionData.amount),
+  //   reference: subscriptionData.ref_no
+  // };
+  // const mailData = {
+  //   email: user.email,
+  //   subject: 'Account Upgrade Initialization Through Agent',
+  //   type: 'html',
+  //   html: subPayementAgentEmail(creationData).html
+  // };
 
-  const msg = await formattMailInfo(mailData, env);
-  const msgDelivered = await messageBird(msg);
+  // const msg = await formattMailInfo(mailData, env);
+  // const msgDelivered = await messageBird(msg);
 
-  if (!msgDelivered) {
-    throw new InternalServerError(
-      "Server slip. Bulk Account Upgrade Initialization email wasn't sent"
-    );
-  }
+  // if (!msgDelivered) {
+  //   throw new InternalServerError(
+  //     "Server slip. Bulk Account Upgrade Initialization email wasn't sent"
+  //   );
+  // }
 
   // Create notification
   const notify = await notificationsModel.create({
@@ -397,6 +400,29 @@ export const subscriptionThroughAgent = async ({ user, body }) => {
   const ava = await subscriptionModel.find({ sponsor_id: user._id });
 
   return { ava };
+};
+
+export const sendAgentSubEmail = async ({ user, body }) => {
+  const onboardingData = {
+    name: `${capitalizeWords(body.first_name)} ${capitalizeWords(body.last_name)}`,
+    email: body.email,
+    phone: body.phone,
+    amount: formatAmount(body.amount),
+    note: body.description
+  };
+
+  const mailData = {
+    email: 'ask@akilaah.com',
+    subject: `Subscription Payment Request form ${onboardingData.name}`,
+    type: 'html',
+    html: subPayementAgentEmail(onboardingData).html
+  };
+  const msg = await formattMailInfo(mailData, env);
+
+  const msgDelivered = await messageBird(msg);
+
+  if (!msgDelivered)
+    throw new InternalServerError('server slip. Payment verification mail not sent');
 };
 
 export const uploadReceipt = async ({ user, body }) => {
