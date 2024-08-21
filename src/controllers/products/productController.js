@@ -104,7 +104,7 @@ export const unpublishProductHandler = async (req, res) => {
 
   const product = await unPublishProduct({ user, product_id });
 
-  res.send(appResponse('product published successfully', product));
+  res.send(appResponse('product unpublished successfully', product));
 };
 
 export const updateSingleProductHandler = async (req, res) => {

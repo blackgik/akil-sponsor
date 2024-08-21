@@ -72,13 +72,13 @@ const productRoot = () => {
     authentication,
     cancelProductHandler
   );
-  productRoutes.get(
+  productRoutes.post(
     '/publish-product/:product_id',
     Validate(viewSingleProductSchema, 'params'),
     authentication,
     publishProductHandler
   );
-  productRoutes.get(
+  productRoutes.post(
     '/unpublish-product/:product_id',
     Validate(viewSingleProductSchema, 'params'),
     authentication,
