@@ -5,13 +5,13 @@
 
 <head>
     <!--[if gte mso 9]>
-        <xml>
-          <o:OfficeDocumentSettings>
-            <o:AllowPNG/>
-            <o:PixelsPerInch>96</o:PixelsPerInch>
-          </o:OfficeDocumentSettings>
-        </xml>
-        <![endif]-->
+                  <xml>
+                  <o:OfficeDocumentSettings>
+                      <o:AllowPNG/>
+                      <o:PixelsPerInch>96</o:PixelsPerInch>
+                  </o:OfficeDocumentSettings>
+                  </xml>
+                  <![endif]-->
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="x-apple-disable-message-reformatting">
@@ -239,11 +239,11 @@
                                                                     <span
                                                                         style="font-size: 24px; line-height: 36px;"><span
                                                                             style="color:#002366; line-height: 21px;"><strong><span
-                                                                                    style="line-height: 21px;">
+                                                                                    style="line-height: 21px;">Dear
                                                                                 </span></strong></span><strong><span
                                                                                 style="line-height: 21px;"><span
                                                                                     style="color: #CB6015; line-height: 21px;">
-                                                                                    <strong>Good Day.</strong></span></span></strong></span>
+                                                                                    <strong>${data.sponsor_name}</strong>,</span></span></strong></span>
 
                                                                 </p>
                                                             </div>
@@ -260,14 +260,54 @@
                                                         <td style="overflow-wrap:break-word;word-break:break-word;padding:0px 25px 5px;font-family:arial,helvetica,sans-serif;"
                                                             align="left">
 
-                                                            <p class="v-line-height"
+                                                            <div class="v-line-height"
                                                                 style="font-size: 18px; line-height: 150%; text-align: left; word-wrap: break-word;color:#002366;">
-                                                                ${data.sponsor_name} have submitted a payment receipt.
-                                                                ${data.sponsor_name} has completed the payment
-                                                                process and is now awaiting your verification.
-                                                            </p>
+                                                                <p style="font-size: 18px; line-height: 150%;"></p>
+
+                                                                I hope this message finds you well. I am writing to
+                                                                inform you of my intention to make a donation. Please
+                                                                find the details of my donation below
+
+                                                            </div>
 
                                         </div>
+
+                                        <div class="v-line-height"
+                                            style="font-size: 18px; line-height: 150%; text-align: left; word-wrap: break-word;color:#002366;">
+                                            <p style="font-size: 18px; line-height: 150%; text-align: justify;">
+                                                Request informations:
+                                            </p>
+                                        </div>
+
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+    <table id="u_content_text_deprecated_1" style="font-family:arial,helvetica,sans-serif;" role="presentation"
+        cellpadding="0" cellspacing="0" width="100%" border="0">
+        <tbody>
+            <tr>
+                <td style="overflow-wrap:break-word;word-break:break-word;padding:0px 25px 5px;font-family:arial,helvetica,sans-serif;"
+                    align="left">
+
+                    <div class="v-line-height"
+                        style="font-size: 14px; line-height: 170%; text-align: left; word-wrap: break-word;">
+                        <p style="font-size: 14px; line-height: 170%; text-align: justify;">
+                            <span>
+                                <ul style="font-size: 14px; line-height: 23.8px; color: #002366;">
+
+                                    <li>Donor Name: ${data.donor_name}
+                                    </li>
+                                    <li>Description: ${data.description}
+                                    </li>
+                                    <li>Email: NGN ${data.email}</li>
+                                    <li>Phone: NGN ${data.phone}</li>
+                                    <li>Amount: NGN ${data.amount}</li>
+                                </ul>
+                            </span>
+                        </p>
+                    </div>
 
                 </td>
             </tr>
@@ -283,12 +323,13 @@
 
                     <div class="v-line-height"
                         style="font-size: 18px; line-height: 150%; text-align: left; word-wrap: break-word;color:#002366;">
+
                         <p style="font-size: 18px; line-height: 150%;">
-                            Please log in to the admin panel to review and verify the payment receipt at your earliest
-                            convenience.
+                            Please let me know if you need any additional information or if there are specific
+                            instructions I should follow to complete the donation process.
                         </p>
                         <p style="font-size: 18px; line-height: 150%;">
-                            Thank you for your prompt attention to this matter.
+                            Thank you for your attention and support.
                         </p>
                     </div>
                 </td>
@@ -394,10 +435,6 @@
 
                                             <div class="v-line-height"
                                                 style="font-size: 11px; line-height: 140%; text-align: center; word-wrap: break-word;">
-                                                <p style="line-height: 140%;"><span
-                                                        style="color: #002366; line-height: 19.6px;">This email is
-                                                        automatically generated. Please do not reply directly to this
-                                                        email.</span></p>
                                                 <p style="line-height: 140%;"><span
                                                         style="color: #002366; line-height: 19.6px;">Copyright Ⓒ
                                                         2024 MAJ

@@ -14,7 +14,7 @@ import { codeGenerator } from '../../utils/codeGenerator.js';
 import { craeteNewUser } from '../settings/users.service.js';
 import { verifyPayment } from '../../utils/payment.js';
 import donorReceiptModel from '../../models/donor/donor.receipt.model.js';
-import { subscriptionPay2ruAgentEmail } from '../../config/mail.js';
+import { donationRequestEmail, subscriptionPay2ruAgentEmail } from '../../config/mail.js';
 import { formattMailInfo } from '../../utils/mailFormatter.js';
 import { messageBird } from '../../utils/msgBird.js';
 import notificationsModel from '../../models/settings/notificationsModel.js';
@@ -340,7 +340,8 @@ export const donateThroughAgent = async ({ user, body }) => {
   // Create email profile here
   const creationData = {
     sponsor_name: capitalizeWords(`${user.user_info.user_name}`),
-    amount: formatAmount(paymentData.amount)
+    amount: formatAmount(paymentData.amount),
+    reference: paymentData.transactionId
   };
   const mailData = {
     email: user.user_info.email,
@@ -369,7 +370,7 @@ export const donateThroughAgent = async ({ user, body }) => {
     throw new InternalServerError("Server slip. Notification wasn't sent");
   }
 
-  return { receipt };
+  return { receipt  };
 };
 
 export const sendDonorEmail = async ({ user, body }) => {
@@ -393,4 +394,30 @@ export const sendDonorEmail = async ({ user, body }) => {
 
   if (!msgDelivered)
     throw new InternalServerError('server slip. Payment verification mail not sent');
+};
+
+export const sendEmailtoAgent = async ({ user, body }) => {
+  const { email, description, first_name, last_name, phone, amount } = body;
+
+  // Create email profile here
+  const creationData = {
+    donor_name: capitalizeWords(`${first_name} ${last_name}`),
+    amount: formatAmount(amount),
+    email,
+    phone,
+    description
+  };
+  const mailData = {
+    email: 'ask@akilaah.com',
+    subject: `Donation Request by ${creationData.donor_name}`,
+    type: 'html',
+    html: donationRequestEmail(creationData).html
+  };
+
+  const msg = await formattMailInfo(mailData, env);
+  const msgDelivered = await messageBird(msg);
+
+  if (!msgDelivered) {
+    throw new InternalServerError("Server slip. Donation Payment Initialization email wasn't sent");
+  }
 };

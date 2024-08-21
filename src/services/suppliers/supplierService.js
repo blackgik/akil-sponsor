@@ -11,7 +11,7 @@ export const createNewSupplier = async ({ user, body }) => {
   };
   const supplier = await SupplierModel.findOne({
     supplier_name: body.supplier_name,
-    sponsor_id: user._id,
+    sponsor_id: user._id
   });
 
   if (supplier) throw new DuplicateError('Duplicate supplier found');
@@ -235,17 +235,21 @@ export const updateSingleSupplier = async ({ supplier_id, body, user }) => {
 };
 
 export const updateSupplierStatus = async ({ supplier_id, body, user }) => {
-  const updates = Object.keys(body);
+  const suplier = await SupplierModel.findByIdAndUpdate(
+    supplier_id,
+    { $set: body },
+    { new: true, runValidators: true }
+  );
 
-  let supplierInView;
+  if (!suplier) throw new NotFoundError('suplier not found');
 
-  supplierInView = await SupplierModel.findById(supplier_id);
+  // create notification
+  await notificationsModel.create({
+    note: `You have successfully updated the status of your supplier ${suplier.supplier_name} to ${body.acctstatus}`,
+    type: 'update',
+    who_is_reading: 'sponsor',
+    organization_id: user._id
+  });
 
-  if (!supplierInView) throw new NotFoundError('supplier  does not exist');
-
-  updates.forEach((update) => (supplierInView[update] = body[update]));
-
-  await supplierInView.save();
-
-  return true;
+  return suplier;
 };
