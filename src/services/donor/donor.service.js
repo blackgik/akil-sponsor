@@ -337,26 +337,26 @@ export const donateThroughAgent = async ({ user, body }) => {
 
   const receipt = await donorReceiptModel.create(paymentData);
 
-  // Create email profile here
-  const creationData = {
-    sponsor_name: capitalizeWords(`${user.user_info.user_name}`),
-    amount: formatAmount(paymentData.amount),
-    reference: paymentData.transactionId
-  };
-  const mailData = {
-    email: user.user_info.email,
-    subject: 'Donation Payment Initialization Through Agent',
-    type: 'html',
-    html: subscriptionPay2ruAgentEmail(creationData).html,
-    text: subscriptionPay2ruAgentEmail(creationData).text
-  };
+  // // Create email profile here
+  // const creationData = {
+  //   sponsor_name: capitalizeWords(`${user.user_info.user_name}`),
+  //   amount: formatAmount(paymentData.amount),
+  //   reference: paymentData.transactionId
+  // };
+  // const mailData = {
+  //   email: user.user_info.email,
+  //   subject: 'Donation Payment Initialization Through Agent',
+  //   type: 'html',
+  //   html: subscriptionPay2ruAgentEmail(creationData).html,
+  //   text: subscriptionPay2ruAgentEmail(creationData).text
+  // };
 
-  const msg = await formattMailInfo(mailData, env);
-  const msgDelivered = await messageBird(msg);
+  // const msg = await formattMailInfo(mailData, env);
+  // const msgDelivered = await messageBird(msg);
 
-  if (!msgDelivered) {
-    throw new InternalServerError("Server slip. Donation Payment Initialization email wasn't sent");
-  }
+  // if (!msgDelivered) {
+  //   throw new InternalServerError("Server slip. Donation Payment Initialization email wasn't sent");
+  // }
 
   // Create notification
   const notify = await notificationsModel.create({
@@ -370,19 +370,20 @@ export const donateThroughAgent = async ({ user, body }) => {
     throw new InternalServerError("Server slip. Notification wasn't sent");
   }
 
-  return { receipt  };
+  return { receipt };
 };
 
 export const sendDonorEmail = async ({ user, body }) => {
   const onboardingData = {
     name: `${body.first_name} ${body.last_name}`,
-    email: body.phone,
+    email: body.email,
+    phone: body.phone,
     donation: body.amount,
     note: body.description
   };
 
   const mailData = {
-    email: 'support@majfintech.com',
+    email: 'ask@akilaah.com',
     subject: 'Onboarding Request',
     type: 'html',
     html: donorEmailText(onboardingData),
