@@ -382,7 +382,7 @@ export const sendDonorEmail = async ({ user, body }) => {
   };
 
   const mailData = {
-    email: 'support@majfintech.com',
+    email: 'ask@akilaah.com',
     subject: 'Onboarding Request',
     type: 'html',
     html: donorEmailText(onboardingData),
