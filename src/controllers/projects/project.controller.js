@@ -96,6 +96,10 @@ export const fetchProjectHandler = async (req, res) => {
     const worksheet = new Date().getTime() + (await codeGenerator(5));
     const worksheetHeaders = [
       { header: 'ProductName', key: 'project_name', width: 50 },
+      { header: 'Product Name', key: 'product_name', width: 50 },
+      { header: 'State', key: 'project_state', width: 50 },
+      { header: 'Status', key: 'project_status', width: 50 },
+      { header: 'Beneficiary Added Status', key: 'is_beneficary_added', width: 50 },
       { header: 'DateCreated', key: 'createdAt', width: 50 }
     ];
 
@@ -104,6 +108,10 @@ export const fetchProjectHandler = async (req, res) => {
     for (let response of responses) {
       mainList.push({
         project_name: response.project_name,
+        product_name: response.product_type.product_category_name,
+        is_beneficary_added: response.is_beneficary_added,
+        project_status: response.project_status,
+        project_state: response.project_state,
         createdAt: response.createdAt
       });
     }
