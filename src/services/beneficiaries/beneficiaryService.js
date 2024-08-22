@@ -93,7 +93,21 @@ export const verifyEmail = async (body) => {
 };
 
 export const fetchBeneficiariesByStatus = async ({ user, params }) => {
-  let { page_no, no_of_requests, search, status, has_paid, beneficiary_id } = params;
+  let {
+    page_no,
+    no_of_requests,
+    search,
+    status,
+    gender,
+    origin_state,
+    city,
+    resident_state,
+    age,
+    employment_stat,
+    has_paid,
+    beneficiary_id,
+    download
+  } = params;
 
   page_no = Number(page_no) || 1;
   no_of_requests = Number(no_of_requests) || 20;
@@ -107,6 +121,42 @@ export const fetchBeneficiariesByStatus = async ({ user, params }) => {
 
   if (query) {
     filterData['$or'] = [{ 'personal.member_name': searchRgx }, { 'contact.email': searchRgx }];
+  }
+  if (gender) {
+    filterData['personal.gender'] = gender;
+  }
+
+  if (origin_state) {
+    filterData['personal.state_of_origin'] = origin_state;
+  }
+
+  if (resident_state) {
+    filterData['contact.state'] = resident_state;
+  }
+
+  if (city) {
+    filterData['contact.city'] = city;
+  }
+
+  if (age) {
+    const currentYear = new Date().getFullYear();
+    const currentMonth = new Date().getMonth() + 1;
+    const currentDate = new Date().getDate();
+
+    const startBirthDate = new Date(currentYear - age - 1, currentMonth, currentDate);
+    const endBirthDate = new Date(currentYear - age, currentMonth, currentDate);
+
+    const startBirthDateString = startBirthDate.toISOString().split('T')[0];
+    const endBirthDateString = endBirthDate.toISOString().split('T')[0];
+
+    filterData['personal.dob'] = {
+      $gte: startBirthDateString,
+      $lt: endBirthDateString
+    };
+  }
+
+  if (employment_stat) {
+    filterData['employment_info.employment_status'] = employment_stat;
   }
 
   if (status) {
@@ -138,9 +188,11 @@ export const fetchBeneficiariesByStatus = async ({ user, params }) => {
       'personal.lga': 1,
       'personal.state_of_origin': 1,
       'personal.dob': 1,
-      'contact.email': 1,
       'employment_info.employment_status': 1,
+      'contact.email': 1,
       'contact.country_of_residence': 1,
+      'contact.state': 1,
+      'contact.city': 1,
       'personal.gender': 1,
       has_paid_reg: 1,
       'contact.phone': 1,
@@ -157,8 +209,13 @@ export const fetchBeneficiariesByStatus = async ({ user, params }) => {
     .limit(no_of_requests);
 
   const available_pages = Math.ceil(beneficiaryCount / no_of_requests);
-
-  return { page_no, available_pages, fetchedResults };
+  return download === 'on'
+    ? fetchedResults
+    : {
+        page_no,
+        available_pages,
+        fetchedResults
+      };
 };
 
 export const updateBeneficiaryStatus = async ({ user, status, beneficiary_id, note }) => {
