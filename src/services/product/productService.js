@@ -220,8 +220,13 @@ export const fetchProduct = async ({ user, params }) => {
   const available_pages = Math.ceil(totalCount / no_of_requests)
     ? Math.ceil(totalCount / no_of_requests)
     : 1;
-
-  return { page_no, available_pages, fetchData };
+  return download === 'on'
+    ? fetchData
+    : {
+        page_no,
+        available_pages,
+        fetchData
+      };
 };
 
 export const fetchProductRestockHistory = async ({ user, params }) => {
@@ -274,7 +279,7 @@ export const fetchProductRestockHistory = async ({ user, params }) => {
 //------ common product handlers --------------------\\
 
 export const fetchAllProducts = async ({ user, params }) => {
-  let { page_no, no_of_requests, search, status, cat_id, organization_id } = params;
+  let { page_no, no_of_requests, search, status, cat_id, organization_id, download } = params;
 
   page_no = Number(page_no) || 1;
   no_of_requests = Number(no_of_requests) || Infinity;
@@ -322,8 +327,14 @@ export const fetchAllProducts = async ({ user, params }) => {
   fetchedData = fetchedData.slice(startIndex, endIndex);
 
   const available_pages = Math.ceil(count / no_of_requests);
-
-  return { page_no, available_pages, fetchedData };
+  return download === 'on'
+    ? fetchedData
+    : {
+        page_no,
+        available_pages,
+        fetchedData
+      };
+  // return { page_no, available_pages, fetchedData };
 };
 
 export const getSingleProduct = async ({ user, product_id }) => {
