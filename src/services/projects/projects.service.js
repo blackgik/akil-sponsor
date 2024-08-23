@@ -853,7 +853,7 @@ export const fetchBeneficiariesForProjects = async ({ user, param, project_id })
 
   if (!project) throw new NotFoundError('Project not found');
 
-  let { page_no, no_of_requests, search, status } = param;
+  let { page_no, no_of_requests, search, status, download } = param;
 
   page_no = Number(page_no) || 1;
   no_of_requests = Number(no_of_requests) || 20;
@@ -905,6 +905,11 @@ export const fetchBeneficiariesForProjects = async ({ user, param, project_id })
     .limit(no_of_requests);
 
   const available_pages = Math.ceil(beneficiaryCount / no_of_requests);
-
-  return { page_no, available_pages, fetchedResults };
+  return download === 'on'
+    ? fetchedResults
+    : {
+        page_no,
+        available_pages,
+        fetchedResults
+      };
 };

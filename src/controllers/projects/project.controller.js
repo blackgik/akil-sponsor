@@ -220,7 +220,47 @@ export const fetchBeneficiariesHandler = async (req, res) => {
 
   const { project_id } = params;
 
-  const beneficiaries = await fetchBeneficiariesForProjects({ user, param, project_id });
+  const responses = await fetchBeneficiariesForProjects({ user, param, project_id });
+  if (param.download === 'on') {
+    const worksheet = 'beneficiary_list';
+    const worksheetHeaders = [
+      { header: 'Name', key: 'member_name', width: 50 },
+      { header: 'Date_Of_Birth', key: 'dob', width: 50 },
+      { header: 'Gender', key: 'gender', width: 50 },
+      { header: 'Phone', key: 'phone', width: 50 },
+      { header: 'Email', key: 'email', width: 50 },
+      { header: 'Country_Of_Residence', key: 'country_of_residence', width: 50 },
+      { header: 'State_Of_Origin', key: 'state_of_origin', width: 50 },
+      { header: 'LGA', key: 'lga', width: 50 },
+      { header: 'Employment_Status', key: 'employment_status', width: 50 },
+      { header: 'Status', key: 'acctstatus', width: 50 },
+      { header: 'Has_paid_reg', key: 'has_paid_reg', width: 50 },
+      { header: 'DateCreated', key: 'createdAt', width: 50 }
+    ];
 
-  res.send(appResponse('Fetched successfully', beneficiaries));
+    let mainList = [];
+
+    for (let response of responses) {
+      mainList.push({
+        member_name: response.personal.member_name,
+        dob: response.personal.dob,
+        gender: response.personal.gender,
+        phone: response.contact.phone,
+        email: response.contact.email,
+        country_of_residence: response.contact.country_of_residence,
+        state_of_origin: response.personal.state_of_origin,
+        lga: response.personal.lga,
+        employment_status: response.employment_info.employment_status,
+        acctstatus: response.acctstatus,
+        has_paid_reg: response.has_paid_reg,
+        createdAt: response.createdAt
+      });
+    }
+
+    const file = await downloadExcel(worksheet, worksheetHeaders, mainList);
+
+    res.send(appResponse('File paths', file));
+  } else {
+    res.send(appResponse('Fetched successfully', responses));
+  }
 };
