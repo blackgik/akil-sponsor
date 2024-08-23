@@ -709,7 +709,7 @@ export const fetchAllProject = async ({ params, user }) => {
 
   const { today, timeDiff } = dateFilters({ duration, from, to, todayTime });
   const filter = {
-    sponsor_id: mongoose.Types.ObjectId(user._id),
+    // sponsor_id: mongoose.Types.ObjectId(user._id),
     createdAt: { $gte: timeDiff, $lte: today }
   };
 

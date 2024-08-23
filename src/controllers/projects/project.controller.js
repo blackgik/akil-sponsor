@@ -51,7 +51,7 @@ export const fetchGenerateListHandler = async (req, res) => {
 
   const responses = await fetchGenerateList({ param: query, user, project_id });
   if (query.download === 'on') {
-    const worksheet = new Date().getTime() + (await codeGenerator(5));
+    const worksheet = 'Generated_List';
     const worksheetHeaders = [
       { header: 'Batch Code', key: 'batch_code', width: 50 },
       { header: 'Beneficiary', key: 'name', width: 50 },
@@ -145,12 +145,17 @@ export const fetchProjectHandler = async (req, res) => {
   const responses = await fetchAllProject({ user, params });
 
   if (params.download === 'on') {
-    const worksheet = new Date().getTime() + (await codeGenerator(5));
+    const worksheet = 'All_Projects';
     const worksheetHeaders = [
-      { header: 'ProductName', key: 'project_name', width: 50 },
+      { header: 'Project Name', key: 'project_name', width: 50 },
       { header: 'Product Name', key: 'product_name', width: 50 },
-      { header: 'State', key: 'project_state', width: 50 },
-      { header: 'Status', key: 'project_status', width: 50 },
+      { header: 'Product Items', key: 'product_item_display', width: 50 },
+      { header: 'Quantity Per Person', key: 'quantity_per_person', width: 50 },
+      { header: 'Project Start Date', key: 'start_date', width: 50 },
+      { header: 'Project End Date', key: 'end_date', width: 50 },
+      { header: 'Is Active', key: 'is_active', width: 50 },
+      { header: 'Project State', key: 'project_state', width: 50 },
+      { header: 'Project Status', key: 'project_status', width: 50 },
       { header: 'Beneficiary Added Status', key: 'is_beneficary_added', width: 50 },
       { header: 'DateCreated', key: 'createdAt', width: 50 }
     ];
@@ -160,6 +165,11 @@ export const fetchProjectHandler = async (req, res) => {
     for (let response of responses) {
       mainList.push({
         project_name: response.project_name,
+        quantity_per_person: response.quantity_per_person,
+        start_date: response.start_date,
+        end_date: response.end_date,
+        is_active: response.is_active,
+        product_item_display: response.product_item_display,
         product_name: response.product_type.product_category_name,
         is_beneficary_added: response.is_beneficary_added,
         project_status: response.project_status,
