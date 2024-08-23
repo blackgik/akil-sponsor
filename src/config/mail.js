@@ -13368,13 +13368,13 @@ export const subscriptionPay2ruAgentEmail = (data) => {
 
         <head>
             <!--[if gte mso 9]>
-                <xml>
-                <o:OfficeDocumentSettings>
-                    <o:AllowPNG/>
-                    <o:PixelsPerInch>96</o:PixelsPerInch>
-                </o:OfficeDocumentSettings>
-                </xml>
-                <![endif]-->
+            <xml>
+            <o:OfficeDocumentSettings>
+                <o:AllowPNG/>
+                <o:PixelsPerInch>96</o:PixelsPerInch>
+            </o:OfficeDocumentSettings>
+            </xml>
+            <![endif]-->
             <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
             <meta name="x-apple-disable-message-reformatting">
@@ -13627,11 +13627,16 @@ export const subscriptionPay2ruAgentEmail = (data) => {
                                                                         style="font-size: 18px; line-height: 150%; text-align: left; word-wrap: break-word;color:#002366;">
                                                                         <p style="font-size: 18px; line-height: 150%;"></p>
 
-                                                                        We are writing to inform you that your request to make payment 
+                                                                        We are writing to inform you that your request to make
+                                                                        payment
                                                                         through an agent has been successfully received and
                                                                         processed by our agent. The update will start
                                                                         immediately the necessary payments have been made
                                                                         successfully
+                                                                        </p>
+                                                                        <p
+                                                                            style="font-size: 18px; line-height: 150%; text-align: justify;">
+                                                                            Here are the details of your request:
                                                                         </p>
 
 
@@ -13653,16 +13658,12 @@ export const subscriptionPay2ruAgentEmail = (data) => {
                                                                     <div class="v-line-height"
                                                                         style="font-size: 14px; line-height: 170%; text-align: left; word-wrap: break-word;">
                                                                         <p
-                                                                            style="font-size: 18px; line-height: 150%; text-align: justify;">
-                                                                            Here are the details of your request:
-                                                                        </p>
-                                                                        <p
                                                                             style="font-size: 14px; line-height: 170%; text-align: justify;">
                                                                             <span>
                                                                                 <ul
                                                                                     style="font-size: 14px; line-height: 23.8px; color: #002366;">
-                                                                                    <li>Name: NGN ${data.name}</li>               
-                                                                                    <li>Amount: NGN ${data.amount}</li>                                                                                
+                                                                                    <li>Name: NGN ${data.name}</li>
+                                                                                    <li>Amount: NGN ${data.amount}</li>
                                                                                 </ul>
                                                                             </span>
                                                                         </p>
@@ -13683,9 +13684,11 @@ export const subscriptionPay2ruAgentEmail = (data) => {
                                                                     <div class="v-line-height"
                                                                         style="font-size: 18px; line-height: 150%; text-align: left; word-wrap: break-word;color:#002366;">
                                                                         <p style="font-size: 18px; line-height: 150%;">
-                                                                            If you have any further questions or need additional assistance, please feel free to contact us at  
-                                                                            <a href="mailto:ask@akilaah.com" style="color: blue;">
-                                                                            <strong>ask@akilaah.com</strong></a>.
+                                                                            If you have any further questions or need additional
+                                                                            assistance, please feel free to contact us at
+                                                                            <a href="mailto:ask@akilaah.com"
+                                                                                style="color: blue;">
+                                                                                <strong>ask@akilaah.com</strong></a>.
                                                                         </p>
                                                                         <p style="font-size: 18px; line-height: 150%;">
                                                                             Thank you for your continued support and
