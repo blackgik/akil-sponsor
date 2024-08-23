@@ -10,6 +10,7 @@ import {
   startSchedule,
   viewSchedule
 } from '../../services/projects/scheduling.service.js';
+import { downloadExcel } from '../../utils/general.js';
 
 export const createProductScheduleHandler = async (req, res) => {
   const { body, user, params, query } = req;
@@ -40,9 +41,43 @@ export const listScheduleHandler = async (req, res) => {
 
   const { project_id } = params;
 
-  const response = await listschedules({ user, param: query, project_id });
+  const responses = await listschedules({ user, param: query, project_id });
+  if (query.download === 'on') {
+    const worksheet = 'scheduled_list';
+    const worksheetHeaders = [
+      { header: 'Batch Number', key: 'batch_number', width: 50 },
+      { header: 'Description', key: 'description', width: 50 },
+      { header: 'Start_Date', key: 'start_date', width: 50 },
+      { header: 'End_Date', key: 'end_date', width: 50 },
+      { header: 'Delivery_Address ', key: 'delivery_address', width: 50 },
+      { header: 'Landmark', key: 'landmark', width: 50 },
+      { header: 'Phone', key: 'phone', width: 50 },
+      { header: 'Status', key: 'status', width: 50 },
+      { header: 'CreatedAt', key: 'createdAt', width: 50 }
 
-  res.send(appResponse('Fetched succcessfully', response));
+    ];
+
+    let mainlist = [];
+
+    for (let response of responses) {
+      mainlist.push({
+        batch_number: response.batch_number,
+        description: response.description,
+        start_date: response.start_date,
+        end_date: response.end_date,
+        delivery_address: response.delivery_address,
+        landmark: response.landmark,
+        phone: response.phone,
+        status: response.status,
+        createdAt: response.createdAt,
+      });
+    }
+
+    const file = await downloadExcel(worksheet, worksheetHeaders, mainlist);
+    res.send(appResponse('File paths', file));
+  } else {
+    res.send(appResponse('Fetched succcessfully', responses));
+  }
 };
 
 export const startScheduleHandler = async (req, res) => {
