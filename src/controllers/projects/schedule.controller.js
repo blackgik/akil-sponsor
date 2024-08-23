@@ -54,7 +54,6 @@ export const listScheduleHandler = async (req, res) => {
       { header: 'Phone', key: 'phone', width: 50 },
       { header: 'Status', key: 'status', width: 50 },
       { header: 'CreatedAt', key: 'createdAt', width: 50 }
-
     ];
 
     let mainlist = [];
@@ -69,7 +68,7 @@ export const listScheduleHandler = async (req, res) => {
         landmark: response.landmark,
         phone: response.phone,
         status: response.status,
-        createdAt: response.createdAt,
+        createdAt: response.createdAt
       });
     }
 
@@ -105,9 +104,50 @@ export const fetchAwardeesinScheduleHandler = async (req, res) => {
 
   const { schedule_id } = params;
 
-  const response = await fetchAwardeesinSchedule({ schedule_id, param: query, user });
+  const responses = await fetchAwardeesinSchedule({ schedule_id, param: query, user });
+  if (query.download === 'on') {
+    const worksheet = 'sheduled_awardees';
+    const worksheetHeaders = [
+      { header: 'Batch Number', key: 'batch_code', width: 50 },
+      { header: 'Name', key: 'name', width: 50 },
+      { header: 'Gender', key: 'gender', width: 50 },
+      { header: 'Age', key: 'age', width: 50 },
+      { header: 'Email', key: 'email', width: 50 },
+      { header: 'Phone', key: 'phone', width: 50 },
+      { header: 'Occupation ', key: 'occupation', width: 50 },
+      { header: 'State', key: 'state', width: 50 },
+      { header: 'LGA', key: 'lga', width: 50 },
+      { header: 'Ward', key: 'ward', width: 50 },
+      { header: 'Beneficiary_status', key: 'beneficiary_status', width: 50 },
+      { header: 'Status', key: 'status', width: 50 },
+      { header: 'CreatedAt', key: 'createdAt', width: 50 }
+    ];
 
-  res.send(appResponse('Fetched succcessfully', response));
+    let mainlist = [];
+
+    for (let response of responses) {
+      mainlist.push({
+        batch_code: response.batch_code,
+        name: response.name,
+        gender: response.gender,
+        age: response.age,
+        email: response.beneficiary_id.contact.email,
+        phone: response.phone,
+        occupation: response.occupation,
+        state: response.state,
+        lga: response.lga,
+        ward: response.ward,
+        status: response.status,
+        beneficiary_status: response.beneficiary_status,
+        createdAt: response.createdAt
+      });
+    }
+
+    const file = await downloadExcel(worksheet, worksheetHeaders, mainlist);
+    res.send(appResponse('File paths', file));
+  } else {
+    res.send(appResponse('Fetched succcessfully', responses));
+  }
 };
 
 export const editScheduleHandler = async (req, res) => {
