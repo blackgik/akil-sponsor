@@ -26,7 +26,7 @@ export const fetchBeneficiariesByStatusHandler = async (req, res) => {
 
   const beneficiaries = await fetchBeneficiariesByStatus({ user, params });
   if (params.download === 'on') {
-    const worksheet = new Date().getTime() + (await codeGenerator(5));
+    const worksheet = 'beneficiaries';
    const worksheetHeaders = [
       { header: 'Beneficiary', key: 'name', width: 50 },
       { header: 'Email', key: 'email', width: 50 },
