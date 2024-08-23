@@ -460,6 +460,7 @@ export const fetchGenerateList = async ({ param, user, project_id }) => {
     age,
     occupation,
     status,
+    download,
     is_shortaged
   } = param;
 
@@ -489,11 +490,7 @@ export const fetchGenerateList = async ({ param, user, project_id }) => {
   }
 
   if (age) {
-    const ageSplit = age.split('-');
-    const min = ageSplit[0];
-    const max = ageSplit[1];
-
-    filter.age = { $gte: Number(min), $lte: Number(max) };
+    filter.age = age;
   }
 
   if (occupation) {
@@ -523,13 +520,14 @@ export const fetchGenerateList = async ({ param, user, project_id }) => {
     .skip((page_no - 1) * no_of_requests)
     .limit(no_of_requests);
   const available_pages = Math.ceil(count / no_of_requests);
-
-  return {
-    page_no,
-    available_pages,
-    count,
-    fetched_data
-  };
+  return download === 'on'
+    ? fetched_data
+    : {
+        page_no,
+        available_pages,
+        count,
+        fetched_data
+      };
 };
 
 export const projectDashBoardStats = async ({ user }) => {

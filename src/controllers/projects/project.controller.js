@@ -47,10 +47,62 @@ export const fetchGenerateListHandler = async (req, res) => {
   const { query, user, params } = req;
 
   const { project_id } = params;
+  console.log('here', params);
 
-  const response = await fetchGenerateList({ param: query, user, project_id });
+  const responses = await fetchGenerateList({ param: query, user, project_id });
+  if (query.download === 'on') {
+    const worksheet = new Date().getTime() + (await codeGenerator(5));
+    const worksheetHeaders = [
+      { header: 'Batch Code', key: 'batch_code', width: 50 },
+      { header: 'Beneficiary', key: 'name', width: 50 },
+      { header: 'Quantity per Person', key: 'quantity_per_person', width: 50 },
+      { header: 'Project Start Date', key: 'start_date', width: 50 },
+      { header: 'Project End Date', key: 'end_date', width: 50 },
+      { header: 'Gender', key: 'gender', width: 50 },
+      { header: 'Age', key: 'age', width: 50 },
+      { header: 'Occupation', key: 'occupation', width: 50 },
+      { header: 'State', key: 'state', width: 50 },
+      { header: 'Project State', key: 'project_state', width: 50 },
+      { header: 'Project Status', key: 'project_status', width: 50 },
+      { header: 'LGA', key: 'lga', width: 50 },
+      { header: 'Ward', key: 'ward', width: 50 },
+      { header: 'Phone', key: 'phone', width: 50 },
+      { header: 'Status', key: 'status', width: 50 },
+      { header: 'Shortaged', key: 'is_shortaged', width: 50 },
+      { header: 'Project Name', key: 'project_name', width: 50 },
+      { header: 'Date Added', key: 'createdAt', width: 50 }
+    ];
 
-  res.send(appResponse('Fetched successfully', response));
+    let mainlist = [];
+
+    for (let response of responses) {
+      mainlist.push({
+        batch_code: response.batch_code,
+        name: response.name,
+        gender: response.gender,
+        age: response.age,
+        occupation: response.occupation,
+        state: response.state,
+        lga: response.lga,
+        ward: response.ward,
+        phone: response.phone,
+        status: response.status,
+        is_shortaged: response.is_shortaged,
+        project_name: response.project_id.project_name,
+        quantity_per_person: response.project_id.quantity_per_person,
+        start_date: response.project_id.start_date,
+        end_date: response.project_id.end_date,
+        project_state: response.project_id.project_state,
+        project_status: response.project_id.project_status,
+        createdAt: response.createdAt
+      });
+    }
+
+    const file = await downloadExcel(worksheet, worksheetHeaders, mainlist);
+    res.send(appResponse('File paths', file));
+  } else {
+    res.send(appResponse('Fetched successfully', responses));
+  }
 };
 
 export const updateProjectHandler = async (req, res) => {
