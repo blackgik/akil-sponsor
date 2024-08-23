@@ -4,6 +4,7 @@ import {
   checkIfBenficiaryHandler,
   createNewuserHandler,
   deleteUserHandler,
+  downloadExcelHandler,
   editUserHandler,
   fetchUserHandler,
   fetchUsersHandler,
@@ -59,5 +60,7 @@ userRoute.delete(
   permissions({ authorize: 'settings', functions: 'users', permission: 'delete' }),
   deleteUserHandler
 );
+userRoute.get('/download-xcel', downloadExcelHandler)
+
 
 export default userRoute;

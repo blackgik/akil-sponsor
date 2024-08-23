@@ -11,6 +11,8 @@ import {
   viewBeneficiariesDashboardStats,
   viewBeneficiariesUploadedList
 } from '../../services/beneficiaries/beneficiaryService.js';
+import { codeGenerator } from '../../utils/codeGenerator.js';
+import { downloadExcel } from '../../utils/general.js';
 
 export const fetchedUploadedFilesHandler = async (req, res) => {
   const formatFile = await fileFormatter(req.files);
@@ -23,8 +25,33 @@ export const fetchBeneficiariesByStatusHandler = async (req, res) => {
   const params = req.query;
 
   const beneficiaries = await fetchBeneficiariesByStatus({ user, params });
+  if (params.download === 'on') {
+    const worksheet = 'beneficiaries';
+   const worksheetHeaders = [
+      { header: 'Beneficiary', key: 'name', width: 50 },
+      { header: 'Email', key: 'email', width: 50 },
+      { header: 'Phone', key: 'phone', width: 50 },
+      { header: 'Date Added', key: 'createdAt', width: 50 },
+      { header: 'Status', key: 'acctstatus', width: 50 }
+    ];
 
-  res.send(appResponse('fetched organization beneficiaries successfully', beneficiaries));
+    let mainlist = [];
+
+    for (let response of beneficiaries) {
+      mainlist.push({
+        name: response.personal.member_name,
+        email: response.contact.email,
+        phone: response.contact.phone,
+        createdAt: response.createdAt,
+        acctstatus: response.acctstatus
+      });
+    }
+
+    const file = await downloadExcel(worksheet, worksheetHeaders, mainlist);
+    res.send(appResponse('File paths', file));
+  } else {
+    res.send(appResponse('fetched organization beneficiaries successfully', beneficiaries));
+  }
 };
 
 export const beneficiaryEmailVerifyHandler = async (req, res) => {
@@ -88,7 +115,6 @@ export const beneficiaryUpdateBatchListHandler = async (req, res) => {
 
   res.send(appResponse('Updated beneficiaries uploaded list successfully', updatedList));
 };
-
 
 export const beneficiaryBankListHandler = async (req, res) => {
   const banks = await getBankList();
