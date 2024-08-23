@@ -8,6 +8,7 @@ import {
   fetchUsers,
   updateStatus
 } from '../../services/settings/users.service.js';
+import { removeFile } from '../../utils/general.js';
 
 export const createNewuserHandler = async (req, res) => {
   const { user, body } = req;
@@ -73,4 +74,21 @@ export const deleteUserHandler = async (req, res) => {
   const response = await deleteUser({ user_id });
 
   res.send(appResponse('Deleted successfully', response));
+};
+
+export const downloadExcelHandler = async (req, res) => {
+  const filePath = `xcels/${req.query.code}.xlsx`;
+
+  res.download(filePath, `${req.query.code}.xlsx`, (err) => {
+    if (!err) {
+      removeFile(filePath);
+    } else {
+      console.error(err);
+      res.send({
+        success: false,
+        message: 'File Path not found',
+        data: null
+      });
+    }
+  });
 };

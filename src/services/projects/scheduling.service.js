@@ -323,7 +323,7 @@ export const generateSchedule = async ({ user, project_id }) => {
 };
 
 export const listschedules = async ({ user, param, project_id }) => {
-  let { page_no, no_of_requests, search, status } = param;
+  let { page_no, no_of_requests, search, status, download } = param;
 
   page_no = Number(page_no) || 1;
   no_of_requests = Number(no_of_requests) || Infinity;
@@ -350,8 +350,14 @@ export const listschedules = async ({ user, param, project_id }) => {
     .limit(no_of_requests);
 
   const available_pages = Math.ceil(count / no_of_requests);
-
-  return { page_no, available_pages, count, fetched_data };
+  return download === 'on'
+    ? fetched_data
+    : {
+        page_no,
+        available_pages,
+        count,
+        fetched_data
+      };
 };
 
 export const startSchedule = async ({ body, user, project_id }) => {
@@ -448,7 +454,8 @@ export const viewSchedule = async ({ schedule_id, user }) => {
 };
 
 export const fetchAwardeesinSchedule = async ({ schedule_id, user, param }) => {
-  let { page_no, no_of_requests, search, gender, state, lga, age, occupation, status } = param;
+  let { page_no, no_of_requests, search, gender, state, lga, age, occupation, status, download } =
+    param;
 
   page_no = Number(page_no) || 1;
   no_of_requests = Number(no_of_requests) || Infinity;
@@ -476,11 +483,7 @@ export const fetchAwardeesinSchedule = async ({ schedule_id, user, param }) => {
   }
 
   if (age) {
-    const ageSplit = age.split('-');
-    const min = ageSplit[0].trim();
-    const max = ageSplit[1].trim();
-
-    filter.age = { $gte: Number(min), $lte: Number(max) };
+    filter.age = age;
   }
 
   if (occupation) {
@@ -503,13 +506,14 @@ export const fetchAwardeesinSchedule = async ({ schedule_id, user, param }) => {
     .limit(no_of_requests);
 
   const available_pages = Math.ceil(count / no_of_requests);
-
-  return {
-    page_no,
-    available_pages,
-    count,
-    fetched_data
-  };
+  return download === 'on'
+  ? fetched_data
+  : {
+      page_no,
+      available_pages,
+      count,
+      fetched_data
+    };
 };
 
 export const editSchedule = async ({ schedule_id, user, body }) => {

@@ -460,6 +460,7 @@ export const fetchGenerateList = async ({ param, user, project_id }) => {
     age,
     occupation,
     status,
+    download,
     is_shortaged
   } = param;
 
@@ -489,11 +490,7 @@ export const fetchGenerateList = async ({ param, user, project_id }) => {
   }
 
   if (age) {
-    const ageSplit = age.split('-');
-    const min = ageSplit[0];
-    const max = ageSplit[1];
-
-    filter.age = { $gte: Number(min), $lte: Number(max) };
+    filter.age = age;
   }
 
   if (occupation) {
@@ -523,13 +520,14 @@ export const fetchGenerateList = async ({ param, user, project_id }) => {
     .skip((page_no - 1) * no_of_requests)
     .limit(no_of_requests);
   const available_pages = Math.ceil(count / no_of_requests);
-
-  return {
-    page_no,
-    available_pages,
-    count,
-    fetched_data
-  };
+  return download === 'on'
+    ? fetched_data
+    : {
+        page_no,
+        available_pages,
+        count,
+        fetched_data
+      };
 };
 
 export const projectDashBoardStats = async ({ user }) => {
@@ -855,7 +853,7 @@ export const fetchBeneficiariesForProjects = async ({ user, param, project_id })
 
   if (!project) throw new NotFoundError('Project not found');
 
-  let { page_no, no_of_requests, search, status } = param;
+  let { page_no, no_of_requests, search, status, download } = param;
 
   page_no = Number(page_no) || 1;
   no_of_requests = Number(no_of_requests) || 20;
@@ -907,6 +905,11 @@ export const fetchBeneficiariesForProjects = async ({ user, param, project_id })
     .limit(no_of_requests);
 
   const available_pages = Math.ceil(beneficiaryCount / no_of_requests);
-
-  return { page_no, available_pages, fetchedResults };
+  return download === 'on'
+    ? fetchedResults
+    : {
+        page_no,
+        available_pages,
+        fetchedResults
+      };
 };
