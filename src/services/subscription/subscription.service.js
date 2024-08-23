@@ -412,7 +412,7 @@ export const sendAgentSubEmail = async ({ user, body }) => {
   };
 
   const mailData = {
-    email: 'okolonathanchinedu@gmail.com',
+    email: 'ask@akilaah.com',
     subject: `Subscription Payment Request from ${onboardingData.name}`,
     type: 'html',
     html: subPayementAgentEmail(onboardingData).html
