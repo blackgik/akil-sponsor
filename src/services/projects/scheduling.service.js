@@ -42,18 +42,12 @@ export const createProductSchedule = async ({ user, body, project_id, param }) =
     status: 'allocated'
   });
 
-  const division = minimun / quantity_per_person;
+  const people_can_feed = minimun / quantity_per_person;
 
-  console.log({ minimun, quantity_per_person });
-  console.log({ division });
+  let shortage_persons = people_can_feed - total_allocated;
 
-  let shortage_persons = division - total_allocated;
-
-  console.log({ shortage_persons });
-
-  const total_persons_to_get = total_allocated - Math.abs(shortage_persons);
-
-  console.log({ total_allocated });
+  const total_persons_to_get =
+    shortage_persons < 0 ? total_allocated - Math.abs(shortage_persons) : total_allocated;
 
   const { gender, state, lga, age, occupation, status } = param;
 
@@ -117,11 +111,7 @@ export const createProductSchedule = async ({ user, body, project_id, param }) =
 
   const total_left = total_persons_to_get - total_scheduled;
 
-  // console.log({ total_scheduled });
-  // console.log({ total_left });
-  // console.log({ total_persons_to_get });
-
-  // if (total_left <= 0) throw new BadRequestError('Total number of participants has be exhauted');
+  if (total_left <= 0) throw new BadRequestError('Total number of participants has be exhauted');
 
   //   create object
   const schedule_data = {
@@ -194,7 +184,7 @@ export const createProductSchedule = async ({ user, body, project_id, param }) =
     for (const benefic_id of body.selection.slice(0, 5)) {
       const awardee = await awardeesModel.findById(benefic_id);
 
-      if (!awardee) throw new NotFoundError('Some Awardees are not beneficiaries on your portal');
+      if (!awardee) continue;
 
       const benefic = await organizationBeneficiaryModel
         .findById(awardee.beneficiary_id)
