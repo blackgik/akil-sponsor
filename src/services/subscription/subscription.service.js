@@ -413,15 +413,30 @@ export const sendAgentSubEmail = async ({ user, body }) => {
 
   const mailData = {
     email: 'ask@akilaah.com',
-    subject: `Subscription Payment Request form ${onboardingData.name}`,
+    subject: `Subscription Payment Request from ${onboardingData.name}`,
     type: 'html',
     html: subPayementAgentEmail(onboardingData).html
   };
+
   const msg = await formattMailInfo(mailData, env);
 
   const msgDelivered = await messageBird(msg);
 
   if (!msgDelivered)
+    throw new InternalServerError('server slip. Payment verification mail not sent');
+
+  const memberEmailData = {
+    email: body.email,
+    subject: `Subscription Payment Request`,
+    type: 'html',
+    html: subscriptionPay2ruAgentEmail(onboardingData).html
+  };
+
+  const msg1 = await formattMailInfo(memberEmailData, env);
+
+  const msgDelivered1 = await messageBird(msg1);
+
+  if (!msgDelivered1)
     throw new InternalServerError('server slip. Payment verification mail not sent');
 };
 
