@@ -193,7 +193,7 @@ export const craeteNewUser = async ({ user, body }) => {
 };
 
 export const fetchUsers = async ({ user, param }) => {
-  let { page_no, no_of_request, search, acctstatus, role } = param;
+  let { page_no, no_of_request, search, acctstatus, role, download } = param;
 
   page_no = parseInt(page_no, 10) || 1;
   no_of_request = parseInt(no_of_request, 10) || 20;
@@ -225,8 +225,14 @@ export const fetchUsers = async ({ user, param }) => {
     .limit(no_of_request);
 
   const available_pages = Math.ceil(count / no_of_request);
-
-  return { count, available_pages, page_no, fetched_data };
+  return download === 'on'
+    ? fetched_data
+    : {
+        page_no,
+        available_pages,
+        count,
+        fetched_data
+      };
 };
 
 export const fetchUser = async ({ user_id, user }) => {

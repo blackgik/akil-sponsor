@@ -719,12 +719,12 @@ export const sponsorRequestInfo = async ({ user }) => {
   });
 
   return {
-    finance: (totalFinanceAmount / totalCount) * 100,
-    food: (totalFoodAmount / totalCount) * 100,
-    health: (totalHealthAmount / totalCount) * 100,
-    education: (totalEducationAmount / totalCount) * 100,
-    housing: (totalHousingAmount / totalCount) * 100,
-    transportation: (totalTransportationAmount / totalCount) * 100,
+    finance: Math.floor((totalFinanceAmount / totalCount) * 1000) / 10,
+    food: Math.floor((totalFoodAmount / totalCount) * 1000) / 10,
+    health: Math.floor((totalHealthAmount / totalCount) * 1000) / 10,
+    education: Math.floor((totalEducationAmount / totalCount) * 1000) / 10,
+    housing: Math.floor((totalHousingAmount / totalCount) * 1000) / 10,
+    transportation: Math.floor((totalTransportationAmount / totalCount) * 1000) / 10,
     totalCount,
     graphInfo: result
   };

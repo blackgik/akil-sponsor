@@ -162,6 +162,15 @@ export const confirmDisbursement = async ({ user, awardee_id }) => {
     who_is_reading: 'sponsor',
     organization_id: user._id
   });
+
+  // create notification
+  await notificationsModel.create({
+    note: `You have successfully received ${project.project_name} project `,
+    type: 'update',
+    who_is_reading: 'beneficiary',
+    organization_id: user._id,
+    member_id: awardee.beneficiary_id
+  });
   return { awardee };
 };
 

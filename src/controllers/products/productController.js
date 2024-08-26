@@ -15,6 +15,7 @@ import {
   fetchProductRestockHistory,
   itemStatistics
 } from '../../services/product/productService.js';
+import { downloadExcel } from '../../utils/general.js';
 
 export const createNewProductHandler = async (req, res) => {
   const { user, body } = req;
@@ -58,7 +59,47 @@ export const getAllProductsHandler = async (req, res) => {
   const params = query;
 
   const fetchedData = await fetchAllProducts({ user, params });
+  if (params.download === 'on') {
+    const worksheet = 'product_list';
+    const worksheetHeaders = [
+      { header: 'Product Name', key: 'product_name', width: 50 },
+      { header: 'Product Quantity', key: 'product_quantity', width: 50 },
+      { header: 'Product Value Amount ', key: 'product_value_amount', width: 50 },
+      { header: 'Product Slug ', key: 'product_slug', width: 50 },
+      { header: 'Product Unit ', key: 'product_unit', width: 50 },
+      // { header: 'Product Category Name ', key: 'product_category_name', width: 50 },
+      // { header: 'Product Category Slug ', key: 'product_category_slug', width: 50 },
+      // { header: 'Product Category Description ', key: 'product_category_description', width: 50 },
+      // { header: 'Product Category is_active ', key: 'product_is_active', width: 50 },
+      { header: ' Product Description', key: 'product_description', width: 50 },
+      // { header: ' Product Status', key: 'prdstatus', width: 50 },
+      { header: ' Product is_active', key: 'is_active', width: 50 },
+      { header: ' CreatedAt', key: 'createdAt', width: 50 }
+    ];
 
+    let mainlist = [];
+
+    for (let response of fetchedData) {
+      mainlist.push({
+        product_name: response.product_name,
+        product_quantity: response.product_quantity,
+        product_value_amount: response.product_value_amount,
+        product_slug: response.product_slug,
+        product_unit: response.product_unit,
+        // product_category_name: response.product_category_id.product_category_name || 'ty',
+        // product_category_slug: response.product_category_id.product_category_slug,
+        // product_category_description: response.product_category_id.product_category_description,
+        // product_is_active: response.product_category_id.is_active,
+        product_description: response.product_description,
+        product_description: response.product_description,
+        is_active: response.is_active,
+        createdAt: response.createdAt
+      });
+    }
+
+    const file = await downloadExcel(worksheet, worksheetHeaders, mainlist);
+    res.send(appResponse('File paths', file));
+  }
   res.send(appResponse('fetched products successfully', fetchedData));
 };
 
