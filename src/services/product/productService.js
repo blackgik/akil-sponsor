@@ -34,16 +34,18 @@ export const createNewProduct = async ({ user, body }) => {
   if (!created)
     throw new InternalServerError('server slip error. Please Check your Input properly');
 
-  body.warehouses.forEach(async (element) => {
-    let warehouse = await WarehouseModel.findById(element);
-    if (warehouse) {
-      await warehouseProductModel.create({
-        product_id: created._id,
-        warehouse_id: warehouse._id,
-        quantity: created.product_quantity
-      });
-    }
-  });
+  if (body.warehouses) {
+    body.warehouses.forEach(async (element) => {
+      let warehouse = await WarehouseModel.findById(element);
+      if (warehouse) {
+        await warehouseProductModel.create({
+          product_id: created._id,
+          warehouse_id: warehouse._id,
+          quantity: created.product_quantity
+        });
+      }
+    });
+  }
   //create email profile here
   const creationData = {
     email: user.email,
@@ -54,6 +56,7 @@ export const createNewProduct = async ({ user, body }) => {
     status: 'published'
   };
   const mailData = {
+    sponsor_name: `${user.firstname} ${user.lastname}`.toUpperCase(),
     email: user.email,
     subject: 'Successful Creation of Product on Akilaah',
     type: 'html',
@@ -105,6 +108,7 @@ export const createNewProductDraft = async ({ user, body }) => {
     status: 'draft'
   };
   const mailData = {
+    sponsor_name: `${user.firstname} ${user.lastname}`.toUpperCase(),
     email: user.email,
     subject: 'Successful Creation of Product on Akilaah',
     type: 'html',
@@ -276,12 +280,13 @@ export const fetchProductRestockHistory = async ({ user, params }) => {
 
   page_no = Number(page_no) || 1;
   no_of_requests = Number(no_of_requests) || Infinity;
-  const product_idd = typeof product_id !== 'undefined' ? product_id : false;
-  if (!product_idd) throw new BadRequestError('A product Id is required');
-  const filterData = { product_id: product_id };
 
-  const query = typeof search !== 'undefined' ? search : false;
-  const rtkstatus = typeof status !== 'undefined' ? status : false;
+  if (!product_id) throw new BadRequestError('A product Id is required');
+
+  const filterData = { product_id };
+
+  const query = search !== undefined ? search : false;
+  const rtkstatus = status !== undefined ? status : false;
   const rgx = (pattern) => new RegExp(`.*${pattern}.*`, 'i');
   const searchRgx = rgx(query);
 
@@ -290,7 +295,7 @@ export const fetchProductRestockHistory = async ({ user, params }) => {
   }
 
   if (rtkstatus) {
-    filterData['$and'] = [{ rtkstatus: rtkstatus }];
+    filterData['$and'] = [{ rtkstatus }];
   }
 
   const totalCount = await RestockModel.countDocuments({
@@ -309,13 +314,31 @@ export const fetchProductRestockHistory = async ({ user, params }) => {
     })
     .sort({ createdAt: -1 })
     .skip((page_no - 1) * no_of_requests)
-    .limit(no_of_requests);
+    .limit(no_of_requests)
+    .lean(); // Convert to plain objects
 
-  const available_pages = Math.ceil(totalCount / no_of_requests)
-    ? Math.ceil(totalCount / no_of_requests)
-    : 1;
+  // Replace IDs with corresponding data
+  const updatedFetchData = await Promise.all(
+    fetchData.map(async (restock) => {
+      // Fetch warehouse data for each warehouse ID in restock.warehouses
+      const warehouseData = await Promise.all(
+        restock.warehouses.map(async (warehouseId) => {
+          return await WarehouseModel.findById(warehouseId);
+        })
+      );
 
-  return { page_no, available_pages, fetchData };
+      return {
+        ...restock,
+        product_id: restock.product_id, // Already populated
+        supplier_id: restock.supplier_id, // Already populated
+        warehouses: warehouseData // Replace warehouse IDs with actual warehouse data
+      };
+    })
+  );
+
+  const available_pages = Math.ceil(totalCount / no_of_requests) || 1;
+
+  return { page_no, available_pages, fetchData: updatedFetchData };
 };
 
 //------ common product handlers --------------------\\

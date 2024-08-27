@@ -56,6 +56,7 @@ export const disbursementCode = async ({ awardee_id, user }) => {
       code: code
     };
     const mailData = {
+      sponsor_name: `${user.firstname} ${user.lastname}`.toUpperCase(),
       email: contactEmail,
       subject: `Your ${emailData.project_name} Package is Ready for Collection`,
       type: 'html',
@@ -159,6 +160,7 @@ export const confirmDisbursement = async ({ user, awardee_id }) => {
   };
 
   const mailData = {
+    sponsor_name: `${user.firstname} ${user.lastname}`.toUpperCase(),
     email: emailData.email,
     subject: `Batch Delivery Completed - ${emailData.project_name}`,
     type: 'html',
@@ -191,11 +193,14 @@ export const confirmDisbursement = async ({ user, awardee_id }) => {
   return { awardee };
 };
 
-export const makeRequestedPayment = async ({ user, body }) => {
-  let amount = 10;
+export const makeRequestedPayment = async ({ user, body, project_id }) => {
+  const project = await ProjectModel.findById(project_id).populate('product_items');
+  let amount =
+    Number(project.quantity_per_person) * Number(project.product_items[0].product_value_amount);
   const requests = [];
   const errorLog = [];
-
+  console.log(amount)
+  return
   for (const beneficiary_id of body.beneficiary_ids) {
     const checkAzza = await organizationBeneficiaryModel.findOne({
       _id: beneficiary_id,
@@ -307,6 +312,7 @@ export const validateRequestPayments = async ({ user, body }) => {
         product_name: capitalizeWords(projectInfo.project_name)
       };
       const mailData = {
+        sponsor_name: `${user.firstname} ${user.lastname}`.toUpperCase(),
         email: benefic.contact.email,
         subject: `Payment Confirmation for ${capitalizeWords(project.project_name)}`,
         type: 'html',

@@ -6085,7 +6085,6 @@ export const batchDeliveryStartedEmail = (data) => {
                                                                             style="font-size: 18px; line-height: 150%; text-align: left; word-wrap: break-word;color:#002366;">
                                                                             <p style="font-size: 18px; line-height: 150%;"></p>
                                                                             We are pleased to inform you that the batch delivery
-                                                                            <span><strong>${data.batch_delivery_number}</strong></span>
                                                                             for the
                                                                             <span><strong>${data.project_name}</strong></span>
                                                                             project has officially started.

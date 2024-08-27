@@ -464,7 +464,7 @@ export const uploadReceipt = async ({ user, body }) => {
     sponsor_name: capitalizeWords(`${user.firstname} ${user.lastname}`)
   };
   const mailData = {
-    email: 'test@yopmail.com',
+    email: 'ask@akilaah.com',
     subject: `Payment Receipt upload for Subscription by ${creationData.sponsor_name}`,
     type: 'html',
     html: uploadReceiptEmail(creationData).html,
