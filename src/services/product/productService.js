@@ -179,6 +179,11 @@ export const restockProductData = async ({ user, body }) => {
 
   await updateShortagedPerson({ product, user });
 
+  await RestockModel.create({
+    ...body,
+    rtkstatus: 'complete'
+  });
+
   return {};
 };
 
