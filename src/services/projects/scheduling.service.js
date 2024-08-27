@@ -567,7 +567,7 @@ export const fetchAwardeesinSchedule = async ({ schedule_id, user, param }) => {
   const rgx = (pattern) => new RegExp(`.*${pattern}.*`, 'i');
   const searchRgx = rgx(query);
 
-  const filter = { sponsor_id: user._id, batch_id: schedule_id };
+  const filter = { sponsor_id: user._id, batch_id: schedule_id, is_shortaged: false };
 
   if (query) {
     filter['$or'] = [{ name: searchRgx, phone: searchRgx }];
@@ -697,4 +697,37 @@ export const deleteSchedule = async ({ schedule_id, user }) => {
   });
 
   return {};
+};
+
+export const updateShortagedPerson = async ({ product, user }) => {
+  const projects = await ProjectModel.find({
+    sponsor_id: user._id,
+    product_items: { $in: [product._id] }
+  });
+
+  if (!projects.length) return [];
+
+  let totalProductQuanity = product.product_quantity;
+
+  for (let project of projects) {
+    const quantityPerPerso = project.quantity_per_person;
+    const awardeeCount = await awardeesModel.countDocuments({
+      project_id: project._id,
+      sponsor_id: user._id,
+      is_shortaged: true
+    });
+
+    const totalNeededProduct = quantityPerPerso * awardeeCount;
+
+    if (totalNeededProduct < totalProductQuanity) {
+      await awardeesModel.updateMany(
+        { project_id: project._id, sponsor_id: user._id, is_shortaged: true },
+        { $set: { is_shortaged: false } }
+      );
+
+      product.product_quantity = totalProductQuanity - totalNeededProduct;
+    }
+  }
+
+  return [];
 };

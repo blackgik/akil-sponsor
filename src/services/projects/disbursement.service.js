@@ -16,6 +16,7 @@ import { buildOtpHash, codeGenerator, verifyOTP } from '../../utils/codeGenerato
 import { capitalizeWords } from '../../utils/general.js';
 import { formattMailInfo } from '../../utils/mailFormatter.js';
 import { messageBird } from '../../utils/msgBird.js';
+import ProductModel from '../../models/products/ProductModel.js';
 
 export const disbursementCode = async ({ awardee_id, user }) => {
   const awardee = await awardeesModel
@@ -133,6 +134,22 @@ export const confirmDisbursement = async ({ user, awardee_id }) => {
   if (awardee) awardee.status = 'disbursed';
 
   await awardee.save();
+
+  // update the products here
+  const products = project.product_items;
+
+  for (const productid of products) {
+    const product = await ProductModel.findById(productid._id);
+    if (!product) continue;
+
+    product.product_quantity -= project.quantity_per_person;
+
+    if (product.product_quantity < 0) product.product_quantity = 0;
+
+    await product.save();
+
+    // Able to select the warehouse to remove from.
+  }
 
   //create email profile here
   const emailData = {
