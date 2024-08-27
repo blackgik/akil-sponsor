@@ -194,11 +194,13 @@ export const confirmDisbursement = async ({ user, awardee_id }) => {
 };
 
 export const makeRequestedPayment = async ({ user, body, project_id }) => {
-  const project = await ProjectModel.findById(project_id);
-  let amount = Number(project.quantity_per_person);
+  const project = await ProjectModel.findById(project_id).populate('product_items');
+  let amount =
+    Number(project.quantity_per_person) * Number(project.product_items[0].product_value_amount);
   const requests = [];
   const errorLog = [];
-
+  console.log(amount)
+  return
   for (const beneficiary_id of body.beneficiary_ids) {
     const checkAzza = await organizationBeneficiaryModel.findOne({
       _id: beneficiary_id,
