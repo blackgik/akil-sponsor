@@ -16,6 +16,7 @@ import { buildOtpHash, codeGenerator, verifyOTP } from '../../utils/codeGenerato
 import { capitalizeWords } from '../../utils/general.js';
 import { formattMailInfo } from '../../utils/mailFormatter.js';
 import { messageBird } from '../../utils/msgBird.js';
+import ProductModel from '../../models/products/ProductModel.js';
 
 export const disbursementCode = async ({ awardee_id, user }) => {
   const awardee = await awardeesModel
@@ -55,6 +56,7 @@ export const disbursementCode = async ({ awardee_id, user }) => {
       code: code
     };
     const mailData = {
+      sponsor_name: `${user.firstname} ${user.lastname}`.toUpperCase(),
       email: contactEmail,
       subject: `Your ${emailData.project_name} Package is Ready for Collection`,
       type: 'html',
@@ -133,6 +135,22 @@ export const confirmDisbursement = async ({ user, awardee_id }) => {
 
   await awardee.save();
 
+  // update the products here
+  const products = project.product_items;
+
+  for (const productid of products) {
+    const product = await ProductModel.findById(productid._id);
+    if (!product) continue;
+
+    product.product_quantity -= project.quantity_per_person;
+
+    if (product.product_quantity < 0) product.product_quantity = 0;
+
+    await product.save();
+
+    // Able to select the warehouse to remove from.
+  }
+
   //create email profile here
   const emailData = {
     sponsor_name: capitalizeWords(beneficiary.personal.member_name),
@@ -142,6 +160,7 @@ export const confirmDisbursement = async ({ user, awardee_id }) => {
   };
 
   const mailData = {
+    sponsor_name: `${user.firstname} ${user.lastname}`.toUpperCase(),
     email: emailData.email,
     subject: `Batch Delivery Completed - ${emailData.project_name}`,
     type: 'html',
@@ -162,14 +181,26 @@ export const confirmDisbursement = async ({ user, awardee_id }) => {
     who_is_reading: 'sponsor',
     organization_id: user._id
   });
+
+  // create notification
+  await notificationsModel.create({
+    note: `You have successfully received ${project.project_name} project `,
+    type: 'update',
+    who_is_reading: 'beneficiary',
+    organization_id: user._id,
+    member_id: awardee.beneficiary_id
+  });
   return { awardee };
 };
 
-export const makeRequestedPayment = async ({ user, body }) => {
-  let amount = 10;
+export const makeRequestedPayment = async ({ user, body, project_id }) => {
+  const project = await ProjectModel.findById(project_id).populate('product_items');
+  let amount =
+    Number(project.quantity_per_person) * Number(project.product_items[0].product_value_amount);
   const requests = [];
   const errorLog = [];
-
+  console.log(amount)
+  return
   for (const beneficiary_id of body.beneficiary_ids) {
     const checkAzza = await organizationBeneficiaryModel.findOne({
       _id: beneficiary_id,
@@ -281,6 +312,7 @@ export const validateRequestPayments = async ({ user, body }) => {
         product_name: capitalizeWords(projectInfo.project_name)
       };
       const mailData = {
+        sponsor_name: `${user.firstname} ${user.lastname}`.toUpperCase(),
         email: benefic.contact.email,
         subject: `Payment Confirmation for ${capitalizeWords(project.project_name)}`,
         type: 'html',

@@ -82,6 +82,7 @@ export const createProject = async ({ body, user }) => {
     };
 
     const mailData = {
+      sponsor_name: `${user.firstname} ${user.lastname}`.toUpperCase(),
       email: user.email,
       subject: `New Project Created - ${emailData.project_name}`,
       type: 'html',
@@ -233,6 +234,7 @@ export const generateProjectList = async ({ user, param, project_id, body }) => 
     };
 
     const sponsorMailData = {
+      sponsor_name: `${user.firstname} ${user.lastname}`.toUpperCase(),
       email: user.email,
       subject: `Successful Project Beneficiary Award Notification`,
       type: 'html',
@@ -278,6 +280,7 @@ export const generateProjectList = async ({ user, param, project_id, body }) => 
         };
 
         const beneficiaryMailData = {
+          sponsor_name: `${user.firstname} ${user.lastname}`.toUpperCase(),
           email: beneficiary.contact.email,
           subject: `You have been awarded to project ${project.project_name}`,
           type: 'html',
@@ -384,6 +387,7 @@ export const saveGenerateList = async ({ user, param, project_id, body }) => {
   };
 
   const mailData = {
+    sponsor_name: `${user.firstname} ${user.lastname}`.toUpperCase(),
     email: user.email,
     subject: `Beneficiary Successfully Allocated to ${emailData.project_name}`,
     type: 'html',
@@ -424,6 +428,7 @@ export const saveGenerateList = async ({ user, param, project_id, body }) => {
       };
 
       const beneficiaryMailData = {
+        sponsor_name: `${user.firstname} ${user.lastname}`.toUpperCase(),
         email: beneficiary.contact.email,
         subject: `You have been allocated to project ${project.project_name}`,
         type: 'html',
@@ -795,6 +800,7 @@ export const closeProject = async ({ user, project_id }) => {
   };
 
   const mailData = {
+    sponsor_name: `${user.firstname} ${user.lastname}`.toUpperCase(),
     email: user.email,
     subject: `Project Closure Notification of -${emailData.project_name}`,
     type: 'html',

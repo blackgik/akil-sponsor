@@ -142,9 +142,11 @@ export const approveRequests = async ({ body, user, status }) => {
     //create email profile here
     const creationData = {
       member_name: capitalizeWords(`${benefi.personal.member_name}`),
+      sponsor_name: `${user.firstname} ${user.lastname}`,
       product_name: request.subject_request
     };
     const mailData = {
+      sponsor_name: creationData.sponsor_name.toUpperCase(),
       email: benefi.contact.email,
       subject: `Great News! Your Sponsorship Request Has Been Approved`,
       type: 'html',
@@ -226,9 +228,11 @@ export const denyRequests = async ({ body, status, user }) => {
     const creationData = {
       member_name: capitalizeWords(`${benefi.personal.member_name}`),
       denial_reason: denial_reason,
+      sponsor_name: `${user.firstname} ${user.lastname}`,
       product_name: request.subject_request
     };
     const mailData = {
+      sponsor_name: creationData.sponsor_name.toUpperCase(),
       email: benefi.contact.email,
       subject: `Request Application Status Update`,
       type: 'html',
@@ -284,6 +288,7 @@ export const uploadMore = async ({ request_id, body, user }) => {
     member_name: capitalizeWords(`${benefi.personal.member_name}`)
   };
   const mailData = {
+    sponsor_name: `${user.firstname} ${user.lastname}`.toUpperCase(),
     email: benefi.contact.email,
     subject: `Request for Additional Documents to Support Your Sponsorship Application`,
     type: 'html',
@@ -543,6 +548,7 @@ export const validateRequestPayments = async ({ user, body }) => {
         product_name: checkRequest.subject_request
       };
       const mailData = {
+        sponsor_name: `${user.firstname} ${user.lastname}`.toUpperCase(),
         email: benefic.contact.email,
         subject: `Payment Confirmation for Your Request`,
         type: 'html',
@@ -719,12 +725,12 @@ export const sponsorRequestInfo = async ({ user }) => {
   });
 
   return {
-    finance: (totalFinanceAmount / totalCount) * 100,
-    food: (totalFoodAmount / totalCount) * 100,
-    health: (totalHealthAmount / totalCount) * 100,
-    education: (totalEducationAmount / totalCount) * 100,
-    housing: (totalHousingAmount / totalCount) * 100,
-    transportation: (totalTransportationAmount / totalCount) * 100,
+    finance: Math.floor((totalFinanceAmount / totalCount) * 1000) / 10,
+    food: Math.floor((totalFoodAmount / totalCount) * 1000) / 10,
+    health: Math.floor((totalHealthAmount / totalCount) * 1000) / 10,
+    education: Math.floor((totalEducationAmount / totalCount) * 1000) / 10,
+    housing: Math.floor((totalHousingAmount / totalCount) * 1000) / 10,
+    transportation: Math.floor((totalTransportationAmount / totalCount) * 1000) / 10,
     totalCount,
     graphInfo: result
   };

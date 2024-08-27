@@ -13,26 +13,31 @@ export const createNewProduct = Joi.object({
 });
 
 export const restockProduct = Joi.object({
-  restock_quantity: Joi.number().required(),
-  quantity_per_warehouse:Joi.number().required(),
-  restock_value_amount: Joi.number().required(),
-  restock_unit: Joi.string().required(),
-  restock_start_date: Joi.date().required(),
   product_id: Joi.string().required(),
-  warehouses: Joi.array().items(Joi.string().allow('', null)).required(),
+  restock_start_date: Joi.date().required(),
+  restock_quantity: Joi.number().required(),
+  restock_unit: Joi.string().required(),
+  restock_value_amount: Joi.number().required(),
+  warehouses: Joi.array()
+    .items(
+      Joi.object({
+        warehouse: Joi.string().required(),
+        quantity: Joi.number().required()
+      })
+    )
+    .required(),
   supplier_id: Joi.string().required(),
   rtkstatus: Joi.string().required()
 });
-
 
 export const viewSingleProductSchema = Joi.object({
   product_id: Joi.string().required()
 });
 
 export const updateProductImageSchema = Joi.object({
-  product_image: Joi.object({ key: Joi.string().optional().allow('', null) }).optional(),
+  product_image: Joi.object({ key: Joi.string().optional().allow('', null) }).optional()
 });
 
 export const updateRestockSchema = Joi.object({
-  rtkstatus: Joi.string().required(),
+  rtkstatus: Joi.string().required()
 });

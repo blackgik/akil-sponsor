@@ -29,7 +29,7 @@ export const fetchNotifications = async ({ user, param }) => {
     .limit(no_of_requests);
 
   for (let notification of notifications) {
-    notification.is_read = true;
+    // notification.is_read = true;
 
     await notification.save();
   }

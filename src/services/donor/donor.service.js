@@ -383,6 +383,7 @@ export const sendDonorEmail = async ({ user, body }) => {
   };
 
   const mailData = {
+    sponsor_name: `${user.firstname} ${user.lastname}`.toUpperCase(),
     email: 'ask@akilaah.com',
     subject: 'Onboarding Request',
     type: 'html',
@@ -403,12 +404,14 @@ export const sendEmailtoAgent = async ({ user, body }) => {
   // Create email profile here
   const creationData = {
     donor_name: capitalizeWords(`${first_name} ${last_name}`),
+    name: capitalizeWords(`${first_name} ${last_name}`),
     amount: formatAmount(amount),
     email,
     phone,
     description
   };
   const mailData = {
+    sponsor_name: `${user.firstname} ${user.lastname}`.toUpperCase(),
     email: 'ask@akilaah.com',
     subject: `Donation Request by ${creationData.donor_name}`,
     type: 'html',
@@ -419,6 +422,21 @@ export const sendEmailtoAgent = async ({ user, body }) => {
   const msgDelivered = await messageBird(msg);
 
   if (!msgDelivered) {
+    throw new InternalServerError("Server slip. Donation Payment Initialization email wasn't sent");
+  }
+
+  const mailData1 = {
+    sponsor_name: `${user.firstname} ${user.lastname}`.toUpperCase(),
+    email: body.email,
+    subject: `Donation Request to Akilaah`,
+    type: 'html',
+    html: subscriptionPay2ruAgentEmail(creationData).html
+  };
+
+  const msg1 = await formattMailInfo(mailData1, env);
+  const msgDelivered1 = await messageBird(msg1);
+
+  if (!msgDelivered1) {
     throw new InternalServerError("Server slip. Donation Payment Initialization email wasn't sent");
   }
 };

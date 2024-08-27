@@ -6085,7 +6085,6 @@ export const batchDeliveryStartedEmail = (data) => {
                                                                             style="font-size: 18px; line-height: 150%; text-align: left; word-wrap: break-word;color:#002366;">
                                                                             <p style="font-size: 18px; line-height: 150%;"></p>
                                                                             We are pleased to inform you that the batch delivery
-                                                                            <span><strong>${data.batch_delivery_number}</strong></span>
                                                                             for the
                                                                             <span><strong>${data.project_name}</strong></span>
                                                                             project has officially started.
@@ -13368,13 +13367,13 @@ export const subscriptionPay2ruAgentEmail = (data) => {
 
         <head>
             <!--[if gte mso 9]>
-                <xml>
-                <o:OfficeDocumentSettings>
-                    <o:AllowPNG/>
-                    <o:PixelsPerInch>96</o:PixelsPerInch>
-                </o:OfficeDocumentSettings>
-                </xml>
-                <![endif]-->
+            <xml>
+            <o:OfficeDocumentSettings>
+                <o:AllowPNG/>
+                <o:PixelsPerInch>96</o:PixelsPerInch>
+            </o:OfficeDocumentSettings>
+            </xml>
+            <![endif]-->
             <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
             <meta name="x-apple-disable-message-reformatting">
@@ -13606,7 +13605,7 @@ export const subscriptionPay2ruAgentEmail = (data) => {
                                                                                         </span></strong></span><strong><span
                                                                                         style="line-height: 21px;"><span
                                                                                             style="color: #CB6015; line-height: 21px;">
-                                                                                            <strong>${data.sponsor_name}</strong>,</span></span></strong></span>
+                                                                                            <strong>${data.name}</strong>,</span></span></strong></span>
 
                                                                         </p>
                                                                     </div>
@@ -13627,21 +13626,19 @@ export const subscriptionPay2ruAgentEmail = (data) => {
                                                                         style="font-size: 18px; line-height: 150%; text-align: left; word-wrap: break-word;color:#002366;">
                                                                         <p style="font-size: 18px; line-height: 150%;"></p>
 
-                                                                        We are writing to inform you that your request to make payment 
+                                                                        We are writing to inform you that your request to make
+                                                                        payment
                                                                         through an agent has been successfully received and
                                                                         processed by our agent. The update will start
                                                                         immediately the necessary payments have been made
                                                                         successfully
                                                                         </p>
-
-                                                                    </div>
-                                                                    
-                                                                    <div class="v-line-height"
-                                                                        style="font-size: 18px; line-height: 150%; text-align: left; word-wrap: break-word;color:#002366;">
                                                                         <p
                                                                             style="font-size: 18px; line-height: 150%; text-align: justify;">
-                                                                            Payment informations:
+                                                                            Here are the details of your request:
                                                                         </p>
+
+
                                                                     </div>
 
                                                                 </td>
@@ -13664,15 +13661,8 @@ export const subscriptionPay2ruAgentEmail = (data) => {
                                                                             <span>
                                                                                 <ul
                                                                                     style="font-size: 14px; line-height: 23.8px; color: #002366;">
-
-                                                                                    <li>Bank Name: : Zenith Bank
-                                                                                    </li>
-                                                                                    <li>Account Name: MAJ FINTECH LIMITED
-                                                                                    </li>
-                                                                                    <li>Account Number: 1228541186
-                                                                                    </li>
+                                                                                    <li>Name: NGN ${data.name}</li>
                                                                                     <li>Amount: NGN ${data.amount}</li>
-                                                                                    <li>Reference Number: NGN ${data.reference}</li>
                                                                                 </ul>
                                                                             </span>
                                                                         </p>
@@ -13693,16 +13683,11 @@ export const subscriptionPay2ruAgentEmail = (data) => {
                                                                     <div class="v-line-height"
                                                                         style="font-size: 18px; line-height: 150%; text-align: left; word-wrap: break-word;color:#002366;">
                                                                         <p style="font-size: 18px; line-height: 150%;">
-                                                                            Ensure to email us your proof of payment  at 
-                                                                            <a href="mailto:ask@akilaah.com" style="color: blue;">
-                                                                            <strong>ask@akilaah.com</strong></a>
-                                                                            to enable us verify your payment.
-                                                                        </p>
-                                                                        <p style="font-size: 18px; line-height: 150%;">
-                                                                            Once the payment is recieved you will receive an
-                                                                            email confirmation along with detailed information
-                                                                            about the new features and benefits available to
-                                                                            you.
+                                                                            If you have any further questions or need additional
+                                                                            assistance, please feel free to contact us at
+                                                                            <a href="mailto:ask@akilaah.com"
+                                                                                style="color: blue;">
+                                                                                <strong>ask@akilaah.com</strong></a>.
                                                                         </p>
                                                                         <p style="font-size: 18px; line-height: 150%;">
                                                                             Thank you for your continued support and
@@ -13852,17 +13837,6 @@ export const subscriptionPay2ruAgentEmail = (data) => {
 
         </html>
         `,
-    text: `
-    We are writing to inform you that your payment request through an agent \n
-    has been successfully received and processed by our agent. \n
-    The upgrade process will start immediately the necessary payments have \n
-    been made successfully \n
-    Payment informations:\n
-    Bank Name: : Zenith Bank PLC\n
-    Account Name: MAJ FINTECH LIMITED\n
-    Account Number: 1228541186 \n
-    Amount: ${data.amount}
-      `
   };
 };
 

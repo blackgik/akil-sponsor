@@ -17,14 +17,14 @@ const ProductSchema = new Schema(
     product_unit: { type: String, trim: true },
     product_category_id: {
       type: Schema.Types.ObjectId,
-      ref: ' ',
+      ref: 'ProductCategory',
       required: true
     },
     product_image: {
       key: { type: String }
     },
     product_description: { type: String, trim: true },
-    
+
     organization_id: {
       type: Schema.Types.ObjectId,
       ref: 'Organization',

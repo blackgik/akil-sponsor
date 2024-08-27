@@ -264,7 +264,7 @@ export const loginOrganization = async (body, clienturl) => {
     if (!user) throw new InvalidError('Invalid Sponsor');
   }
 
-  console.log({user, })
+  console.log({ user });
 
   const acctstatus = checkOrg ? checkOrg.isApproved : user.acctstatus === 'active' ? true : false;
 
@@ -288,11 +288,11 @@ export const loginOrganization = async (body, clienturl) => {
     loginData.is_first_time = false;
     await loginData.save();
   }
-  console.log({ clienturl });
 
   const allowdOrigin = [
     'akilaah-sponsor.vercel.app',
     'sponsor.akilaah.com',
+    'chat.akilaah.com',
     'http://localhost:4000',
     'http://localhost:4005',
     'http://localhost:3000',

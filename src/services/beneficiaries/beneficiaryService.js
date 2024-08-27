@@ -63,6 +63,7 @@ export const verifyEmail = async (body) => {
     name_of_cooperation: checkAcct.firstname + ' ' + checkAcct.lastname
   };
   const mailData = {
+    sponsor_name: onboardingData.name_of_cooperation.toUpperCase(),
     email: checkAcct.email,
     subject: 'MAJFINTECH ONBOARDING',
     type: 'html',
@@ -287,6 +288,7 @@ export const updateBeneficiaryStatus = async ({ user, status, beneficiary_id, no
     status: status
   };
   const orgMailData = {
+    sponsor_name: orgnizationOnboardingData.name_of_cooperation.toUpperCase(),
     email: user.email,
     subject: `${user.firstname.toUpperCase()} ACCOUNT UPDATE`,
     type: 'html',
@@ -315,6 +317,7 @@ export const updateBeneficiaryStatus = async ({ user, status, beneficiary_id, no
     status: status
   };
   const mailData = {
+    sponsor_name: onboardingData.name_of_cooperation.toUpperCase(),
     email: beneficiary.contact.email,
     subject: `${user.firstname.toUpperCase()} ACCOUNT UPDATE`,
     type: 'html',
@@ -563,6 +566,7 @@ export const updateBeneficiaryBatchListStatus = async ({ beneficiary_batch_id, b
             };
 
             const mailData = {
+              sponsor_name: onboardingData.name_of_cooperation.toUpperCase(),
               email: onboardingData.email,
               subject: 'MAJFINTECH ONBOARDING',
               type: 'html',
@@ -807,6 +811,7 @@ export const importUserGuideCreation = async (data, user) => {
   };
 
   const mailData = {
+    sponsor_name: onboardingData.name_of_cooperation.toUpperCase(),
     email: createData.email,
     subject: 'AKIILAAH ONBOARDING',
     type: 'html',

@@ -42,7 +42,7 @@ export const createNewWarehouse = async ({ user, body }) => {
 };
 
 export const fetchWarehouse = async ({ user, params }) => {
-  let { page_no, no_of_requests, search, status } = params;
+  let { page_no, no_of_requests, search, status, download } = params;
 
   page_no = Number(page_no) || 1;
   no_of_requests = Number(no_of_requests) || Infinity;
@@ -81,14 +81,19 @@ export const fetchWarehouse = async ({ user, params }) => {
   const available_pages = Math.ceil(totalCount / no_of_requests)
     ? Math.ceil(totalCount / no_of_requests)
     : 1;
-
-  return { page_no, available_pages, fetchData };
+  return download === 'on'
+    ? fetchData
+    : {
+        page_no,
+        available_pages,
+        fetchData
+      };
 };
 
 //------ common warehouse handlers --------------------\\
 
 export const fetchAllWarehouses = async ({ user, params }) => {
-  let { page_no, no_of_requests, search, status } = params;
+  let { page_no, no_of_requests, search, status, download } = params;
 
   page_no = Number(page_no) || 1;
   no_of_requests = Number(no_of_requests) || Infinity;
@@ -127,7 +132,13 @@ export const fetchAllWarehouses = async ({ user, params }) => {
 
   const available_pages = Math.ceil(count / no_of_requests);
 
-  return { page_no, available_pages, fetchedData };
+  return download === 'on'
+    ? fetchedData
+    : {
+        page_no,
+        available_pages,
+        fetchedData
+      };
 };
 
 export const getSingleWarehouse = async ({ user, warehouse_id }) => {

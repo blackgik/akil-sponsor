@@ -3,7 +3,8 @@ import env from '../../config/env.js';
 import {
   batchDeliveryCreatedEmail,
   batchDeliveryStartedEmail,
-  beneSuccefulProjectScheduledEmail
+  beneSuccefulProjectScheduledEmail,
+  disbursementBeneficiariesEmail
 } from '../../config/mail.js';
 import organizationBeneficiaryModel from '../../models/beneficiaries/organizationBeneficiaryModel.js';
 import awardeesModel from '../../models/projects/awardeesModel.js';
@@ -16,6 +17,7 @@ import { formattMailInfo } from '../../utils/mailFormatter.js';
 import { messageBird } from '../../utils/msgBird.js';
 import ProductModel from '../../models/products/ProductModel.js';
 import notificationsModel from '../../models/settings/notificationsModel.js';
+import { buildOtpHash, codeGenerator } from '../../utils/codeGenerator.js';
 
 export const createProductSchedule = async ({ user, body, project_id, param }) => {
   const project = await ProjectModel.findById(project_id).populate('product_items');
@@ -243,6 +245,7 @@ export const createProductSchedule = async ({ user, body, project_id, param }) =
   };
 
   const mailData = {
+    sponsor_name: `${user.firstname} ${user.lastname}`.toUpperCase(),
     email: user.email,
     subject: `Batch Delivery Created for - ${emailData.project_name}`,
     type: 'html',
@@ -284,6 +287,7 @@ export const createProductSchedule = async ({ user, body, project_id, param }) =
       };
 
       const beneficiaryMailData = {
+        sponsor_name: `${user.firstname} ${user.lastname}`.toUpperCase(),
         email: beneficiary.contact.email,
         subject: `you have been successfully scheduled for the ${project.project_name} project with the batch number ${body.batch_number}`,
         type: 'html',
@@ -317,7 +321,7 @@ export const generateSchedule = async ({ user, project_id }) => {
 
   const code = generateId(count);
 
-  const batch_number = `${project.project_name.toUpperCase()}/BAT/${code}`;
+  const batch_number = `${project.project_name.toUpperCase().replace(/ /g, '_')}/BAT/${code}`;
 
   return batch_number;
 };
@@ -412,7 +416,7 @@ export const startSchedule = async ({ body, user, project_id }) => {
       : new Date();
 
   await project.save();
-
+  await disbursementCode({ project_id, user });
   //create email profile here
   const emailData = {
     sponsor_name: capitalizeWords(`${user.firstname} ${user.lastname}`),
@@ -421,6 +425,7 @@ export const startSchedule = async ({ body, user, project_id }) => {
   };
 
   const mailData = {
+    sponsor_name: emailData.sponsor_name.toUpperCase(),
     email: user.email,
     subject: `Batch Delivery Started for - ${emailData.project_name}`,
     type: 'html',
@@ -445,6 +450,104 @@ export const startSchedule = async ({ body, user, project_id }) => {
   return {};
 };
 
+const disbursementCode = async ({ project_id, user }) => {
+  const awardees = await awardeesModel
+    .find({ sponsor_id: user._id, project_id })
+    // .find({ batch_id: sponsor })
+    .populate('beneficiary_id')
+    .populate('project_id')
+    .populate('batch_id');
+
+  if (awardees.length === 0) throw new NotFoundError('No awardees found');
+  const results = [];
+
+  for (const awardee of awardees) {
+    const code = await codeGenerator(6);
+
+    const contact = awardee.beneficiary_id.contact.email
+      ? awardee.beneficiary_id.contact.email
+      : awardee.beneficiary_id.contact.phone;
+
+    const hash = buildOtpHash(contact, code, env.otpKey, 15);
+
+    awardee.hash = hash;
+
+    const contactEmail = awardee.beneficiary_id.contact.email;
+    const contactPhone = awardee.beneficiary_id.contact.phone;
+
+    await awardee.save();
+
+    if (contactEmail) {
+      // Create email profile
+      const emailData = {
+        beneficiary_name: capitalizeWords(awardee.name),
+        project_name: capitalizeWords(awardee.project_id.project_name),
+        start_date: awardee.batch_id.start_date,
+        end_date: awardee.batch_id.end_date,
+        location: awardee.batch_id.delivery_address,
+        code: code
+      };
+      const mailData = {
+        sponsor_name: `${user.firstname} ${user.lastname}`.toUpperCase(),
+        email: contactEmail,
+        subject: `Your ${emailData.project_name} Package is Ready for Collection`,
+        type: 'html',
+        html: disbursementBeneficiariesEmail(emailData).html,
+        text: disbursementBeneficiariesEmail(emailData).text
+      };
+
+      const msg = await formattMailInfo(mailData, env);
+
+      const msgDelivered = await messageBird(msg);
+      if (!msgDelivered) {
+        results.push({
+          awardee_id: awardee._id,
+          error: 'Server slip. Project delivery created without mail being sent'
+        });
+      }
+    } else {
+      // Create SMS profile
+      const smsUrl = `${env.termii_api_url}/api/sms/send`;
+      const smsData = {
+        to: contactPhone,
+        from: env.termii_sender_id,
+        sms: `Hi there, you should go to ${awardee.batch_id.delivery_address} from ${
+          awardee.batch_id.start_date
+        } to ${awardee.batch_id.end_date} to collect your ${capitalizeWords(
+          awardee.project_id.project_name
+        )}.\nCome with a means of identification and also your disbursement code ${code}`,
+        type: 'plain',
+        api_key: env.termii_api_secret,
+        channel: 'generic'
+      };
+
+      const config = {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      };
+
+      try {
+        await axios.post(smsUrl, smsData, config);
+      } catch (error) {
+        results.push({
+          awardee_id: awardee._id,
+          error: 'Failed to send SMS'
+        });
+      }
+    }
+
+    results.push({
+      awardee_id: awardee._id,
+      code,
+      contact,
+      hash
+    });
+  }
+
+  return results;
+};
+
 export const viewSchedule = async ({ schedule_id, user }) => {
   const schedule = await scheduleModel.findById(schedule_id).populate('project').populate('userid');
 
@@ -464,7 +567,7 @@ export const fetchAwardeesinSchedule = async ({ schedule_id, user, param }) => {
   const rgx = (pattern) => new RegExp(`.*${pattern}.*`, 'i');
   const searchRgx = rgx(query);
 
-  const filter = { sponsor_id: user._id, batch_id: schedule_id };
+  const filter = { sponsor_id: user._id, batch_id: schedule_id, is_shortaged: false };
 
   if (query) {
     filter['$or'] = [{ name: searchRgx, phone: searchRgx }];
@@ -507,13 +610,13 @@ export const fetchAwardeesinSchedule = async ({ schedule_id, user, param }) => {
 
   const available_pages = Math.ceil(count / no_of_requests);
   return download === 'on'
-  ? fetched_data
-  : {
-      page_no,
-      available_pages,
-      count,
-      fetched_data
-    };
+    ? fetched_data
+    : {
+        page_no,
+        available_pages,
+        count,
+        fetched_data
+      };
 };
 
 export const editSchedule = async ({ schedule_id, user, body }) => {
@@ -570,6 +673,7 @@ export const deleteSchedule = async ({ schedule_id, user }) => {
     start_date: scheduleCheck.start_date
   };
   const mailData = {
+    sponsor_name: `${user.firstname} ${user.lastname}`.toUpperCase(),
     email: user.email,
     subject: `Batch Delivery Deleted for - ${emailData.project_name}`,
     type: 'html',
@@ -593,4 +697,37 @@ export const deleteSchedule = async ({ schedule_id, user }) => {
   });
 
   return {};
+};
+
+export const updateShortagedPerson = async ({ product, user }) => {
+  const projects = await ProjectModel.find({
+    sponsor_id: user._id,
+    product_items: { $in: [product._id] }
+  });
+
+  if (!projects.length) return [];
+
+  let totalProductQuanity = product.product_quantity;
+
+  for (let project of projects) {
+    const quantityPerPerso = project.quantity_per_person;
+    const awardeeCount = await awardeesModel.countDocuments({
+      project_id: project._id,
+      sponsor_id: user._id,
+      is_shortaged: true
+    });
+
+    const totalNeededProduct = quantityPerPerso * awardeeCount;
+
+    if (totalNeededProduct < totalProductQuanity) {
+      await awardeesModel.updateMany(
+        { project_id: project._id, sponsor_id: user._id, is_shortaged: true },
+        { $set: { is_shortaged: false } }
+      );
+
+      product.product_quantity = totalProductQuanity - totalNeededProduct;
+    }
+  }
+
+  return [];
 };

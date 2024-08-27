@@ -4,7 +4,6 @@ const { Schema, model } = mongoose;
 
 const RestockSchema = new Schema(
   {
-
     restock_quantity: { type: Number, default: 0 },
     quantity_per_warehouse: { type: Number, default: 0 },
     restock_value_amount: { type: Number, default: 0 },
@@ -15,7 +14,10 @@ const RestockSchema = new Schema(
       ref: 'Product',
       required: true
     },
-    warehouses: Array,
+    warehouses: {
+      warehouse: { type: Schema.Types.ObjectId, ref: 'Warehouse' },
+      quantity: { type: Number, default: 0 }
+    },
     supplier_id: {
       type: Schema.Types.ObjectId,
       ref: 'Supplier',

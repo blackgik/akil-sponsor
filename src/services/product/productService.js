@@ -16,6 +16,7 @@ import notificationsModel from '../../models/settings/notificationsModel.js';
 import { capitalizeWords } from '../../utils/general.js';
 import ProjectModel from '../../models/projects/ProjectModel.js';
 import awardeesModel from '../../models/projects/awardeesModel.js';
+import { updateShortagedPerson } from '../projects/scheduling.service.js';
 
 export const createNewProduct = async ({ user, body }) => {
   const productData = {
@@ -33,16 +34,18 @@ export const createNewProduct = async ({ user, body }) => {
   if (!created)
     throw new InternalServerError('server slip error. Please Check your Input properly');
 
-  body.warehouses.forEach(async (element) => {
-    let warehouse = await WarehouseModel.findById(element);
-    if (warehouse) {
-      await warehouseProductModel.create({
-        product_id: created._id,
-        warehouse_id: warehouse._id,
-        quantity: created.product_quantity
-      });
-    }
-  });
+  if (body.warehouses) {
+    body.warehouses.forEach(async (element) => {
+      let warehouse = await WarehouseModel.findById(element);
+      if (warehouse) {
+        await warehouseProductModel.create({
+          product_id: created._id,
+          warehouse_id: warehouse._id,
+          quantity: created.product_quantity
+        });
+      }
+    });
+  }
   //create email profile here
   const creationData = {
     email: user.email,
@@ -53,6 +56,7 @@ export const createNewProduct = async ({ user, body }) => {
     status: 'published'
   };
   const mailData = {
+    sponsor_name: `${user.firstname} ${user.lastname}`.toUpperCase(),
     email: user.email,
     subject: 'Successful Creation of Product on Akilaah',
     type: 'html',
@@ -104,6 +108,7 @@ export const createNewProductDraft = async ({ user, body }) => {
     status: 'draft'
   };
   const mailData = {
+    sponsor_name: `${user.firstname} ${user.lastname}`.toUpperCase(),
     email: user.email,
     subject: 'Successful Creation of Product on Akilaah',
     type: 'html',
@@ -120,29 +125,70 @@ export const createNewProductDraft = async ({ user, body }) => {
 };
 
 export const restockProductData = async ({ user, body }) => {
-  const created = await RestockModel.create(body);
-  if (!created)
-    throw new InternalServerError('server slip error. Please Check your Input properly');
+  const product = await ProductModel.findById(body.product_id);
+  if (!product) throw new NotFoundError('product not found');
 
-  if (body.rtkstatus == 'complete') {
-    body.warehouses.forEach(async (element) => {
-      let restock = await warehouseProductModel.findOne({
-        product_id: body.product_id,
-        warehouse_id: element
+  let quantityPerHouse = 0;
+  const errorBucket = [];
+
+  for (let warehouseInfo of body.warehouses) {
+    const warehouse = await WarehouseModel.findById(warehouseInfo.warehouse_id);
+
+    if (!warehouse) {
+      errorBucket.push({
+        msg: 'warehouse with id ' + warehouseInfo.warehouse_id + ' does not exist'
       });
-      let product = await ProductModel.findById(body.product_id);
-      if (restock) {
-        restock.quantity += body.quantity_per_warehouse;
-        if (product) {
-          product.product_quantity += body.quantity_per_warehouse;
-          await product.save();
-        }
-        await restock.save();
-      }
+      continue;
+    }
+
+    const productInwareHouse = await warehouseProductModel.findOne({
+      warehouse_id: warehouseInfo.warehouse,
+      product_id: body.product_id
     });
+
+    if (!productInwareHouse) {
+      errorBucket.push({
+        msg: ' product in warehouse with id ' + body.product_id + ' does not exist'
+      });
+
+      continue;
+    }
+
+    if (quantityPerHouse + warehouseInfo.quantity > body.restock_quantity)
+      throw new BadRequestError(
+        `Quantity in ${warehouse.warehouse_name} makes it excess. Increase stock quantity to adjust`
+      );
+
+    quantityPerHouse += warehouseInfo.quantity;
+
+    if (body.rtkstatus === 'draft') continue;
+
+    productInwareHouse.quantity += Number(warehouseInfo.quantity);
+
+    await productInwareHouse.save();
   }
 
-  return true;
+  if (body.rtkstatus === 'draft') {
+    await RestockModel.create({
+      ...body,
+      rtkstatus: 'draft'
+    });
+
+    return {};
+  }
+
+  product.product_quantity += Number(body.restock_quantity);
+
+  await product.save();
+
+  await updateShortagedPerson({ product, user });
+
+  await RestockModel.create({
+    ...body,
+    rtkstatus: 'complete'
+  });
+
+  return {};
 };
 
 export const completeRestock = async ({ restock_id, body, user }) => {
@@ -220,8 +266,13 @@ export const fetchProduct = async ({ user, params }) => {
   const available_pages = Math.ceil(totalCount / no_of_requests)
     ? Math.ceil(totalCount / no_of_requests)
     : 1;
-
-  return { page_no, available_pages, fetchData };
+  return download === 'on'
+    ? fetchData
+    : {
+        page_no,
+        available_pages,
+        fetchData
+      };
 };
 
 export const fetchProductRestockHistory = async ({ user, params }) => {
@@ -229,12 +280,13 @@ export const fetchProductRestockHistory = async ({ user, params }) => {
 
   page_no = Number(page_no) || 1;
   no_of_requests = Number(no_of_requests) || Infinity;
-  const product_idd = typeof product_id !== 'undefined' ? product_id : false;
-  if (!product_idd) throw new BadRequestError('A product Id is required');
-  const filterData = { product_id: product_id };
 
-  const query = typeof search !== 'undefined' ? search : false;
-  const rtkstatus = typeof status !== 'undefined' ? status : false;
+  if (!product_id) throw new BadRequestError('A product Id is required');
+
+  const filterData = { product_id };
+
+  const query = search !== undefined ? search : false;
+  const rtkstatus = status !== undefined ? status : false;
   const rgx = (pattern) => new RegExp(`.*${pattern}.*`, 'i');
   const searchRgx = rgx(query);
 
@@ -243,7 +295,7 @@ export const fetchProductRestockHistory = async ({ user, params }) => {
   }
 
   if (rtkstatus) {
-    filterData['$and'] = [{ rtkstatus: rtkstatus }];
+    filterData['$and'] = [{ rtkstatus }];
   }
 
   const totalCount = await RestockModel.countDocuments({
@@ -262,19 +314,37 @@ export const fetchProductRestockHistory = async ({ user, params }) => {
     })
     .sort({ createdAt: -1 })
     .skip((page_no - 1) * no_of_requests)
-    .limit(no_of_requests);
+    .limit(no_of_requests)
+    .lean(); // Convert to plain objects
 
-  const available_pages = Math.ceil(totalCount / no_of_requests)
-    ? Math.ceil(totalCount / no_of_requests)
-    : 1;
+  // Replace IDs with corresponding data
+  const updatedFetchData = await Promise.all(
+    fetchData.map(async (restock) => {
+      // Fetch warehouse data for each warehouse ID in restock.warehouses
+      const warehouseData = await Promise.all(
+        restock.warehouses.map(async (warehouseId) => {
+          return await WarehouseModel.findById(warehouseId);
+        })
+      );
 
-  return { page_no, available_pages, fetchData };
+      return {
+        ...restock,
+        product_id: restock.product_id, // Already populated
+        supplier_id: restock.supplier_id, // Already populated
+        warehouses: warehouseData // Replace warehouse IDs with actual warehouse data
+      };
+    })
+  );
+
+  const available_pages = Math.ceil(totalCount / no_of_requests) || 1;
+
+  return { page_no, available_pages, fetchData: updatedFetchData };
 };
 
 //------ common product handlers --------------------\\
 
 export const fetchAllProducts = async ({ user, params }) => {
-  let { page_no, no_of_requests, search, status, cat_id, organization_id } = params;
+  let { page_no, no_of_requests, search, status, cat_id, organization_id, download } = params;
 
   page_no = Number(page_no) || 1;
   no_of_requests = Number(no_of_requests) || Infinity;
@@ -322,8 +392,14 @@ export const fetchAllProducts = async ({ user, params }) => {
   fetchedData = fetchedData.slice(startIndex, endIndex);
 
   const available_pages = Math.ceil(count / no_of_requests);
-
-  return { page_no, available_pages, fetchedData };
+  return download === 'on'
+    ? fetchedData
+    : {
+        page_no,
+        available_pages,
+        fetchedData
+      };
+  // return { page_no, available_pages, fetchedData };
 };
 
 export const getSingleProduct = async ({ user, product_id }) => {
@@ -334,10 +410,10 @@ export const getSingleProduct = async ({ user, product_id }) => {
   });
 
   if (!productInView) throw new NotFoundError('product  does not exist');
-  const warehouse = await warehouseProductModel.findOne({ product_id }).populate('warehouse_id');
+  const warehouse = await warehouseProductModel.find({ product_id }).populate('warehouse_id');
   productInView = productInView.toObject();
-  productInView.warehouse_id = warehouse._id;
-  productInView.warehouse_name = warehouse.warehouse_id.warehouse_name;
+  productInView.warehouse = warehouse;
+  // productInView.warehouse_name = warehouse.warehouse_id.warehouse_name;
   return productInView;
 };
 
