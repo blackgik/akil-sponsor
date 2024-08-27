@@ -264,9 +264,13 @@ export const loginOrganization = async (body, clienturl) => {
     if (!user) throw new InvalidError('Invalid Sponsor');
   }
 
-  console.log({ user });
-
-  const acctstatus = checkOrg ? checkOrg.isApproved : user.acctstatus === 'active' ? true : false;
+  const acctstatus = checkOrg
+    ? checkOrg.isApproved
+    : user?.acctstatus === 'active'
+    ? true
+    : checkOrg?.acctstatus === 'active'
+    ? true
+    : false;
 
   if (!acctstatus) throw new BadRequestError('Account not verified');
 
