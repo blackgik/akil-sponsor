@@ -193,8 +193,9 @@ export const confirmDisbursement = async ({ user, awardee_id }) => {
   return { awardee };
 };
 
-export const makeRequestedPayment = async ({ user, body }) => {
-  let amount = 10;
+export const makeRequestedPayment = async ({ user, body, project_id }) => {
+  const project = await ProjectModel.findById(project_id);
+  let amount = Number(project.quantity_per_person);
   const requests = [];
   const errorLog = [];
 

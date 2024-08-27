@@ -26,7 +26,7 @@ disbursement_router.patch(
   confirmDisbursementHandler
 );
 disbursement_router.post(
-  '/make-requested-payment',
+  '/make-requested-payment/:project_id',
   validators(payDisbursementSchema),
   authentication,
   makeRequestedPaymentHandler

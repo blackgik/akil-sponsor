@@ -34,16 +34,18 @@ export const createNewProduct = async ({ user, body }) => {
   if (!created)
     throw new InternalServerError('server slip error. Please Check your Input properly');
 
-  body.warehouses.forEach(async (element) => {
-    let warehouse = await WarehouseModel.findById(element);
-    if (warehouse) {
-      await warehouseProductModel.create({
-        product_id: created._id,
-        warehouse_id: warehouse._id,
-        quantity: created.product_quantity
-      });
-    }
-  });
+  if (body.warehouses) {
+    body.warehouses.forEach(async (element) => {
+      let warehouse = await WarehouseModel.findById(element);
+      if (warehouse) {
+        await warehouseProductModel.create({
+          product_id: created._id,
+          warehouse_id: warehouse._id,
+          quantity: created.product_quantity
+        });
+      }
+    });
+  }
   //create email profile here
   const creationData = {
     email: user.email,

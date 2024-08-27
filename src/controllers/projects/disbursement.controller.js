@@ -36,8 +36,9 @@ export const confirmDisbursementHandler = async (req, res) => {
 
 export const makeRequestedPaymentHandler = async (req, res) => {
   const { user, body } = req;
+  const { project_id } = req.params;
 
-  const response = await makeRequestedPayment({ user, body });
+  const response = await makeRequestedPayment({ user, body, project_id });
 
   res.send(appResponse('Initiated gateway', response));
 };
