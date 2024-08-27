@@ -410,10 +410,10 @@ export const getSingleProduct = async ({ user, product_id }) => {
   });
 
   if (!productInView) throw new NotFoundError('product  does not exist');
-  const warehouse = await warehouseProductModel.findOne({ product_id }).populate('warehouse_id');
+  const warehouse = await warehouseProductModel.find({ product_id }).populate('warehouse_id');
   productInView = productInView.toObject();
-  productInView.warehouse_id = warehouse._id;
-  productInView.warehouse_name = warehouse.warehouse_id.warehouse_name;
+  productInView.warehouse = warehouse;
+  // productInView.warehouse_name = warehouse.warehouse_id.warehouse_name;
   return productInView;
 };
 
