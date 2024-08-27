@@ -317,7 +317,7 @@ export const generateSchedule = async ({ user, project_id }) => {
 
   const code = generateId(count);
 
-  const batch_number = `${project.project_name.toUpperCase()}/BAT/${code}`;
+  const batch_number = `${project.project_name.toUpperCase().replace(/ /g, '_')}/BAT/${code}`;
 
   return batch_number;
 };
@@ -507,13 +507,13 @@ export const fetchAwardeesinSchedule = async ({ schedule_id, user, param }) => {
 
   const available_pages = Math.ceil(count / no_of_requests);
   return download === 'on'
-  ? fetched_data
-  : {
-      page_no,
-      available_pages,
-      count,
-      fetched_data
-    };
+    ? fetched_data
+    : {
+        page_no,
+        available_pages,
+        count,
+        fetched_data
+      };
 };
 
 export const editSchedule = async ({ schedule_id, user, body }) => {
