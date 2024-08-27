@@ -16,6 +16,7 @@ import notificationsModel from '../../models/settings/notificationsModel.js';
 import { capitalizeWords } from '../../utils/general.js';
 import ProjectModel from '../../models/projects/ProjectModel.js';
 import awardeesModel from '../../models/projects/awardeesModel.js';
+import { updateShortagedPerson } from '../projects/scheduling.service.js';
 
 export const createNewProduct = async ({ user, body }) => {
   const productData = {
@@ -120,29 +121,65 @@ export const createNewProductDraft = async ({ user, body }) => {
 };
 
 export const restockProductData = async ({ user, body }) => {
-  const created = await RestockModel.create(body);
-  if (!created)
-    throw new InternalServerError('server slip error. Please Check your Input properly');
+  const product = await ProductModel.findById(body.product_id);
+  if (!product) throw new NotFoundError('product not found');
 
-  if (body.rtkstatus == 'complete') {
-    body.warehouses.forEach(async (element) => {
-      let restock = await warehouseProductModel.findOne({
-        product_id: body.product_id,
-        warehouse_id: element
+  let quantityPerHouse = 0;
+  const errorBucket = [];
+
+  for (let warehouseInfo of body.warehouses) {
+    const warehouse = await WarehouseModel.findById(warehouseInfo.warehouse_id);
+
+    if (!warehouse) {
+      errorBucket.push({
+        msg: 'warehouse with id ' + warehouseInfo.warehouse_id + ' does not exist'
       });
-      let product = await ProductModel.findById(body.product_id);
-      if (restock) {
-        restock.quantity += body.quantity_per_warehouse;
-        if (product) {
-          product.product_quantity += body.quantity_per_warehouse;
-          await product.save();
-        }
-        await restock.save();
-      }
+      continue;
+    }
+
+    const productInwareHouse = await warehouseProductModel.findOne({
+      warehouse_id: warehouseInfo.warehouse,
+      product_id: body.product_id
     });
+
+    if (!productInwareHouse) {
+      errorBucket.push({
+        msg: ' product in warehouse with id ' + body.product_id + ' does not exist'
+      });
+
+      continue;
+    }
+
+    if (quantityPerHouse + warehouseInfo.quantity > body.restock_quantity)
+      throw new BadRequestError(
+        `Quantity in ${warehouse.warehouse_name} makes it excess. Increase stock quantity to adjust`
+      );
+
+    quantityPerHouse += warehouseInfo.quantity;
+
+    if (body.rtkstatus === 'draft') continue;
+
+    productInwareHouse.quantity += Number(warehouseInfo.quantity);
+
+    await productInwareHouse.save();
   }
 
-  return true;
+  if (body.rtkstatus === 'draft') {
+    await RestockModel.create({
+      ...body,
+      rtkstatus: 'draft'
+    });
+
+    return {};
+  }
+
+  product.product_quantity += Number(body.restock_quantity);
+
+  await product.save();
+
+  await updateShortagedPerson({ product, user });
+
+  return {};
 };
 
 export const completeRestock = async ({ restock_id, body, user }) => {
