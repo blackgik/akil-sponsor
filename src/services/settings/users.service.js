@@ -82,6 +82,7 @@ export const craeteNewUser = async ({ user, body }) => {
 
     if (body.email) {
       const mailData = {
+        sponsor_name: `${user.firstname} ${user.lastname}`.toUpperCase(),
         email: body.email,
         subject: 'Welcome to Akilaah - Successful Registration',
         type: 'html',
@@ -148,6 +149,7 @@ export const craeteNewUser = async ({ user, body }) => {
 
   if (body.email) {
     const mailData = {
+      sponsor_name: `${user.firstname} ${user.lastname}`.toUpperCase(),
       email: body.email,
       subject: 'Welcome to Akilaah - Successful Registration',
       type: 'html',

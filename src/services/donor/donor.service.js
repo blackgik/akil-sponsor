@@ -383,6 +383,7 @@ export const sendDonorEmail = async ({ user, body }) => {
   };
 
   const mailData = {
+    sponsor_name: `${user.firstname} ${user.lastname}`.toUpperCase(),
     email: 'ask@akilaah.com',
     subject: 'Onboarding Request',
     type: 'html',
@@ -410,6 +411,7 @@ export const sendEmailtoAgent = async ({ user, body }) => {
     description
   };
   const mailData = {
+    sponsor_name: `${user.firstname} ${user.lastname}`.toUpperCase(),
     email: 'ask@akilaah.com',
     subject: `Donation Request by ${creationData.donor_name}`,
     type: 'html',
@@ -424,6 +426,7 @@ export const sendEmailtoAgent = async ({ user, body }) => {
   }
 
   const mailData1 = {
+    sponsor_name: `${user.firstname} ${user.lastname}`.toUpperCase(),
     email: body.email,
     subject: `Donation Request to Akilaah`,
     type: 'html',

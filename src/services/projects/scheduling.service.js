@@ -243,6 +243,7 @@ export const createProductSchedule = async ({ user, body, project_id, param }) =
   };
 
   const mailData = {
+    sponsor_name: `${user.firstname} ${user.lastname}`.toUpperCase(),
     email: user.email,
     subject: `Batch Delivery Created for - ${emailData.project_name}`,
     type: 'html',
@@ -284,6 +285,7 @@ export const createProductSchedule = async ({ user, body, project_id, param }) =
       };
 
       const beneficiaryMailData = {
+        sponsor_name: `${user.firstname} ${user.lastname}`.toUpperCase(),
         email: beneficiary.contact.email,
         subject: `you have been successfully scheduled for the ${project.project_name} project with the batch number ${body.batch_number}`,
         type: 'html',
@@ -421,6 +423,7 @@ export const startSchedule = async ({ body, user, project_id }) => {
   };
 
   const mailData = {
+    sponsor_name: emailData.sponsor_name.toUpperCase(),
     email: user.email,
     subject: `Batch Delivery Started for - ${emailData.project_name}`,
     type: 'html',
@@ -570,6 +573,7 @@ export const deleteSchedule = async ({ schedule_id, user }) => {
     start_date: scheduleCheck.start_date
   };
   const mailData = {
+    sponsor_name: `${user.firstname} ${user.lastname}`.toUpperCase(),
     email: user.email,
     subject: `Batch Delivery Deleted for - ${emailData.project_name}`,
     type: 'html',

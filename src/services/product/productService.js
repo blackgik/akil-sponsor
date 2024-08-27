@@ -53,6 +53,7 @@ export const createNewProduct = async ({ user, body }) => {
     status: 'published'
   };
   const mailData = {
+    sponsor_name: `${user.firstname} ${user.lastname}`.toUpperCase(),
     email: user.email,
     subject: 'Successful Creation of Product on Akilaah',
     type: 'html',
@@ -104,6 +105,7 @@ export const createNewProductDraft = async ({ user, body }) => {
     status: 'draft'
   };
   const mailData = {
+    sponsor_name: `${user.firstname} ${user.lastname}`.toUpperCase(),
     email: user.email,
     subject: 'Successful Creation of Product on Akilaah',
     type: 'html',

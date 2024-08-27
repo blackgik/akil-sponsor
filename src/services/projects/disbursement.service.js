@@ -55,6 +55,7 @@ export const disbursementCode = async ({ awardee_id, user }) => {
       code: code
     };
     const mailData = {
+      sponsor_name: `${user.firstname} ${user.lastname}`.toUpperCase(),
       email: contactEmail,
       subject: `Your ${emailData.project_name} Package is Ready for Collection`,
       type: 'html',
@@ -142,6 +143,7 @@ export const confirmDisbursement = async ({ user, awardee_id }) => {
   };
 
   const mailData = {
+    sponsor_name: `${user.firstname} ${user.lastname}`.toUpperCase(),
     email: emailData.email,
     subject: `Batch Delivery Completed - ${emailData.project_name}`,
     type: 'html',
@@ -290,6 +292,7 @@ export const validateRequestPayments = async ({ user, body }) => {
         product_name: capitalizeWords(projectInfo.project_name)
       };
       const mailData = {
+        sponsor_name: `${user.firstname} ${user.lastname}`.toUpperCase(),
         email: benefic.contact.email,
         subject: `Payment Confirmation for ${capitalizeWords(project.project_name)}`,
         type: 'html',
