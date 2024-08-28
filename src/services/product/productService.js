@@ -516,7 +516,7 @@ export const itemStatistics = async ({ product_id, user }) => {
 
     const disbursed_persons = await awardeesModel.countDocuments({
       project_id: project._id,
-      status: 'disbursed'
+      status: { $in: ['disbursed', 'feedback'] }
     });
 
     total_needed_quantity += quantity_person * allocated_persons;
