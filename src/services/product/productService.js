@@ -34,7 +34,7 @@ export const createNewProduct = async ({ user, body }) => {
   if (!created)
     throw new InternalServerError('server slip error. Please Check your Input properly');
 
-  if (body.warehouses) {
+  if (body.warehouses & (body.warehouses !== 'bank')) {
     body.warehouses.forEach(async (element) => {
       let warehouse = await WarehouseModel.findById(element);
       if (warehouse) {
