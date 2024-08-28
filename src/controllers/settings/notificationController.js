@@ -15,9 +15,9 @@ export const fetchNotifcationHandler = async (req, res) => {
 };
 
 export const markAsReadHandler = async (req, res) => {
-  const { notification_id } = req.params;
+  const { user, body } = req;
 
-  const response = await marksAsRread({ notification_id });
+  const response = await marksAsRread({ user, body });
 
   res.send(appResponse('marked notification as read', response));
 };

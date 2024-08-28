@@ -47,13 +47,27 @@ export const removeNotification = async ({ notification_id }) => {
   return {};
 };
 
-export const marksAsRread = async ({ notification_id }) => {
-  const notification = await notificationsModel.findById(notification_id);
+export const marksAsRread = async ({ user, body }) => {
+  if (body.notification_id) {
+    const { notification_id } = body;
+    const notification = await notificationsModel.findById(notification_id);
 
-  if (!notification) throw new NotFoundError('Notification not found');
+    if (!notification) {
+      throw new NotFoundError('Notification not found');
+    }
 
-  notification.is_read = true;
-  await notification.save();
+    notification.is_read = true;
+    await notification.save();
+  } else {
+    const result = await notificationsModel.updateMany(
+      { organization_id: user._id },
+      { $set: { is_read: true } }
+    );
+
+    if (result.modifiedCount === 0) {
+      throw new NotFoundError('No notifications found');
+    }
+  }
 
   return {};
 };
