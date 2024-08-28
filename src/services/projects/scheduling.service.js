@@ -604,6 +604,13 @@ export const fetchAwardeesinSchedule = async ({ schedule_id, user, param }) => {
       path: 'beneficiary_id',
       model: 'Organization_Member'
     })
+    .populate({
+      path: 'project_id', // Field to populate
+      populate: {
+        path: 'product_type', // Nested field to populate
+        model: 'ProductCategory' // Model for `product_type`
+      }
+    })
     .sort({ createdAt: -1 })
     .skip((page_no - 1) * no_of_requests)
     .limit(no_of_requests);
