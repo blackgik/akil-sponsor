@@ -17,7 +17,7 @@ import { messageBird } from '../../utils/msgBird.js';
 import { initializePayment, verifyPayment } from '../../utils/payment.js';
 
 export const fetchSubscriptionsHistory = async ({ param, user }) => {
-  let { page_no, no_of_requests, search, status } = param;
+  let { page_no, no_of_requests, search, status, download } = param;
 
   page_no = Number(page_no) || 1;
   no_of_requests = Number(no_of_requests) || 20;
@@ -45,13 +45,13 @@ export const fetchSubscriptionsHistory = async ({ param, user }) => {
     .limit(no_of_requests);
 
   const available_pages = Math.ceil(count / no_of_requests);
-
-  return {
-    count,
-    available_pages,
-    page_no,
-    fetched_data
-  };
+  return download === 'on'
+    ? fetched_data
+    : {
+        page_no,
+        available_pages,
+        fetched_data
+      };
 };
 
 export const subscriptionUpdate = async ({ user, body, param }) => {

@@ -9,6 +9,7 @@ import {
   updateSingleSupplier,
   getSponosrSupplier
 } from '../../services/suppliers/supplierService.js';
+import { downloadExcel } from '../../utils/general.js';
 
 export const createNewSupplierHandler = async (req, res) => {
   const { user, body } = req;
@@ -30,9 +31,42 @@ export const fetchSupplierHandler = async (req, res) => {
   const { user } = req;
   const params = req.query;
 
-  const fetchedData = await fetchSupplier({ user, params });
+  const responses = await fetchSupplier({ user, params });
+  if (params.download === 'on') {
+    const worksheet = 'suppliers';
+    const worksheetHeaders = [
+      { header: 'Supplier Surname', key: 'supplier_surname', width: 50 },
+      { header: 'Supplier Lastname', key: 'supplier_name', width: 50 },
+      { header: 'Supplier Phone', key: 'supplier_phone', width: 50 },
+      { header: 'Supplier Business Name', key: 'supplier_business_name', width: 50 },
+      { header: 'Supplier Address', key: 'supplier_address', width: 50 },
+      { header: 'Is_Active ', key: 'is_active', width: 50 },
+      { header: 'Product', key: 'product_category_name', width: 50 },
+      { header: 'Status', key: 'acctstatus', width: 50 },
+      { header: 'CreatedAt', key: 'createdAt', width: 50 }
+    ];
 
-  res.send(appResponse('fetched suppliers successfully', fetchedData));
+    let mainlist = [];
+
+    for (let response of responses) {
+      mainlist.push({
+        supplier_surname: response.supplier_surname,
+        supplier_name: response.supplier_name,
+        supplier_phone: response.supplier_phone,
+        supplier_business_name: response.supplier_business_name,
+        supplier_address: response.supplier_address,
+        is_active: response.is_active,
+        product_category_name: response.supplier_product_category_id.product_category_name,
+        acctstatus: response.acctstatus,
+        createdAt: response.createdAt
+      });
+    }
+
+    const file = await downloadExcel(worksheet, worksheetHeaders, mainlist);
+    res.send(appResponse('File paths', file));
+  } else {
+    res.send(appResponse('fetched suppliers successfully', responses));
+  }
 };
 
 export const getSponosrSupplierHanlder = async (req, res) => {

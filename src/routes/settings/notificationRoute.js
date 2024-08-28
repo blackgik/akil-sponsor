@@ -11,7 +11,7 @@ const notificationRoutes = router.Router();
 
 const notificationRoots = () => {
   notificationRoutes.get('/', authentication, fetchNotifcationHandler);
-  notificationRoutes.patch('/mark-as-read/:notification_id', authentication, markAsReadHandler);
+  notificationRoutes.patch('/mark-as-read', authentication, markAsReadHandler);
   notificationRoutes.delete(
     '/remove-notification/:notification_id',
     authentication,

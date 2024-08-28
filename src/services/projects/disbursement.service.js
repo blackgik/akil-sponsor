@@ -199,8 +199,6 @@ export const makeRequestedPayment = async ({ user, body, project_id }) => {
     Number(project.quantity_per_person) * Number(project.product_items[0].product_value_amount);
   const requests = [];
   const errorLog = [];
-  console.log(amount)
-  return
   for (const beneficiary_id of body.beneficiary_ids) {
     const checkAzza = await organizationBeneficiaryModel.findOne({
       _id: beneficiary_id,

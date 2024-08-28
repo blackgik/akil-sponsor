@@ -34,7 +34,7 @@ export const createNewProduct = async ({ user, body }) => {
   if (!created)
     throw new InternalServerError('server slip error. Please Check your Input properly');
 
-  if (body.warehouses) {
+  if (body.warehouses & (body.warehouses !== 'bank')) {
     body.warehouses.forEach(async (element) => {
       let warehouse = await WarehouseModel.findById(element);
       if (warehouse) {
@@ -483,7 +483,13 @@ export const unPublishProduct = async ({ user, product_id }) => {
   productInView = await ProductModel.findById(product_id);
 
   if (!productInView) throw new NotFoundError('product  does not exist');
+  const project = await ProjectModel.findOne({
+    product_items: { $in: [product_id] }
+  });
 
+  if (project) {
+    throw new BadRequestError('cannot unpublish a product in use');
+  }
   productInView.prdstatus = 'unpublished';
 
   await productInView.save();

@@ -145,7 +145,7 @@ export const fetchProjectHandler = async (req, res) => {
   const responses = await fetchAllProject({ user, params });
 
   if (params.download === 'on') {
-    const worksheet = 'All_Projects';
+    const worksheet = 'projects';
     const worksheetHeaders = [
       { header: 'Project Name', key: 'project_name', width: 50 },
       { header: 'Product Name', key: 'product_name', width: 50 },

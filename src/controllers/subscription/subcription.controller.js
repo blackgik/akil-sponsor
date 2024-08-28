@@ -11,13 +11,43 @@ import {
   uploadReceipt,
   viewSubscription
 } from '../../services/subscription/subscription.service.js';
+import { downloadExcel } from '../../utils/general.js';
 
 export const fetchSubscriptionsHistoryHandler = async (req, res) => {
   const { query, user } = req;
 
-  const response = await fetchSubscriptionsHistory({ param: query, user });
+  const responses = await fetchSubscriptionsHistory({ param: query, user });
+  if (query.download === 'on') {
+    const worksheet = 'subscription_payments';
+    const worksheetHeaders = [
+      { header: 'Sender ', key: 'sender', width: 50 },
+      { header: 'Amount ', key: 'amount', width: 50 },
+      { header: 'Ref_No ', key: 'ref_no', width: 50 },
+      { header: 'Deposit_Method ', key: 'deposit_method', width: 50 },
+      { header: 'Date ', key: 'date', width: 50 },
+      { header: 'Status', key: 'status', width: 50 },
+      { header: 'CreatedAt', key: 'createdAt', width: 50 }
+    ];
 
-  res.send(appResponse('Fetch successfully', response));
+    let mainlist = [];
+
+    for (let response of responses) {
+      mainlist.push({
+        amount: response.amount,
+        ref_no: response.ref_no,
+        deposit_method: response.deposit_method,
+        date: response.date,
+        sender: response.sender,
+        status: response.status,
+        createdAt: response.createdAt
+      });
+    }
+
+    const file = await downloadExcel(worksheet, worksheetHeaders, mainlist);
+    res.send(appResponse('File paths', file));
+  } else {
+    res.send(appResponse('Fetch successfully', responses));
+  }
 };
 
 export const subscriptionUpdatehandler = async (req, res) => {
