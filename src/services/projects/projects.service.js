@@ -154,11 +154,47 @@ export const generateProjectList = async ({ user, param, project_id, body }) => 
     }
 
     const batch = [];
+    const errolog = [];
 
     if (selection.includes('*')) {
       const beneficiaries = await organizationBeneficiaryModel.find(filter);
 
       for (const beneficiary of beneficiaries) {
+        // Check for missing or incomplete fields
+        const missingFields = [];
+        if (!beneficiary.personal.member_name) missingFields.push('name');
+        if (!beneficiary.personal.gender) missingFields.push('gender');
+        if (!beneficiary.personal.dob) missingFields.push('dob');
+        if (!beneficiary.contact.phone) missingFields.push('phone');
+        if (!beneficiary.personal.lga) missingFields.push('lga');
+        if (!beneficiary.employment_info.employment_status) missingFields.push('occupation');
+
+        if (missingFields.length > 0) {
+          // Log the error
+          errolog.push({
+            beneficiary_id: beneficiary._id,
+            missingFields: missingFields,
+            name: beneficiary.personal.member_name || 'N/A',
+            phone: beneficiary.contact.phone || 'N/A',
+            lga: beneficiary.personal.lga || 'N/A',
+            occupation: beneficiary.employment_info.employment_status || 'N/A',
+            age: beneficiary.personal.dob
+              ? Math.floor(
+                  Date.now() / (1000 * 60 * 60 * 24 * 365) -
+                    new Date(beneficiary.personal.dob).getTime() / (1000 * 60 * 60 * 24 * 365)
+                )
+              : 'N/A',
+            gender: beneficiary.personal.gender || 'N/A'
+          });
+
+          // Throw an error for the missing profile information
+          throw new BadRequestError(
+            `Beneficiary ${
+              capitalizeWords(beneficiary.personal.member_name)
+            } has not updated their profile. Missing fields: ${missingFields.join(', ')}`
+          );
+        }
+
         const today = Date.now() / (1000 * 60 * 24 * 60 * 365);
         const dob = beneficiary.personal.dob.getTime() / (1000 * 60 * 24 * 60 * 365);
         const data = {
@@ -187,6 +223,40 @@ export const generateProjectList = async ({ user, param, project_id, body }) => 
         if (!beneficiary) continue;
 
         if (beneficiary.project_ids.includes(project_id)) continue;
+
+        const missingFields = [];
+        if (!beneficiary.personal.member_name) missingFields.push('name');
+        if (!beneficiary.personal.gender) missingFields.push('gender');
+        if (!beneficiary.personal.dob) missingFields.push('dob');
+        if (!beneficiary.contact.phone) missingFields.push('phone');
+        if (!beneficiary.personal.lga) missingFields.push('lga');
+        if (!beneficiary.employment_info.employment_status) missingFields.push('occupation');
+
+        if (missingFields.length > 0) {
+          // Log the error
+          errolog.push({
+            beneficiary_id: beneficiary._id,
+            missingFields: missingFields,
+            name: beneficiary.personal.member_name || 'N/A',
+            phone: beneficiary.contact.phone || 'N/A',
+            lga: beneficiary.personal.lga || 'N/A',
+            occupation: beneficiary.employment_info.employment_status || 'N/A',
+            age: beneficiary.personal.dob
+              ? Math.floor(
+                  Date.now() / (1000 * 60 * 60 * 24 * 365) -
+                    new Date(beneficiary.personal.dob).getTime() / (1000 * 60 * 60 * 24 * 365)
+                )
+              : 'N/A',
+            gender: beneficiary.personal.gender || 'N/A'
+          });
+
+          // Throw an error for the missing profile information
+          throw new BadRequestError(
+            `Beneficiary ${
+              capitalizeWords(beneficiary.personal.member_name)
+            } has not updated their profile. Missing fields: ${missingFields.join(', ')}`
+          );
+        }
 
         const today = Date.now() / (1000 * 60 * 24 * 60 * 365);
         const dob = beneficiary.personal.dob.getTime() / (1000 * 60 * 24 * 60 * 365);
