@@ -195,6 +195,7 @@ export const confirmDisbursement = async ({ user, awardee_id }) => {
 
 export const makeRequestedPayment = async ({ user, body, project_id }) => {
   const project = await ProjectModel.findById(project_id).populate('product_items');
+  const awardee = await awardeesModel.findOne({ project_id });
   let amount =
     Number(project.quantity_per_person) * Number(project.product_items[0].product_value_amount);
   const requests = [];
@@ -227,7 +228,7 @@ export const makeRequestedPayment = async ({ user, body, project_id }) => {
   const paymentata = {
     email: user.email,
     amount: amount * 100,
-    callback_url: `${env.dev_base_url_org}/projects/sponsorship`,
+    callback_url: `${env.dev_base_url_org}/projects/disbursements/${project_id}/${awardee.batch_id}`,
     channels: ['bank'],
     metadata: {
       requests: requests,
