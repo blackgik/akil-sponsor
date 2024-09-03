@@ -471,7 +471,7 @@ const disbursementCode = async ({ project_id, user }) => {
     const hash = buildOtpHash(contact, code, env.otpKey, 15);
 
     awardee.hash = hash;
-    const awardedBenefi = await awardeesModel.findOne({ beneficiary_id: awardee.beneficiary_id });
+    const awardedBenefi = await awardeesModel.findOne({ beneficiary_id: awardee.beneficiary_id }).populate("batch_id");
 
     const contactEmail = awardee.beneficiary_id.contact.email;
     const contactPhone = awardee.beneficiary_id.contact.phone;

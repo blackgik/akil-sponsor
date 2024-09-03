@@ -262,7 +262,7 @@ export const validateRequestPayments = async ({ user, body }) => {
 
     const paymentdata = response.data.data;
     const metadata = response.data.data.metadata;
-
+    console.log("metadata",metadata);
     const bulkreceiptientData = [];
 
     // initate transfers on account
@@ -313,7 +313,7 @@ export const validateRequestPayments = async ({ user, body }) => {
       const mailData = {
         sponsor_name: `${user.firstname} ${user.lastname}`.toUpperCase(),
         email: benefic.contact.email,
-        subject: `Payment Confirmation for ${capitalizeWords(project.project_name)}`,
+        subject: `Payment Confirmation for ${capitalizeWords(projectInfo.project_name)}`,
         type: 'html',
         html: paidProjectRequestEmail(creationData).html,
         text: paidProjectRequestEmail(creationData).text
@@ -383,6 +383,6 @@ export const validateRequestPayments = async ({ user, body }) => {
 
     return bulkTransfer.data.data;
   } catch (err) {
-    console.error(err);
+    console.log("err", err);
   }
 };
