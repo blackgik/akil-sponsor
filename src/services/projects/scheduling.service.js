@@ -376,6 +376,7 @@ export const startSchedule = async ({ body, user, project_id }) => {
     sponsor_id: user._id,
     project: project_id
   });
+  let updatedAwardees = [];
 
   if (body.selection.includes('*')) {
     await scheduleModel.updateMany(
@@ -390,6 +391,13 @@ export const startSchedule = async ({ body, user, project_id }) => {
         { batch_id: schedule._id },
         { $set: { status: 'in-progress' } }
       );
+
+      const updated = await awardeesModel
+        .find({ batch_id: schedule._id, status: 'in-progress' })
+        .populate('beneficiary_id')
+        .populate('project_id')
+        .populate('batch_id');
+      updatedAwardees = [...updatedAwardees, ...updated];
     }
   } else {
     await scheduleModel.updateMany(
@@ -399,6 +407,13 @@ export const startSchedule = async ({ body, user, project_id }) => {
 
     for (const eachbatch of body.selection) {
       await awardeesModel.updateMany({ batch_id: eachbatch }, { $set: { status: 'in-progress' } });
+
+      const updated = await awardeesModel
+        .find({ batch_id: eachbatch, status: 'in-progress' })
+        .populate('beneficiary_id')
+        .populate('project_id')
+        .populate('batch_id');
+      updatedAwardees = [...updatedAwardees, ...updated];
     }
   }
 
@@ -416,7 +431,8 @@ export const startSchedule = async ({ body, user, project_id }) => {
       : new Date();
 
   await project.save();
-  await disbursementCode({ project_id, user });
+  return { updatedAwardees };
+  await disbursementCode({ project_id, user, updatedAwardees });
   //create email profile here
   const emailData = {
     sponsor_name: capitalizeWords(`${user.firstname} ${user.lastname}`),
@@ -450,18 +466,9 @@ export const startSchedule = async ({ body, user, project_id }) => {
   return {};
 };
 
-const disbursementCode = async ({ project_id, user }) => {
-  const awardees = await awardeesModel
-    .find({ sponsor_id: user._id, project_id })
-    // .find({ batch_id: sponsor })
-    .populate('beneficiary_id')
-    .populate('project_id')
-    .populate('batch_id');
-
-  if (awardees.length === 0) throw new NotFoundError('No awardees found');
+const disbursementCode = async ({ project_id, user, updatedAwardees }) => {
   const results = [];
-
-  for (const awardee of awardees) {
+  for (const awardee of updatedAwardees) {
     const code = await codeGenerator(6);
 
     const contact = awardee.beneficiary_id.contact.email
@@ -471,7 +478,6 @@ const disbursementCode = async ({ project_id, user }) => {
     const hash = buildOtpHash(contact, code, env.otpKey, 15);
 
     awardee.hash = hash;
-    const awardedBenefi = await awardeesModel.findOne({ beneficiary_id: awardee.beneficiary_id }).populate("batch_id");
 
     const contactEmail = awardee.beneficiary_id.contact.email;
     const contactPhone = awardee.beneficiary_id.contact.phone;
@@ -483,9 +489,9 @@ const disbursementCode = async ({ project_id, user }) => {
       const emailData = {
         beneficiary_name: capitalizeWords(awardee.name),
         project_name: capitalizeWords(awardee.project_id.project_name),
-        start_date: awardedBenefi.batch_id.start_date,
-        end_date: awardedBenefi.batch_id.end_date,
-        location: awardedBenefi.batch_id.delivery_address,
+        start_date: awardee.batch_id.start_date,
+        end_date: awardee.batch_id.end_date,
+        location: awardee.batch_id.delivery_address,
         code: code
       };
       const mailData = {
