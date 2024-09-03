@@ -431,7 +431,7 @@ export const startSchedule = async ({ body, user, project_id }) => {
       : new Date();
 
   await project.save();
-  return { updatedAwardees };
+  // return { updatedAwardees };
   await disbursementCode({ project_id, user, updatedAwardees });
   //create email profile here
   const emailData = {
