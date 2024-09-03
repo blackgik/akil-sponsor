@@ -113,7 +113,7 @@ export const createProductSchedule = async ({ user, body, project_id, param }) =
 
   const total_left = total_persons_to_get - total_scheduled;
 
-  if (total_left <= 0) throw new BadRequestError('Total number of participants has be exhauted');
+  if (total_left <= 0) throw new BadRequestError('Total number of participants has beeen exhauted');
 
   //   create object
   const schedule_data = {
@@ -471,6 +471,7 @@ const disbursementCode = async ({ project_id, user }) => {
     const hash = buildOtpHash(contact, code, env.otpKey, 15);
 
     awardee.hash = hash;
+    const awardedBenefi = await awardeesModel.findOne({ beneficiary_id: awardee.beneficiary_id });
 
     const contactEmail = awardee.beneficiary_id.contact.email;
     const contactPhone = awardee.beneficiary_id.contact.phone;
@@ -482,9 +483,9 @@ const disbursementCode = async ({ project_id, user }) => {
       const emailData = {
         beneficiary_name: capitalizeWords(awardee.name),
         project_name: capitalizeWords(awardee.project_id.project_name),
-        start_date: awardee.batch_id.start_date,
-        end_date: awardee.batch_id.end_date,
-        location: awardee.batch_id.delivery_address,
+        start_date: awardedBenefi.batch_id.start_date,
+        end_date: awardedBenefi.batch_id.end_date,
+        location: awardedBenefi.batch_id.delivery_address,
         code: code
       };
       const mailData = {
