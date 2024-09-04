@@ -489,10 +489,10 @@ export const viewBeneficiariesUploadedList = async ({ user, params }) => {
   return { available_pages, page_no, beneficiaryCount, fetched_data };
 };
 
-export const updateBeneficiaryBatchListStatus = async ({ beneficiary_batch_id, body, user }) => {
+export const updateBeneficiaryBatchListStatus = async ({ body, user }) => {
   try {
     let beneficiaries;
-
+    const { beneficiaries_ids } = body;
     if (body.approval_type === 'all') {
       // if (!body.batch_no) throw new BadRequestError('Batch number must be provided');
 
@@ -501,21 +501,6 @@ export const updateBeneficiaryBatchListStatus = async ({ beneficiary_batch_id, b
         // batch_no: body.batch_no,
         status: 'pending'
       });
-
-      // // Check for existing beneficiaries by email or phone
-      // const existingBeneficiaries = await organizationBeneficiaryModel.find({
-      //   organization_id: user._id,
-      //   $or: [
-      //     { 'contact.email': { $in: beneficiaries.map((b) => b.contact.email) } },
-      //     { 'contact.phone': { $in: beneficiaries.map((b) => b.contact.phone) } }
-      //   ]
-      // });
-
-      // if (existingBeneficiaries.length > 0) {
-      //   throw new BadRequestError(
-      //     'One or more beneficiaries already exist with the provided email or phone number.'
-      //   );
-      // }
 
       for (let beneficiary of beneficiaries) {
         const filter = { organization_id: user._id, $or: [] };
@@ -599,95 +584,68 @@ export const updateBeneficiaryBatchListStatus = async ({ beneficiary_batch_id, b
         }
       }
     } else {
-      const beneficiaries = await beneficiaryBatchUploadModel.findOne({
-        _id: beneficiary_batch_id,
-        status: 'pending'
-      });
-      // beneficiaries = await beneficiaryBatchUploadModel.findById(beneficiary_batch_id);
-      if (!beneficiaries) throw new NotFoundError('Beneficiary not found');
-
-      if (beneficiaries.comment.trim() === 'Beneficiary is already part of this organization') {
-        throw new DuplicateError('Beneficiary is already part of this organization');
-      }
-
-      if (body.status === 'declined') {
-        await beneficiaries.remove();
-      } else if (body.status === 'approved') {
-        beneficiaries.status = body.status;
-        await beneficiaries.save();
-
-        const checkBeneficiary = await organizationBeneficiaryModel.findOne({
-          $or: [
-            { 'contact.email': beneficiaries.contact.email },
-            { 'contact.phone': beneficiaries.contact.phone }
-          ],
-          organization_id: user._id
+      for (const beneficiary_id of beneficiaries_ids) {
+        const beneficiaries = await beneficiaryBatchUploadModel.findOne({
+          _id: beneficiary_id,
+          status: 'pending'
         });
 
-        if (!checkBeneficiary) {
-          // Build Beneficiary Object
-          const password = await codeGenerator(9, 'ABCDEFGHI&*$%#1234567890');
-          const beneficiaryUniqueId = `${user.firstname
-            .substring(0, 3)
-            .toUpperCase()}${await codeGenerator(7, 'ABCDEFGHIJKLMN1234567890')}`;
+        if (!beneficiaries) {
+          throw new NotFoundError('Beneficiary not found');
+        }
 
-          const beneficiaryObject = {
-            ...beneficiaries.toJSON(),
-            organization_id: user._id,
-            acctstatus: 'pending',
-            password: await bcrypt.hash(password, 12),
-            beneficiary_unique_id: beneficiaryUniqueId,
-            has_paid_reg: false
-          };
+        if (beneficiaries.comment.trim() === 'Beneficiary is already part of this organization') {
+          throw new DuplicateError('Beneficiary is already part of this organization');
+        }
 
-          // const activeBeneficiary = await organizationBeneficiaryModel.create(beneficiaryObject);
+        if (body.status === 'declined') {
+          await beneficiaries.remove();
+        } else if (body.status === 'approved') {
+          beneficiaries.status = body.status;
+          await beneficiaries.save();
 
-          // if (!activeBeneficiary) {
-          //   throw new InternalServerError(
-          //     'Server slipped, beneficiary was approved but could not be transferred to active beneficiaries'
-          //   );
-          // }
-
-          // Email constructor
-          // const onboardingData = {
-          //   email: beneficiaries.contact.email,
-          //   name: beneficiaries.personal.member_name,
-          //   name_of_cooperation: user.firstname,
-          //   password: password,
-          //   company_code: user.company_code
-          // };
-
-          // const mailData = {
-          //   email: beneficiaries.contact.email,
-          //   subject: 'MAJFINTECH ONBOARDING',
-          //   type: 'html',
-          //   html: onboardinMail(onboardingData).html,
-          //   text: onboardinMail(onboardingData).text
-          // };
-
-          // const msg = await formattMailInfo(mailData, env);
-          // const msgDelivered = await messageBird(msg);
-
-          // if (!msgDelivered) {
-          //   throw new InternalServerError(
-          //     'Server slip. Beneficiary was created without mail being sent'
-          //   );
-          // }
-
-          user.total_number_of_beneficiaries_created += 1;
-
-          // Create notification for beneficiary
-          await notificationsModel.create({
-            note: `You are ${body.status} on ${user.firstname}`,
-            who_is_reading: 'beneficiary',
-            compliment_obj: { status: body.status },
+          const checkBeneficiary = await organizationBeneficiaryModel.findOne({
+            $or: [
+              { 'contact.email': beneficiaries.contact.email },
+              { 'contact.phone': beneficiaries.contact.phone }
+            ],
             organization_id: user._id
-            // beneficiary_id: activeBeneficiary._id
           });
-        } else {
-          throw new BadRequestError(
-            'Beneficiary already exists with the provided email or phone number.'
-          );
+
+          if (!checkBeneficiary) {
+            // Build Beneficiary Object
+            const password = await codeGenerator(9, 'ABCDEFGHI&*$%#1234567890');
+            const beneficiaryUniqueId = `${user.firstname
+              .substring(0, 3)
+              .toUpperCase()}${await codeGenerator(7, 'ABCDEFGHIJKLMN1234567890')}`;
+
+            const beneficiaryObject = {
+              ...beneficiaries.toJSON(),
+              organization_id: user._id,
+              acctstatus: 'pending',
+              password: await bcrypt.hash(password, 12),
+              beneficiary_unique_id: beneficiaryUniqueId,
+              has_paid_reg: false
+            };
+
+            // Increment the user's total number of beneficiaries created
+            user.total_number_of_beneficiaries_created += 1;
+
+            // Save the beneficiary object to the organizationBeneficiaryModel
+            await organizationBeneficiaryModel.create(beneficiaryObject);
+
+            // Create notification for beneficiary
+            await notificationsModel.create({
+              note: `You are ${body.status} on ${user.firstname}`,
+              who_is_reading: 'beneficiary',
+              compliment_obj: { status: body.status },
+              organization_id: user._id
+            });
+          } else {
+            throw new BadRequestError(
+              'Beneficiary already exists with the provided email or phone number.'
+            );
+          }
         }
       }
     }

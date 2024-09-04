@@ -113,7 +113,7 @@ export const createProductSchedule = async ({ user, body, project_id, param }) =
 
   const total_left = total_persons_to_get - total_scheduled;
 
-  if (total_left <= 0) throw new BadRequestError('Total number of participants has be exhauted');
+  if (total_left <= 0) throw new BadRequestError('Total number of participants has beeen exhauted');
 
   //   create object
   const schedule_data = {
@@ -376,6 +376,7 @@ export const startSchedule = async ({ body, user, project_id }) => {
     sponsor_id: user._id,
     project: project_id
   });
+  let updatedAwardees = [];
 
   if (body.selection.includes('*')) {
     await scheduleModel.updateMany(
@@ -390,6 +391,13 @@ export const startSchedule = async ({ body, user, project_id }) => {
         { batch_id: schedule._id },
         { $set: { status: 'in-progress' } }
       );
+
+      const updated = await awardeesModel
+        .find({ batch_id: schedule._id, status: 'in-progress' })
+        .populate('beneficiary_id')
+        .populate('project_id')
+        .populate('batch_id');
+      updatedAwardees = [...updatedAwardees, ...updated];
     }
   } else {
     await scheduleModel.updateMany(
@@ -399,6 +407,13 @@ export const startSchedule = async ({ body, user, project_id }) => {
 
     for (const eachbatch of body.selection) {
       await awardeesModel.updateMany({ batch_id: eachbatch }, { $set: { status: 'in-progress' } });
+
+      const updated = await awardeesModel
+        .find({ batch_id: eachbatch, status: 'in-progress' })
+        .populate('beneficiary_id')
+        .populate('project_id')
+        .populate('batch_id');
+      updatedAwardees = [...updatedAwardees, ...updated];
     }
   }
 
@@ -416,7 +431,8 @@ export const startSchedule = async ({ body, user, project_id }) => {
       : new Date();
 
   await project.save();
-  await disbursementCode({ project_id, user });
+  // return { updatedAwardees };
+  await disbursementCode({ project_id, user, updatedAwardees });
   //create email profile here
   const emailData = {
     sponsor_name: capitalizeWords(`${user.firstname} ${user.lastname}`),
@@ -450,18 +466,9 @@ export const startSchedule = async ({ body, user, project_id }) => {
   return {};
 };
 
-const disbursementCode = async ({ project_id, user }) => {
-  const awardees = await awardeesModel
-    .find({ sponsor_id: user._id, project_id })
-    // .find({ batch_id: sponsor })
-    .populate('beneficiary_id')
-    .populate('project_id')
-    .populate('batch_id');
-
-  if (awardees.length === 0) throw new NotFoundError('No awardees found');
+const disbursementCode = async ({ project_id, user, updatedAwardees }) => {
   const results = [];
-
-  for (const awardee of awardees) {
+  for (const awardee of updatedAwardees) {
     const code = await codeGenerator(6);
 
     const contact = awardee.beneficiary_id.contact.email

@@ -109,9 +109,8 @@ export const beneficiaryUploadedListHandler = async (req, res) => {
 
 export const beneficiaryUpdateBatchListHandler = async (req, res) => {
   const { user, body, query } = req;
-  const { beneficiary_batch_id } = query;
 
-  const updatedList = await updateBeneficiaryBatchListStatus({ beneficiary_batch_id, body, user });
+  const updatedList = await updateBeneficiaryBatchListStatus({ body, user });
 
   res.send(appResponse('Updated beneficiaries uploaded list successfully', updatedList));
 };
