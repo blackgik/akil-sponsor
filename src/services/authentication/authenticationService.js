@@ -318,6 +318,11 @@ export const loginOrganization = async (body, clienturl) => {
       String(findPersonalization.sponsor_id) !== String(checkOrg ? checkOrg._id : user?.sponsor_id)
     )
       throw new BadRequestError('Invalid account user');
+
+    const organization = await organizationModel.findById(findPersonalization.sponsor_id);
+
+    if (organization.psdEnd.getTime() < new Date().getTime())
+      throw new BadRequestError('Your Domain has expired. Kindly renew');
   }
 
   const tokenEncryption = jwt.sign(

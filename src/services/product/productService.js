@@ -312,33 +312,34 @@ export const fetchProductRestockHistory = async ({ user, params }) => {
       path: 'supplier_id',
       model: 'Supplier'
     })
+    .populate('warehouses.warehouse')
     .sort({ createdAt: -1 })
     .skip((page_no - 1) * no_of_requests)
     .limit(no_of_requests)
     .lean(); // Convert to plain objects
 
-  // Replace IDs with corresponding data
-  const updatedFetchData = await Promise.all(
-    fetchData.map(async (restock) => {
-      // Fetch warehouse data for each warehouse ID in restock.warehouses
-      const warehouseData = await Promise.all(
-        restock.warehouses.map(async (warehouseId) => {
-          return await WarehouseModel.findById(warehouseId);
-        })
-      );
+  // // Replace IDs with corresponding data
+  // const updatedFetchData = await Promise.all(
+  //   fetchData.map(async (restock) => {
+  //     // Fetch warehouse data for each warehouse ID in restock.warehouses
+  //     const warehouseData = await Promise.all(
+  //       restock?.warehouses?.map(async (warehouseId) => {
+  //         return await WarehouseModel.findById(warehouseId);
+  //       })
+  //     );
 
-      return {
-        ...restock,
-        product_id: restock.product_id, // Already populated
-        supplier_id: restock.supplier_id, // Already populated
-        warehouses: warehouseData // Replace warehouse IDs with actual warehouse data
-      };
-    })
-  );
+  //     return {
+  //       ...restock,
+  //       product_id: restock.product_id, // Already populated
+  //       supplier_id: restock.supplier_id, // Already populated
+  //       warehouses: warehouseData // Replace warehouse IDs with actual warehouse data
+  //     };
+  //   })
+  // );
 
   const available_pages = Math.ceil(totalCount / no_of_requests) || 1;
 
-  return { page_no, available_pages, fetchData: updatedFetchData };
+  return { page_no, available_pages, fetchData: fetchData };
 };
 
 //------ common product handlers --------------------\\

@@ -2,6 +2,7 @@ import appResponse from '../../../lib/appResponse.js';
 import {
   addNewBankAccount,
   dashboardStatistics,
+  itemstatistics,
   sponsorsGraph,
   updateOrganizationProfile
 } from '../../services/profile/profileService.js';
@@ -36,6 +37,14 @@ export const sponsorGraphHandler = async (req, res) => {
   const { year } = req.query;
 
   const response = await sponsorsGraph({ user, year });
+
+  res.send(appResponse('Fetched succfully', response));
+};
+
+export const itemstatisticsHandler = async (req, res) => {
+  const { user } = req;
+
+  const response = await itemstatistics({ user });
 
   res.send(appResponse('Fetched succfully', response));
 };
