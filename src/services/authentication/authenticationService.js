@@ -266,6 +266,16 @@ export const loginOrganization = async (body, clienturl) => {
 
   if (checkOrg && checkOrg.acctstatus === 'active') {
     checkOrg.isApproved = true;
+
+    if (!checkOrg.firstname || !checkOrg.lastname) {
+      const coopNameSplit = checkOrg.name_of_cooperation.split(' ');
+
+      checkOrg.firstname = coopNameSplit[0];
+      checkOrg.lastname = coopNameSplit[1] ? coopNameSplit[1] : coopNameSplit[0];
+      checkOrg.total_number_of_beneficiaries_chosen = checkOrg.total_number_of_members_chosen;
+      checkOrg.total_number_of_beneficiaries_created = checkOrg.total_number_of_members_created;
+    }
+
     await checkOrg.save();
   }
 
