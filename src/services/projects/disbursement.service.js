@@ -195,6 +195,7 @@ export const confirmDisbursement = async ({ user, awardee_id }) => {
 
 export const makeRequestedPayment = async ({ user, body, project_id }) => {
   const project = await ProjectModel.findById(project_id).populate('product_items');
+  const awardee = await awardeesModel.findOne({ project_id });
   let amount =
     Number(project.quantity_per_person) * Number(project.product_items[0].product_value_amount);
   const requests = [];
@@ -227,7 +228,7 @@ export const makeRequestedPayment = async ({ user, body, project_id }) => {
   const paymentata = {
     email: user.email,
     amount: amount * 100,
-    callback_url: `${env.dev_base_url_org}/projects/sponsorship`,
+    callback_url: `${env.dev_base_url_org}/projects/disbursements/${project_id}/${awardee.batch_id}`,
     channels: ['bank'],
     metadata: {
       requests: requests,
@@ -261,7 +262,7 @@ export const validateRequestPayments = async ({ user, body }) => {
 
     const paymentdata = response.data.data;
     const metadata = response.data.data.metadata;
-
+    console.log("metadata",metadata);
     const bulkreceiptientData = [];
 
     // initate transfers on account
@@ -312,7 +313,7 @@ export const validateRequestPayments = async ({ user, body }) => {
       const mailData = {
         sponsor_name: `${user.firstname} ${user.lastname}`.toUpperCase(),
         email: benefic.contact.email,
-        subject: `Payment Confirmation for ${capitalizeWords(project.project_name)}`,
+        subject: `Payment Confirmation for ${capitalizeWords(projectInfo.project_name)}`,
         type: 'html',
         html: paidProjectRequestEmail(creationData).html,
         text: paidProjectRequestEmail(creationData).text
@@ -382,6 +383,6 @@ export const validateRequestPayments = async ({ user, body }) => {
 
     return bulkTransfer.data.data;
   } catch (err) {
-    console.error(err);
+    console.log("err", err);
   }
 };
