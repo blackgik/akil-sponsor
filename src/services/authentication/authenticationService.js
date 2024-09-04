@@ -2,8 +2,6 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import XLSX from 'xlsx';
 import axios from 'axios';
-import request from 'request';
-import path from 'path';
 import fs, { exists } from 'fs';
 import Microinvoice from 'microinvoice';
 import env from '../../config/env.js';
@@ -251,14 +249,23 @@ export const verifyEmail = async (body) => {
 };
 
 export const loginOrganization = async (body, clienturl) => {
-  const { email, password } = body;
-  let checkOrg = await organizationModel.findOne({ email });
+  const { contact, password } = body;
+
+  const filter = {};
+
+  if (validator.isEmail(contact)) {
+    filter['email'] = contact;
+  } else {
+    filter['phone'] = contact;
+  }
+
+  let checkOrg = await organizationModel.findOne({ ...filter });
 
   let user;
 
   if (!checkOrg) {
     user = await usersModels
-      .findOne({ email })
+      .findOne({ ...filter })
       .populate({ path: 'role_id', select: { role_name: 1 } });
 
     if (!user) throw new InvalidError('Invalid Sponsor');

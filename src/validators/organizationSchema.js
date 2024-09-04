@@ -41,7 +41,7 @@ export const updateOrganizationProfileSchema = Joi.object({
 });
 
 export const validateLoginOrganizationSchema = Joi.object({
-  email: Joi.string().email().required(),
+  contact: Joi.string().required(),
   password: Joi.string().optional().allow('', null).min(6)
 });
 
