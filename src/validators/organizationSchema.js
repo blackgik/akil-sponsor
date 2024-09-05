@@ -41,13 +41,13 @@ export const updateOrganizationProfileSchema = Joi.object({
 });
 
 export const validateLoginOrganizationSchema = Joi.object({
-  email: Joi.string().email().required(),
+  contact: Joi.string().required(),
   password: Joi.string().optional().allow('', null).min(6)
 });
 
 export const validateVerifyOnboardingEmailSchema = Joi.object({
   hash: Joi.string().required(),
-  email: Joi.string().email().required(),
+  contact: Joi.string().required(),
   code: Joi.string().min(6).required()
 });
 
@@ -113,7 +113,7 @@ export const validateForgotOtpSchema = Joi.object({
 });
 
 export const validateForgotPasswordSchema = Joi.object({
-  email: Joi.string().email().required()
+  contact: Joi.string().required()
 });
 
 export const beneficiaryIdSchema = Joi.object({
