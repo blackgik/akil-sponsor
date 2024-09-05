@@ -8,6 +8,7 @@ import {
 import {
   addNewBankAccountHandler,
   dashboardStatisticsHandler,
+  itemstatisticsHandler,
   sponsorGraphHandler,
   updateOrganizationProfileHandler
 } from '../../controllers/profile/profileController.js';
@@ -31,6 +32,7 @@ const profileRoot = () => {
   );
   profileRooute.get('/statistics', authentication, dashboardStatisticsHandler);
   profileRooute.get('/s-graph', authentication, sponsorGraphHandler);
+  profileRooute.get('/item-statistics', authentication, itemstatisticsHandler);
 
   return profileRooute;
 };

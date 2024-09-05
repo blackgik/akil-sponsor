@@ -467,6 +467,18 @@ export const startSchedule = async ({ body, user, project_id }) => {
 };
 
 const disbursementCode = async ({ project_id, user, updatedAwardees }) => {
+  const project = await ProjectModel.findById(project_id);
+
+  const start_date = project.start_date;
+  const end_date = project.end_date;
+  const awardees = await awardeesModel
+    .find({ sponsor_id: user._id, project_id })
+    // .find({ batch_id: sponsor })
+    .populate('beneficiary_id')
+    .populate('project_id')
+    .populate('batch_id');
+
+  if (awardees.length === 0) throw new NotFoundError('No awardees found');
   const results = [];
   for (const awardee of updatedAwardees) {
     const code = await codeGenerator(6);
@@ -489,11 +501,12 @@ const disbursementCode = async ({ project_id, user, updatedAwardees }) => {
       const emailData = {
         beneficiary_name: capitalizeWords(awardee.name),
         project_name: capitalizeWords(awardee.project_id.project_name),
-        start_date: awardee.batch_id.start_date,
-        end_date: awardee.batch_id.end_date,
+        start_date: awardee?.batch_id?.start_date || start_date,
+        end_date: awardee?.batch_id?.end_date || end_date,
         location: awardee.batch_id.delivery_address,
         code: code
       };
+
       const mailData = {
         sponsor_name: `${user.firstname} ${user.lastname}`.toUpperCase(),
         email: contactEmail,

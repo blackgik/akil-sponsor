@@ -166,6 +166,265 @@ export const sponsorsGraph = async ({ user, year = new Date().getFullYear() }) =
 
   //  education housing transportation finance
 
+  const food = await sponsorshipRequestModel.aggregate([
+    {
+      $lookup: {
+        from: 'productcategories',
+        as: 'product_info',
+        let: { productId: '$product_type' },
+        pipeline: [
+          {
+            $match: {
+              $expr: { $and: [{ $eq: ['$_id', '$$productId'] }] }
+            }
+          }
+        ]
+      }
+    },
+    { $unwind: '$product_info' },
+    {
+      $match: {
+        'product_info.product_category_name': 'food',
+        sponsor_id: user._id,
+        request_state: 'completed'
+      }
+    },
+    {
+      $group: {
+        _id: null,
+        totalSum: { $sum: '$amount' }
+      }
+    }
+  ]);
+
+  const health = await sponsorshipRequestModel.aggregate([
+    {
+      $lookup: {
+        from: 'productcategories',
+        as: 'product_info',
+        let: { productId: '$product_type' },
+        pipeline: [
+          {
+            $match: {
+              $expr: { $and: [{ $eq: ['$_id', '$$productId'] }] }
+            }
+          }
+        ]
+      }
+    },
+    { $unwind: '$product_info' },
+    {
+      $match: {
+        'product_info.product_category_name': 'health',
+        sponsor_id: user._id,
+        request_state: 'completed'
+      }
+    },
+    {
+      $group: {
+        _id: null,
+        totalSum: { $sum: '$amount' }
+      }
+    }
+  ]);
+
+  const education = await sponsorshipRequestModel.aggregate([
+    {
+      $lookup: {
+        from: 'productcategories',
+        as: 'product_info',
+        let: { productId: '$product_type' },
+        pipeline: [
+          {
+            $match: {
+              $expr: { $and: [{ $eq: ['$_id', '$$productId'] }] }
+            }
+          }
+        ]
+      }
+    },
+    { $unwind: '$product_info' },
+    {
+      $match: {
+        'product_info.product_category_name': 'education',
+        sponsor_id: user._id,
+        request_state: 'completed'
+      }
+    },
+
+    {
+      $group: {
+        _id: null,
+        totalSum: { $sum: '$amount' }
+      }
+    }
+  ]);
+  const housing = await sponsorshipRequestModel.aggregate([
+    {
+      $lookup: {
+        from: 'productcategories',
+        as: 'product_info',
+        let: { productId: '$product_type' },
+        pipeline: [
+          {
+            $match: {
+              $expr: { $and: [{ $eq: ['$_id', '$$productId'] }] }
+            }
+          }
+        ]
+      }
+    },
+    { $unwind: '$product_info' },
+    {
+      $match: {
+        'product_info.product_category_name': 'housing',
+        sponsor_id: user._id,
+        request_state: 'completed'
+      }
+    },
+
+    {
+      $group: {
+        _id: null,
+        totalSum: { $sum: '$amount' }
+      }
+    }
+  ]);
+  const transportation = await sponsorshipRequestModel.aggregate([
+    {
+      $lookup: {
+        from: 'productcategories',
+        as: 'product_info',
+        let: { productId: '$product_type' },
+        pipeline: [
+          {
+            $match: {
+              $expr: { $and: [{ $eq: ['$_id', '$$productId'] }] }
+            }
+          }
+        ]
+      }
+    },
+    { $unwind: '$product_info' },
+    {
+      $match: {
+        'product_info.product_category_name': 'transportation',
+        sponsor_id: user._id,
+        request_state: 'completed'
+      }
+    },
+
+    {
+      $group: {
+        _id: null,
+        totalSum: { $sum: '$amount' }
+      }
+    }
+  ]);
+  const finance = await sponsorshipRequestModel.aggregate([
+    {
+      $lookup: {
+        from: 'productcategories',
+        as: 'product_info',
+        let: { productId: '$product_type' },
+        pipeline: [
+          {
+            $match: {
+              $expr: { $and: [{ $eq: ['$_id', '$$productId'] }] }
+            }
+          }
+        ]
+      }
+    },
+    { $unwind: '$product_info' },
+    {
+      $match: {
+        'product_info.product_category_name': 'finance',
+        sponsor_id: user._id,
+        request_state: 'completed'
+      }
+    },
+
+    {
+      $group: {
+        _id: null,
+        totalSum: { $sum: '$amount' }
+      }
+    }
+  ]);
+
+  const distributed =
+    (food[0]?.totalSum || 0) +
+    (health[0]?.totalSum || 0) +
+    (education[0]?.totalSum || 0) +
+    (housing[0]?.totalSum || 0) +
+    (transportation[0]?.totalSum || 0) +
+    (finance[0]?.totalSum || 0);
+
+  console;
+
+  const pie = {
+    food: Number((((food[0]?.totalSum || 0) / distributed) * 100 || 0).toFixed(2)),
+    health: Number((((health[0]?.totalSum || 0) / distributed) * 100 || 0).toFixed(2)),
+    education: Number((((education[0]?.totalSum || 0) / distributed) * 100 || 0).toFixed(2)),
+    housing: Number((((housing[0]?.totalSum || 0) / distributed) * 100 || 0).toFixed(2)),
+    transportation: Number(
+      (((transportation[0]?.totalSum || 0) / distributed) * 100 || 0).toFixed(2)
+    ),
+    finance: Number((((finance[0]?.totalSum || 0) / distributed) * 100 || 0).toFixed(2)),
+    distributed
+  };
+
+  return { graph: result, pie };
+};
+
+export const itemstatistics = async ({ user }) => {
+  const finance = await awardeesModel.aggregate([
+    {
+      $lookup: {
+        from: 'projects',
+        as: 'project_info',
+        let: { projectId: '$project_id' },
+        pipeline: [
+          {
+            $match: {
+              $expr: { $and: [{ $eq: ['$_id', '$$projectId'] }] }
+            }
+          }
+        ]
+      }
+    },
+    { $unwind: '$project_info' },
+    {
+      $lookup: {
+        from: 'productcategories',
+        as: 'product_info',
+        let: { productId: '$project_info.product_type' },
+        pipeline: [
+          {
+            $match: {
+              $expr: { $and: [{ $eq: ['$_id', '$$productId'] }] }
+            }
+          }
+        ]
+      }
+    },
+    { $unwind: '$product_info' },
+    {
+      $match: {
+        'product_info.product_category_name': 'finance',
+        sponsor_id: user._id,
+        status: 'disbursed'
+      }
+    },
+
+    {
+      $group: {
+        _id: null,
+        totalSum: { $sum: '$project_info.quantity_per_person' }
+      }
+    }
+  ]);
   const food = await awardeesModel.aggregate([
     {
       $lookup: {
@@ -201,9 +460,10 @@ export const sponsorsGraph = async ({ user, year = new Date().getFullYear() }) =
       $match: {
         'product_info.product_category_name': 'food',
         sponsor_id: user._id,
-        status: 'allocated'
+        status: 'disbursed'
       }
     },
+
     {
       $group: {
         _id: null,
@@ -211,7 +471,6 @@ export const sponsorsGraph = async ({ user, year = new Date().getFullYear() }) =
       }
     }
   ]);
-  console.log({ food });
   const health = await awardeesModel.aggregate([
     {
       $lookup: {
@@ -250,6 +509,7 @@ export const sponsorsGraph = async ({ user, year = new Date().getFullYear() }) =
         status: 'disbursed'
       }
     },
+
     {
       $group: {
         _id: null,
@@ -257,9 +517,6 @@ export const sponsorsGraph = async ({ user, year = new Date().getFullYear() }) =
       }
     }
   ]);
-
-  console.log(health);
-
   const education = await awardeesModel.aggregate([
     {
       $lookup: {
@@ -398,52 +655,6 @@ export const sponsorsGraph = async ({ user, year = new Date().getFullYear() }) =
       }
     }
   ]);
-  const finance = await awardeesModel.aggregate([
-    {
-      $lookup: {
-        from: 'projects',
-        as: 'project_info',
-        let: { projectId: '$project_id' },
-        pipeline: [
-          {
-            $match: {
-              $expr: { $and: [{ $eq: ['$_id', '$$projectId'] }] }
-            }
-          }
-        ]
-      }
-    },
-    { $unwind: '$project_info' },
-    {
-      $lookup: {
-        from: 'productcategories',
-        as: 'product_info',
-        let: { productId: '$project_info.product_type' },
-        pipeline: [
-          {
-            $match: {
-              $expr: { $and: [{ $eq: ['$_id', '$$productId'] }] }
-            }
-          }
-        ]
-      }
-    },
-    { $unwind: '$product_info' },
-    {
-      $match: {
-        'product_info.product_category_name': 'finance',
-        sponsor_id: user._id,
-        status: 'disbursed'
-      }
-    },
-
-    {
-      $group: {
-        _id: null,
-        totalSum: { $sum: '$project_info.quantity_per_person' }
-      }
-    }
-  ]);
 
   const distributed =
     (food[0]?.totalSum || 0) +
@@ -453,19 +664,13 @@ export const sponsorsGraph = async ({ user, year = new Date().getFullYear() }) =
     (transportation[0]?.totalSum || 0) +
     (finance[0]?.totalSum || 0);
 
-  console;
-
-  const pie = {
-    food: Number((((food[0]?.totalSum || 0) / distributed) * 100 || 0).toFixed(2)),
-    health: Number((((health[0]?.totalSum || 0) / distributed) * 100 || 0).toFixed(2)),
-    education: Number((((education[0]?.totalSum || 0) / distributed) * 100 || 0).toFixed(2)),
-    housing: Number((((housing[0]?.totalSum || 0) / distributed) * 100 || 0).toFixed(2)),
-    transportation: Number(
-      (((transportation[0]?.totalSum || 0) / distributed) * 100 || 0).toFixed(2)
-    ),
-    finance: Number((((finance[0]?.totalSum || 0) / distributed) * 100 || 0).toFixed(2)),
+  return {
+    food: food[0]?.totalSum || 0,
+    health: health[0]?.totalSum || 0,
+    education: education[0]?.totalSum || 0,
+    housing: housing[0]?.totalSum || 0,
+    transportation: transportation[0]?.totalSum || 0,
+    finance: finance[0]?.totalSum || 0,
     distributed
   };
-
-  return { graph: result, pie };
 };
