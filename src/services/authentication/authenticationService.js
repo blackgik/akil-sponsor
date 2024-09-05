@@ -32,7 +32,7 @@ import {
   verifyOTP
 } from '../../utils/codeGenerator.js';
 import { formattMailInfo } from '../../utils/mailFormatter.js';
-import { messageBird } from '../../utils/msgBird.js';
+import { messageBird, sendsms } from '../../utils/msgBird.js';
 import organizationBeneficiaryModel from '../../models/beneficiaries/organizationBeneficiaryModel.js';
 import beneficiaryBatchUploadModel from '../../models/beneficiaries/beneficiaryBatchUploadModel.js';
 import { plans } from '../../config/modules.js';
@@ -113,71 +113,103 @@ export const onboardNewOrganization = async ({ body, dbConnection }) => {
     organization_id: createOrganizationProfile._id
   });
 
+  await sendsms({
+    phone: body.phone,
+    sms: `Hi from AKILAAH! please use this OTP ${otp} to verify your account`
+  });
+
   return { code: otp, hash: otpHash, email: createOrganizationProfile.email };
 };
 
 export const resendOtp = async (body) => {
-  //const hash = await argon.hash(dto.password);
-  let checkIfNotVerified = await organizationModel.findOne({ email: body.email });
-  let user;
+  const filter = {};
+
+  if (validator.isEmail(body.contact)) {
+    filter['email'] = body.contact;
+  } else {
+    filter['phone'] = body.contact;
+  }
+
+  let checkIfNotVerified, user;
+
+  checkIfNotVerified = await organizationModel.findOne({ ...filter });
+
   if (!checkIfNotVerified) {
-    user = await usersModels.findOne({ email: body.email });
+    user = await usersModels.findOne({ ...filter });
     if (!user) throw new BadRequestError('Account not found!');
   }
 
   // if (checkIfNotVerified.isApproved) throw new BadRequestError('Account already verified! Login!');
 
+  const key = Object.keys(filter);
+
   const otp = await codeGenerator(6);
 
-  const emailTouse = checkIfNotVerified ? checkIfNotVerified.email : user.email;
+  const emailTouse = checkIfNotVerified ? checkIfNotVerified[`${key}`] : user[`${key}`];
 
   const otpHash = buildOtpHash(emailTouse, otp, env.otpKey, 15);
-
-  // checkIfNotVerified.otpHash = otpHash;
-  // checkIfNotVerified.otp = otp;
-
-  // await checkIfNotVerified.save();
 
   //create email profile here
   const nameToUse = checkIfNotVerified
     ? checkIfNotVerified.firstname + ' ' + checkIfNotVerified.lastname
     : user.user_name;
 
-  const onboardingData = {
-    name: nameToUse,
-    code: otp
-  };
-  const mailData = {
-    email: emailTouse,
-    subject: 'SPONSOR ONBOARDING',
-    type: 'html',
-    html: verifyOnbordingMail(onboardingData).html,
-    text: verifyOnbordingMail(onboardingData).text
-  };
-  const msg = await formattMailInfo(mailData, env);
+  if (validator.isEmail(body.contact)) {
+    const onboardingData = {
+      name: nameToUse,
+      code: otp
+    };
 
-  const msgDelivered = await messageBird(msg);
-  if (!msgDelivered)
-    throw new InternalServerError(
-      500,
-      'server slip. Sponsor was created without mail being sent',
-      ''
-    );
+    const mailData = {
+      email: emailTouse,
+      subject: 'SPONSOR ONBOARDING',
+      type: 'html',
+      html: verifyOnbordingMail(onboardingData).html,
+      text: verifyOnbordingMail(onboardingData).text
+    };
 
-  return { code: otp, hash: otpHash, email: checkIfNotVerified.email };
+    const msg = await formattMailInfo(mailData, env);
+
+    const msgDelivered = await messageBird(msg);
+    if (!msgDelivered)
+      throw new InternalServerError(
+        500,
+        'server slip. Sponsor was created without mail being sent',
+        ''
+      );
+  } else {
+    const smsData = {
+      phone: emailTouse,
+      sms: `Hi from AKILAAH!, Use this OTP ${otp} to verify your account`
+    };
+
+    const sms = await sendsms(smsData);
+    if (!sms) throw new BadRequestError('OTP not sent. Please check your phone number');
+  }
+
+  return { code: otp, hash: otpHash, contact: checkIfNotVerified[`${key}`] };
 };
 
 export const verifyEmail = async (body) => {
-  const { code, hash, email } = body;
+  const { code, hash, contact } = body;
 
-  let checkAcct = await organizationModel.findOne({ email });
+  const filter = {};
+
+  if (validator.isEmail(contact)) {
+    filter['email'] = contact;
+  } else {
+    filter['phone'] = contact;
+  }
+
+  let checkAcct = await organizationModel.findOne({ ...filter });
   let user;
   if (!checkAcct) {
-    user = await usersModels.findOne({ email });
+    user = await usersModels.findOne({ ...filter });
     if (!user) throw new BadRequestError('User not found');
   }
 
-  const emailToUse = checkAcct ? checkAcct.email : user.email;
+  const key = Object.keys(filter);
+  const emailToUse = checkAcct ? checkAcct[`${key}`] : user[`${key}`];
 
   const verifyOtp = verifyOTP(emailToUse, code, hash, env.otpKey);
 
@@ -202,31 +234,34 @@ export const verifyEmail = async (body) => {
     checkAcct = await organizationModel.findById(user.sponsor_id);
   }
 
-  //create email profile here
-  const onboardingData = {
-    email: emailToUse,
-    name_of_cooperation: nameToUse,
-    company_code: checkAcct.company_code,
-    name: nameToUse
-  };
+  if (validator.isEmail(contact)) {
+    //create email profile here
+    const onboardingData = {
+      email: emailToUse,
+      name_of_cooperation: nameToUse,
+      company_code: checkAcct.company_code,
+      name: nameToUse
+    };
 
-  const mailData = {
-    email: emailToUse,
-    subject: 'SPONSOR ONBOARDING',
-    type: 'html',
-    html: onboardinMail(onboardingData).html,
-    text: onboardinMail(onboardingData).text
-  };
+    const mailData = {
+      email: emailToUse,
+      subject: 'SPONSOR ONBOARDING',
+      type: 'html',
+      html: onboardinMail(onboardingData).html,
+      text: onboardinMail(onboardingData).text
+    };
 
-  const msg = await formattMailInfo(mailData, env);
+    const msg = await formattMailInfo(mailData, env);
 
-  const msgDelivered = await messageBird(msg);
-  if (!msgDelivered)
-    throw new InternalServerError(
-      500,
-      'server slip. Sponsor was created without mail being sent',
-      ''
-    );
+    const msgDelivered = await messageBird(msg);
+    if (!msgDelivered)
+      throw new InternalServerError(
+        500,
+        'server slip. Sponsor was created without mail being sent',
+        ''
+      );
+  }
+
   const admin = checkAcct.toJSON();
   admin.onboardingSetting = plans.sponsor_onboarding_settings;
 
@@ -356,43 +391,58 @@ export const loginOrganization = async (body, clienturl) => {
 };
 
 export const forgotPassword = async ({ body }) => {
-  let checkOrg = await organizationModel.findOne({ email: body.email });
+  const filter = {};
+
+  if (validator.isEmail(body.contact)) {
+    filter['email'] = body.contact;
+  } else {
+    filter['phone'] = body.contact;
+  }
+
+  let checkOrg = await organizationModel.findOne({ ...filter });
   let user;
 
   if (!checkOrg) {
-    user = await usersModels.findOne({ email: body.email });
+    user = await usersModels.findOne({ ...filter });
     if (!user) return {};
   }
 
+  const key = Object.keys(filter);
+
   const newPassword = await codeGenerator(6);
 
-  const hash = buildOtpHash(body.email, newPassword, env.otpKey, 15);
+  const hash = buildOtpHash(body.contact, newPassword, env.otpKey, 15);
 
-  // checkOrg.password = hash;
+  if (validator.isEmail(body.contact)) {
+    const onboardingData = {
+      name: checkOrg ? checkOrg.firstname + ' ' + checkOrg.lastname : user.user_name,
+      code: newPassword
+    };
 
-  // checkOrg.save();
+    const mailData = {
+      email: body.contact,
+      subject: 'PASSWORD RESET REQUEST',
+      type: 'html',
+      html: forgotPasswordMail(onboardingData).html,
+      text: forgotPasswordMail(onboardingData).text
+    };
 
-  const onboardingData = {
-    name: checkOrg ? checkOrg.firstname + ' ' + checkOrg.lastname : user.user_name,
-    code: newPassword
-  };
+    const msg = await formattMailInfo(mailData, env);
 
-  const mailData = {
-    email: body.email,
-    subject: 'PASSWORD RESET REQUEST',
-    type: 'html',
-    html: forgotPasswordMail(onboardingData).html,
-    text: forgotPasswordMail(onboardingData).text
-  };
+    const msgDelivered = await messageBird(msg);
 
-  const msg = await formattMailInfo(mailData, env);
+    if (!msgDelivered) throw new InternalServerError('server slip. Reset Password code not sent');
+  } else {
+    const smsData = {
+      phone: body.contact,
+      sms: `Hi from AKILAAH!, Use this OTP ${newPassword} to verify your account`
+    };
 
-  const msgDelivered = await messageBird(msg);
-
-  if (!msgDelivered) throw new InternalServerError('server slip. Reset Password code not sent');
-
+    const sms = await sendsms(smsData);
+    if (!sms) throw new BadRequestError('OTP not sent. Please check your phone number');
+  }
   // return { email: checkBeneficiary.email };
-  return { hash: hash, email: body.email };
+  return { hash: hash, email: body.contact };
 };
 
 export const resetPassword = async ({ body, user }) => {
