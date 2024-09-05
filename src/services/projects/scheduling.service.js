@@ -113,7 +113,7 @@ export const createProductSchedule = async ({ user, body, project_id, param }) =
 
   const total_left = total_persons_to_get - total_scheduled;
 
-  if (total_left <= 0) throw new BadRequestError('Total number of participants has beeen exhauted');
+  if (total_left <= 0) throw new BadRequestError('Total number of participants has been exhausted');
 
   //   create object
   const schedule_data = {

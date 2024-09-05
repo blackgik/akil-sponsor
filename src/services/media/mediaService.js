@@ -77,7 +77,7 @@ export const changeMediaStatus = async ({ user, status, media_id }) => {
     { new: true, runValidators: true }
   );
 
-  if (!mediaFile) throw new NotFoundError('mediaFile does not exist');
+  if (!mediaFile) throw new NotFoundError('media file does not exist');
 
   // create notification
   await notificationsModel.create({
@@ -93,7 +93,7 @@ export const changeMediaStatus = async ({ user, status, media_id }) => {
 export const removeMediaFile = async ({ user, media_id }) => {
   const mediaFile = await mediaModel.findById(media_id);
 
-  if (!mediaFile) throw new NotFoundError('mediaFile not found');
+  if (!mediaFile) throw new NotFoundError('media file not found');
 
   await mediaFile.remove();
   // create notification
@@ -114,7 +114,7 @@ export const editMediaFile = async ({ body, media_id }) => {
     { new: true, runValidators: true }
   );
 
-  if (!mediaFile) throw new NotFoundError('mediaFile not found');
+  if (!mediaFile) throw new NotFoundError('media file not found');
 
   return mediaFile;
 };

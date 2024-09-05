@@ -156,7 +156,7 @@ export const approveRequests = async ({ body, user, status }) => {
     const msg = await formattMailInfo(mailData, env);
     const msgDelivered = await messageBird(msg);
     if (!msgDelivered)
-      throw new InternalServerError('server slip. reequest sent but email not sent');
+      throw new InternalServerError('server slip. request sent but email not sent');
 
     // Create notifications for each request
     notifications.push(
@@ -242,7 +242,7 @@ export const denyRequests = async ({ body, status, user }) => {
     const msg = await formattMailInfo(mailData, env);
     const msgDelivered = await messageBird(msg);
     if (!msgDelivered)
-      throw new InternalServerError('server slip. reequest sent but email not sent');
+      throw new InternalServerError('server slip. request sent but email not sent');
 
     // Create notifications for each request
     notifications.push(
@@ -297,19 +297,19 @@ export const uploadMore = async ({ request_id, body, user }) => {
   };
   const msg = await formattMailInfo(mailData, env);
   const msgDelivered = await messageBird(msg);
-  if (!msgDelivered) throw new InternalServerError('server slip. reequest sent but email not sent');
+  if (!msgDelivered) throw new InternalServerError('server slip. request sent but email not sent');
 
   // Create notifications
   const notifications = [
     {
-      note: `your sponsor needs you to upload more document for your ${request.subject_request} `,
+      note: `your sponsor needs you to upload more documents for your ${request.subject_request} `,
       type: 'update',
       who_is_reading: 'beneficiary',
       member_id: request.beneficiary_id,
       organization_id: user._id
     },
     {
-      note: `you have requested for ${benefi.personal.member_name} of to upload more documents for his ${request.subject_request} request`,
+      note: `you have requested for ${benefi.personal.member_name} of to upload more documentss for his ${request.subject_request} request`,
       type: 'update',
       who_is_reading: 'sponsor',
       member_id: request.beneficiary_id,
@@ -339,7 +339,7 @@ export const renewSponsorshipRequests = async ({ body, user }) => {
     }
 
     if (existingRequest.feedback_stats !== true) {
-      throw new BadRequestError('you havent givien feedback for your first payment');
+      throw new BadRequestError('you have not given feedback for your first payment');
     }
 
     if (existingRequest.recurring.status === false) {
@@ -448,7 +448,7 @@ export const makeRequestedPayment = async ({ user, body }) => {
 
   if (!amount)
     throw new BadRequestError(
-      'Seams all requests have no amount attached. Please contact the beneficiaries'
+      'Seems all requests have no amount attached. Please contact the beneficiaries'
     );
 
   if (!requests.length) throw new BadRequestError('You have all members as invalid');
@@ -558,7 +558,7 @@ export const validateRequestPayments = async ({ user, body }) => {
       const msg = await formattMailInfo(mailData, env);
       const msgDelivered = await messageBird(msg);
       if (!msgDelivered)
-        throw new InternalServerError('server slip. reequest sent but email not sent');
+        throw new InternalServerError('server slip. request sent but email not sent');
 
       const receiptientData = {
         type: 'nuban',

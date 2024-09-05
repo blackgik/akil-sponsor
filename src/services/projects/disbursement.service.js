@@ -321,7 +321,7 @@ export const validateRequestPayments = async ({ user, body }) => {
       const msg = await formattMailInfo(mailData, env);
       const msgDelivered = await messageBird(msg);
       if (!msgDelivered)
-        throw new InternalServerError('server slip. reequest sent but email not sent');
+        throw new InternalServerError('server slip. request sent but email not sent');
 
       const receiptientData = {
         type: 'nuban',

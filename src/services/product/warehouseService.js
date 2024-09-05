@@ -213,7 +213,7 @@ export const removeWarehouse = async ({ user, warehouse_id }) => {
   if (!warehouse) throw new NotFoundError('warehouse not found');
   const product = await warehouseProductModel.find({ warehouse_id });
   if (product && product.length > 0)
-    throw new BadRequestError('you cannot delete this warehouse beacuse it has products in it');
+    throw new BadRequestError('you cannot delete this warehouse because it has products in it');
 
   await warehouse.remove();
 

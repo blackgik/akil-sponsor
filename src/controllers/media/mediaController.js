@@ -49,7 +49,7 @@ export const editMediaFileHandler = async (req, res) => {
 
   const response = await editMediaFile({ body, media_id });
 
-  res.send(appResponse('mediafile edited', response));
+  res.send(appResponse('media filie edited', response));
 };
 
 export const removeMediaFileHandler = async (req, res) => {

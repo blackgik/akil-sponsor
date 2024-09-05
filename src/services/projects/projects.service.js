@@ -34,7 +34,7 @@ export const createProject = async ({ body, user }) => {
       sponsor_id: user._id
     });
 
-    if (checkProject) throw new DuplicateError('Project already exisiting');
+    if (checkProject) throw new DuplicateError('Project already existing');
 
     // check if any project has the product type
     const checkProductTypeProject = await ProjectModel.findOne({
@@ -746,7 +746,7 @@ export const deleteProject = async ({ project_id }) => {
   const deleteProject = await ProjectModel.findByIdAndDelete(project_id);
 
   if (!deleteProject)
-    throw new InternalServerError('Deleting project cannot work. contant our customer support');
+    throw new InternalServerError('Deleting project cannot work. contact our customer support');
 
   await awardeesModel.deleteMany({ project_id });
   await scheduleModel.deleteMany({ project: project_id });
