@@ -17418,7 +17418,7 @@ export const donationRequestEmail = (data) => {
         </html>
           `
     };
-  };
+};
 
 export const paymentWarningsMail = (data) => {
   return paymentWarningHTML

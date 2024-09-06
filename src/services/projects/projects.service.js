@@ -364,6 +364,18 @@ export const generateProjectList = async ({ user, param, project_id, body }) => 
         if (!beneficiaryMsgDelivered) {
           throw new InternalServerError(`Failed to send email to beneficiary`);
         }
+
+        if (beneficiary.contact.phone) {
+          const smsData = {
+            phone: benefi.contact.phone,
+            sms: `Congratulations, you have been successfully awarded to the ${capitalizeWords(
+              project.project_name
+            )} project.`
+          };
+          const sms = await sendsms(smsData);
+          if (!sms)
+            throw new BadRequestError('server slip. project awarded without sms being sent');
+        }
       }
     }
 
