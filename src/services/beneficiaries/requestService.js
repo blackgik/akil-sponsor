@@ -22,7 +22,7 @@ import {
   uploadMoreEmail
 } from '../../config/mail.js';
 import { formattMailInfo } from '../../utils/mailFormatter.js';
-import { messageBird } from '../../utils/msgBird.js';
+import { messageBird, sendsms } from '../../utils/msgBird.js';
 
 export const fetchAllRequests = async ({ params, user }) => {
   let {
@@ -157,7 +157,16 @@ export const approveRequests = async ({ body, user, status }) => {
     const msgDelivered = await messageBird(msg);
     if (!msgDelivered)
       throw new InternalServerError('server slip. request sent but email not sent');
+    if (benefi.contact.phone) {
+      const smsData = {
+        phone: benefi.contact.phone,
+        sms: `your ${request.subject_request} request has been approved`
+      };
 
+      const sms = await sendsms(smsData);
+      if (!sms)
+        throw new BadRequestError('server slip. request status updated without sms being sent');
+    }
     // Create notifications for each request
     notifications.push(
       {
@@ -243,7 +252,16 @@ export const denyRequests = async ({ body, status, user }) => {
     const msgDelivered = await messageBird(msg);
     if (!msgDelivered)
       throw new InternalServerError('server slip. request sent but email not sent');
+    if (benefi.contact.phone) {
+      const smsData = {
+        phone: benefi.contact.phone,
+        sms: `your ${request.subject_request} request has been denied`
+      };
 
+      const sms = await sendsms(smsData);
+      if (!sms)
+        throw new BadRequestError('server slip. request status updated without sms being sent');
+    }
     // Create notifications for each request
     notifications.push(
       {
@@ -298,7 +316,16 @@ export const uploadMore = async ({ request_id, body, user }) => {
   const msg = await formattMailInfo(mailData, env);
   const msgDelivered = await messageBird(msg);
   if (!msgDelivered) throw new InternalServerError('server slip. request sent but email not sent');
+  if (benefi.contact.phone) {
+    const smsData = {
+      phone: benefi.contact.phone,
+      sms: `your sponsor needs you to upload more documents`
+    };
 
+    const sms = await sendsms(smsData);
+    if (!sms)
+      throw new BadRequestError('server slip. request status updated without sms being sent');
+  }
   // Create notifications
   const notifications = [
     {

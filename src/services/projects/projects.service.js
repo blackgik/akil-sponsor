@@ -23,7 +23,7 @@ import {
   succefulProjectAwardedEmail
 } from '../../config/mail.js';
 import { formattMailInfo } from '../../utils/mailFormatter.js';
-import { messageBird } from '../../utils/msgBird.js';
+import { messageBird, sendsms } from '../../utils/msgBird.js';
 import env from '../../config/env.js';
 import notificationsModel from '../../models/settings/notificationsModel.js';
 
@@ -189,9 +189,9 @@ export const generateProjectList = async ({ user, param, project_id, body }) => 
 
           // Throw an error for the missing profile information
           throw new BadRequestError(
-            `Beneficiary ${
-              capitalizeWords(beneficiary.personal.member_name)
-            } has not updated their profile. Missing fields: ${missingFields.join(', ')}`
+            `Beneficiary ${capitalizeWords(
+              beneficiary.personal.member_name
+            )} has not updated their profile. Missing fields: ${missingFields.join(', ')}`
           );
         }
 
@@ -252,9 +252,9 @@ export const generateProjectList = async ({ user, param, project_id, body }) => 
 
           // Throw an error for the missing profile information
           throw new BadRequestError(
-            `Beneficiary ${
-              capitalizeWords(beneficiary.personal.member_name)
-            } has not updated their profile. Missing fields: ${missingFields.join(', ')}`
+            `Beneficiary ${capitalizeWords(
+              beneficiary.personal.member_name
+            )} has not updated their profile. Missing fields: ${missingFields.join(', ')}`
           );
         }
 
@@ -513,6 +513,19 @@ export const saveGenerateList = async ({ user, param, project_id, body }) => {
         throw new InternalServerError(
           'server slip.project allocated without email sent to awardees'
         );
+      }
+
+      if (beneficiary.contact.phone) {
+        const smsData = {
+          phone: beneficiary.contact.phone,
+          sms: `Congratulations, you have been allocated to the ${capitalizeWords(
+            project.project_name
+          )} project.`
+        };
+
+        const sms = await sendsms(smsData);
+        if (!sms)
+          throw new BadRequestError('server slip. project allocated without sms being sent');
       }
     }
   }

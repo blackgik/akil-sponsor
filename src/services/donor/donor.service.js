@@ -424,19 +424,33 @@ export const sendEmailtoAgent = async ({ user, body }) => {
   if (!msgDelivered) {
     throw new InternalServerError("Server slip. Donation Payment Initialization email wasn't sent");
   }
+  if (body.email) {
+    const mailData1 = {
+      sponsor_name: `${user.firstname} ${user.lastname}`.toUpperCase(),
+      email: body.email,
+      subject: `Donation Request to Akilaah`,
+      type: 'html',
+      html: subscriptionPay2ruAgentEmail(creationData).html
+    };
 
-  const mailData1 = {
-    sponsor_name: `${user.firstname} ${user.lastname}`.toUpperCase(),
-    email: body.email,
-    subject: `Donation Request to Akilaah`,
-    type: 'html',
-    html: subscriptionPay2ruAgentEmail(creationData).html
-  };
+    const msg1 = await formattMailInfo(mailData1, env);
+    const msgDelivered1 = await messageBird(msg1);
 
-  const msg1 = await formattMailInfo(mailData1, env);
-  const msgDelivered1 = await messageBird(msg1);
+    if (!msgDelivered1) {
+      throw new InternalServerError(
+        "Server slip. Donation Payment Initialization email wasn't sent"
+      );
+    }
+  } else {
+    const smsData = {
+      phone: benefi.contact.phone,
+      sms: `your request to make donation payment of ${formatAmount(
+        amount
+      )} has been received by the agent`
+    };
 
-  if (!msgDelivered1) {
-    throw new InternalServerError("Server slip. Donation Payment Initialization email wasn't sent");
+    const sms = await sendsms(smsData);
+    if (!sms)
+      throw new BadRequestError('server slip. request status updated without sms being sent');
   }
 };
