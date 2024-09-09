@@ -71,13 +71,16 @@ export const disbursementCode = async ({ awardee_id, user }) => {
       throw new InternalServerError(
         'server slip. project delivery created without mail being sent'
       );
-  } else {
+  }
+  if (contactPhone) {
     //create sms profile here
     const smsData = {
       phone: contactPhone,
-      sms: `come to ${batch_id.delivery_address}, and collect your ${capitalizeWords(
+      sms: `come to ${awardee.batch_id.delivery_address}, and collect your ${capitalizeWords(
         awardee.project_id.project_name
-      )} starting from ${awardee.batch_id.start_date} to ${awardee.batch_id.end_date}.`
+      )} starting from ${awardee.batch_id.start_date} to ${
+        awardee.batch_id.end_date
+      }. come with a means of identification`
     };
 
     const sms = await sendsms(smsData);
