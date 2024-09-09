@@ -80,7 +80,7 @@ export const disbursementCode = async ({ awardee_id, user }) => {
         awardee.project_id.project_name
       )} starting from ${awardee.batch_id.start_date} to ${
         awardee.batch_id.end_date
-      }. come with a means of identification`
+      }. come with a means of identification.`
     };
 
     const sms = await sendsms(smsData);
