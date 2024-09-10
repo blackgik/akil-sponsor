@@ -27,7 +27,7 @@ export const sendsms = async (data) => {
       sms: data.sms,
       type: 'plain',
       api_key: env.termii_api_secret,
-      channel: 'generic'
+      channel: 'dnd'
     };
 
     const config = {
