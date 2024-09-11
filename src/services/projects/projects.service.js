@@ -23,7 +23,7 @@ import {
   succefulProjectAwardedEmail
 } from '../../config/mail.js';
 import { formattMailInfo } from '../../utils/mailFormatter.js';
-import { messageBird } from '../../utils/msgBird.js';
+import { messageBird, sendsms } from '../../utils/msgBird.js';
 import env from '../../config/env.js';
 import notificationsModel from '../../models/settings/notificationsModel.js';
 
@@ -34,7 +34,7 @@ export const createProject = async ({ body, user }) => {
       sponsor_id: user._id
     });
 
-    if (checkProject) throw new DuplicateError('Project already exisiting');
+    if (checkProject) throw new DuplicateError('Project already existing');
 
     // check if any project has the product type
     const checkProductTypeProject = await ProjectModel.findOne({
@@ -189,9 +189,9 @@ export const generateProjectList = async ({ user, param, project_id, body }) => 
 
           // Throw an error for the missing profile information
           throw new BadRequestError(
-            `Beneficiary ${
-              capitalizeWords(beneficiary.personal.member_name)
-            } has not updated their profile. Missing fields: ${missingFields.join(', ')}`
+            `Beneficiary ${capitalizeWords(
+              beneficiary.personal.member_name
+            )} has not updated their profile. Missing fields: ${missingFields.join(', ')}`
           );
         }
 
@@ -252,9 +252,9 @@ export const generateProjectList = async ({ user, param, project_id, body }) => 
 
           // Throw an error for the missing profile information
           throw new BadRequestError(
-            `Beneficiary ${
-              capitalizeWords(beneficiary.personal.member_name)
-            } has not updated their profile. Missing fields: ${missingFields.join(', ')}`
+            `Beneficiary ${capitalizeWords(
+              beneficiary.personal.member_name
+            )} has not updated their profile. Missing fields: ${missingFields.join(', ')}`
           );
         }
 
@@ -363,6 +363,18 @@ export const generateProjectList = async ({ user, param, project_id, body }) => 
         const beneficiaryMsgDelivered = await messageBird(beneficiaryMsg);
         if (!beneficiaryMsgDelivered) {
           throw new InternalServerError(`Failed to send email to beneficiary`);
+        }
+
+        if (beneficiary.contact.phone) {
+          const smsData = {
+            phone: benefi.contact.phone,
+            sms: `Congratulations, you have been successfully awarded to the ${capitalizeWords(
+              project.project_name
+            )} project.`
+          };
+          const sms = await sendsms(smsData);
+          if (!sms)
+            throw new BadRequestError('server slip. project awarded without sms being sent');
         }
       }
     }
@@ -513,6 +525,19 @@ export const saveGenerateList = async ({ user, param, project_id, body }) => {
         throw new InternalServerError(
           'server slip.project allocated without email sent to awardees'
         );
+      }
+
+      if (beneficiary.contact.phone) {
+        const smsData = {
+          phone: beneficiary.contact.phone,
+          sms: `Congratulations, you have been allocated to the ${capitalizeWords(
+            project.project_name
+          )} project.`
+        };
+
+        const sms = await sendsms(smsData);
+        if (!sms)
+          throw new BadRequestError('server slip. project allocated without sms being sent');
       }
     }
   }
@@ -746,7 +771,7 @@ export const deleteProject = async ({ project_id }) => {
   const deleteProject = await ProjectModel.findByIdAndDelete(project_id);
 
   if (!deleteProject)
-    throw new InternalServerError('Deleting project cannot work. contant our customer support');
+    throw new InternalServerError('Deleting project cannot work. contact our customer support');
 
   await awardeesModel.deleteMany({ project_id });
   await scheduleModel.deleteMany({ project: project_id });

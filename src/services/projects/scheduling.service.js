@@ -14,7 +14,7 @@ import rolepermissionModel from '../../models/settings/rolepermission.model.js';
 import usersModels from '../../models/settings/users.models.js';
 import { capitalizeWords, generateId } from '../../utils/general.js';
 import { formattMailInfo } from '../../utils/mailFormatter.js';
-import { messageBird } from '../../utils/msgBird.js';
+import { messageBird, sendsms } from '../../utils/msgBird.js';
 import ProductModel from '../../models/products/ProductModel.js';
 import notificationsModel from '../../models/settings/notificationsModel.js';
 import { buildOtpHash, codeGenerator } from '../../utils/codeGenerator.js';
@@ -113,7 +113,7 @@ export const createProductSchedule = async ({ user, body, project_id, param }) =
 
   const total_left = total_persons_to_get - total_scheduled;
 
-  if (total_left <= 0) throw new BadRequestError('Total number of participants has beeen exhauted');
+  if (total_left <= 0) throw new BadRequestError('Total number of participants has been exhausted');
 
   //   create object
   const schedule_data = {
@@ -267,7 +267,6 @@ export const createProductSchedule = async ({ user, body, project_id, param }) =
   });
 
   for (const benefic_id of body.selection) {
-    console.log('i am here');
     const beneficiary = await organizationBeneficiaryModel.findById(benefic_id);
     if (beneficiary) {
       // Create notification for beneficiary
@@ -302,6 +301,18 @@ export const createProductSchedule = async ({ user, body, project_id, param }) =
         throw new InternalServerError(
           'server slip.project allocated without email sent to awardees'
         );
+      }
+      if (beneficiary.contact.phone) {
+        const smsData = {
+          phone: beneficiary.contact.phone,
+          sms: `Congratulations, you have been scheduled for the ${capitalizeWords(
+            project.project_name
+          )} project with batch number ${body.batch_number}`
+        };
+
+        const sms = await sendsms(smsData);
+        if (!sms)
+          throw new BadRequestError('server slip. project scheduled without sms being sent');
       }
     }
   }
@@ -527,34 +538,17 @@ const disbursementCode = async ({ project_id, user, updatedAwardees }) => {
       }
     } else {
       // Create SMS profile
-      const smsUrl = `${env.termii_api_url}/api/sms/send`;
       const smsData = {
-        to: contactPhone,
-        from: env.termii_sender_id,
+        phone: contactPhone,
         sms: `Hi there, you should go to ${awardee.batch_id.delivery_address} from ${
           awardee.batch_id.start_date
         } to ${awardee.batch_id.end_date} to collect your ${capitalizeWords(
           awardee.project_id.project_name
-        )}.\nCome with a means of identification and also your disbursement code ${code}`,
-        type: 'plain',
-        api_key: env.termii_api_secret,
-        channel: 'generic'
+        )}.\nCome with a means of identification and also your disbursement code ${code}`
       };
 
-      const config = {
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      };
-
-      try {
-        await axios.post(smsUrl, smsData, config);
-      } catch (error) {
-        results.push({
-          awardee_id: awardee._id,
-          error: 'Failed to send SMS'
-        });
-      }
+      const sms = await sendsms(smsData);
+      if (!sms) throw new BadRequestError('server slip. project scheduled without sms being sent');
     }
 
     results.push({

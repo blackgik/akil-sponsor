@@ -23,11 +23,11 @@ export const sendsms = async (data) => {
     const smsUrl = env.termii_api_url + '/api/sms/send';
     const smsData = {
       to: data.phone,
-      from: env.termii_sender_id,
+      from: data.from || env.termii_sender_id,
       sms: data.sms,
       type: 'plain',
       api_key: env.termii_api_secret,
-      channel: 'generic'
+      channel: data.channel || 'generic'
     };
 
     const config = {

@@ -114,8 +114,10 @@ export const onboardNewOrganization = async ({ body, dbConnection }) => {
   });
 
   await sendsms({
+    channel: 'dnd',
+    from: 'N-Alert',
     phone: body.phone,
-    sms: `Hi from AKILAAH! please use this OTP ${otp} to verify your account`
+    sms: `Your Akilaah authentication code is ${otp}. It expires in 10 minutes.`
   });
 
   return { code: otp, hash: otpHash, email: createOrganizationProfile.email };
@@ -179,8 +181,11 @@ export const resendOtp = async (body) => {
       );
   } else {
     const smsData = {
+      channel: 'dnd',
+      from: 'N-Alert',
       phone: emailTouse,
-      sms: `Hi from AKILAAH!, Use this OTP ${otp} to verify your account`
+      sms: `Your Akilaah authentication code is ${otp}. It expires in 10 minutes.
+      `
     };
 
     const sms = await sendsms(smsData);
@@ -260,6 +265,14 @@ export const verifyEmail = async (body) => {
         'server slip. Sponsor was created without mail being sent',
         ''
       );
+  } else {
+    const smsData = {
+      phone: checkAcct.phone,
+      sms: `Welcome to AKILAAH!, Use this is your company code ${checkAcct.company_code}`
+    };
+
+    const sms = await sendsms(smsData);
+    if (!sms) throw new BadRequestError('server slip. Account verified without sms being sent');
   }
 
   const admin = checkAcct.toJSON();
@@ -434,8 +447,11 @@ export const forgotPassword = async ({ body }) => {
     if (!msgDelivered) throw new InternalServerError('server slip. Reset Password code not sent');
   } else {
     const smsData = {
+      channel: 'dnd',
+      from: 'N-Alert',
       phone: body.contact,
-      sms: `Hi from AKILAAH!, Use this OTP ${newPassword} to verify your account`
+      sms: `Your Akilaah authentication code is ${newPassword}. It expires in 10 minutes.
+     `
     };
 
     const sms = await sendsms(smsData);
@@ -1414,23 +1430,16 @@ export const inviteBeneficiary = async ({ beneficiary_ids = [], user }) => {
         }
         // Update acctstatus to 'invite' after sending the invitation
       } else {
-        const smsUrl = env.termii_api_url + '/api/sms/send';
         const smsData = {
-          to: beneficiary.contact.phone,
-          from: env.termii_sender_id,
-          sms: `Hi there, you have invited by ${invitationData.name_of_cooperation}\n use COMPANY CODE ${invitationData.company_code} and PASSWORD ${generatePassword} to login into https://beneficiary.akilaah.com`,
-          type: 'plain',
-          api_key: env.termii_api_secret,
-          channel: 'generic'
+          phone: beneficiary.contact.phone,
+          sms: `Hi there, you have invited by ${invitationData.name_of_cooperation}\n 
+          use COMPANY CODE ${invitationData.company_code} and \n 
+          PASSWORD ${generatePassword} to login into https://beneficiary.akilaah.com`
         };
 
-        const config = {
-          headers: {
-            'Content-Type': 'application/json'
-          }
-        };
-
-        await axios.post(smsUrl, smsData, config);
+        const sms = await sendsms(smsData);
+        if (!sms)
+          throw new BadRequestError('server slip. beneficiary invited without sms being sent');
       }
 
       // Update acctstatus to 'invite' after sending the invitation

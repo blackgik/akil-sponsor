@@ -15,7 +15,7 @@ import notificationsModel from '../../models/settings/notificationsModel.js';
 import { buildOtpHash, codeGenerator, verifyOTP } from '../../utils/codeGenerator.js';
 import { capitalizeWords } from '../../utils/general.js';
 import { formattMailInfo } from '../../utils/mailFormatter.js';
-import { messageBird } from '../../utils/msgBird.js';
+import { messageBird, sendsms } from '../../utils/msgBird.js';
 import ProductModel from '../../models/products/ProductModel.js';
 
 export const disbursementCode = async ({ awardee_id, user }) => {
@@ -71,30 +71,23 @@ export const disbursementCode = async ({ awardee_id, user }) => {
       throw new InternalServerError(
         'server slip. project delivery created without mail being sent'
       );
-  } else {
+  }
+  if (contactPhone) {
     //create sms profile here
-    const smsUrl = env.termii_api_url + '/api/sms/send';
     const smsData = {
-      to: contactPhone,
-      from: env.termii_sender_id,
-      sms: `Hi there, you should to ${batch_id.delivery_address} from ${
-        awardee.batch_id.start_date
-      } to ${awardee.batch_id.end_date} to collect your ${capitalizeWords(
+      phone: contactPhone,
+      channel: 'dnd',
+      from: 'N-Alert',
+      sms: `Come to ${awardee.batch_id.delivery_address}, with this code ${code} and collect your ${capitalizeWords(
         awardee.project_id.project_name
-      )}.\n 
-      Come with a means of identification and also your disbursement code ${code}`,
-      type: 'plain',
-      api_key: env.termii_api_secret,
-      channel: 'generic'
+      )}, starting from ${awardee.batch_id.start_date}, to ${
+        awardee.batch_id.end_date
+      }. come with a means of identification.`
     };
 
-    const config = {
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    };
-
-    await axios.post(smsUrl, smsData, config);
+    const sms = await sendsms(smsData);
+    if (!sms)
+      throw new BadRequestError('server slip. project delivery created without sms being sent');
   }
 
   return { code, contact, hash, awardee: awardee_id };
@@ -173,7 +166,18 @@ export const confirmDisbursement = async ({ user, awardee_id }) => {
   const msgDelivered = await messageBird(msg);
   if (!msgDelivered)
     throw new InternalServerError('server slip. project was created without mail being sent');
+  if (beneficiary.contact.phone) {
+    const smsData = {
+      phone: beneficiary.contact.phone,
+      sms: `your ${capitalizeWords(
+        project.project_name
+      )} project has been successfully disbursed to you.`
+    };
 
+    const sms = await sendsms(smsData);
+    if (!sms)
+      throw new BadRequestError('server slip. project delivery disbursed without sms being sent');
+  }
   // create notification
   await notificationsModel.create({
     note: `You have successfully disbursed ${project.project_name} project to ${beneficiary.personal.member_name} `,
@@ -262,7 +266,7 @@ export const validateRequestPayments = async ({ user, body }) => {
 
     const paymentdata = response.data.data;
     const metadata = response.data.data.metadata;
-    console.log("metadata",metadata);
+    console.log('metadata', metadata);
     const bulkreceiptientData = [];
 
     // initate transfers on account
@@ -321,8 +325,20 @@ export const validateRequestPayments = async ({ user, body }) => {
       const msg = await formattMailInfo(mailData, env);
       const msgDelivered = await messageBird(msg);
       if (!msgDelivered)
-        throw new InternalServerError('server slip. reequest sent but email not sent');
+        throw new InternalServerError('server slip. request sent but email not sent');
 
+      if (benefic.contact.phone) {
+        const smsData = {
+          phone: benefic.contact.phone,
+          sms: `Your ${capitalizeWords(
+            projectInfo.project_name
+          )} project has been successfully disbursed to you. Do not forget to drop a feedback.`
+        };
+
+        const sms = await sendsms(smsData);
+        if (!sms)
+          throw new BadRequestError('server slip. project delivery created without sms being sent');
+      }
       const receiptientData = {
         type: 'nuban',
         name: benefic.personal.member_name,
@@ -383,6 +399,6 @@ export const validateRequestPayments = async ({ user, body }) => {
 
     return bulkTransfer.data.data;
   } catch (err) {
-    console.log("err", err);
+    console.log('err', err);
   }
 };

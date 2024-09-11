@@ -438,6 +438,8 @@ export const sendAgentSubEmail = async ({ user, body }) => {
 
   if (!msgDelivered1)
     throw new InternalServerError('server slip. Payment verification mail not sent');
+
+  
 };
 
 export const uploadReceipt = async ({ user, body }) => {

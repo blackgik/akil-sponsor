@@ -12,7 +12,7 @@ export const createNewProductCategoryHandler = async (req, res) => {
 
   const newProductCategory = await createNewProductCategory({ user, body });
 
-  res.send(appResponse('created productCategory successfully', newProductCategory));
+  res.send(appResponse('created product category successfully', newProductCategory));
 };
 
 export const fetchProductCategoryHandler = async (req, res) => {
@@ -21,7 +21,7 @@ export const fetchProductCategoryHandler = async (req, res) => {
 
   const fetchedData = await fetchProductCategory({ user, params });
 
-  res.send(appResponse('fetched contribution productCategorys successfully', fetchedData));
+  res.send(appResponse('fetched contribution productcategories successfully', fetchedData));
 };
 //================================================================================================
 
@@ -33,7 +33,7 @@ export const getAllProductCategoriesHandler = async (req, res) => {
 
   const fetchedData = await fetchAllProductCategories({ user, params });
 
-  res.send(appResponse('fetched productCategorys successfully', fetchedData));
+  res.send(appResponse('fetched productcategories successfully', fetchedData));
 };
 
 export const getSingleProductCategoryHandler = async (req, res) => {
@@ -42,7 +42,7 @@ export const getSingleProductCategoryHandler = async (req, res) => {
 
   const productCategory = await getSingleProductCategory({ user, productCategory_id });
 
-  res.send(appResponse('fetched productCategory successfully', productCategory));
+  res.send(appResponse('fetched product category successfully', productCategory));
 };
 
 export const updateSingleProductCategoryHandler = async (req, res) => {
@@ -51,5 +51,5 @@ export const updateSingleProductCategoryHandler = async (req, res) => {
 
   const updated = await updateSingleProductCategory({ productCategory_id, body, user });
 
-  res.send(appResponse('updated productCategory successfully', updated));
+  res.send(appResponse('updated product category successfully', updated));
 };

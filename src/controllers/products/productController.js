@@ -182,5 +182,5 @@ export const itemStatistictHandler = async (req, res) => {
 
   const response = await itemStatistics({ product_id, user });
 
-  res.send(appResponse('Fetched Succesfuly', response));
+  res.send(appResponse('fetched succesfully', response));
 };
