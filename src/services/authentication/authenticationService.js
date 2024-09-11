@@ -114,8 +114,10 @@ export const onboardNewOrganization = async ({ body, dbConnection }) => {
   });
 
   await sendsms({
+    channel: 'dnd',
+    from: 'N-Alert',
     phone: body.phone,
-    sms: `Hi from AKILAAH! please use this OTP ${otp} to verify your account`
+    sms: `Your Akilaah authentication code is ${otp}. It expires in 10 minutes.`
   });
 
   return { code: otp, hash: otpHash, email: createOrganizationProfile.email };
@@ -179,8 +181,11 @@ export const resendOtp = async (body) => {
       );
   } else {
     const smsData = {
+      channel: 'dnd',
+      from: 'N-Alert',
       phone: emailTouse,
-      sms: `Hi from AKILAAH!, Use this OTP ${otp} to verify your account`
+      sms: `Your Akilaah authentication code is ${otp}. It expires in 10 minutes.
+      `
     };
 
     const sms = await sendsms(smsData);
@@ -442,8 +447,11 @@ export const forgotPassword = async ({ body }) => {
     if (!msgDelivered) throw new InternalServerError('server slip. Reset Password code not sent');
   } else {
     const smsData = {
+      channel: 'dnd',
+      from: 'N-Alert',
       phone: body.contact,
-      sms: `Hi from AKILAAH!, Use this OTP ${newPassword} to verify your account`
+      sms: `Your Akilaah authentication code is ${newPassword}. It expires in 10 minutes.
+     `
     };
 
     const sms = await sendsms(smsData);
@@ -1424,7 +1432,9 @@ export const inviteBeneficiary = async ({ beneficiary_ids = [], user }) => {
       } else {
         const smsData = {
           phone: beneficiary.contact.phone,
-          sms: `Hi there, you have invited by ${invitationData.name_of_cooperation}\n use COMPANY CODE ${invitationData.company_code} and PASSWORD ${generatePassword} to login into https://beneficiary.akilaah.com`
+          sms: `Hi there, you have invited by ${invitationData.name_of_cooperation}\n 
+          use COMPANY CODE ${invitationData.company_code} and \n 
+          PASSWORD ${generatePassword} to login into https://beneficiary.akilaah.com`
         };
 
         const sms = await sendsms(smsData);

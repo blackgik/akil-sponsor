@@ -16,7 +16,7 @@ import { verifyPayment } from '../../utils/payment.js';
 import donorReceiptModel from '../../models/donor/donor.receipt.model.js';
 import { donationRequestEmail, subscriptionPay2ruAgentEmail } from '../../config/mail.js';
 import { formattMailInfo } from '../../utils/mailFormatter.js';
-import { messageBird } from '../../utils/msgBird.js';
+import { messageBird, sendsms } from '../../utils/msgBird.js';
 import notificationsModel from '../../models/settings/notificationsModel.js';
 import { capitalizeWords, formatAmount } from '../../utils/general.js';
 import { donorEmailText } from '../../htmls/donor/index.js';

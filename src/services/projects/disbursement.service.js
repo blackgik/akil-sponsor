@@ -76,9 +76,11 @@ export const disbursementCode = async ({ awardee_id, user }) => {
     //create sms profile here
     const smsData = {
       phone: contactPhone,
-      sms: `come to ${awardee.batch_id.delivery_address}, and collect your ${capitalizeWords(
+      channel: 'dnd',
+      from: 'N-Alert',
+      sms: `Come to ${awardee.batch_id.delivery_address}, with this code ${code} and collect your ${capitalizeWords(
         awardee.project_id.project_name
-      )} starting from ${awardee.batch_id.start_date} to ${
+      )}, starting from ${awardee.batch_id.start_date}, to ${
         awardee.batch_id.end_date
       }. come with a means of identification.`
     };
